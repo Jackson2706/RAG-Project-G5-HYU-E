@@ -1,0 +1,14 @@
+{"qid": "q01", "question": "How many credits can a first-year student register for?", "relevant": ["local://samples/course_registration.md"], "answerable": true}
+{"qid": "q02", "question": "When is the add/drop period?", "relevant": ["local://samples/course_registration.md"], "answerable": true}
+{"qid": "q03", "question": "What happens if I withdraw from a course after the add/drop period?", "relevant": ["local://samples/course_registration.md"], "answerable": true}
+{"qid": "q04", "question": "What should I bring to orientation?", "relevant": ["local://samples/orientation_guide.md"], "answerable": true}
+{"qid": "q05", "question": "Is there a special orientation session for international students?", "relevant": ["local://samples/orientation_guide.md"], "answerable": true}
+{"qid": "q06", "question": "What documents do I need for the need-based scholarship?", "relevant": ["local://samples/scholarships.html"], "answerable": true}
+{"qid": "q07", "question": "Can I receive two scholarships in the same semester?", "relevant": ["local://samples/scholarships.html"], "answerable": true}
+{"qid": "q08", "question": "How do international students qualify for a tuition waiver?", "relevant": ["local://samples/scholarships.html"], "answerable": true}
+{"qid": "q09", "question": "How many counseling sessions are available per semester?", "relevant": ["local://samples/student_services.txt"], "answerable": true}
+{"qid": "q10", "question": "I lost my student ID card. What should I do?", "relevant": ["local://samples/student_services.txt"], "answerable": true}
+{"qid": "q11", "question": "How do I apply for a dormitory at the ERICA campus?", "relevant": ["local://samples/erica_housing.md"], "answerable": true}
+{"qid": "q12", "question": "What do I need for dormitory move-in?", "relevant": ["local://samples/erica_housing.md"], "answerable": true}
+{"qid": "q13", "question": "Where can I park my car on campus?", "relevant": [], "answerable": false}
+{"qid": "q14", "question": "What is the cafeteria menu today?", "relevant": [], "answerable": false}

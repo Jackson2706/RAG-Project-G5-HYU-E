@@ -1,0 +1,163 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Semantic color tokens (light / dark pairs). Components use only these names. */
+:root {
+  --background: #ffffff;
+  --surface: #f7f8fa;
+  --card: #ffffff;
+  --foreground: #0f172a;
+  --muted: #eef1f5;
+  --muted-foreground: #5b6474;
+  --border: #e2e6ec;
+  --primary: #0e4a84;
+  --primary-foreground: #ffffff;
+  --accent: #e8f0fa;
+  --ring: #2563eb;
+  --success: #15803d;
+  --warning: #b45309;
+  --danger: #dc2626;
+  --info: #1d4ed8;
+  --user-bubble: #eef1f5;
+}
+
+.dark {
+  --background: #0f172a;
+  --surface: #131c31;
+  --card: #1b2336;
+  --foreground: #f1f5f9;
+  --muted: #232d44;
+  --muted-foreground: #9aa6b8;
+  --border: #2f3a52;
+  --primary: #6aa6ec;
+  --primary-foreground: #0b1220;
+  --accent: #1e2c48;
+  --ring: #93c5fd;
+  --success: #4ade80;
+  --warning: #fbbf24;
+  --danger: #f87171;
+  --info: #93c5fd;
+  --user-bubble: #232d44;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
+  --color-user-bubble: var(--user-bubble);
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-background text-foreground font-sans antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+button,
+[role="button"],
+summary,
+select,
+label[for] {
+  cursor: pointer;
+}
+
+button:disabled,
+select:disabled {
+  cursor: not-allowed;
+}
+
+/* Resize handle (react-resizable-panels v4 exposes data-separator states) */
+[data-separator] {
+  position: relative;
+  width: 6px;
+  background: transparent;
+  transition: background-color 150ms ease;
+}
+[data-separator]::after {
+  content: "";
+  position: absolute;
+  inset: 0 2.5px;
+  background: var(--border);
+}
+[data-separator="hover"]::after,
+[data-separator="active"]::after,
+[data-separator]:focus-visible::after {
+  background: var(--primary);
+  inset: 0 1.5px;
+}
+
+/* Answer typography */
+.prose-answer {
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+.prose-answer p {
+  margin: 0.5rem 0;
+}
+.prose-answer ul,
+.prose-answer ol {
+  margin: 0.5rem 0;
+  padding-left: 1.4rem;
+}
+.prose-answer ul {
+  list-style: disc;
+}
+.prose-answer ol {
+  list-style: decimal;
+}
+.prose-answer li {
+  margin: 0.2rem 0;
+}
+.prose-answer strong {
+  font-weight: 600;
+}
+.prose-answer code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: var(--muted);
+  padding: 0.1rem 0.3rem;
+  border-radius: 0.25rem;
+}
+.prose-answer table {
+  border-collapse: collapse;
+  margin: 0.5rem 0;
+  font-size: 0.9em;
+}
+.prose-answer th,
+.prose-answer td {
+  border: 1px solid var(--border);
+  padding: 0.3rem 0.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

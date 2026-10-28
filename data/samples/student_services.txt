@@ -1,0 +1,11 @@
+Student Services Overview (Sample)
+
+SYNTHETIC SAMPLE - written for HYU Compass development and testing. It is not official Hanyang University policy; do not rely on it.
+
+Counseling center. The counseling center offers free individual counseling for enrolled students. Students book an appointment through the student portal. Sessions last about fifty minutes, and up to eight sessions per semester are available in this sample. Counseling in English is available on request.
+
+Health center. The health center provides basic medical consultations, first aid and annual health check-ups for students. Students should bring their student ID card. International students should also bring proof of health insurance enrollment.
+
+Career center. The career center helps students with resume reviews, mock interviews and internship listings. Career workshops are announced on the student portal at the beginning of each semester.
+
+Lost student ID card. A lost student ID card can be reissued at the student affairs office. In this sample, students fill in a reissue form and pay a small reissue fee; the new card is ready within three working days.

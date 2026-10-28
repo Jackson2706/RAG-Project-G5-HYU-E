@@ -1,0 +1,31 @@
+# Install into the existing Conda environment only:
+#   conda activate RAG && python -m pip install -r backend/requirements.txt
+# Versions are the ones verified in the RAG environment (Python 3.13).
+
+# API
+fastapi==0.143.3
+uvicorn==0.54.0
+pydantic==2.14.1
+pydantic-settings==2.16.0
+python-multipart==0.0.32
+httpx==0.28.1
+
+# Storage
+pymongo==4.19.0
+qdrant-client==1.20.0
+
+# Embeddings / tokenization
+sentence-transformers==6.1.0
+transformers==5.18.0
+torch==2.14.1
+numpy==2.5.3
+
+# Parsing
+pypdf==6.21.1
+beautifulsoup4==4.15.0
+PyYAML==6.0.3
+
+# Tests
+pytest==9.2.0
+anyio==4.15.1
+mongomock==4.3.0

@@ -1,0 +1,31 @@
+# Secrets / local configuration
+.env
+backend/.env
+!*.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+# Do not create virtual environments here — use the Conda env `RAG`
+.venv/
+venv/
+
+# Node / frontend build
+frontend/node_modules/
+frontend/dist/
+frontend/*.tsbuildinfo
+*.log
+
+# Generated data (rebuild with scripts/ingest.py). Manifests and eval results are kept.
+data/processed/
+data/qdrant_local/
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/

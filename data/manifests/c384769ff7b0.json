@@ -1,0 +1,134 @@
+{
+  "revision_id": "c384769ff7b0",
+  "collection": "hyu_chunks_c384769ff7b0",
+  "embedding_contract": {
+    "provider": "sentence_transformers",
+    "model_id": "BAAI/bge-small-en-v1.5",
+    "model_revision": "5c38ec7c405ec4b44b94cc5a9bb96e735b38267a",
+    "dimension": 384,
+    "normalize": true,
+    "distance": "Cosine",
+    "query_instruction": "Represent this sentence for searching relevant passages: ",
+    "max_seq_length": 512
+  },
+  "offline_config": {
+    "document_loading": {
+      "enabled": true,
+      "method": "local_files",
+      "params": {
+        "file_types": [
+          "pdf",
+          "txt",
+          "md",
+          "html"
+        ],
+        "recursive": true,
+        "max_file_mb": 20
+      }
+    },
+    "parsing": {
+      "enabled": true,
+      "method": "structure_aware",
+      "params": {
+        "preserve_tables": true,
+        "normalize_unicode": true
+      }
+    },
+    "chunking": {
+      "enabled": true,
+      "method": "structure_aware",
+      "params": {
+        "chunk_size": 256,
+        "chunk_overlap": 32,
+        "min_chunk_size": 32,
+        "max_chunk_size": 512,
+        "preserve_headings": true,
+        "tokenizer_id": "BAAI/bge-small-en-v1.5"
+      }
+    },
+    "metadata_extraction": {
+      "enabled": true,
+      "method": "rule_based",
+      "params": {
+        "detect_topics": true,
+        "detect_campus": true,
+        "detect_academic_year": true,
+        "keywords_per_chunk": 8
+      }
+    },
+    "embedding": {
+      "enabled": true,
+      "method": "sentence_transformers",
+      "params": {
+        "model_id": "BAAI/bge-small-en-v1.5",
+        "model_revision": "5c38ec7c405ec4b44b94cc5a9bb96e735b38267a",
+        "normalize": true,
+        "query_instruction": "Represent this sentence for searching relevant passages: ",
+        "batch_size": 32,
+        "device": "cpu"
+      }
+    },
+    "vector_indexing": {
+      "enabled": true,
+      "method": "qdrant",
+      "params": {
+        "distance": "Cosine",
+        "hnsw_m": 16,
+        "hnsw_ef_construct": 100
+      }
+    }
+  },
+  "documents": [
+    {
+      "doc_id": "ce167620-a415-5d46-b861-40a74882b4ff",
+      "source_uri": "local://samples/course_registration.md",
+      "media_type": "text/markdown",
+      "source_sha256": "c0a19a7683000b5c089388a3539e6c3b432e426f9fc52c795c0a8a8785b34d8c",
+      "parser_id": "md-structure_aware-v1",
+      "version_id": "6462a1c77aea2e95",
+      "title": "Course Registration Handbook (Sample)",
+      "chunks": 7
+    },
+    {
+      "doc_id": "f07deb27-7eff-5ceb-ac03-82ed539c4235",
+      "source_uri": "local://samples/erica_housing.md",
+      "media_type": "text/markdown",
+      "source_sha256": "7dc73b977170dc8d3bf5c71d245038811cb6f81b08c9fe9329adea81a916400c",
+      "parser_id": "md-structure_aware-v1",
+      "version_id": "7fd795f102fbaf79",
+      "title": "ERICA Campus Housing Notice (Sample)",
+      "chunks": 5
+    },
+    {
+      "doc_id": "db270a89-b05a-5e4c-bb8e-76516da1054f",
+      "source_uri": "local://samples/orientation_guide.md",
+      "media_type": "text/markdown",
+      "source_sha256": "1769fb463f10a831cd812c3c33db7e961faae35b40264776ac2cbdc80ecc4a06",
+      "parser_id": "md-structure_aware-v1",
+      "version_id": "3bc95c3c698d4236",
+      "title": "New Student Orientation Guide (Sample)",
+      "chunks": 6
+    },
+    {
+      "doc_id": "1068255c-a007-5069-9ed3-02985d5ec62d",
+      "source_uri": "local://samples/scholarships.html",
+      "media_type": "text/html",
+      "source_sha256": "10a1b03cb56abe0509ac7f345e4d7c3b8587da55d78e60b3a8106e4dd7f5cf58",
+      "parser_id": "html-structure_aware-v1",
+      "version_id": "758e21679f13494b",
+      "title": "Scholarship Application Guide (Sample)",
+      "chunks": 5
+    },
+    {
+      "doc_id": "618f6037-ee11-591d-af96-27b31de9c09f",
+      "source_uri": "local://samples/student_services.txt",
+      "media_type": "text/plain",
+      "source_sha256": "27bedfb34be403a56edc963a27e1629f6bbbbba68662b4ab86e88440ad7eba52",
+      "parser_id": "txt-structure_aware-v1",
+      "version_id": "99b4e431b65f1017",
+      "title": "Student Services Overview (Sample)",
+      "chunks": 1
+    }
+  ],
+  "chunk_count": 24
+}
