@@ -1,123 +1,116 @@
-from __future__ import annotations
+"""Tests for app/rag/registry.py."""
+
+import inspect
 
 import pytest
 
-from app.models.config import ImplementationStatus, PipelineConfig, Scope, StageConfig
-from app.rag import registry as r
+from app.rag import registry
+from app.rag.blocks.retrieval import BaseDenseRetriever, QdrantDenseRetriever
+from app.rag.registry import PIPELINE, STAGES, ConfigError, Method, Param, check_registry, create_block, registry_json, validate_config
+from app.rag.schemas import RetrievalResult
 
 
-def draft(**stages) -> PipelineConfig:
-    return PipelineConfig(stages={k: StageConfig(**v) for k, v in stages.items()})
+def errors_of(draft) -> str:
+    with pytest.raises(ConfigError) as info:
+        validate_config(draft)
+    return " | ".join(e["message"] for e in info.value.errors)
 
 
-def messages(result) -> str:
-    return " | ".join(e.message for e in result.errors)
+def test_method_ids_are_unique_and_classes_inherit_correctly():
+    ids = [m.method_id for s in PIPELINE for m in s.methods]
+    assert len(ids) == len(set(ids))
+    for stage in PIPELINE:
+        for m in stage.methods:
+            assert issubclass(m.cls, stage.base_class) and not inspect.isabstract(m.cls)
+    check_registry()  # also runs at import
 
 
-def test_registry_lists_every_required_stage_in_order():
-    payload = r.registry_payload()
-    assert payload["offline_order"] == ["document_loading", "parsing", "chunking", "metadata_extraction", "embedding", "vector_indexing"]
-    assert payload["online_order"] == [
-        "query_understanding", "query_rewriting", "constraint_validation", "metadata_filtering", "dense_retrieval",
-        "lexical_retrieval", "hybrid_fusion", "metadata_enrichment", "reranking", "evidence_selection", "sufficiency_gate",
-        "context_builder", "generation", "citation_verification", "response_guard",
-    ]  # fmt: skip
-    for stage in payload["stages"]:
-        assert stage["available_methods"] and stage["implementation_status"] in {"implemented", "planned", "unavailable"}
-        if stage["category"] == "online":
-            assert set(stage["input_schema"]) == set(stage["reads"])
+def test_every_required_block_has_an_abstract_class():
+    names = {s.base_class.__name__ for s in PIPELINE}
+    assert names == {
+        "BaseDocumentLoader", "BaseDocumentParser", "BaseChunker", "BaseMetadataExtractor", "BaseEmbedder", "BaseVectorIndexer",
+        "BaseQueryUnderstanding", "BaseQueryRewriter", "BaseConstraintValidator", "BaseMetadataFilter", "BaseDenseRetriever",
+        "BaseLexicalRetriever", "BaseHybridFusion", "BaseMetadataEnricher", "BaseReranker", "BaseEvidenceSelector",
+        "BaseSufficiencyGate", "BaseContextBuilder", "BaseGenerator", "BaseCitationVerifier", "BaseResponseGuard"}  # fmt: skip
 
 
-def test_default_methods_are_implemented_and_defaults_validate():
-    for spec in r.STAGES.values():
-        method = spec.method(spec.selected_method)
-        if spec.enabled:
-            assert method.status is ImplementationStatus.implemented, spec.stage_id
-        for p in method.parameters:
-            assert p.validate_value(p.default) == p.default
-    result = r.resolve_config(r.default_config())
-    assert result.valid and not result.warnings
+def test_defaults_are_valid_and_planned_stages_are_off():
+    config = validate_config({})
+    assert config["dense_retrieval"] == {"method": "qdrant_cosine", "params": {"top_k": 5}}
+    assert config["reranking"] == {"method": None, "params": {}}
+    assert config["chunking"]["params"] == {"chunk_size": 256, "chunk_overlap": 32}
 
 
-def test_partial_draft_is_filled_with_defaults():
-    result = r.resolve_config(draft(dense_retrieval={"params": {"top_k": 25}}))
-    assert result.valid
-    dense = result.resolved.stage("dense_retrieval")
-    assert dense.params["top_k"] == 25 and dense.params["exact"] is False and dense.method == "qdrant_cosine"
+def test_planned_methods_cannot_be_selected_or_created(services):
+    assert "not implemented yet" in errors_of({"reranking": {"method": "cross_encoder"}})
+    with pytest.raises(NotImplementedError):
+        create_block("reranking", "cross_encoder", {}, services)
 
 
-def test_planned_method_cannot_be_executed():
-    result = r.resolve_config(draft(reranking={"enabled": True, "method": "cross_encoder"}))
-    assert not result.valid and "planned" in messages(result)
-    # ...but selecting it while the stage is disabled is allowed (shown, not run)
-    assert r.resolve_config(draft(reranking={"enabled": False, "method": "cross_encoder"})).valid
+@pytest.mark.parametrize("params, message", [
+    ({"top_k": 0}, "at least 1"), ({"top_k": 99}, "at most 20"), ({"top_k": 2.5}, "whole number"),
+    ({"top_k": "five"}, "number"), ({"topk": 5}, "no parameter 'topk'"),
+])  # fmt: skip
+def test_hyperparameters_are_validated(params, message):
+    assert message in errors_of({"dense_retrieval": {"method": "qdrant_cosine", "params": params}})
 
 
-@pytest.mark.parametrize(
-    "params, fragment",
-    [({"top_k": 0}, "≥ 1"), ({"top_k": 1000}, "≤ 100"), ({"top_k": 2.5}, "integer"), ({"exact": "yes"}, "true or false"),
-     ({"score_threshold": 1.5}, "≤ 1")],
-)  # fmt: skip
-def test_parameter_validation(params, fragment):
-    result = r.resolve_config(draft(dense_retrieval={"params": params}))
-    assert not result.valid and fragment in messages(result)
+def test_combination_rules():
+    assert "smaller than chunk size" in errors_of({"chunking": {"method": "section_tokens", "params": {"chunk_size": 64, "chunk_overlap": 64}}})
+    assert "at least one retriever" in errors_of({"dense_retrieval": {"method": None}})
+    assert "needs a method" in errors_of({"generation": {"method": None}})
+    assert "Unknown stage" in errors_of({"nonsense": {}})
 
 
-def test_enum_and_multi_enum_validation():
-    assert "not one of" in messages(r.resolve_config(draft(metadata_filtering={"enabled": True, "params": {"campus": "BUSAN"}})))
-    assert "unknown value" in messages(r.resolve_config(draft(metadata_filtering={"params": {"audience": ["robots"]}})))
+def test_registry_json_has_no_python_objects_and_marks_status():
+    data = registry_json()
+    stages = {s["stage_id"]: s for s in data["stages"]}
+    assert stages["dense_retrieval"]["implemented"] and not stages["reranking"]["implemented"]
+    assert stages["reranking"]["methods"][0]["class_name"] == "CrossEncoderReranker"
+    assert stages["generation"]["methods"][0]["parameters"]["model"]["ui"] == "ollama_model"
+    assert stages["chunking"]["methods"][0]["parameters"]["chunk_size"]["scope"] == "ingestion"
+    import json
+
+    json.dumps(data)  # fully serializable
 
 
-def test_unknown_params_and_stages():
-    result = r.resolve_config(draft(dense_retrieval={"params": {"bogus": 1}}))
-    assert result.valid and result.warnings[0].param == "bogus"
-    assert "Unknown stage" in messages(r.resolve_config(draft(nonexistent={})))
-    assert "Unknown method" in messages(r.resolve_config(draft(dense_retrieval={"method": "faiss"})))
+class StubRetriever(BaseDenseRetriever):
+    async def retrieve(self, query, filters=None):
+        return RetrievalResult(candidates=[])
 
 
-def test_required_stage_cannot_be_disabled():
-    assert "cannot be disabled" in messages(r.resolve_config(draft(generation={"enabled": False})))
+@pytest.fixture
+def extra_method():
+    """Temporarily register a new dense retrieval method, like a student would."""
+    stage = STAGES["dense_retrieval"]
+    method = Method("stub_dense", "Stub dense", StubRetriever, True, "Test method",
+                    parameters={"top_k": Param("integer", 3, "Top K", "How many", min=1, max=10)})  # fmt: skip
+    stage.methods.append(method)
+    yield method
+    stage.methods.remove(method)
 
 
-def test_cross_stage_retriever_and_fusion_rules():
-    assert "choose RRF" in messages(r.resolve_config(draft(lexical_retrieval={"enabled": True})))
-    assert r.resolve_config(draft(lexical_retrieval={"enabled": True}, hybrid_fusion={"method": "rrf"})).valid
-    assert "needs both" in messages(r.resolve_config(draft(hybrid_fusion={"method": "rrf"})))
-    assert "at least one retriever" in messages(r.resolve_config(draft(dense_retrieval={"enabled": False})))
-    assert r.resolve_config(draft(dense_retrieval={"enabled": False}, lexical_retrieval={"enabled": True})).valid
+def test_a_new_method_appears_in_the_api_and_can_be_selected(extra_method, services):
+    dense = next(s for s in registry_json()["stages"] if s["stage_id"] == "dense_retrieval")
+    assert "stub_dense" in [m["method_id"] for m in dense["methods"]]
+    config = validate_config({"dense_retrieval": {"method": "stub_dense", "params": {"top_k": 7}}})
+    block = create_block("dense_retrieval", "stub_dense", config["dense_retrieval"]["params"], services)
+    assert isinstance(block, StubRetriever) and block.params == {"top_k": 7} and block.method_id == "stub_dense"
 
 
-def test_chunking_constraints():
-    assert "Overlap" in messages(r.resolve_config(draft(chunking={"params": {"chunk_size": 64, "chunk_overlap": 64}})))
-    assert "min_chunk_size" in messages(r.resolve_config(draft(chunking={"params": {"chunk_size": 64, "max_chunk_size": 64, "min_chunk_size": 80}})))
-
-
-def test_snapshot_is_frozen_and_hash_is_stable():
-    a = r.resolve_config(draft(generation={"params": {"temperature": 0.7}})).resolved
-    b = r.resolve_config(draft(generation={"params": {"temperature": 0.7}})).resolved
-    c = r.resolve_config(draft(generation={"params": {"temperature": 0.1}})).resolved
-    assert a.config_hash == b.config_hash != c.config_hash
-    with pytest.raises(Exception):
-        a.stage("generation").method = "other"  # type: ignore[misc]
-
-
-def test_reindexing_scopes():
-    emb = r.STAGES["embedding"].method("sentence_transformers")
-    scopes = {p.name: p.scope for p in emb.parameters}
-    assert scopes["model_id"] is Scope.index and scopes["normalize"] is Scope.index and scopes["batch_size"] is Scope.ingestion
-    assert r.STAGES["embedding"].requires_reindexing and r.STAGES["chunking"].requires_reindexing
-    online_scopes = {p.scope for s in r.ONLINE_STAGES for m in s.available_methods for p in m.parameters}
-    assert online_scopes == {Scope.runtime}
-
-
-def test_offline_differences_are_reported():
-    resolved = r.resolve_config(draft(chunking={"params": {"chunk_size": 128}})).resolved
-    active = r.resolve_config(r.default_config()).resolved
-    issues = r.offline_config_differences(resolved, {k: v.model_dump() for k, v in active.stages.items()})
-    assert [i.stage_id for i in issues] == ["chunking"]
-
-
-def test_presets_marked_unavailable_when_they_need_planned_methods():
-    availability = {p.preset_id: r.preset_availability(p) for p in r.BUILTIN_PRESETS}
-    assert availability["baseline_dense"].available and availability["hybrid"].available and availability["metadata_aware"].available
-    assert not availability["advanced"].available and "Cross-encoder" in availability["advanced"].unavailable_reason
+def test_registry_check_catches_mistakes(monkeypatch):
+    stage = STAGES["dense_retrieval"]
+    wrong = Method("wrong_base", "Wrong", registry.MongoChunkLookup, True, "inherits from the wrong class")
+    stage.methods.append(wrong)
+    try:
+        with pytest.raises(TypeError, match="must inherit from BaseDenseRetriever"):
+            check_registry()
+    finally:
+        stage.methods.remove(wrong)
+    duplicate = Method("qdrant_cosine", "Again", QdrantDenseRetriever, True, "duplicate id")
+    stage.methods.append(duplicate)
+    try:
+        with pytest.raises(TypeError, match="duplicate method id"):
+            check_registry()
+    finally:
+        stage.methods.remove(duplicate)

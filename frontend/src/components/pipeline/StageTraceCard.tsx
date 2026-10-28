@@ -1,139 +1,106 @@
-import { Ban, CheckCircle2, ChevronRight, Circle, Loader2, SkipForward, XCircle } from "lucide-react";
+import { CheckCircle2, ChevronRight, Circle, Loader2, MinusCircle, XCircle } from "lucide-react";
 import { useState } from "react";
 
 import { JsonView } from "@/components/pipeline/JsonView";
 import { Badge, Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/primitives";
 import { cn, formatMs } from "@/lib/utils";
-import type { StageSpec, StageStatus, StageTrace } from "@/types/api";
+import type { StageDef, StageRecord } from "@/types/api";
 
-export const STAGE_STATUS: Record<StageStatus, { icon: typeof Circle; cls: string; label: string }> = {
-  pending: { icon: Circle, cls: "text-muted-foreground", label: "Pending" },
+const STATUS = {
+  waiting: { icon: Circle, cls: "text-muted-foreground", label: "Not run yet" },
   running: { icon: Loader2, cls: "text-info animate-spin", label: "Running" },
   completed: { icon: CheckCircle2, cls: "text-success", label: "Completed" },
-  bypassed: { icon: SkipForward, cls: "text-warning", label: "Bypassed" },
+  skipped: { icon: MinusCircle, cls: "text-warning", label: "Skipped" },
   failed: { icon: XCircle, cls: "text-danger", label: "Failed" },
 };
 
 type Row = Record<string, unknown>;
-/** chunk_id → title/text/section/page reported by another stage of the same request. */
-export type ChunkLookup = Record<string, Row>;
 
-/** Readable list for candidate/evidence arrays (chunk_id + scores + text). */
-function CandidateList({ items: raw, title, lookup }: { items: Row[]; title: string; lookup: ChunkLookup }) {
-  // Retrieval stages carry only IDs and scores (Qdrant payloads hold no text); join the text
-  // that Metadata Enrichment loaded from MongoDB for the same chunk_id in this request.
-  const items = raw.map((c) => {
-    const extra = lookup[String(c.chunk_id)];
-    return extra && c.text === undefined ? { ...c, title: extra.title, text: extra.text, section: extra.section, page: extra.page, _joined: true } : c;
-  });
-  const [expanded, setExpanded] = useState<string | null>(null);
+/** Readable cards for lists of retrieved chunks (Vector Retrieval / Chunk Lookup outputs). */
+function ChunkList({ items }: { items: Row[] }) {
+  const [open, setOpen] = useState<number | null>(null);
   return (
-    <div className="space-y-1.5">
-      <p className="text-[11px] font-medium text-muted-foreground">{title} ({items.length})</p>
-      <ol className="space-y-1.5">
-        {items.map((c, i) => {
-          const id = String(c.chunk_id ?? i);
-          const text = typeof c.text === "string" ? c.text : null;
-          const scores = (["dense_score", "lexical_score", "fused_score"] as const).filter((k) => typeof c[k] === "number");
-          return (
-            <li key={id + i} className="rounded-lg border border-border bg-card p-2 text-xs">
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="font-mono text-[11px] text-muted-foreground">#{i + 1}</span>
-                <span className="min-w-0 flex-1 truncate font-medium">{String(c.title ?? c.doc_id ?? "")}</span>
-                {scores.map((k) => (
-                  <Badge key={k} tone={k === "dense_score" ? "info" : k === "lexical_score" ? "warning" : "primary"}>
-                    {k.replace("_score", "")} {(c[k] as number).toFixed(4)}
-                  </Badge>
-                ))}
-                {typeof c.dense_rank === "number" && typeof c.lexical_rank === "number" && <Badge>ranks d{c.dense_rank as number}/l{c.lexical_rank as number}</Badge>}
-              </div>
-              <div className="mt-0.5 flex flex-wrap gap-x-2 text-[10.5px] text-muted-foreground">
-                <span className="font-mono">chunk {id.slice(0, 8)}</span>
-                {c.section ? <span>§ {String(c.section)}</span> : null}
-                {c.page ? <span>p. {String(c.page)}</span> : null}
-                {c.payload && typeof c.payload === "object" && (c.payload as Row).campus ? <span>campus {String((c.payload as Row).campus)}</span> : null}
-              </div>
-              {c._joined ? <p className="mt-0.5 text-[10px] italic text-muted-foreground">text from Metadata Enrichment (MongoDB)</p> : null}
-              {text && (
-                <p className={cn("mt-1 whitespace-pre-wrap text-[11.5px] leading-snug", expanded !== id && "line-clamp-3")}>
-                  {text}
-                </p>
-              )}
-              {text && text.length > 160 && (
-                <button type="button" className="mt-0.5 text-[10.5px] text-primary underline" onClick={() => setExpanded(expanded === id ? null : id)}>
-                  {expanded === id ? "collapse" : "full text"}
-                </button>
-              )}
-            </li>
-          );
-        })}
-      </ol>
-    </div>
+    <ol className="space-y-1.5">
+      {items.map((c, i) => (
+        <li key={String(c.chunk_id) + i} className="rounded-lg border border-border bg-card p-2 text-xs">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="font-mono text-muted-foreground">#{String(c.rank ?? i + 1)}</span>
+            <span className="min-w-0 flex-1 truncate font-medium">{String(c.title ?? `doc ${String(c.doc_id).slice(0, 8)}`)}</span>
+            {typeof c.score === "number" && <Badge tone="info">similarity {c.score.toFixed(4)}</Badge>}
+          </div>
+          <p className="mt-0.5 font-mono text-[10.5px] text-muted-foreground">
+            chunk {String(c.chunk_id).slice(0, 8)}{c.section ? ` · § ${String(c.section)}` : ""}{c.page_number ? ` · page ${String(c.page_number)}` : ""}
+          </p>
+          {typeof c.text === "string" && (
+            <>
+              <p className={cn("mt-1 whitespace-pre-wrap leading-snug", open !== i && "line-clamp-3")}>{c.text}</p>
+              <button type="button" className="text-[10.5px] text-primary underline" onClick={() => setOpen(open === i ? null : i)}>
+                {open === i ? "collapse" : "expand"}
+              </button>
+            </>
+          )}
+        </li>
+      ))}
+    </ol>
   );
 }
 
-function OutputView({ output, lookup }: { output: Record<string, unknown>; lookup: ChunkLookup }) {
-  const lists = (["candidates", "evidence"] as const).filter((k) => Array.isArray(output[k]) && (output[k] as Row[]).length > 0);
-  const rest = Object.fromEntries(Object.entries(output).filter(([k]) => !lists.includes(k as (typeof lists)[number])));
-  const answer = typeof output.answer === "string" ? output.answer : null;
+const isChunkList = (v: unknown): v is Row[] => Array.isArray(v) && v.length > 0 && typeof v[0] === "object" && v[0] !== null && "chunk_id" in v[0];
+
+/** Show the real output: chunk lists as cards, the answer as text, everything else as JSON. */
+function Output({ output }: { output: unknown }) {
+  if (output == null) return <p className="text-xs text-muted-foreground">No output.</p>;
+  if (isChunkList(output)) return <ChunkList items={output} />;
+  if (typeof output !== "object" || Array.isArray(output)) return <JsonView value={output} label="Output" />;
+  const obj = output as Row;
+  const listKey = (["candidates", "evidence", "citations"] as const).find((k) => isChunkList(obj[k]));
+  const rest = Object.fromEntries(Object.entries(obj).filter(([k]) => k !== listKey));
   return (
     <div className="space-y-2">
-      {answer && <div className="whitespace-pre-wrap rounded-lg border border-border bg-card p-2 text-xs">{answer}</div>}
-      {lists.map((k) => <CandidateList key={k} items={output[k] as Row[]} lookup={lookup} title={k === "evidence" ? "Selected evidence" : "Candidates"} />)}
+      {typeof obj.answer === "string" && <div className="whitespace-pre-wrap rounded-lg border border-border bg-card p-2 text-xs">{obj.answer}</div>}
+      {listKey === "candidates" && (
+        <p className="text-[11px] text-muted-foreground">Qdrant stores only IDs and vectors. The chunk text is loaded from MongoDB in the next stage (Chunk Lookup).</p>
+      )}
+      {listKey && <ChunkList items={obj[listKey] as Row[]} />}
       {Object.keys(rest).length > 0 && <JsonView value={rest} label="Output" />}
-      {!lists.length && !Object.keys(rest).length && <p className="text-xs text-muted-foreground">No output recorded.</p>}
     </div>
   );
 }
 
-export function StageTraceCard({ spec, trace, methodName, index, lookup }: { spec: StageSpec; trace?: StageTrace; methodName?: string; index: number; lookup: ChunkLookup }) {
-  const status = trace?.status ?? "pending";
-  const disabled = status === "bypassed" && trace?.summary === "Disabled";
-  const S = STAGE_STATUS[status];
-  const Icon = S.icon;
-  const hasDetail = trace && status !== "pending";
+/** One stage with an implemented method, in the Execution tab. Expandable once it has run. */
+export function StageTraceCard({ stage, record }: { stage: StageDef; record?: StageRecord }) {
+  const status = STATUS[record?.status ?? "waiting"];
+  const Icon = status.icon;
+  const expandable = !!record && record.status !== "skipped"; // a skipped stage has no input/output to show
   return (
-    <details className="group rounded-xl border border-border bg-card" data-testid={`stage-trace-${spec.stage_id}`} data-status={status}>
-      <summary className={cn("flex list-none items-center gap-2 px-3 py-2 [&::-webkit-details-marker]:hidden", !hasDetail && "pointer-events-none")}>
-        <ChevronRight className={cn("h-4 w-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-90", !hasDetail && "invisible")} aria-hidden />
-        <Icon className={cn("h-4 w-4 shrink-0", S.cls)} aria-label={S.label} />
-        <span className="w-4 shrink-0 text-right font-mono text-[10.5px] text-muted-foreground">{index}</span>
+    <details className="group rounded-xl border border-border bg-card" data-testid={`stage-${stage.stage_id}`} data-status={record?.status ?? "waiting"}>
+      <summary className={cn("flex list-none items-center gap-2 px-3 py-2 [&::-webkit-details-marker]:hidden", !expandable && "pointer-events-none")}>
+        <ChevronRight className={cn("h-4 w-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-90", !expandable && "invisible")} aria-hidden />
+        <Icon className={cn("h-4 w-4 shrink-0", status.cls)} aria-label={status.label} />
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <span className={cn("truncate text-sm font-medium", status === "pending" && "text-muted-foreground")}>{spec.stage_name}</span>
-            {methodName && status !== "pending" && !disabled && <span className="hidden truncate text-[11px] text-muted-foreground sm:inline">· {methodName}</span>}
-          </div>
-          {trace?.summary && status !== "pending" && <p className="truncate text-[11px] text-muted-foreground">{trace.error ?? trace.summary}</p>}
+          <p className={cn("truncate text-sm font-medium", !record && "text-muted-foreground")}>
+            {stage.name}{record?.method_name && <span className="font-normal text-muted-foreground"> · {record.method_name}</span>}
+          </p>
+          <p className="truncate text-[11px] text-muted-foreground">{record ? record.error ?? record.summary : stage.description}</p>
         </div>
-        <span className="shrink-0 font-mono text-[11px] text-muted-foreground">{status === "running" ? "…" : status === "pending" ? "" : formatMs(trace?.duration_ms)}</span>
+        {expandable && record.status !== "running" && <span className="shrink-0 font-mono text-[11px] text-muted-foreground">{formatMs(record.duration_ms)}</span>}
       </summary>
-      {hasDetail && (
+      {expandable && (
         <div className="border-t border-border p-3">
-          <Tabs defaultValue="overview">
+          <p className="mb-2 text-xs">
+            <span className={status.cls.replace("animate-spin", "")}>{status.label}</span> · {formatMs(record.duration_ms)} (measured) ·{" "}
+            <span className="font-mono">{record.method_id}</span>
+          </p>
+          {record.error && <p role="alert" className="mb-2 rounded-md bg-danger/10 px-2 py-1.5 text-xs text-danger">{record.error}</p>}
+          <Tabs defaultValue="output">
             <TabsList>
-              <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="input">Input</TabsTrigger>
               <TabsTrigger value="output">Output</TabsTrigger>
-              <TabsTrigger value="debug">Debug</TabsTrigger>
+              <TabsTrigger value="params">Parameters</TabsTrigger>
             </TabsList>
-            <TabsContent value="overview" className="mt-3 space-y-2 text-xs">
-              <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">
-                <dt className="text-muted-foreground">Status</dt><dd className={S.cls.replace("animate-spin", "")}>{S.label}</dd>
-                <dt className="text-muted-foreground">Method</dt><dd>{disabled ? "— (stage disabled)" : <>{methodName ?? trace.method_id} <span className="font-mono text-muted-foreground">({trace.method_id})</span></>}</dd>
-                <dt className="text-muted-foreground">Implementation</dt><dd>{trace.implementation_status}</dd>
-                <dt className="text-muted-foreground">Duration</dt><dd className="font-mono">{formatMs(trace.duration_ms)} (measured)</dd>
-                <dt className="text-muted-foreground">Summary</dt><dd>{trace.summary}</dd>
-              </dl>
-              {trace.bypass_reason && <p className="rounded-md bg-warning/10 px-2 py-1.5 text-warning"><Ban className="mr-1 inline h-3 w-3" />{trace.bypass_reason}</p>}
-              {trace.error && <p className="rounded-md bg-danger/10 px-2 py-1.5 text-danger" role="alert">{trace.error}</p>}
-            </TabsContent>
-            <TabsContent value="input" className="mt-3"><JsonView value={trace.input} label="Actual input" /></TabsContent>
-            <TabsContent value="output" className="mt-3"><OutputView output={trace.output} lookup={lookup} /></TabsContent>
-            <TabsContent value="debug" className="mt-3 space-y-2">
-              <JsonView value={trace.configuration} label="Applied parameters" />
-              <JsonView value={{ request_id: trace.request_id, stage_id: trace.stage_id, method_id: trace.method_id, started_at: trace.started_at,
-                                 completed_at: trace.completed_at, error: trace.error, bypass_reason: trace.bypass_reason }} label="Identifiers & timing" />
-            </TabsContent>
+            <TabsContent value="input" className="mt-2"><JsonView value={record.input} label="Input" /></TabsContent>
+            <TabsContent value="output" className="mt-2"><Output output={record.output} /></TabsContent>
+            <TabsContent value="params" className="mt-2"><JsonView value={record.params} label="Parameters used" /></TabsContent>
           </Tabs>
         </div>
       )}

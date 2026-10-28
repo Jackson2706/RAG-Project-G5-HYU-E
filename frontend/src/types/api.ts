@@ -1,244 +1,121 @@
-// TypeScript mirrors of the backend Pydantic models (backend/app/models/*).
-// The registry itself is fetched at runtime — no algorithm list is hardcoded here.
+// TypeScript versions of the data the backend sends (see backend/app/*.py).
 
-export type ImplementationStatus = "implemented" | "planned" | "unavailable";
-export type StageStatus = "pending" | "running" | "completed" | "bypassed" | "failed";
-export type ParamType = "integer" | "float" | "boolean" | "enum" | "string" | "string_list" | "multi_enum";
-export type Control =
-  | "slider" | "number" | "toggle" | "select" | "text" | "textarea" | "tags" | "multiselect" | "ollama_model";
-export type Scope = "runtime" | "ingestion" | "index";
-export type ParamValue = string | number | boolean | null | string[];
+export type ParamValue = number | string | boolean;
 
-export interface Option {
-  value: string | number | boolean;
-  label: string;
-}
-
-export interface ParameterSpec {
-  name: string;
-  label: string;
-  type: ParamType;
+/** One hyperparameter of a method (registry.py → Param). */
+export interface ParamDef {
+  type: "integer" | "float" | "boolean" | "enum" | "string";
   default: ParamValue;
+  label: string;
   description: string;
-  control: Control;
-  scope: Scope;
-  level: "basic" | "advanced";
-  nullable: boolean;
+  ui: "slider" | "number" | "toggle" | "select" | "text" | "ollama_model";
   min: number | null;
   max: number | null;
   step: number | null;
-  unit: string | null;
-  options: Option[] | null;
-  visible_when: Record<string, ParamValue[]> | null;
+  options: string[] | null;
+  scope: "runtime" | "ingestion" | "index";
 }
 
-export interface MethodSpec {
+/** One algorithm for a block (registry.py → Method). */
+export interface MethodDef {
   method_id: string;
-  display_name: string;
+  name: string;
   description: string;
-  status: ImplementationStatus;
-  implementation: string | null;
-  parameters: ParameterSpec[];
-  constraints: string[];
+  implemented: boolean;
+  class_name: string;
+  parameters: Record<string, ParamDef>;
 }
 
-export interface StageSpec {
+/** One pipeline block, from GET /api/pipeline/registry (registry.py → Stage). */
+export interface StageDef {
   stage_id: string;
-  stage_name: string;
+  name: string;
+  phase: "offline" | "online";
   description: string;
-  category: "offline" | "online";
-  can_disable: boolean;
-  enabled: boolean;
-  selected_method: string;
-  available_methods: MethodSpec[];
-  reads: string[];
-  writes: string[];
-  dependencies: string[];
-  requires_reindexing: boolean;
-  implementation_status: ImplementationStatus;
-  input_schema?: Record<string, string>;
-  output_schema?: Record<string, string>;
+  base_class: string;
+  optional: boolean;
+  default_method: string | null;
+  implemented: boolean; // true if at least one method is implemented
+  methods: MethodDef[];
 }
 
-export interface Registry {
-  stages: StageSpec[];
-  online_order: string[];
-  offline_order: string[];
-}
+/** The chosen method and parameters for every stage: {stage_id: {method, params}}. */
+export type StageChoices = Record<string, { method: string | null; params: Record<string, ParamValue> }>;
 
-export interface StageConfig {
-  enabled?: boolean | null;
-  method?: string | null;
-  params: Record<string, ParamValue>;
-}
-
-export interface PipelineConfig {
-  stages: Record<string, StageConfig>;
-}
-
-export interface ResolvedConfig {
-  stages: Record<string, { enabled: boolean; method: string; params: Record<string, ParamValue> }>;
-  config_hash: string;
-}
-
-export interface ValidationIssue {
+export interface ConfigError {
   stage_id: string | null;
   param: string | null;
   message: string;
 }
 
-export interface ValidationResult {
-  valid: boolean;
-  errors: ValidationIssue[];
-  warnings: ValidationIssue[];
-  resolved: ResolvedConfig | null;
-}
-
-export interface Preset {
-  preset_id: string;
+/** What one stage did during one request (app/tracing.py → Tracer). */
+export interface StageRecord {
+  stage_id: string;
   name: string;
-  description: string;
-  builtin: boolean;
-  config: PipelineConfig;
-  available: boolean;
-  unavailable_reason: string | null;
-}
-
-export interface SourceSpan {
-  start: number;
-  end: number;
+  method_id: string | null;
+  method_name: string | null;
+  status: "running" | "completed" | "failed" | "skipped";
+  input: unknown;
+  output: unknown;
+  params: Record<string, unknown>;
+  summary: string;
+  duration_ms: number | null;
+  error: string | null;
 }
 
 export interface Citation {
-  marker: string;
+  label: string;
+  cited: boolean;
   chunk_id: string;
   doc_id: string;
-  title: string | null;
-  source_uri: string | null;
-  section_path: string[];
+  title: string;
+  source_uri: string;
+  section: string | null;
   page_number: number | null;
-  source_span: SourceSpan | null;
+  score: number;
   excerpt: string;
-  cited: boolean;
-  resolved: boolean;
-  span_verified: boolean | null;
 }
 
-export interface CitationReport {
-  method: string;
-  cited_markers: string[];
-  invalid_markers: string[];
-  uncited_evidence: string[];
-  unresolved: string[];
-  span_failures: string[];
-  sentences_total: number;
-  sentences_with_citation: number;
-  note: string;
-}
-
-export type Outcome = "answered" | "insufficient_evidence" | "abstained" | "failed";
-
-export interface AnswerResult {
-  answer: string;
-  outcome: Outcome;
-  citations: Citation[];
-  citation_report: CitationReport | null;
-  guard_notes: string[];
-  model: string | null;
-}
-
-export interface StageTrace {
+/** The full record of one question (also stored in MongoDB → GET /api/traces/{id}). */
+export interface Trace {
   request_id: string;
-  stage_id: string;
-  stage_name: string;
-  method_id: string | null;
-  status: StageStatus;
-  implementation_status: string | null;
-  started_at: string | null;
-  completed_at: string | null;
-  duration_ms: number | null;
-  summary: string;
-  input: Record<string, unknown>;
-  output: Record<string, unknown>;
-  configuration: Record<string, unknown>;
-  error: string | null;
-  bypass_reason: string | null;
-}
-
-export interface ExecutionTrace {
-  request_id: string;
-  session_id: string | null;
-  created_at: string;
   question: string;
+  created_at: string;
+  config: StageChoices; // the exact methods and parameters this request used
   status: "running" | "completed" | "failed" | "cancelled";
-  config: ResolvedConfig;
-  index_revision: Record<string, unknown>;
-  stages: StageTrace[];
-  result: AnswerResult | null;
-  total_ms: number | null;
+  stages: StageRecord[];
+  answer: string;
+  outcome: "answered" | "insufficient_context" | "error" | null;
+  citations: Citation[];
+  model: string | null;
   error: string | null;
+  total_ms?: number;
 }
 
-export type EventType =
-  | "pipeline_started" | "stage_started" | "stage_completed" | "stage_bypassed" | "stage_failed"
-  | "answer_delta" | "answer_completed" | "pipeline_completed" | "pipeline_error";
+/** Events of POST /api/chat/stream. */
+export type StreamEvent =
+  | { type: "started"; request_id: string; config: StageChoices }
+  | { type: "stage"; request_id: string; stage: StageRecord }
+  | { type: "answer_delta"; request_id: string; text: string }
+  | { type: "done"; request_id: string; trace: Trace };
 
-export interface PipelineEvent {
-  type: EventType;
-  request_id: string;
-  timestamp: string;
-  stage?: StageTrace;
-  delta?: string;
-  result?: AnswerResult;
-  trace?: ExecutionTrace;
-  error?: string;
-  data?: Record<string, unknown>;
+export interface IndexInfo {
+  documents: number;
+  chunks: number;
+  vectors: number;
+  chunking: { method: string; chunk_size: number; chunk_overlap: number } | null; // how the index was built
+  embedding_method: string | null;
+}
+
+export interface Health {
+  mongodb: { ok: boolean; error?: string };
+  qdrant: { ok: boolean; error?: string };
+  ollama: { ok: boolean; error?: string; models?: number };
+  index: IndexInfo | null;
 }
 
 export interface OllamaModel {
   name: string;
-  size: number | null;
-  family: string | null;
   parameter_size: string | null;
-  quantization: string | null;
-}
-
-export interface OllamaStatus {
-  base_url: string;
-  reachable?: boolean;
-  version?: string;
-  model_count?: number;
-  configured_model: string | null;
-  error?: string;
-  hint?: string;
-}
-
-export interface Health {
-  status: "ok" | "degraded";
-  mongodb: { ok: boolean; error?: string };
-  qdrant: { ok: boolean; error?: string; mode?: string };
-  ollama: { ok: boolean; error?: string; version?: string };
-  active_index: {
-    revision_id: string;
-    collection: string;
-    doc_count: number;
-    chunk_count: number;
-    embedding_model: string;
-    dimension: number;
-  } | null;
-}
-
-export interface DocumentSummary {
-  doc_id: string;
-  source_uri: string;
-  title: string | null;
-  media_type: string;
-  campus: string | null;
-  audience: string[];
-  document_type: string | null;
-  academic_year: string | null;
-  topics: string[];
-  version_id: string;
-  parse_warnings: string[];
-  metadata_provenance: Record<string, string>;
+  capabilities: string[];
 }

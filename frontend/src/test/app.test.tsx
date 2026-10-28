@@ -1,155 +1,121 @@
-// Frontend tests. registry.fixture.json is exported from the real backend registry
-// (`python -c "from app.rag.registry import registry_payload; ..."`, see docs/DEVELOPER_GUIDE.md).
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { StageConfigCard } from "@/components/pipeline/StageConfigCard";
-import { StageTraceCard } from "@/components/pipeline/StageTraceCard";
 import { Workspace } from "@/components/layout/Workspace";
+import { DisabledStage } from "@/components/pipeline/DisabledStage";
+import { ExecutionTab } from "@/components/pipeline/ExecutionTab";
+import { StageConfigCard } from "@/components/pipeline/StageConfigCard";
 import { TooltipProvider } from "@/components/ui/primitives";
-import { applyEvent, type LiveTrace } from "@/hooks/useChat";
+import { applyEvent, type ChatState, type LiveTrace } from "@/hooks/useChat";
+import { defaultChoices, type PipelineConfigState } from "@/hooks/usePipelineConfig";
 import type { SystemState } from "@/hooks/useSystem";
-import { completeDraft, isVisible, onlineConfig, setMethod, setParam, stageById } from "@/lib/config";
-import { parseSseChunk } from "@/services/api";
-import type { PipelineConfig, Registry, StageTrace, ValidationResult } from "@/types/api";
-import registryJson from "./registry.fixture.json";
+import { parseEvents } from "@/services/api";
+import type { MethodDef, StageDef, StageRecord } from "@/types/api";
 
-const registry = registryJson as unknown as Registry;
-const stages = stageById(registry);
-const system = { models: [], defaultModel: null, ollama: null, loadingModels: false, refreshModels: vi.fn() } as unknown as SystemState;
+// A small registry in the same shape as GET /api/pipeline/registry.
+const topK = { type: "integer", default: 5, label: "Top K", description: "How many chunks.", ui: "slider", min: 1, max: 20, step: null, options: null, scope: "runtime" } as const;
+const dense: StageDef = {
+  stage_id: "dense_retrieval", name: "Dense Retrieval", phase: "online", description: "Find similar chunks.", base_class: "BaseDenseRetriever",
+  optional: true, default_method: "qdrant_cosine", implemented: true,
+  methods: [
+    { method_id: "qdrant_cosine", name: "Qdrant cosine", description: "Nearest vectors.", implemented: true, class_name: "QdrantDenseRetriever", parameters: { top_k: topK } },
+    { method_id: "other_dense", name: "Other dense", description: "Planned.", implemented: false, class_name: "OtherDenseRetriever", parameters: {} },
+  ],
+};
+const reranking: StageDef = {
+  stage_id: "reranking", name: "Reranking", phase: "online", description: "Put the best evidence first.", base_class: "BaseReranker",
+  optional: true, default_method: null, implemented: false,
+  methods: [{ method_id: "cross_encoder", name: "Cross-encoder", description: "", implemented: false, class_name: "CrossEncoderReranker", parameters: {} }],
+};
+const system = { models: [], defaultModel: null, health: null, refresh: vi.fn() } as unknown as SystemState;
 
-function stageTrace(over: Partial<StageTrace>): StageTrace {
-  return { request_id: "r1", stage_id: "reranking", stage_name: "Reranking", method_id: "cross_encoder", status: "bypassed",
-           implementation_status: "planned", started_at: null, completed_at: null, duration_ms: 0, summary: "Disabled", input: {},
-           output: {}, configuration: {}, error: null, bypass_reason: "Reranking is disabled in this configuration; input passed through unchanged.", ...over };  // prettier-ignore
+function configFor(stages: StageDef[], errors: PipelineConfigState["errors"] = []) {
+  return { stages, choices: defaultChoices(stages), errors, valid: errors.length === 0, setMethod: vi.fn(), setParam: vi.fn(), resetStage: vi.fn(), resetAll: vi.fn() } as unknown as PipelineConfigState;
 }
 
-describe("SSE parsing", () => {
-  it("parses complete events and keeps the partial remainder", () => {
-    const a = `event: stage_started\ndata: {"type":"stage_started","request_id":"r1","timestamp":"t"}\n\n`;
-    const b = `event: answer_delta\ndata: {"type":"answer_delta","request_id":"r1","timestamp":"t","delta":"Hi"}\n\n`;
-    const { events, rest } = parseSseChunk(a + b + ": keep-alive\n\n" + "event: answer_del");
-    expect(events.map((e) => e.type)).toEqual(["stage_started", "answer_delta"]);
-    expect(events[1].delta).toBe("Hi");
-    expect(rest).toBe("event: answer_del");
-  });
+const record = (over: Partial<StageRecord>): StageRecord => ({
+  stage_id: "dense_retrieval", name: "Dense Retrieval", method_id: "qdrant_cosine", method_name: "Qdrant cosine", status: "completed",
+  input: { query: "How?" }, params: { top_k: 2 }, output: { candidates: [{ rank: 1, chunk_id: "abc12345", doc_id: "d1", score: 0.8123 }], details: {} },
+  summary: "1 candidates", duration_ms: 12.4, error: null, ...over,
 });
 
-describe("live trace reducer", () => {
-  it("records stage events per request and replaces them with the final trace", () => {
-    let t: LiveTrace = { request_id: "r1", question: "q", status: "running", stages: {} };
-    t = applyEvent(t, { type: "stage_started", request_id: "r1", timestamp: "", stage: stageTrace({ stage_id: "dense_retrieval", status: "running" }) });
-    expect(t.stages.dense_retrieval.status).toBe("running");
-    t = applyEvent(t, { type: "stage_completed", request_id: "r1", timestamp: "", stage: stageTrace({ stage_id: "dense_retrieval", status: "completed" }) });
+describe("streaming", () => {
+  it("parses complete SSE events and keeps the unfinished rest", () => {
+    const { events, rest } = parseEvents('data: {"type":"answer_delta","request_id":"r","text":"Hi"}\n\ndata: {"type":"sta');
+    expect(events).toEqual([{ type: "answer_delta", request_id: "r", text: "Hi" }]);
+    expect(rest).toBe('data: {"type":"sta');
+  });
+
+  it("builds the live trace from stage events", () => {
+    let t: LiveTrace = { requestId: "r", question: "q", status: "running", stages: {} };
+    t = applyEvent(t, { type: "stage", request_id: "r", stage: record({ status: "running" }) });
+    t = applyEvent(t, { type: "stage", request_id: "r", stage: record({}) });
     expect(t.stages.dense_retrieval.status).toBe("completed");
-    const final = { request_id: "r1", status: "failed", stages: [stageTrace({ stage_id: "generation", status: "failed" })] } as never;
-    t = applyEvent(t, { type: "pipeline_error", request_id: "r1", timestamp: "", trace: final });
-    expect(t.status).toBe("failed");
-    expect(Object.keys(t.stages)).toEqual(["generation"]);
   });
 });
 
-describe("configuration helpers", () => {
-  const draft = completeDraft(registry, { stages: {} });
-
-  it("fills every registered stage with registry defaults", () => {
-    expect(Object.keys(draft.stages).sort()).toEqual(registry.stages.map((s) => s.stage_id).sort());
-    expect(draft.stages.dense_retrieval.params.top_k).toBe(10);
-  });
-
-  it("switching method keeps parameters that share a name", () => {
-    const edited = setParam(draft, "evidence_selection", "max_chunks", 7);
-    const switched = setMethod(edited, stages.evidence_selection, "token_budget");
-    expect(switched.stages.evidence_selection.params.max_chunks).toBe(7);
-    expect(switched.stages.evidence_selection.params.max_tokens).toBe(1200);
-  });
-
-  it("evaluates visibility conditions and sends only online stages", () => {
-    const hnsw = stages.dense_retrieval.available_methods[0].parameters.find((p) => p.name === "hnsw_ef")!;
-    expect(isVisible(hnsw, { exact: false })).toBe(true);
-    expect(isVisible(hnsw, { exact: true })).toBe(false);
-    const online = onlineConfig(registry, draft);
-    expect(Object.keys(online.stages)).toEqual(registry.online_order);
-    expect(online.stages.chunking).toBeUndefined();
-  });
-});
-
-function renderCard(stageId: string, draft: PipelineConfig, validation: ValidationResult | null = null, onChange = vi.fn()) {
-  render(
-    <TooltipProvider>
-      <StageConfigCard spec={stages[stageId]} draft={draft} onChange={onChange} validation={validation} advanced system={system} index={1} />
-    </TooltipProvider>,
-  );
-  return onChange;
-}
-
-describe("registry-driven configuration UI", () => {
-  const draft = completeDraft(registry, { stages: {} });
-
-  it("renders controls from the registry and shows planned methods as disabled", () => {
-    renderCard("reranking", setParam(draft, "reranking", "top_n", 20));
+describe("Configuration tab (driven by the registry)", () => {
+  it("lets you select implemented methods and shows planned ones disabled", () => {
+    render(<TooltipProvider><StageConfigCard stage={dense} config={configFor([dense])} system={system} /></TooltipProvider>);
     const select = screen.getByLabelText("Method") as HTMLSelectElement;
-    expect(Array.from(select.options).map((o) => o.textContent)).toEqual([
-      "Cross-encoder — planned", "LLM reranker — planned", "Rule-aware reranker — planned",
-    ]);
-    expect(screen.getAllByText("planned").length).toBeGreaterThan(0);
+    const options = Object.fromEntries(Array.from(select.options).map((o) => [o.value, o]));
+    expect(options.qdrant_cosine.disabled).toBe(false);
+    expect(options.other_dense.disabled).toBe(true);
+    expect(options.other_dense.textContent).toContain("not implemented");
+    expect(options.__off__.textContent).toContain("Off"); // optional stage can be switched off
   });
 
-  it("disables planned options once the stage is enabled", () => {
-    const enabled = { stages: { ...draft.stages, metadata_filtering: { ...draft.stages.metadata_filtering, enabled: true } } };
-    renderCard("metadata_filtering", enabled);
-    const options = Array.from((screen.getByLabelText("Method") as HTMLSelectElement).options);
-    expect(options.find((o) => o.value === "exact")!.disabled).toBe(false);
-    expect(options.find((o) => o.value === "boolean")!.disabled).toBe(true);
+  it("draws hyperparameters from the registry and sends changes to the config", () => {
+    const config = configFor([dense], [{ stage_id: "dense_retrieval", param: "top_k", message: "Top K must be at most 20" }]);
+    render(<TooltipProvider><StageConfigCard stage={dense} config={config} system={system} /></TooltipProvider>);
+    expect(screen.getByRole("alert")).toHaveTextContent("at most 20");
+    fireEvent.change(screen.getByLabelText("Top K", { selector: "input" }), { target: { value: "7" } });
+    expect(config.setParam).toHaveBeenCalledWith("dense_retrieval", "top_k", 7);
   });
 
-  it("shows backend validation errors next to the parameter and edits through onChange", () => {
-    const validation: ValidationResult = { valid: false, warnings: [], resolved: null,
-      errors: [{ stage_id: "dense_retrieval", param: "top_k", message: "Top K must be ≤ 100" }] };  // prettier-ignore
-    const onChange = renderCard("dense_retrieval", draft, validation);
-    expect(screen.getByRole("alert")).toHaveTextContent("Top K must be ≤ 100");
-    fireEvent.change(screen.getAllByLabelText("Top K").find((el) => el.tagName === "INPUT")!, { target: { value: "25" } });
-    expect(onChange).toHaveBeenCalled();
-    expect(onChange.mock.calls.at(-1)![0].stages.dense_retrieval.params.top_k).toBe(25);
+  it("shows a newly registered method without any frontend change", () => {
+    const added: MethodDef = { method_id: "keyword_overlap", name: "Keyword overlap", description: "New!", implemented: true, class_name: "KeywordOverlapRetriever", parameters: {} };
+    const stage = { ...dense, methods: [...dense.methods, added] };
+    render(<TooltipProvider><StageConfigCard stage={stage} config={configFor([stage])} system={system} /></TooltipProvider>);
+    const option = screen.getByRole("option", { name: "Keyword overlap" }) as HTMLOptionElement;
+    expect(option.disabled).toBe(false);
+  });
+
+  it("darkens and disables blocks without an implemented method", () => {
+    render(<DisabledStage stage={reranking} />);
+    const block = screen.getByTestId("disabled-stage-reranking");
+    expect(block).toHaveAttribute("aria-disabled", "true");
+    expect(block.className).toContain("pointer-events-none");
+    expect(block).toHaveTextContent("Not implemented");
+    expect(screen.getByRole("combobox")).toBeDisabled();
+    expect(block.querySelector("button, a, input, summary, details, [tabindex]")).toBeNull();
   });
 });
 
-describe("execution trace UI", () => {
-  it("shows bypass reason and actual output candidates", () => {
-    render(
-      <TooltipProvider>
-        <StageTraceCard spec={stages.reranking} index={9} lookup={{}} trace={stageTrace({})} />
-        <StageTraceCard spec={stages.dense_retrieval} index={5} methodName="Qdrant vector search" lookup={{ c1: { chunk_id: "c1", title: "Guide", text: "Joined text" } }}
-          trace={stageTrace({ stage_id: "dense_retrieval", status: "completed", summary: "1 candidates", duration_ms: 12.5, bypass_reason: null,
-                              output: { candidates: [{ chunk_id: "c1", doc_id: "d1", dense_score: 0.81234 }] } })} />
-      </TooltipProvider>,
-    );
-    expect(screen.getByTestId("stage-trace-reranking")).toHaveAttribute("data-status", "bypassed");
-    fireEvent.click(screen.getByTestId("stage-trace-reranking").querySelector("summary")!);
-    expect(screen.getByText(/input passed through unchanged/)).toBeInTheDocument();
-    expect(screen.getByText("13 ms")).toBeInTheDocument();
-    const dense = screen.getByTestId("stage-trace-dense_retrieval");
-    fireEvent.click(dense.querySelector("summary")!);
-    fireEvent.mouseDown(screen.getAllByRole("tab", { name: "Output" })[1]);
-    expect(screen.getByText("dense 0.8123")).toBeInTheDocument();
-    expect(screen.getByText("Joined text")).toBeInTheDocument();
+describe("Execution tab", () => {
+  it("shows the method and parameters that really ran; future blocks stay disabled", () => {
+    const chat = { messages: [{ id: "m", role: "assistant", content: "", requestId: "r1" }], selected: "r1", select: vi.fn(),
+      traces: { r1: { requestId: "r1", question: "How?", status: "completed", stages: { dense_retrieval: record({}) } } } } as unknown as ChatState;  // prettier-ignore
+    render(<TooltipProvider><ExecutionTab stages={[dense, reranking]} chat={chat} /></TooltipProvider>);
+    const card = screen.getByTestId("stage-dense_retrieval");
+    expect(card).toHaveTextContent("Qdrant cosine");
+    fireEvent.click(card.querySelector("summary")!);
+    expect(screen.getByText("similarity 0.8123")).toBeInTheDocument();
+    expect(screen.getByTestId("disabled-stage-reranking")).toBeInTheDocument();
+    expect(screen.queryByTestId("stage-reranking")).toBeNull();
   });
 });
 
 describe("resizable layout", () => {
-  it("renders a keyboard-focusable separator between the two panels", () => {
+  it("has a keyboard-focusable divider on wide screens", () => {
     window.matchMedia = vi.fn().mockReturnValue({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() });
-    render(<Workspace mobileView="chat" pipeline={<div>pipeline-panel</div>} chat={<div>chat-panel</div>} />);
-    const sep = screen.getByRole("separator");
-    expect(sep).toHaveAttribute("tabindex", "0");
-    expect(screen.getByText("pipeline-panel")).toBeInTheDocument();
-    expect(screen.getByText("chat-panel")).toBeInTheDocument();
+    render(<Workspace mobileView="chat" pipeline={<div>pipeline</div>} chat={<div>chat</div>} />);
+    expect(screen.getByRole("separator")).toHaveAttribute("tabindex", "0");
   });
 
-  it("shows one panel at a time on narrow screens", () => {
+  it("shows one panel at a time on phones", () => {
     window.matchMedia = vi.fn().mockReturnValue({ matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn() });
-    render(<Workspace mobileView="pipeline" pipeline={<div>pipeline-panel</div>} chat={<div>chat-panel</div>} />);
-    expect(screen.getByText("pipeline-panel")).toBeInTheDocument();
-    expect(screen.queryByText("chat-panel")).toBeNull();
+    render(<Workspace mobileView="pipeline" pipeline={<div>pipeline</div>} chat={<div>chat</div>} />);
+    expect(screen.queryByText("chat")).toBeNull();
   });
 });

@@ -1,54 +1,30 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { api } from "@/services/api";
-import type { Health, OllamaModel, OllamaStatus } from "@/types/api";
+import type { Health, OllamaModel } from "@/types/api";
 
-/** Backend health + Ollama status and installed models. */
+/** Backend status and installed Ollama models. */
 export function useSystem() {
   const [health, setHealth] = useState<Health | null>(null);
-  const [healthError, setHealthError] = useState<string | null>(null);
-  const [ollama, setOllama] = useState<OllamaStatus | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [models, setModels] = useState<OllamaModel[]>([]);
   const [defaultModel, setDefaultModel] = useState<string | null>(null);
-  const [loadingModels, setLoadingModels] = useState(false);
 
-  const refreshHealth = useCallback(async () => {
+  const refresh = useCallback(async () => {
     try {
       setHealth(await api.health());
-      setHealthError(null);
+      setError(null);
     } catch (err) {
-      setHealth(null);
-      setHealthError((err as Error).message);
+      setError((err as Error).message);
     }
-  }, []);
-
-  const refreshModels = useCallback(async () => {
-    setLoadingModels(true);
-    try {
-      const status = await api.ollamaStatus();
-      setOllama(status);
-      if (status.reachable) {
-        const res = await api.ollamaModels();
-        setModels(res.models);
-        setDefaultModel(res.default);
-      } else {
-        setModels([]);
-      }
-    } catch (err) {
-      setOllama({ base_url: "", configured_model: null, reachable: false, error: (err as Error).message });
-    } finally {
-      setLoadingModels(false);
-    }
+    api.models().then((r) => { setModels(r.models); setDefaultModel(r.default); }).catch(() => setModels([]));
   }, []);
 
   useEffect(() => {
-    void refreshHealth();
-    void refreshModels();
-    const id = setInterval(refreshHealth, 30000);
-    return () => clearInterval(id);
-  }, [refreshHealth, refreshModels]);
+    void refresh();
+  }, [refresh]);
 
-  return { health, healthError, refreshHealth, ollama, models, defaultModel, loadingModels, refreshModels };
+  return { health, error, models, defaultModel, refresh };
 }
 
 export type SystemState = ReturnType<typeof useSystem>;

@@ -1,7 +1,6 @@
-# Secrets / local configuration
+# Secrets and local settings (copy from the *.env.example files)
 .env
 backend/.env
-!*.env.example
 
 # Python
 __pycache__/
@@ -9,23 +8,21 @@ __pycache__/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
-.coverage
-htmlcov/
-# Do not create virtual environments here — use the Conda env `RAG`
+# Use the Conda environment `RAG`, not a virtual environment in this folder
 .venv/
 venv/
 
-# Node / frontend build
+# Embedded Qdrant data (only when QDRANT_PATH is used instead of Docker)
+backend/qdrant_data/
+
+# Frontend
 frontend/node_modules/
 frontend/dist/
 frontend/*.tsbuildinfo
+
+# Logs, OS and editor files
 *.log
-
-# Generated data (rebuild with scripts/ingest.py). Manifests and eval results are kept.
-data/processed/
-data/qdrant_local/
-
-# OS / editors
 .DS_Store
 .idea/
 .vscode/
+.claude

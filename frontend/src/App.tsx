@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { ChatPanel } from "@/components/chat/ChatPanel";
-import { IndexDialog } from "@/components/documents/IndexDialog";
 import { Header } from "@/components/layout/Header";
 import { Workspace } from "@/components/layout/Workspace";
 import { PipelinePanel, type PipelineTab } from "@/components/pipeline/PipelinePanel";
@@ -9,60 +8,43 @@ import { TooltipProvider } from "@/components/ui/primitives";
 import { useChat } from "@/hooks/useChat";
 import { usePipelineConfig } from "@/hooks/usePipelineConfig";
 import { useSystem } from "@/hooks/useSystem";
-import { onlineConfig } from "@/lib/config";
 import { storage } from "@/lib/utils";
 
-const THEME_KEY = "hyu-compass:theme";
-
 export default function App() {
-  const cfg = usePipelineConfig();
-  const chat = useChat();
+  const config = usePipelineConfig();
   const system = useSystem();
+  const chat = useChat();
   const [tab, setTab] = useState<PipelineTab>("configuration");
   const [mobileView, setMobileView] = useState<"chat" | "pipeline">("chat");
-  const [indexOpen, setIndexOpen] = useState(false);
-  const [dark, setDark] = useState(() => storage.get<boolean | null>(THEME_KEY, null) ?? window.matchMedia("(prefers-color-scheme: dark)").matches);
+  const [dark, setDark] = useState(() => storage.get<boolean | null>("hyu-compass:dark", null) ?? window.matchMedia("(prefers-color-scheme: dark)").matches);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
+    storage.set("hyu-compass:dark", dark);
   }, [dark]);
 
-  // The chat sends the validated online configuration; invalid drafts block sending.
-  const blocked = !cfg.registry || !cfg.draft
-    ? "Loading pipeline configuration…"
-    : cfg.validation && !cfg.validation.valid
-      ? `Fix ${cfg.validation.errors.length} configuration error(s) in the RAG Pipeline panel before sending.`
-      : null;
+  const blocked = !config.choices ? "Loading the pipeline configuration…" : !config.valid ? "Fix the configuration error in the RAG Pipeline panel first." : null;
 
-  const send = useCallback(
-    (q: string) => {
-      if (!cfg.registry || !cfg.draft) return;
-      setTab("execution");
-      void chat.send(q, onlineConfig(cfg.registry, cfg.draft));
-    },
-    [cfg.registry, cfg.draft, chat],
-  );
+  const send = (question: string) => {
+    setTab("execution"); // watch the stages run
+    void chat.send(question, config.choices!); // the exact methods + parameters for this request
+  };
 
-  const inspect = useCallback(
-    (requestId: string) => {
-      void chat.selectRequest(requestId);
-      setTab("execution");
-      setMobileView("pipeline");
-    },
-    [chat],
-  );
+  const inspect = (requestId: string) => {
+    void chat.select(requestId);
+    setTab("execution");
+    setMobileView("pipeline");
+  };
 
   return (
     <TooltipProvider>
       <div className="flex h-full flex-col">
-        <Header system={system} dark={dark} onToggleTheme={() => { setDark(!dark); storage.set(THEME_KEY, !dark); }}
-                onOpenIndex={() => setIndexOpen(true)} mobileView={mobileView} onMobileView={setMobileView} />
+        <Header system={system} dark={dark} onToggleTheme={() => setDark(!dark)} mobileView={mobileView} onMobileView={setMobileView} />
         <Workspace
           mobileView={mobileView}
-          pipeline={<PipelinePanel cfg={cfg} chat={chat} system={system} tab={tab} onTabChange={setTab} />}
-          chat={<ChatPanel chat={chat} onSend={send} sendBlockedReason={blocked} onInspect={inspect} />}
+          pipeline={<PipelinePanel config={config} system={system} chat={chat} tab={tab} onTabChange={setTab} />}
+          chat={<ChatPanel chat={chat} onSend={send} blockedReason={blocked} onInspect={inspect} />}
         />
-        <IndexDialog open={indexOpen} onOpenChange={setIndexOpen} cfg={cfg} system={system} />
       </div>
     </TooltipProvider>
   );

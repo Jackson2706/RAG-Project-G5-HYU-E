@@ -1,15 +1,18 @@
-# Raw source documents
+# Raw documents
 
-Place manually collected, **approved** English documents here (PDF, TXT, Markdown, HTML).
-Sub-folders are scanned recursively. Files are never modified by ingestion.
+Put the real, approved English documents here: **PDF, TXT, Markdown (`.md`) or HTML**.
+Sub-folders are fine. Ingestion only reads these files and never changes them.
 
-Do not bypass authentication or download restrictions of https://book.hanyang.ac.kr/html/ —
-save only documents you are allowed to access and share with the team.
+Then run, from the `hyu-compass/` folder:
 
-Optional metadata: Markdown files may start with YAML front matter and HTML files may use
-`<meta name="..." content="...">` tags. Recognized keys: `title`, `document_type`, `campus`
-(SEOUL | ERICA | ALL), `audience` (undergraduate, graduate, international, exchange, freshman, all),
-`academic_year`, `issuer`, `publication_date`, `effective_from`, `effective_until`, `topics`.
-Values outside the vocabularies are dropped with a warning; missing values stay unknown.
+```bash
+conda activate RAG
+python scripts/ingest.py --path data/raw
+```
 
-Uploads made through the API are stored in `raw/uploads/`. This README is skipped by the loader.
+Tips:
+- Only save documents you are allowed to access and share. Do not bypass logins or download
+  limits on https://book.hanyang.ac.kr/html/.
+- Markdown files may start with front matter like `title: My Title` between `---` lines; the
+  title is used in citations. Other files use their `<title>`, PDF title or first line.
+- This README itself is skipped by ingestion.

@@ -1,109 +1,73 @@
-import type {
-  DocumentSummary, ExecutionTrace, Health, OllamaModel, OllamaStatus, PipelineConfig, PipelineEvent, Preset, Registry,
-  ValidationResult,
-} from "@/types/api";
-
-const BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? "";
-
-export class ApiError extends Error {
-  constructor(message: string, readonly status: number, readonly detail?: unknown) {
-    super(message);
-  }
-}
-
-function describe(detail: unknown): string {
-  if (typeof detail === "string") return detail;
-  if (detail && typeof detail === "object") {
-    const d = detail as { message?: string; errors?: { message: string }[] };
-    if (d.errors?.length) return `${d.message ?? "Invalid request"}: ${d.errors.map((e) => e.message).join("; ")}`;
-    if (d.message) return d.message;
-  }
-  return "Request failed";
-}
+// Every call the frontend makes to FastAPI (backend/app/api.py).
+import type { ConfigError, Health, IndexInfo, OllamaModel, StageChoices, StageDef, StreamEvent, Trace } from "@/types/api";
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let res: Response;
   try {
-    res = await fetch(BASE + path, { ...init, headers: { "Content-Type": "application/json", ...init?.headers } });
+    res = await fetch(path, { ...init, headers: { "Content-Type": "application/json", ...init?.headers } });
   } catch {
-    throw new ApiError("Cannot reach the HYU Compass API. Is the backend running on port 8000?", 0);
+    throw new Error("Cannot reach the backend. Is it running on http://127.0.0.1:8000?");
   }
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new ApiError(describe(body.detail), res.status, body.detail);
-  }
-  return res.json() as Promise<T>;
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(errorText(body.detail, res.status));
+  return body as T;
 }
 
-const post = <T>(path: string, body: unknown) => request<T>(path, { method: "POST", body: JSON.stringify(body) });
+/** FastAPI errors are a string, or {message, errors: [...]} for an invalid configuration. */
+function errorText(detail: unknown, status: number): string {
+  if (typeof detail === "string") return detail;
+  const d = detail as { errors?: ConfigError[] } | undefined;
+  if (d?.errors?.length) return d.errors.map((e) => e.message).join("; ");
+  return `Request failed (${status})`;
+}
+
+const post = <T>(path: string, data: unknown) => request<T>(path, { method: "POST", body: JSON.stringify(data) });
 
 export const api = {
-  health: () => request<Health>("/api/v1/health"),
-  registry: () => request<Registry>("/api/v1/pipeline/registry"),
-  config: () => request<{ config: PipelineConfig; active_index_config: PipelineConfig["stages"] | null }>("/api/v1/pipeline/config"),
-  validate: (config: PipelineConfig) => post<ValidationResult>("/api/v1/pipeline/config/validate", config),
-  presets: () => request<Preset[]>("/api/v1/pipeline/presets"),
-  savePreset: (name: string, description: string, config: PipelineConfig) =>
-    post<Preset>("/api/v1/pipeline/presets", { name, description, config }),
-  ollamaStatus: () => request<OllamaStatus>("/api/v1/ollama/status"),
-  ollamaModels: () => request<{ models: OllamaModel[]; default: string | null }>("/api/v1/ollama/models"),
-  ollamaShow: (model: string) =>
-    request<{ capabilities: string[]; context_length: number | null; details: Record<string, unknown> }>(
-      `/api/v1/ollama/show?model=${encodeURIComponent(model)}`,
-    ),
-  trace: (requestId: string) => request<ExecutionTrace>(`/api/v1/traces/${requestId}`),
-  documents: () => request<{ revision_id: string; documents: DocumentSummary[] }>("/api/v1/documents"),
-  ingestLocal: (path: string, config: PipelineConfig) =>
-    post<Record<string, unknown>>("/api/v1/ingest/local", { path, config, activate: true }),
+  health: () => request<Health>("/api/health"),
+  registry: () => request<{ stages: StageDef[] }>("/api/pipeline/registry"),
+  validate: (stages: StageChoices) => post<{ valid: boolean; errors: ConfigError[] }>("/api/pipeline/config/validate", stages),
+  models: () => request<{ models: OllamaModel[]; default: string | null }>("/api/ollama/models"),
+  ingest: (folder: string, stages: StageChoices) =>
+    post<{ documents: number; chunks: number; errors: string[] } & Partial<IndexInfo>>("/api/ingest", { folder, stages }),
+  trace: (requestId: string) => request<Trace>(`/api/traces/${requestId}`),
 };
 
-/** Parse a text/event-stream body into events. Exported for tests. */
-export function parseSseChunk(buffer: string): { events: PipelineEvent[]; rest: string } {
-  const events: PipelineEvent[] = [];
-  const blocks = buffer.split("\n\n");
-  const rest = blocks.pop() ?? "";
-  for (const block of blocks) {
-    const data = block
-      .split("\n")
-      .filter((line) => line.startsWith("data: "))
-      .map((line) => line.slice(6))
-      .join("\n");
-    if (data) events.push(JSON.parse(data) as PipelineEvent);
-  }
+/** Split received text into complete SSE events ("data: {...}\n\n"); return the unfinished rest. */
+export function parseEvents(buffer: string): { events: StreamEvent[]; rest: string } {
+  const parts = buffer.split("\n\n");
+  const rest = parts.pop() ?? "";
+  const events = parts.filter((p) => p.startsWith("data: ")).map((p) => JSON.parse(p.slice(6)) as StreamEvent);
   return { events, rest };
 }
 
 /**
- * POST /chat/stream and dispatch each SSE event. Uses fetch (not EventSource) because the
- * request carries a JSON body with the configuration snapshot.
+ * Ask a question and receive live events. We use fetch() instead of EventSource because we
+ * need to POST the question and the chosen methods in the request body.
  */
-export async function streamChat(
-  body: { question: string; session_id: string; config: PipelineConfig },
-  onEvent: (event: PipelineEvent) => void,
-  signal: AbortSignal,
-): Promise<void> {
+export async function streamChat(question: string, stages: StageChoices, onEvent: (e: StreamEvent) => void, signal: AbortSignal) {
   let res: Response;
   try {
-    res = await fetch(`${BASE}/api/v1/chat/stream`, {
+    res = await fetch("/api/chat/stream", {
       method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "text/event-stream" },
-      body: JSON.stringify(body),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question, stages }),
       signal,
     });
   } catch (err) {
     if (signal.aborted) throw err;
-    throw new ApiError("Cannot reach the HYU Compass API. Is the backend running on port 8000?", 0);
+    throw new Error("Cannot reach the backend. Is it running on http://127.0.0.1:8000?");
   }
   if (!res.ok || !res.body) {
-    const payload = await res.json().catch(() => ({}));
-    throw new ApiError(describe(payload.detail), res.status, payload.detail);
+    const body = await res.json().catch(() => ({}));
+    throw new Error(errorText(body.detail, res.status));
   }
   const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
   let buffer = "";
   for (;;) {
     const { value, done } = await reader.read();
     if (done) break;
-    const parsed = parseSseChunk(buffer + value);
+    const parsed = parseEvents(buffer + value);
     buffer = parsed.rest;
     parsed.events.forEach(onEvent);
   }
