@@ -1,13 +1,15 @@
 """The pipeline runners: `run_ingestion()` (offline) and `run_rag()` (one question).
 
-The runners only decide the ORDER of the blocks and pass data from one to the next. They
-never contain an algorithm: every block is created from the registry and called through
-its abstract method (e.g. `retriever.retrieve(query)`), so any registered method can be used.
+The runners only decide the ORDER of the blocks and pass data from one to the next. They never
+contain an algorithm: every block is created from the registry and called through the abstract
+method in its folder's base.py (e.g. `retriever.retrieve(query, prefilter)`), so any registered
+method can be used.
 """
 
 from __future__ import annotations
 
 import hashlib
+import re
 import time
 import uuid
 from collections.abc import Awaitable, Callable
@@ -17,8 +19,9 @@ from pathlib import Path
 from typing import Any
 
 from app.rag.registry import PIPELINE, STAGES, create_block, get_method
-from app.rag.schemas import (CitationResult, Evidence, FinalAnswer, GenerationResult, PromptContext, QueryAnalysis, RetrievalResult,
-                             Services, make_chunk_id, make_doc_id)  # fmt: skip
+from app.rag.schemas import (INSUFFICIENT_ANSWER, INSUFFICIENT_MARKER, Evidence, FilterCriteria, FinalAnswer, GenerationResult,
+                             PostfilterResult, PromptContext, QueryAnalysis, RetrievalResult, RewrittenQuery, Services,
+                             SourceReference, make_chunk_id, make_doc_id)  # fmt: skip
 from app.tracing import Tracer, to_jsonable
 
 
@@ -28,13 +31,14 @@ def _with_embedder(config: dict, services: Services) -> Services:
     return replace(services, embedder=create_block("embedding", choice["method"], choice["params"], services))
 
 
-# =========================================================================== offline
+# =========================================================================== offline: ingestion and indexing
 
 
 def run_ingestion(folder: Path, config: dict, services: Services) -> dict:
-    """Load → parse → extract metadata → chunk → embed → index. Replaces the whole index.
+    """Document Loading → Parsing → Chunking → Metadata Extraction → Embedding → Vector Indexing.
 
-    Nothing is written until every file has been processed, so a crash never leaves half an index.
+    Replaces the whole index. Nothing is written until every file has been processed, so a crash
+    never leaves half an index.
     """
     services = _with_embedder(config, services)
     block = {s: create_block(s, config[s]["method"], config[s]["params"], services)
@@ -44,8 +48,8 @@ def run_ingestion(folder: Path, config: dict, services: Services) -> dict:
     for path in files:
         try:
             parsed = block["parsing"].parse(path)
-            metadata = block["metadata_extraction"].extract(parsed)
             doc_chunks = block["chunking"].chunk(parsed)
+            metadata = block["metadata_extraction"].extract(parsed)
         except Exception as exc:  # report the bad file and continue with the others
             errors.append(f"{path.name}: {exc}")
             continue
@@ -71,26 +75,56 @@ def run_ingestion(folder: Path, config: dict, services: Services) -> dict:
             "errors": errors, "skipped": skipped}  # fmt: skip
 
 
-# =========================================================================== online
+# =========================================================================== online: source attribution and abstention
+
+
+def attach_sources(generated: GenerationResult | None, prompt: PromptContext | None) -> FinalAnswer:
+    """Turn the generated text into the final answer with source references.
+
+    - No answer was generated (no evidence, or evidence sufficiency said no) → abstention.
+    - The model replied INSUFFICIENT_CONTEXT → abstention.
+    - Otherwise every evidence block in the prompt becomes a SourceReference; `cited` is True when
+      the answer contains its [E#] label. Labels that match no evidence block are removed.
+
+    This is source ATTRIBUTION (where the text came from). It does not check whether a sentence is
+    actually supported by its source.
+    """
+    if generated is None or prompt is None:
+        return FinalAnswer(answer=INSUFFICIENT_ANSWER, outcome="insufficient_context")
+    answer = generated.answer
+    if answer.upper().startswith(INSUFFICIENT_MARKER):
+        note = answer[len(INSUFFICIENT_MARKER):].strip(" :\n")
+        return FinalAnswer(answer=INSUFFICIENT_ANSWER + (f"\n\n_Model note: {note}_" if note else ""), outcome="insufficient_context")
+    labels = {e.label for e in prompt.evidence}
+    used = set(re.findall(r"\[(E\d+)\]", answer))
+    for unknown in used - labels:  # a label the model made up: never show a source that does not exist
+        answer = answer.replace(f"[{unknown}]", "")
+    sources = [
+        SourceReference(label=e.label, cited=e.label in used, chunk_id=e.chunk_id, doc_id=e.doc_id, title=e.title,
+                        source_uri=e.source_uri, section=e.section, page_number=e.page_number, score=e.score, excerpt=e.text[:500])
+        for e in prompt.evidence
+    ]  # fmt: skip
+    return FinalAnswer(answer=answer, outcome="answered", sources=sources)
 
 
 def summarize(result: Any) -> str:
     """One readable line for the stage list in the Execution tab."""
     if isinstance(result, RetrievalResult):
         best = f", best score {result.candidates[0].score}" if result.candidates else ""
-        return f"{len(result.candidates)} candidates{best}"
+        where = " (prefiltered)" if result.applied_filter else ""
+        return f"{len(result.candidates)} candidates{best}{where}"
+    if isinstance(result, PostfilterResult):
+        return f"{len(result.kept)} kept, {len(result.removed)} removed"
     if isinstance(result, PromptContext):
         return f"{len(result.evidence)} evidence blocks, {result.token_count} tokens"
     if isinstance(result, GenerationResult):
         return f"{result.model}: {len(result.answer)} characters"
-    if isinstance(result, CitationResult):
-        cited = sum(c.cited for c in result.citations)
-        return f"{cited} citation(s) resolved" + (f", {len(result.invalid_markers)} invalid removed" if result.invalid_markers else "")
-    if isinstance(result, FinalAnswer):
-        return f"Outcome: {result.outcome}"
     if isinstance(result, list) and all(isinstance(e, Evidence) for e in result):
         return f"{len(result)} evidence chunks ({sum(e.token_count for e in result)} tokens)"
     return str(result)[:120]
+
+
+# =========================================================================== online: question answering
 
 
 async def run_rag(question: str, config: dict, services: Services, emit: Callable[[dict], None] = lambda event: None) -> dict:
@@ -99,7 +133,7 @@ async def run_rag(question: str, config: dict, services: Services, emit: Callabl
     tracer = Tracer(request_id, emit)
     trace: dict[str, Any] = {"request_id": request_id, "question": question, "created_at": datetime.now(UTC).isoformat(),
                              "config": config, "status": "running", "stages": tracer.stages, "answer": "", "outcome": None,
-                             "citations": [], "model": None, "error": None}  # fmt: skip
+                             "sources": [], "model": None, "error": None}  # fmt: skip
     emit({"type": "started", "request_id": request_id, "config": config})
     start = time.perf_counter()
 
@@ -124,43 +158,46 @@ async def run_rag(question: str, config: dict, services: Services, emit: Callabl
                 record["summary"] = summarize(result)
             return result
 
-        def skip_because_no_evidence(*stage_ids: str) -> None:
-            for stage_id in stage_ids:
-                tracer.skip(stage_id, STAGES[stage_id].name, "Skipped: no evidence, so the model is not asked to guess.")
+        # ---- before candidate retrieval
+        analysis = await step("query_understanding", lambda b: b.analyze(question), {"question": question}, default=QueryAnalysis())
+        criteria: FilterCriteria = analysis.criteria  # the eligibility conditions both filters enforce
+        rewritten = await step("query_rewriting", lambda b: b.rewrite(question), {"question": question},
+                               default=RewrittenQuery(query=question))  # fmt: skip
+        query = rewritten.query
+        # Prefiltering builds a predicate; it is NOT applied here but passed INTO candidate retrieval.
+        prefilter = await step("metadata_prefiltering", lambda b: b.build_filter(criteria), {"criteria": criteria})
 
-        # ---- before retrieval
-        analysis = await step("query_understanding", lambda b: b.analyze(question), {"question": question}, QueryAnalysis())
-        query = await step("query_rewriting", lambda b: b.rewrite(question), {"question": question}, default=question)
-        constraints = await step("constraint_validation", lambda b: b.validate(analysis), {"analysis": analysis}, default={})
-        filters = await step("metadata_filtering", lambda b: b.build_filter(constraints), {"constraints": constraints})
+        # ---- candidate retrieval: dense, lexical, or both merged by hybrid fusion (all use the same prefilter)
+        dense = await step("dense_retrieval", lambda b: b.retrieve(query, prefilter), {"query": query, "prefilter": prefilter})
+        lexical = await step("lexical_retrieval", lambda b: b.retrieve(query, prefilter), {"query": query, "prefilter": prefilter})
+        fused = await step("hybrid_fusion", lambda b: b.fuse(dense, lexical), {"dense": dense, "lexical": lexical})
+        candidates = (fused or dense or lexical).candidates
 
-        # ---- retrieval (dense, lexical, or both merged by fusion)
-        dense = await step("dense_retrieval", lambda b: b.retrieve(query, filters), {"query": query, "filters": filters})
-        lexical = await step("lexical_retrieval", lambda b: b.retrieve(query, filters), {"query": query, "filters": filters})
-        fused = await step("hybrid_fusion", lambda b: b.fuse(dense.candidates, lexical.candidates),
-                           {"dense": dense and dense.candidates, "lexical": lexical and lexical.candidates})  # fmt: skip
-        retrieved = fused or dense or lexical
+        # ---- Postfiltering works on the candidates retrieval already returned.
+        postfiltered = await step("metadata_postfiltering", lambda b: b.filter_candidates(candidates, criteria),
+                                  {"candidates": candidates, "criteria": criteria})  # fmt: skip
+        if postfiltered is not None:
+            candidates = postfiltered.kept
 
         # ---- evidence
-        evidence = await step("metadata_enrichment", lambda b: b.enrich(retrieved.candidates), {"candidates": retrieved.candidates})
+        evidence = await step("metadata_enrichment", lambda b: b.enrich(candidates), {"candidates": candidates})
         evidence = await step("reranking", lambda b: b.rerank(query, evidence), {"query": query, "evidence": evidence}, default=evidence)
         evidence = await step("evidence_selection", lambda b: b.select(evidence), {"evidence": evidence})
-        decision = await step("sufficiency_gate", lambda b: b.check(question, evidence), {"question": question, "evidence": evidence})
+        decision = await step("evidence_sufficiency", lambda b: b.check(question, evidence), {"question": question, "evidence": evidence})
 
-        # ---- answer
-        verified: CitationResult | None = None
+        # ---- grounded generation, or abstention when there is no (sufficient) evidence
+        prompt = generated = None
         if not evidence or (decision is not None and not decision.sufficient):
-            skip_because_no_evidence("context_builder", "generation", "citation_verification")
+            reason = "Skipped: no evidence, so the model is not asked to guess (abstention)." if not evidence else f"Skipped: {decision.reason}"
+            for stage_id in ("context_construction", "generation"):
+                tracer.skip(stage_id, STAGES[stage_id].name, reason)
         else:
-            prompt = await step("context_builder", lambda b: b.build(question, evidence), {"question": question, "evidence": evidence})
+            prompt = await step("context_construction", lambda b: b.build(question, evidence), {"question": question, "evidence": evidence})
             on_token = lambda text: emit({"type": "answer_delta", "request_id": request_id, "text": text})  # noqa: E731
             generated = await step("generation", lambda b: b.generate(prompt, on_token), {"messages": prompt.messages})
             trace["model"] = generated.model
-            verified = await step("citation_verification", lambda b: b.verify(generated.answer, prompt.evidence),
-                                  {"answer": generated.answer, "evidence_labels": [e.label for e in prompt.evidence]})  # fmt: skip
-        final = await step("response_guard", lambda b: b.finalize(verified), {"citation_result": verified})
-
-        trace.update(status="completed", answer=final.answer, outcome=final.outcome, citations=to_jsonable(final.citations))
+        final = attach_sources(generated, prompt)
+        trace.update(status="completed", answer=final.answer, outcome=final.outcome, sources=to_jsonable(final.sources))
     except Exception as exc:
         trace.update(status="failed", outcome="error", error=f"{exc.__class__.__name__}: {exc}")
     finally:

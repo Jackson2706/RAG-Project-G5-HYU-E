@@ -93,7 +93,7 @@ def anyio_backend():
 def fake_model(monkeypatch):
     """Every test uses FakeModel instead of downloading BAAI/bge-small-en-v1.5."""
     model = FakeModel()
-    monkeypatch.setattr("app.rag.blocks.embedding.load_sentence_transformer", lambda name, revision: model)
+    monkeypatch.setattr("app.rag.blocks.ingestion.embedding.bge_embedder.load_sentence_transformer", lambda name, revision: model)
     return model
 
 

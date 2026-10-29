@@ -16,16 +16,21 @@ import type { MethodDef, StageDef, StageRecord } from "@/types/api";
 const topK = { type: "integer", default: 5, label: "Top K", description: "How many chunks.", ui: "slider", min: 1, max: 20, step: null, options: null, scope: "runtime" } as const;
 const dense: StageDef = {
   stage_id: "dense_retrieval", name: "Dense Retrieval", phase: "online", description: "Find similar chunks.", base_class: "BaseDenseRetriever",
-  optional: true, default_method: "qdrant_cosine", implemented: true,
+  folder: "app/rag/blocks/retrieval/dense_retrieval/", group: "Candidate Retrieval", optional: true, default_method: "qdrant_cosine", implemented: true,
   methods: [
-    { method_id: "qdrant_cosine", name: "Qdrant cosine", description: "Nearest vectors.", implemented: true, class_name: "QdrantDenseRetriever", parameters: { top_k: topK } },
-    { method_id: "other_dense", name: "Other dense", description: "Planned.", implemented: false, class_name: "OtherDenseRetriever", parameters: {} },
+    { method_id: "qdrant_cosine", name: "Qdrant cosine", description: "Nearest vectors.", implemented: true, class_name: "QdrantDenseRetriever", file: "retrieval/dense_retrieval/qdrant_cosine.py", parameters: { top_k: topK } },
+    { method_id: "other_dense", name: "Other dense", description: "Planned.", implemented: false, class_name: "OtherDenseRetriever", file: "retrieval/dense_retrieval/other.py", parameters: {} },
   ],
+};
+const prefilter: StageDef = {
+  stage_id: "metadata_prefiltering", name: "Metadata Prefiltering", phase: "online", description: "Restrict the search to eligible documents.",
+  base_class: "BaseMetadataPrefilter", folder: "app/rag/blocks/metadata_filtering/metadata_prefiltering/", group: null, optional: true, default_method: null, implemented: false,
+  methods: [{ method_id: "qdrant_prefilter", name: "Qdrant payload filter", description: "", implemented: false, class_name: "QdrantMetadataPrefilter", file: "metadata_filtering/metadata_prefiltering/qdrant_prefilter.py", parameters: {} }],
 };
 const reranking: StageDef = {
   stage_id: "reranking", name: "Reranking", phase: "online", description: "Put the best evidence first.", base_class: "BaseReranker",
-  optional: true, default_method: null, implemented: false,
-  methods: [{ method_id: "cross_encoder", name: "Cross-encoder", description: "", implemented: false, class_name: "CrossEncoderReranker", parameters: {} }],
+  folder: "app/rag/blocks/evidence/reranking/", group: null, optional: true, default_method: null, implemented: false,
+  methods: [{ method_id: "cross_encoder", name: "Cross-encoder", description: "", implemented: false, class_name: "CrossEncoderReranker", file: "evidence/reranking/cross_encoder.py", parameters: {} }],
 };
 const system = { models: [], defaultModel: null, health: null, refresh: vi.fn() } as unknown as SystemState;
 
@@ -74,16 +79,16 @@ describe("Configuration tab (driven by the registry)", () => {
   });
 
   it("shows a newly registered method without any frontend change", () => {
-    const added: MethodDef = { method_id: "keyword_overlap", name: "Keyword overlap", description: "New!", implemented: true, class_name: "KeywordOverlapRetriever", parameters: {} };
+    const added: MethodDef = { method_id: "keyword_overlap", name: "Keyword overlap", description: "New!", implemented: true, class_name: "KeywordOverlapRetriever", file: "retrieval/dense_retrieval/keyword_overlap.py", parameters: {} };
     const stage = { ...dense, methods: [...dense.methods, added] };
     render(<TooltipProvider><StageConfigCard stage={stage} config={configFor([stage])} system={system} /></TooltipProvider>);
     const option = screen.getByRole("option", { name: "Keyword overlap" }) as HTMLOptionElement;
     expect(option.disabled).toBe(false);
   });
 
-  it("darkens and disables blocks without an implemented method", () => {
-    render(<DisabledStage stage={reranking} />);
-    const block = screen.getByTestId("disabled-stage-reranking");
+  it("darkens and disables blocks without an implemented method (e.g. Metadata Prefiltering)", () => {
+    render(<DisabledStage stage={prefilter} />);
+    const block = screen.getByTestId("disabled-stage-metadata_prefiltering");
     expect(block).toHaveAttribute("aria-disabled", "true");
     expect(block.className).toContain("pointer-events-none");
     expect(block).toHaveTextContent("Not implemented");
@@ -96,7 +101,9 @@ describe("Execution tab", () => {
   it("shows the method and parameters that really ran; future blocks stay disabled", () => {
     const chat = { messages: [{ id: "m", role: "assistant", content: "", requestId: "r1" }], selected: "r1", select: vi.fn(),
       traces: { r1: { requestId: "r1", question: "How?", status: "completed", stages: { dense_retrieval: record({}) } } } } as unknown as ChatState;  // prettier-ignore
-    render(<TooltipProvider><ExecutionTab stages={[dense, reranking]} chat={chat} /></TooltipProvider>);
+    render(<TooltipProvider><ExecutionTab stages={[prefilter, dense, reranking]} chat={chat} /></TooltipProvider>);
+    expect(screen.getByText("Candidate Retrieval")).toBeInTheDocument(); // group label from the registry
+    expect(screen.getByTestId("disabled-stage-metadata_prefiltering")).toHaveTextContent("Not implemented");
     const card = screen.getByTestId("stage-dense_retrieval");
     expect(card).toHaveTextContent("Qdrant cosine");
     fireEvent.click(card.querySelector("summary")!);

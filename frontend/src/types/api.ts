@@ -23,6 +23,7 @@ export interface MethodDef {
   description: string;
   implemented: boolean;
   class_name: string;
+  file: string; // e.g. "retrieval/dense_retrieval/qdrant_cosine.py"
   parameters: Record<string, ParamDef>;
 }
 
@@ -33,6 +34,8 @@ export interface StageDef {
   phase: "offline" | "online";
   description: string;
   base_class: string;
+  folder: string; // e.g. "app/rag/blocks/retrieval/dense_retrieval/"
+  group: string | null; // e.g. "Candidate Retrieval"
   optional: boolean;
   default_method: string | null;
   implemented: boolean; // true if at least one method is implemented
@@ -63,7 +66,8 @@ export interface StageRecord {
   error: string | null;
 }
 
-export interface Citation {
+/** A source shown under the answer (source attribution, not claim verification). */
+export interface SourceReference {
   label: string;
   cited: boolean;
   chunk_id: string;
@@ -86,7 +90,7 @@ export interface Trace {
   stages: StageRecord[];
   answer: string;
   outcome: "answered" | "insufficient_context" | "error" | null;
-  citations: Citation[];
+  sources: SourceReference[];
   model: string | null;
   error: string | null;
   total_ms?: number;

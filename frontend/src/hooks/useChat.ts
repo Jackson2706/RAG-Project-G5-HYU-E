@@ -10,7 +10,7 @@ export interface ChatMessage {
   content: string;
   requestId?: string; // links an answer to its execution trace
   status?: "streaming" | "done" | "error" | "cancelled";
-  trace?: Trace; // final trace (answer, outcome, citations)
+  trace?: Trace; // final trace (answer, outcome, sources)
   error?: string;
 }
 

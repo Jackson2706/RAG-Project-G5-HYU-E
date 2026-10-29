@@ -43,7 +43,8 @@ export function StageConfigCard({ stage, config, system }: { stage: StageDef; co
           </select>
           {method && (
             <p className="text-[11px] leading-snug text-muted-foreground">
-              {method.description} <span className="font-mono">({method.class_name} ← {stage.base_class})</span>
+              {method.description}{" "}
+              <span className="font-mono">blocks/{method.file} · {method.class_name} ← {stage.base_class}</span>
             </p>
           )}
         </div>

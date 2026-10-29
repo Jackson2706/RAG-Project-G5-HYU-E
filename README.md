@@ -11,19 +11,22 @@ answer **using only those passages**. It then shows you the sources.
 **RAG = Retrieval-Augmented Generation.** A language model on its own answers from memory and
 may invent things. A RAG system first **retrieves** relevant text from our own documents, then lets
 the model **generate** an answer from that text. That is why every answer comes with sources
-like `[E1]` that you can check.
+like `[E1]` that point to the document text they came from.
 
 ## What the app does
 
 - **Ingests** English documents (PDF, TXT, Markdown, HTML) from `data/raw/`.
-- **Answers** questions with citations, and says so honestly when the documents don't contain the answer.
+- **Answers** questions with source references, and abstains honestly when the documents don't contain the answer.
 - **Shows the whole pipeline.** Choose a method and its settings for each block in the
   *Configuration* tab. The *Execution* tab shows every block's real input, output, parameters and
   time. Future blocks (query rewriting, BM25, reranking…) appear greyed out, so you can see the
   roadmap.
-- **Easy to extend.** Every block is an abstract Python class, and every algorithm is a subclass.
-  One registry file (`backend/app/rag/registry.py`) lists all methods and hyperparameters, and the
-  UI is built from it. To add a method you write a class, register it, and test it.
+- **Easy to extend.** Every pipeline block is a folder inside a group folder of
+  `backend/app/rag/blocks/` (`ingestion/`, `query_processing/`, `metadata_filtering/`, `retrieval/`,
+  `evidence/`, `grounded_generation/`), e.g. `blocks/retrieval/dense_retrieval/`. It holds an
+  abstract class (`base.py`) and one file per algorithm. One registry file
+  (`backend/app/rag/registry.py`) lists all methods and hyperparameters, and the UI is built from it.
+  To add a method you write a subclass, register it, and test it.
 
 ## Architecture
 

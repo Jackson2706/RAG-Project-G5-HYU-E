@@ -4,9 +4,12 @@ import { useState } from "react";
 import { DisabledStage } from "@/components/pipeline/DisabledStage";
 import { StageConfigCard } from "@/components/pipeline/StageConfigCard";
 import { Button } from "@/components/ui/primitives";
-import type { PipelineConfigState } from "@/hooks/usePipelineConfig";
+import { groupStartsAt, type PipelineConfigState } from "@/hooks/usePipelineConfig";
 import type { SystemState } from "@/hooks/useSystem";
 import { api } from "@/services/api";
+
+const groupLabel = (label: string | null) =>
+  label && <p className="px-1 pt-1 text-[11px] font-semibold uppercase tracking-wide text-primary">{label}</p>;
 
 /** Re-index buttons + a warning when the chunk settings differ from the current index. */
 function Reindex({ config, system }: { config: PipelineConfigState; system: SystemState }) {
@@ -66,8 +69,9 @@ export function ConfigurationTab({ config, system }: { config: PipelineConfigSta
           </h3>
           {phase === "offline" && <Reindex config={config} system={system} />}
           <ol className="space-y-1.5">
-            {config.stages.filter((s) => s.phase === phase).map((stage) => (
-              <li key={stage.stage_id}>
+            {config.stages.filter((s) => s.phase === phase).map((stage, i, list) => (
+              <li key={stage.stage_id} className={stage.group ? "border-l-2 border-primary/30 pl-2" : undefined}>
+                {groupLabel(groupStartsAt(list, i))}
                 {stage.implemented ? <StageConfigCard stage={stage} config={config} system={system} /> : <DisabledStage stage={stage} />}
               </li>
             ))}

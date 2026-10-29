@@ -16,7 +16,7 @@ const STATUS = {
 
 type Row = Record<string, unknown>;
 
-/** Readable cards for lists of retrieved chunks (Vector Retrieval / Chunk Lookup outputs). */
+/** Readable cards for lists of retrieved chunks (candidate retrieval, postfiltering and Metadata Enrichment outputs). */
 function ChunkList({ items }: { items: Row[] }) {
   const [open, setOpen] = useState<number | null>(null);
   return (
@@ -53,13 +53,13 @@ function Output({ output }: { output: unknown }) {
   if (isChunkList(output)) return <ChunkList items={output} />;
   if (typeof output !== "object" || Array.isArray(output)) return <JsonView value={output} label="Output" />;
   const obj = output as Row;
-  const listKey = (["candidates", "evidence", "citations"] as const).find((k) => isChunkList(obj[k]));
+  const listKey = (["candidates", "kept", "evidence"] as const).find((k) => isChunkList(obj[k]));
   const rest = Object.fromEntries(Object.entries(obj).filter(([k]) => k !== listKey));
   return (
     <div className="space-y-2">
       {typeof obj.answer === "string" && <div className="whitespace-pre-wrap rounded-lg border border-border bg-card p-2 text-xs">{obj.answer}</div>}
       {listKey === "candidates" && (
-        <p className="text-[11px] text-muted-foreground">Qdrant stores only IDs and vectors. The chunk text is loaded from MongoDB in the next stage (Chunk Lookup).</p>
+        <p className="text-[11px] text-muted-foreground">Qdrant stores only IDs and vectors. The chunk text is loaded from MongoDB in Metadata Enrichment.</p>
       )}
       {listKey && <ChunkList items={obj[listKey] as Row[]} />}
       {Object.keys(rest).length > 0 && <JsonView value={rest} label="Output" />}

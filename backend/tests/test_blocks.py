@@ -4,19 +4,21 @@ from pathlib import Path
 
 import pytest
 
-from app.rag.blocks.base import PipelineBlock
-from app.rag.blocks.chunking import BaseChunker, SectionTokenChunker
-from app.rag.blocks.embedding import SentenceTransformerEmbedder
-from app.rag.blocks.embedding import load_sentence_transformer as real_model_loader  # saved before the fake replaces it
-from app.rag.blocks.loading import LocalFolderLoader
-from app.rag.blocks.parsing import BasicDocumentParser
-from app.rag.blocks.reranking import BaseReranker, CrossEncoderReranker
-from app.rag.blocks.retrieval import BaseDenseRetriever
+from app.rag.blocks.ingestion.chunking.section_chunker import SectionTokenChunker
+from app.rag.blocks.ingestion.document_loading.local_loader import LocalFolderLoader
+from app.rag.blocks.ingestion.embedding.bge_embedder import SentenceTransformerEmbedder
+from app.rag.blocks.ingestion.embedding.bge_embedder import load_sentence_transformer as real_model_loader  # saved before the fake replaces it
+from app.rag.blocks.ingestion.parsing.basic_parser import BasicDocumentParser
+from app.rag.blocks.pipeline_block import PipelineBlock
+from app.rag.blocks.evidence.reranking.base import BaseReranker
+from app.rag.blocks.evidence.reranking.cross_encoder import CrossEncoderReranker
+from app.rag.blocks.retrieval.dense_retrieval.base import BaseDenseRetriever
 from app.rag.registry import PIPELINE
 from app.rag.schemas import ParsedDocument, RetrievalResult, Section, make_chunk_id, make_doc_id
 from tests.conftest import SAMPLES
 
 pytestmark = pytest.mark.anyio
+BLOCKS = Path(__file__).resolve().parent.parent / "app" / "rag" / "blocks"
 
 
 def make_pdf(pages: list[str]) -> bytes:
@@ -40,7 +42,21 @@ def make_pdf(pages: list[str]) -> bytes:
     return out + f"trailer\n<< /Size {len(objects) + 1} /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n".encode()
 
 
-# ------------------------------------------------------------------ abstract classes
+# ------------------------------------------------------------------ folder structure & abstract classes
+
+
+def test_every_block_is_a_folder_in_its_group_with_base_and_one_file_per_method():
+    for stage in PIPELINE:
+        folder = BLOCKS / stage.folder  # e.g. retrieval/dense_retrieval
+        assert folder.name == stage.stage_id and (folder.parent / "__init__.py").exists(), stage.stage_id
+        assert (folder / "__init__.py").exists() and (folder / "base.py").exists(), stage.stage_id
+        package = "app.rag.blocks." + stage.folder.replace("/", ".")
+        assert stage.base_class.__module__ == f"{package}.base"
+        for m in stage.methods:
+            module = m.cls.__module__
+            assert module.startswith(f"{package}.") and not module.endswith(".base"), m.method_id
+    modules = [m.cls.__module__ for s in PIPELINE for m in s.methods]
+    assert len(modules) == len(set(modules))  # one algorithm per file
 
 
 def test_abstract_classes_cannot_be_instantiated(services):
@@ -59,7 +75,7 @@ def test_subclass_missing_the_abstract_method_fails(services):
 
 async def test_a_correct_subclass_works(services):
     class EmptyRetriever(BaseDenseRetriever):
-        async def retrieve(self, query, filters=None):
+        async def retrieve(self, query, prefilter=None):
             return RetrievalResult(candidates=[])
 
     retriever = EmptyRetriever({"top_k": 3}, services)
@@ -109,20 +125,23 @@ def test_empty_file_is_an_error(tmp_path: Path, services):
 # ------------------------------------------------------------------ chunking & embedding
 
 
-def _chunker(services, size, overlap) -> BaseChunker:
+def _chunker(services, size, overlap) -> SectionTokenChunker:
     services.embedder = SentenceTransformerEmbedder({}, services)
     return SectionTokenChunker({"chunk_size": size, "chunk_overlap": overlap}, services)
 
 
+def _doc(*sections: Section) -> ParsedDocument:
+    return ParsedDocument(path=Path("x.md"), source_uri="x.md", file_type="md", title="X", sections=list(sections))
+
+
 def test_short_sections_stay_whole(services):
-    doc = ParsedDocument(Path("x.md"), "x.md", "md", "X", [Section("A", "Short text."), Section("B", "Another one.")])
+    doc = _doc(Section(heading="A", text="Short text."), Section(heading="B", text="Another one."))
     assert [c.text for c in _chunker(services, 64, 8).chunk(doc)] == ["Short text.", "Another one."]
 
 
 def test_long_section_is_windowed_with_overlap(services):
     text = " ".join(f"w{i}" for i in range(100))  # 100 tokens with the fake tokenizer
-    doc = ParsedDocument(Path("x.md"), "x.md", "md", "X", [Section("Long", text, page=3)])
-    chunks = _chunker(services, 40, 10).chunk(doc)
+    chunks = _chunker(services, 40, 10).chunk(_doc(Section(heading="Long", text=text, page=3)))
     words = [c.text.split() for c in chunks]
     assert [len(w) for w in words] == [40, 40, 40]  # windows start at tokens 0, 30, 60
     assert words[0][-10:] == words[1][:10] and words[-1][-1] == "w99"
@@ -148,6 +167,6 @@ def test_real_bge_model_has_384_dimensions(services, monkeypatch):
     s = services.settings
     if not try_to_load_from_cache(s.embedding_model, "config.json", revision=s.embedding_revision):
         pytest.skip("BGE model is not downloaded yet")
-    monkeypatch.setattr("app.rag.blocks.embedding.load_sentence_transformer", real_model_loader)
+    monkeypatch.setattr("app.rag.blocks.ingestion.embedding.bge_embedder.load_sentence_transformer", real_model_loader)
     embedder = SentenceTransformerEmbedder({}, services)
     assert embedder.dimension() == 384 and len(embedder.embed_query("How do I register?")) == 384

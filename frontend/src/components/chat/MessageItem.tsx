@@ -3,12 +3,12 @@ import { Children, type ReactNode } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-import { Citations } from "@/components/chat/Citations";
+import { Sources } from "@/components/chat/Sources";
 import { Badge, CopyButton, IconButton } from "@/components/ui/primitives";
 import type { ChatMessage } from "@/hooks/useChat";
 
 /** Make "[E1]" in the answer a small link that opens the matching source card. */
-function linkCitations(children: ReactNode): ReactNode {
+function linkSources(children: ReactNode): ReactNode {
   return Children.map(children, (child) =>
     typeof child !== "string"
       ? child
@@ -16,10 +16,10 @@ function linkCitations(children: ReactNode): ReactNode {
           const label = /^\[(E\d+)\]$/.exec(part)?.[1];
           if (!label) return part;
           return (
-            <a key={i} href={`#cite-${label}`} className="mx-0.5 rounded bg-accent px-1 font-mono text-[10.5px] font-semibold text-primary no-underline"
+            <a key={i} href={`#source-${label}`} className="mx-0.5 rounded bg-accent px-1 font-mono text-[10.5px] font-semibold text-primary no-underline"
                onClick={(e) => {
                  e.preventDefault();
-                 const card = document.getElementById(`cite-${label}`) as HTMLDetailsElement | null;
+                 const card = document.getElementById(`source-${label}`) as HTMLDetailsElement | null;
                  if (card) { card.open = true; card.scrollIntoView({ behavior: "smooth", block: "nearest" }); }
                }}>
               {label}
@@ -49,8 +49,8 @@ export function MessageItem({ message, onInspect }: { message: ChatMessage; onIn
         {message.content ? (
           <div className="prose-answer text-[15px]">
             <ReactMarkdown remarkPlugins={[remarkGfm]} components={{
-              p: ({ children }) => <p>{linkCitations(children)}</p>,
-              li: ({ children }) => <li>{linkCitations(children)}</li>,
+              p: ({ children }) => <p>{linkSources(children)}</p>,
+              li: ({ children }) => <li>{linkSources(children)}</li>,
             }}>{message.content}</ReactMarkdown>
           </div>
         ) : streaming ? (
@@ -62,7 +62,7 @@ export function MessageItem({ message, onInspect }: { message: ChatMessage; onIn
           </p>
         )}
         {message.status === "cancelled" && <p className="mt-1 text-xs text-muted-foreground">Stopped.</p>}
-        {trace && <Citations citations={trace.citations} />}
+        {trace && <Sources sources={trace.sources} />}
         <div className="mt-1.5 flex items-center gap-0.5 opacity-70 transition-opacity group-hover:opacity-100">
           {message.content && !streaming && <CopyButton text={message.content} label="Copy answer" />}
           {message.requestId && (

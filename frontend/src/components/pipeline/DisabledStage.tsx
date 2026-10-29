@@ -22,7 +22,7 @@ export function DisabledStage({ stage }: { stage: StageDef }) {
       </div>
       <select disabled aria-label={`${stage.name} method (not implemented)`}
               className="mt-1.5 h-7 w-full rounded-md border border-border bg-muted px-2 text-[11px] text-muted-foreground">
-        {stage.methods.map((m) => <option key={m.method_id}>{m.name} — {m.class_name} (planned)</option>)}
+        {stage.methods.map((m) => <option key={m.method_id}>{m.name} — {m.file} (planned)</option>)}
       </select>
     </div>
   );

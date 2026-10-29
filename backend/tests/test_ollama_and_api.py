@@ -56,9 +56,13 @@ def api(db, ollama, settings, monkeypatch):
 
 def test_registry_endpoint(api):
     stages = {s["stage_id"]: s for s in api.get("/api/pipeline/registry").json()["stages"]}
-    assert len(stages) == 21
+    assert len(stages) == 19
     assert stages["dense_retrieval"]["implemented"] and stages["dense_retrieval"]["methods"][0]["parameters"]["top_k"]["default"] == 5
+    assert stages["dense_retrieval"]["group"] == "Candidate Retrieval" and stages["dense_retrieval"]["folder"] == "app/rag/blocks/retrieval/dense_retrieval/"
     assert not stages["reranking"]["implemented"] and stages["reranking"]["base_class"] == "BaseReranker"
+    for name in ("metadata_prefiltering", "metadata_postfiltering"):  # the two filtering placements, both planned
+        assert stages[name]["optional"] and not stages[name]["implemented"]
+    assert "citation_verification" not in stages and "response_guard" not in stages
 
 
 def test_config_validation_endpoint(api):

@@ -4,6 +4,7 @@ import { DisabledStage } from "@/components/pipeline/DisabledStage";
 import { StageTraceCard } from "@/components/pipeline/StageTraceCard";
 import { Badge, CopyButton } from "@/components/ui/primitives";
 import type { ChatState } from "@/hooks/useChat";
+import { groupStartsAt } from "@/hooks/usePipelineConfig";
 import { formatMs } from "@/lib/utils";
 import type { StageDef } from "@/types/api";
 
@@ -42,8 +43,9 @@ export function ExecutionTab({ stages, chat }: { stages: StageDef[]; chat: ChatS
         {final?.error && <p className="text-xs text-danger" role="alert">{final.error}</p>}
       </div>
       <ol className="space-y-1.5" aria-label="Pipeline stages">
-        {stages.filter((s) => s.phase === "online").map((stage) => (
-          <li key={stage.stage_id}>
+        {stages.filter((s) => s.phase === "online").map((stage, i, list) => (
+          <li key={stage.stage_id} className={stage.group ? "border-l-2 border-primary/30 pl-2" : undefined}>
+            {groupStartsAt(list, i) && <p className="px-1 pt-1 text-[11px] font-semibold uppercase tracking-wide text-primary">{groupStartsAt(list, i)}</p>}
             {stage.implemented ? <StageTraceCard stage={stage} record={live.stages[stage.stage_id]} /> : <DisabledStage stage={stage} />}
           </li>
         ))}

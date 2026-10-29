@@ -6,6 +6,12 @@ import type { ConfigError, MethodDef, ParamValue, StageChoices, StageDef } from 
 
 const KEY = "hyu-compass:pipeline-config";
 
+/** The group label to show above stage `i`, if it starts a new group (e.g. "Candidate Retrieval"). */
+export function groupStartsAt(stages: StageDef[], i: number): string | null {
+  const group = stages[i].group;
+  return group && stages[i - 1]?.group !== group ? group : null;
+}
+
 export function methodOf(stage: StageDef, methodId: string | null): MethodDef | undefined {
   return stage.methods.find((m) => m.method_id === methodId);
 }

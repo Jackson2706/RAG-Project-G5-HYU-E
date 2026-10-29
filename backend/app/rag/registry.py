@@ -1,8 +1,8 @@
 """THE METHOD REGISTRY — the single list of every pipeline block, its methods and their settings.
 
-To add a method:  write a subclass of the block's abstract class (app/rag/blocks/…),
-add a `Method(...)` entry to the right `Stage` below, and set implemented=True once its
-test passes. The API (GET /api/pipeline/registry) and the UI pick it up automatically.
+To add a method:  write a subclass of the block's abstract class (app/rag/blocks/<group>/<block>/base.py)
+in its own file in that folder, add a `Method(...)` entry to the right `Stage` below, and set
+implemented=True once its test passes. The API (GET /api/pipeline/registry) and the UI pick it up.
 
 This file imports the block classes; block files never import this file.
 """
@@ -13,23 +13,64 @@ import inspect
 from dataclasses import dataclass, field
 from typing import Any, Literal
 
-from app.rag.blocks.base import PipelineBlock
-from app.rag.blocks.chunking import BaseChunker, SectionTokenChunker, SemanticChunker
-from app.rag.blocks.embedding import BaseEmbedder, OllamaEmbedder, SentenceTransformerEmbedder
-from app.rag.blocks.evidence import BaseEvidenceSelector, BaseSufficiencyGate, ScoreThresholdGate, TokenBudgetSelector
-from app.rag.blocks.generation import BaseContextBuilder, BaseGenerator, NumberedContextBuilder, OllamaGenerator
-from app.rag.blocks.indexing import BaseVectorIndexer, QdrantMongoIndexer
-from app.rag.blocks.loading import BaseDocumentLoader, LocalFolderLoader, WebsiteLoader
-from app.rag.blocks.metadata import BaseMetadataExtractor, BasicMetadataExtractor, LLMMetadataExtractor
-from app.rag.blocks.parsing import AdvancedPdfParser, BaseDocumentParser, BasicDocumentParser
-from app.rag.blocks.query_processing import (BaseConstraintValidator, BaseMetadataFilter, BaseQueryRewriter,
-                                             BaseQueryUnderstanding, ExactMetadataFilter, LLMQueryRewriter,
-                                             RuleBasedQueryUnderstanding, VocabularyConstraintValidator)  # fmt: skip
-from app.rag.blocks.reranking import BaseReranker, CrossEncoderReranker, MetadataAwareReranker
-from app.rag.blocks.retrieval import (BaseDenseRetriever, BaseHybridFusion, BaseLexicalRetriever, BaseMetadataEnricher,
-                                      BM25Retriever, MongoChunkLookup, QdrantDenseRetriever, ReciprocalRankFusion)  # fmt: skip
-from app.rag.blocks.verification import (BaseCitationVerifier, BaseResponseGuard, BasicResponseGuard, ClaimVerifier,
-                                         MarkerCitationVerifier)  # fmt: skip
+from app.rag.blocks.pipeline_block import PipelineBlock
+
+# ---- blocks/ingestion/
+from app.rag.blocks.ingestion.document_loading.base import BaseDocumentLoader
+from app.rag.blocks.ingestion.document_loading.local_loader import LocalFolderLoader
+from app.rag.blocks.ingestion.document_loading.web_loader import WebsiteLoader
+from app.rag.blocks.ingestion.parsing.base import BaseDocumentParser
+from app.rag.blocks.ingestion.parsing.basic_parser import BasicDocumentParser
+from app.rag.blocks.ingestion.chunking.base import BaseChunker
+from app.rag.blocks.ingestion.chunking.recursive_chunker import RecursiveChunker
+from app.rag.blocks.ingestion.chunking.section_chunker import SectionTokenChunker
+from app.rag.blocks.ingestion.chunking.semantic_chunker import SemanticChunker
+from app.rag.blocks.ingestion.metadata_extraction.base import BaseMetadataExtractor
+from app.rag.blocks.ingestion.metadata_extraction.basic_extractor import BasicMetadataExtractor
+from app.rag.blocks.ingestion.metadata_extraction.llm_extractor import LLMMetadataExtractor
+from app.rag.blocks.ingestion.embedding.base import BaseEmbedder
+from app.rag.blocks.ingestion.embedding.bge_embedder import SentenceTransformerEmbedder
+from app.rag.blocks.ingestion.embedding.ollama_embedder import OllamaEmbedder
+from app.rag.blocks.ingestion.vector_indexing.base import BaseVectorIndexer
+from app.rag.blocks.ingestion.vector_indexing.qdrant_indexer import QdrantMongoIndexer
+
+# ---- blocks/query_processing/
+from app.rag.blocks.query_processing.query_understanding.base import BaseQueryUnderstanding
+from app.rag.blocks.query_processing.query_understanding.llm_understanding import LLMQueryUnderstanding
+from app.rag.blocks.query_processing.query_rewriting.base import BaseQueryRewriter
+from app.rag.blocks.query_processing.query_rewriting.llm_rewriter import LLMQueryRewriter
+from app.rag.blocks.query_processing.query_rewriting.multi_query import MultiQueryRewriter
+
+# ---- blocks/metadata_filtering/
+from app.rag.blocks.metadata_filtering.metadata_prefiltering.base import BaseMetadataPrefilter
+from app.rag.blocks.metadata_filtering.metadata_prefiltering.qdrant_prefilter import QdrantMetadataPrefilter
+from app.rag.blocks.metadata_filtering.metadata_postfiltering.base import BaseMetadataPostfilter
+from app.rag.blocks.metadata_filtering.metadata_postfiltering.candidate_postfilter import CandidateMetadataPostfilter
+
+# ---- blocks/retrieval/
+from app.rag.blocks.retrieval.dense_retrieval.base import BaseDenseRetriever
+from app.rag.blocks.retrieval.dense_retrieval.qdrant_cosine import QdrantDenseRetriever
+from app.rag.blocks.retrieval.lexical_retrieval.base import BaseLexicalRetriever
+from app.rag.blocks.retrieval.lexical_retrieval.bm25 import BM25Retriever
+from app.rag.blocks.retrieval.hybrid_fusion.base import BaseHybridFusion
+from app.rag.blocks.retrieval.hybrid_fusion.rrf import ReciprocalRankFusion
+
+# ---- blocks/evidence/
+from app.rag.blocks.evidence.metadata_enrichment.base import BaseMetadataEnricher
+from app.rag.blocks.evidence.metadata_enrichment.mongodb_enrichment import MongoChunkLookup
+from app.rag.blocks.evidence.reranking.base import BaseReranker
+from app.rag.blocks.evidence.reranking.cross_encoder import CrossEncoderReranker
+from app.rag.blocks.evidence.reranking.metadata_reranker import MetadataAwareReranker
+from app.rag.blocks.evidence.evidence_selection.base import BaseEvidenceSelector
+from app.rag.blocks.evidence.evidence_selection.token_budget_selector import TokenBudgetSelector
+from app.rag.blocks.evidence.evidence_sufficiency.base import BaseSufficiencyChecker
+from app.rag.blocks.evidence.evidence_sufficiency.sufficiency_checker import ScoreThresholdChecker
+
+# ---- blocks/grounded_generation/
+from app.rag.blocks.grounded_generation.context_construction.base import BaseContextBuilder
+from app.rag.blocks.grounded_generation.context_construction.standard_context import StandardContextBuilder
+from app.rag.blocks.grounded_generation.generation.base import BaseGenerator
+from app.rag.blocks.grounded_generation.generation.ollama_generator import OllamaGenerator
 from app.rag.schemas import Services
 
 # --------------------------------------------------------------------------- the three building blocks
@@ -92,9 +133,9 @@ class Method:
 
 @dataclass(frozen=True)
 class Stage:
-    """One pipeline block. An optional stage can be switched off (then the pipeline skips it)."""
+    """One pipeline block (= one folder app/rag/blocks/<group>/<stage_id>/). An optional stage can be off (then it is skipped)."""
 
-    stage_id: str
+    stage_id: str  # also the block's folder name
     name: str
     phase: Literal["offline", "online"]
     base_class: type[PipelineBlock]
@@ -103,11 +144,32 @@ class Stage:
     default_method: str | None  # None = off by default (optional stages only)
     optional: bool = False
 
+    @property
+    def folder(self) -> str:
+        """Where the block lives, e.g. "retrieval/dense_retrieval" — taken from its base.py location."""
+        return "/".join(self.base_class.__module__.split(".")[3:-1])  # app.rag.blocks.<group>.<block>.base
 
-# --------------------------------------------------------------------------- the registry
+    @property
+    def group(self) -> str:
+        """The block's group, shown as a heading in the UI (from the group folder, see GROUPS)."""
+        return GROUPS[self.folder.split("/")[0]]
+
+
+# The group folders in app/rag/blocks/ and the heading the UI shows for each.
+GROUPS = {
+    "ingestion": "Ingestion",
+    "query_processing": "Query Processing",
+    "metadata_filtering": "Metadata Filtering",
+    "retrieval": "Candidate Retrieval",
+    "evidence": "Evidence",
+    "grounded_generation": "Grounded Generation",
+}
+
+
+# --------------------------------------------------------------------------- the registry (in pipeline order)
 
 PIPELINE: list[Stage] = [
-    # ======================= OFFLINE: ingestion (in execution order) =======================
+    # ======================= OFFLINE: ingestion and indexing =======================
     Stage("document_loading", "Document Loading", "offline", BaseDocumentLoader,
           "Find the files to ingest.", default_method="local_folder", methods=[
               Method("local_folder", "Local folder", LocalFolderLoader, True, "PDF, TXT, Markdown and HTML files in a folder under data/."),
@@ -116,7 +178,6 @@ PIPELINE: list[Stage] = [
     Stage("parsing", "Parsing", "offline", BaseDocumentParser,
           "Read each file into a title and sections (heading, text, page).", default_method="basic_parser", methods=[
               Method("basic_parser", "Basic parser", BasicDocumentParser, True, "Markdown and HTML headings, TXT, PDF pages."),
-              Method("advanced_pdf", "Advanced PDF parser", AdvancedPdfParser, False, "Layout-aware PDF parsing with tables and OCR."),
           ]),
     Stage("chunking", "Chunking", "offline", BaseChunker,
           "Split documents into small pieces that can be searched.", default_method="section_tokens", methods=[
@@ -127,6 +188,7 @@ PIPELINE: list[Stage] = [
                          "chunk_overlap": Param("integer", 32, "Chunk overlap (tokens)", "Tokens repeated between neighbouring windows of a long section.",
                                                 min=0, max=128, step=8, scope="ingestion"),
                      }),
+              Method("recursive", "Recursive splitting", RecursiveChunker, False, "Split at paragraphs, then lines, sentences, words."),
               Method("semantic", "Semantic chunking", SemanticChunker, False, "Cut where the topic changes."),
           ]),
     Stage("metadata_extraction", "Metadata Extraction", "offline", BaseMetadataExtractor,
@@ -143,46 +205,54 @@ PIPELINE: list[Stage] = [
           "Store chunks in MongoDB and their vectors in Qdrant.", default_method="qdrant_mongodb", methods=[
               Method("qdrant_mongodb", "Qdrant + MongoDB", QdrantMongoIndexer, True, "Replaces the whole index (cosine distance)."),
           ]),
-    # ======================= ONLINE: answering a question (in execution order) =======================
+    # ======================= ONLINE: question answering =======================
     Stage("query_understanding", "Query Understanding", "online", BaseQueryUnderstanding,
-          "Find constraints in the question (campus, student type).", default_method=None, optional=True, methods=[
-              Method("rule_based", "Rule-based", RuleBasedQueryUnderstanding, False, "Keyword rules."),
+          "Find what the question asks for, including metadata criteria it states (campus, audience).",
+          default_method=None, optional=True, methods=[
+              Method("llm_understanding", "LLM understanding", LLMQueryUnderstanding, False, "The LLM extracts intent and criteria."),
           ]),
     Stage("query_rewriting", "Query Rewriting", "online", BaseQueryRewriter,
           "Turn the question into a better search query.", default_method=None, optional=True, methods=[
               Method("llm_rewrite", "LLM rewrite", LLMQueryRewriter, False, "The LLM rewrites the question.",
                      parameters={"temperature": Param("float", 0.0, "Temperature", "Randomness of the rewrite.", min=0, max=1, step=0.05)}),
+              Method("multi_query", "Multi-query", MultiQueryRewriter, False, "Several paraphrases of the question.",
+                     parameters={"num_queries": Param("integer", 3, "Number of queries", "Paraphrases to generate.", min=2, max=6)}),
           ]),
-    Stage("constraint_validation", "Constraint Validation", "online", BaseConstraintValidator,
-          "Keep only valid constraints.", default_method=None, optional=True, methods=[
-              Method("vocabulary", "Allowed values", VocabularyConstraintValidator, False, "Values must come from a fixed list."),
-          ]),
-    Stage("metadata_filtering", "Metadata Filtering", "online", BaseMetadataFilter,
-          "Only search documents that apply to the student.", default_method=None, optional=True, methods=[
-              Method("exact_filter", "Exact match", ExactMetadataFilter, False, "Metadata must equal the constraint."),
+    Stage("metadata_prefiltering", "Metadata Prefiltering", "online", BaseMetadataPrefilter,
+          "Restrict candidate retrieval to eligible documents: the predicate is applied DURING the search.",
+          default_method=None, optional=True, methods=[
+              Method("qdrant_prefilter", "Qdrant payload filter", QdrantMetadataPrefilter, False, "Eligibility predicate on Qdrant payload fields."),
           ]),
     Stage("dense_retrieval", "Dense Retrieval", "online", BaseDenseRetriever,
-          "Find the chunks whose meaning is closest to the question.", default_method="qdrant_cosine", optional=True, methods=[
+          "Find the chunks whose meaning is closest to the question.", default_method="qdrant_cosine", optional=True,
+          methods=[
               Method("qdrant_cosine", "Qdrant cosine", QdrantDenseRetriever, True, "Embed the question and find the nearest chunk vectors.", parameters={
                   "top_k": Param("integer", 5, "Top K", "How many of the most similar chunks to retrieve.", min=1, max=20),
               }),
           ]),
     Stage("lexical_retrieval", "Lexical Retrieval", "online", BaseLexicalRetriever,
-          "Find chunks that share words with the question.", default_method=None, optional=True, methods=[
+          "Find chunks that share words with the question.", default_method=None, optional=True,
+          methods=[
               Method("bm25", "BM25", BM25Retriever, False, "Classic keyword ranking.", parameters={
                   "top_k": Param("integer", 5, "Top K", "How many chunks to retrieve.", min=1, max=20),
                   "k1": Param("float", 1.5, "k1", "How fast repeated words stop adding score.", min=0, max=3, step=0.1),
                   "b": Param("float", 0.75, "b", "How much long chunks are penalized.", min=0, max=1, step=0.05),
               }),
           ]),
-    Stage("hybrid_fusion", "Hybrid Fusion", "online", BaseHybridFusion,
-          "Merge dense and lexical results.", default_method=None, optional=True, methods=[
+    Stage("hybrid_fusion", "Hybrid Retrieval (Fusion)", "online", BaseHybridFusion,
+          "Merge dense and lexical candidates into one list.", default_method=None, optional=True,
+          methods=[
               Method("rrf", "Reciprocal Rank Fusion", ReciprocalRankFusion, False, "score = Σ 1/(k + rank).", parameters={
                   "rrf_k": Param("integer", 60, "RRF k", "Larger k = top ranks matter less.", min=1, max=200),
                   "top_k": Param("integer", 5, "Top K", "How many merged chunks to keep.", min=1, max=20),
               }),
           ]),
-    Stage("metadata_enrichment", "Chunk Lookup", "online", BaseMetadataEnricher,
+    Stage("metadata_postfiltering", "Metadata Postfiltering", "online", BaseMetadataPostfilter,
+          "Remove ineligible candidates AFTER candidate retrieval (cannot bring back chunks that were not retrieved).",
+          default_method=None, optional=True, methods=[
+              Method("candidate_postfilter", "Candidate metadata check", CandidateMetadataPostfilter, False, "Check each candidate's document metadata."),
+          ]),
+    Stage("metadata_enrichment", "Metadata Enrichment", "online", BaseMetadataEnricher,
           "Load chunk text, section, page and document title from MongoDB.", default_method="mongodb_lookup", methods=[
               Method("mongodb_lookup", "MongoDB lookup", MongoChunkLookup, True, "Look up each candidate by its chunk_id."),
           ]),
@@ -199,32 +269,23 @@ PIPELINE: list[Stage] = [
                                                min=200, max=8000, step=100),
               }),
           ]),
-    Stage("sufficiency_gate", "Evidence Sufficiency", "online", BaseSufficiencyGate,
-          "Decide whether the evidence is good enough to answer.", default_method=None, optional=True, methods=[
-              Method("score_threshold", "Score threshold", ScoreThresholdGate, False, "Best similarity must reach a minimum.",
+    Stage("evidence_sufficiency", "Evidence Sufficiency", "online", BaseSufficiencyChecker,
+          "Decide whether the evidence is good enough to answer; if not, abstain.", default_method=None, optional=True, methods=[
+              Method("score_threshold", "Score threshold", ScoreThresholdChecker, False, "Best similarity must reach a minimum.",
                      parameters={"min_score": Param("float", 0.5, "Minimum score", "Lowest acceptable best similarity.", min=0, max=1, step=0.01)}),
           ]),
-    Stage("context_builder", "Context Builder", "online", BaseContextBuilder,
-          "Write the evidence into the prompt as [E1], [E2], …", default_method="numbered_blocks", methods=[
-              Method("numbered_blocks", "Numbered evidence blocks", NumberedContextBuilder, True, "Title, section, page and text for each block."),
+    Stage("context_construction", "Context Construction", "online", BaseContextBuilder,
+          "Write the evidence into the prompt as [E1], [E2], …", default_method="standard_context", methods=[
+              Method("standard_context", "Numbered evidence blocks", StandardContextBuilder, True, "Title, section, page and text for each block."),
           ]),
-    Stage("generation", "LLM Generation", "online", BaseGenerator,
-          "The local LLM writes an answer using only the evidence.", default_method="ollama_chat", methods=[
+    Stage("generation", "Generation", "online", BaseGenerator,
+          "Grounded generation: the local LLM answers using only the evidence.", default_method="ollama_chat", methods=[
               Method("ollama_chat", "Ollama chat", OllamaGenerator, True, "Streams the answer from a local Ollama model.", parameters={
                   "model": Param("string", "", "Ollama model", "An installed Ollama model. Empty = the default model.", ui="ollama_model"),
                   "temperature": Param("float", 0.2, "Temperature", "Randomness of the answer. It does not add knowledge.", min=0, max=2, step=0.05),
                   "max_tokens": Param("integer", 1024, "Max generated tokens", "Upper limit on answer length. Thinking models (qwen3) need about 2048.",
                                       min=64, max=4096, step=64),
               }),
-          ]),
-    Stage("citation_verification", "Citation Verification", "online", BaseCitationVerifier,
-          "Link [E1]-style markers to the real chunks.", default_method="marker_resolution", methods=[
-              Method("marker_resolution", "Marker resolution", MarkerCitationVerifier, True, "Every marker must match real evidence; others are removed."),
-              Method("claim_verification", "Claim verification", ClaimVerifier, False, "Check each sentence against its cited evidence."),
-          ]),
-    Stage("response_guard", "Response Guard", "online", BaseResponseGuard,
-          "Decide the final answer (or an honest 'not enough information').", default_method="basic_guard", methods=[
-              Method("basic_guard", "Basic guard", BasicResponseGuard, True, "Abstain when there is no evidence or the model says so."),
           ]),
 ]
 
@@ -336,14 +397,16 @@ def registry_json() -> dict[str, Any]:
             "stage_id": stage.stage_id,
             "name": stage.name,
             "phase": stage.phase,
+            "group": stage.group,
             "description": stage.description,
             "base_class": stage.base_class.__name__,
+            "folder": f"app/rag/blocks/{stage.folder}/",
             "optional": stage.optional,
             "default_method": stage.default_method,
             "implemented": any(m.implemented for m in stage.methods),
             "methods": [
                 {"method_id": m.method_id, "name": m.name, "description": m.description, "implemented": m.implemented,
-                 "class_name": m.cls.__name__,
+                 "class_name": m.cls.__name__, "file": inspect.getfile(m.cls).split("app/rag/blocks/")[-1],
                  "parameters": {name: {"type": p.type, "default": p.default, "label": p.label, "description": p.description,
                                        "ui": p.ui, "min": p.min, "max": p.max, "step": p.step,
                                        "options": list(p.options) if p.options else None, "scope": p.scope}
@@ -364,6 +427,9 @@ def check_registry() -> None:
     seen_stages, seen_methods = set(), set()
     for stage in PIPELINE:
         require(stage.stage_id not in seen_stages, f"duplicate stage id '{stage.stage_id}'")
+        group_folder, _, block_folder = stage.folder.partition("/")
+        require(group_folder in GROUPS and block_folder == stage.stage_id,
+                f"{stage.base_class.__name__} must live in app/rag/blocks/<group>/{stage.stage_id}/base.py (found {stage.folder})")
         seen_stages.add(stage.stage_id)
         for m in stage.methods:
             require(m.method_id not in seen_methods, f"duplicate method id '{m.method_id}'")

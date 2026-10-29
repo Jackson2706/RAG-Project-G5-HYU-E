@@ -11,9 +11,13 @@ from collections.abc import Callable
 from contextlib import contextmanager
 from typing import Any
 
+from pydantic import BaseModel
+
 
 def to_jsonable(value: Any) -> Any:
-    """Turn dataclasses (Candidate, Evidence, …) into plain dicts/lists for JSON."""
+    """Turn Pydantic models (Candidate, Evidence, …) and dataclasses into plain dicts/lists for JSON."""
+    if isinstance(value, BaseModel):
+        return to_jsonable(value.model_dump())
     if dataclasses.is_dataclass(value) and not isinstance(value, type):
         return {f.name: to_jsonable(getattr(value, f.name)) for f in dataclasses.fields(value)}
     if isinstance(value, dict):

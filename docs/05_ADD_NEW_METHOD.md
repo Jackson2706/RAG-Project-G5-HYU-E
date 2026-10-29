@@ -1,337 +1,412 @@
 # 05 · How to Add a New RAG Method
 
-This tutorial walks you through adding a **new retrieval method** from start to finish. You won't
-touch the pipeline runner, the API or the React code: you write one class, register it, test it,
-and the app picks it up.
+This tutorial walks you through implementing a real algorithm, **BM25 lexical retrieval**, from the
+skeleton to a working, selectable method. You won't touch the pipeline runner, the API or the React
+code. Then you get guides for the other future methods, including **Metadata Prefiltering** and
+**Metadata Postfiltering**.
 
-> **Before you start:** the app runs ([01_GETTING_STARTED.md](01_GETTING_STARTED.md)),
-> `python -m pytest` passes in `backend/`, and you have read
-> [03_ABSTRACT_CLASSES.md](03_ABSTRACT_CLASSES.md) and [04_METHOD_REGISTRY.md](04_METHOD_REGISTRY.md).
+> **Before you start:** the app runs ([01_GETTING_STARTED.md](01_GETTING_STARTED.md)), `python -m pytest`
+> passes in `backend/`, and you have read [03_ABSTRACT_CLASSES.md](03_ABSTRACT_CLASSES.md) and
+> [04_METHOD_REGISTRY.md](04_METHOD_REGISTRY.md).
 
 **The recipe for every method:**
 
 | # | What | Where |
 |---|---|---|
-| 1 | Find the block's abstract class | `backend/app/rag/blocks/…` |
-| 2 | Create a subclass | same file (or a new file in `blocks/`) |
-| 3 | Implement its abstract method | your class |
-| 4 | Register it with `implemented=False` | `backend/app/rag/registry.py` |
-| 5 | Register its hyperparameters | the `parameters={...}` of your `Method` |
+| 1 | Open the block folder and read `base.py` | `backend/app/rag/blocks/<group>/<block>/` |
+| 2 | Create or complete the algorithm's file (a subclass) | same folder, one file per algorithm |
+| 3 | Implement the abstract method | your class |
+| 4 | Register it (start with `implemented=False`) | `backend/app/rag/registry.py` |
+| 5 | Register its hyperparameters | `parameters={...}` of your `Method` |
 | 6 | Write a test | `backend/tests/` |
-| 7 | Set `implemented=True` | `registry.py` |
-| 8–9 | Run it and inspect it | browser: Configuration and Execution tabs |
-
-## The example: a keyword-overlap retriever
-
-Our dense retriever finds chunks with a similar *meaning*. A **lexical** retriever finds chunks
-that share *words* with the question. That is useful for exact terms like "TOPIK" or "add/drop".
-We will build the simplest honest version: **score = the share of question words that appear in
-the chunk**.
-
-This is a **teaching example**, not BM25. It ignores word frequency and chunk length. Real
-results, simple algorithm: perfect for learning the workflow.
+| 7 | Mark it implemented | `registry.py` |
+| 8–9 | Select it in the UI and inspect its real input and output | browser |
 
 ---
 
-### Step 1 — Find the abstract class
+## Tutorial: implement BM25
 
-The UI already shows a greyed-out **Lexical Retrieval** block. Its abstract class is
-`BaseLexicalRetriever` in `backend/app/rag/blocks/retrieval.py`:
+**BM25** ranks chunks by shared words. Rare words count more (IDF), repeated words help with
+diminishing returns (`k1`), and long chunks are penalized a little (`b`):
+
+```text
+score(q, d) = Σ over query words t:  IDF(t) · tf(t,d)·(k1+1) / (tf(t,d) + k1·(1 − b + b·|d|/avgdl))
+IDF(t)      = ln(1 + (N − df(t) + 0.5) / (df(t) + 0.5))
+```
+
+`tf(t,d)` = how often word t is in chunk d · `|d|` = chunk length in words · `avgdl` = average chunk
+length · `N` = number of chunks · `df(t)` = chunks containing t.
+
+### Step 1 — Open the folder and read `base.py`
+
+```text
+backend/app/rag/blocks/retrieval/lexical_retrieval/
+├── __init__.py
+├── base.py       BaseLexicalRetriever
+└── bm25.py       BM25Retriever — currently a skeleton (raises NotImplementedError)
+```
+
+`base.py`:
 
 ```python
 class BaseLexicalRetriever(PipelineBlock):
-    """Find chunks that share *words* with the query. Same input/output as BaseDenseRetriever."""
+    """Find chunks that share *words* with the query. Same input and output as BaseDenseRetriever,
+    including the rule that a prefilter predicate must be applied while searching."""
 
     @abstractmethod
-    async def retrieve(self, query: str, filters: dict[str, list[str]] | None = None) -> RetrievalResult: ...
+    async def retrieve(self, query: str, prefilter: RetrievalFilter | None = None) -> RetrievalResult: ...
 ```
 
-- **Input:** `query` (the search text) and `filters` (from metadata filtering; `None` for now).
-- **Output:** a `RetrievalResult` (`backend/app/rag/schemas.py`) with a list of `Candidate`s,
-  best first:
-  ```python
-  Candidate(rank=1, chunk_id="165c3154-…", doc_id="b4852b99-…", score=0.75)
-  ```
-  You only return IDs and scores. The next block (Chunk Lookup) loads the text from MongoDB.
+- **Inputs:** `query` (the search text) and `prefilter` (an eligibility predicate from Metadata
+  Prefiltering, or `None`).
+- **Output:** a `RetrievalResult` (`backend/app/rag/schemas.py`): `Candidate`s best first, plus
+  the filter you applied. You return only IDs and scores. Metadata Enrichment loads the text later.
 
-### Step 2 — Create a subclass
+### Steps 2 and 3 — Complete the subclass and implement `retrieve`
 
-Add this to the end of `backend/app/rag/blocks/retrieval.py`, next to the skeleton `BM25Retriever`:
+Replace the whole content of `backend/app/rag/blocks/retrieval/lexical_retrieval/bm25.py` with:
 
 ```python
-class KeywordOverlapRetriever(BaseLexicalRetriever):
-    """IMPLEMENTED — score = share of the question's words that appear in the chunk.
+"""IMPLEMENTED — Okapi BM25 keyword ranking over all stored chunks."""
 
-    A teaching example: simpler than BM25 (no word frequency, no length normalization).
-    """
+from __future__ import annotations
 
-    STOPWORDS = {"a", "an", "and", "are", "can", "do", "for", "how", "i", "in", "is", "my", "of", "on",
-                 "the", "to", "what", "when", "where", "which", "who", "why", "with"}
+import math
+import re
+from collections import Counter
 
-    async def retrieve(self, query: str, filters: dict[str, list[str]] | None = None) -> RetrievalResult:
-        ...  # step 3
-```
+from app.rag.blocks.retrieval.lexical_retrieval.base import BaseLexicalRetriever
+from app.rag.schemas import Candidate, RetrievalFilter, RetrievalResult
 
-You need `import re` at the top of the file. The other names (`Candidate`, `RetrievalResult`) are
-already imported there.
+WORD = re.compile(r"[a-z0-9]+")
+STOPWORDS = {"a", "an", "and", "are", "at", "can", "do", "for", "how", "i", "in", "is", "my", "of", "on",
+             "or", "the", "to", "what", "when", "where", "which", "who", "why", "with", "you"}
 
-### Step 3 — Implement the method
 
-Replace the `...` with:
+def words(text: str) -> list[str]:
+    return [w for w in WORD.findall(text.lower()) if w not in STOPWORDS]
 
-```python
-        words = set(re.findall(r"[a-z0-9]+", query.lower())) - self.STOPWORDS
-        if not words:
-            return RetrievalResult(candidates=[], details={"query_words": []})
+
+class BM25Retriever(BaseLexicalRetriever):
+    """Hyperparameters: top_k, k1, b."""
+
+    async def retrieve(self, query: str, prefilter: RetrievalFilter | None = None) -> RetrievalResult:
+        if prefilter is not None:
+            # Never ignore an eligibility predicate silently. Supporting it is a good next exercise.
+            raise NotImplementedError("BM25Retriever does not support metadata prefiltering yet.")
+        k1, b, top_k = self.params["k1"], self.params["b"], self.params["top_k"]
+        chunks = list(self.services.db.chunks.find({}, {"_id": 0, "chunk_id": 1, "doc_id": 1, "text": 1}))
+        if not chunks:
+            return RetrievalResult(candidates=[])
+        counts = [Counter(words(c["text"])) for c in chunks]          # tf for every chunk
+        n = len(chunks)
+        avgdl = sum(sum(tf.values()) for tf in counts) / n
+        df = Counter(w for tf in counts for w in tf)                  # in how many chunks each word appears
+        terms = set(words(query))
         scored = []
-        for chunk in self.services.db.chunks.find({}, {"_id": 0, "chunk_id": 1, "doc_id": 1, "text": 1}):
-            chunk_words = set(re.findall(r"[a-z0-9]+", chunk["text"].lower()))
-            overlap = len(words & chunk_words)
-            if overlap:  # chunks without any shared word are not candidates
-                scored.append((overlap / len(words), chunk))
+        for chunk, tf in zip(chunks, counts):
+            length = sum(tf.values())
+            score = 0.0
+            for t in terms & tf.keys():
+                idf = math.log(1 + (n - df[t] + 0.5) / (df[t] + 0.5))
+                score += idf * tf[t] * (k1 + 1) / (tf[t] + k1 * (1 - b + b * length / avgdl))
+            if score > 0:                                             # no shared word → not a candidate
+                scored.append((score, chunk))
         scored.sort(key=lambda pair: (-pair[0], pair[1]["chunk_id"]))  # best first; ties in a fixed order
-        top = scored[: self.params["top_k"]]
-        candidates = [Candidate(rank=i + 1, chunk_id=c["chunk_id"], doc_id=c["doc_id"], score=round(score, 4))
-                      for i, (score, c) in enumerate(top)]
-        return RetrievalResult(candidates=candidates, details={"query_words": sorted(words)})
+        candidates = [Candidate(rank=i + 1, chunk_id=c["chunk_id"], doc_id=c["doc_id"], score=round(s, 4))
+                      for i, (s, c) in enumerate(scored[:top_k])]
+        return RetrievalResult(candidates=candidates, applied_filter=prefilter,
+                               details={"query_terms": sorted(terms), "chunks_scored": n})
 ```
 
 What each part does:
 - `self.services.db.chunks` is the MongoDB `chunks` collection (shared tools come from `self.services`).
-- `self.params["top_k"]` is the hyperparameter you register in step 5. Never hard-code it.
-- `details` is extra information. It appears in the stage's Output in the Execution tab.
+- `self.params["k1"]` etc. are the hyperparameters registered in step 5. Never hard-code them.
+- `details` is extra information that appears in the stage's Output in the Execution tab.
 - Every score is computed from real data. Never return made-up candidates.
+- Refusing a prefilter you can't apply is correct behaviour. Silently ignoring it would break the
+  student's eligibility conditions.
 
-### Step 4 — Register the class
+### Steps 4 and 5 — Register the class and its hyperparameters
 
-Open `backend/app/rag/registry.py`.
+`registry.py` already imports `BM25Retriever` and has its entry, because the skeleton was
+registered as planned:
 
-1. Import your class. Add it to the existing `from app.rag.blocks.retrieval import (...)` lines:
-   ```python
-   from app.rag.blocks.retrieval import (BaseDenseRetriever, BaseHybridFusion, BaseLexicalRetriever, BaseMetadataEnricher,
-                                         BM25Retriever, KeywordOverlapRetriever, MongoChunkLookup, QdrantDenseRetriever,
-                                         ReciprocalRankFusion)
-   ```
-2. Find the `Stage("lexical_retrieval", ...)` entry and add a `Method` **before** the BM25 one.
-   Start with `implemented=False`. It will show in the UI greyed out, so nobody can use it before
-   it is tested:
-   ```python
-   Stage("lexical_retrieval", "Lexical Retrieval", "online", BaseLexicalRetriever,
-         "Find chunks that share words with the question.", default_method=None, optional=True, methods=[
-             Method("keyword_overlap", "Keyword overlap", KeywordOverlapRetriever, False,
-                    "Share of the question's words found in each chunk (teaching example).", parameters={
-                        "top_k": Param("integer", 5, "Top K", "How many chunks to retrieve.", min=1, max=20),
-                    }),
-             Method("bm25", "BM25", BM25Retriever, False, "Classic keyword ranking.", parameters={...unchanged...}),
-         ]),
-   ```
+```python
+from app.rag.blocks.retrieval.lexical_retrieval.bm25 import BM25Retriever
+...
+Stage("lexical_retrieval", "Lexical Retrieval", "online", BaseLexicalRetriever,
+      "Find chunks that share words with the question.", default_method=None, optional=True,
+      methods=[
+          Method("bm25", "BM25", BM25Retriever, False, "Classic keyword ranking.", parameters={
+              "top_k": Param("integer", 5, "Top K", "How many chunks to retrieve.", min=1, max=20),
+              "k1": Param("float", 1.5, "k1", "How fast repeated words stop adding score.", min=0, max=3, step=0.1),
+              "b": Param("float", 0.75, "b", "How much long chunks are penalized.", min=0, max=1, step=0.05),
+          }),
+      ]),
+```
 
-The `method_id` (`"keyword_overlap"`) must be unique in the whole registry. `default_method` stays
-`None`, so the baseline pipeline does not change for anyone until they choose your method.
+For a **brand-new** algorithm you would add both parts yourself: an import line at the top, and a
+`Method("my_id", "My name", MyClass, False, "…", parameters={...})` inside the right `Stage`. The
+`method_id` must be unique in the whole registry.
 
-### Step 5 — Register hyperparameters
-
-You already did this: `parameters={"top_k": Param(...)}`. Each `Param` becomes a control in the UI.
+Each `Param` becomes a UI control, and its value arrives in `self.params[...]`, already validated:
 
 | Want | Write |
 |---|---|
-| a slider 1–20 | `Param("integer", 5, "Top K", "…", min=1, max=20)` |
+| a whole-number slider | `Param("integer", 5, "Top K", "…", min=1, max=20)` |
 | a decimal slider | `Param("float", 1.5, "k1", "…", min=0, max=3, step=0.1)` |
-| a toggle | `Param("boolean", True, "Lowercase", "…", ui="toggle")` |
-| a dropdown | `Param("enum", "fast", "Mode", "…", ui="select", options=("fast", "exact"))` |
+| a toggle | `Param("boolean", True, "Include university-wide", "…", ui="toggle")` |
+| a dropdown | `Param("enum", "SEOUL", "Campus", "…", ui="select", options=("SEOUL", "ERICA"))` |
 | a text box | `Param("string", "", "Prefix", "…", ui="text")` |
 | a setting that needs re-indexing | add `scope="ingestion"` |
 
-Every key in `parameters` is available in your class as `self.params["key"]`, already validated.
-
 ### Step 6 — Add a test
 
-Create `backend/tests/test_keyword_overlap.py`:
+Create `backend/tests/test_bm25.py`:
 
 ```python
 import pytest
 
-from app.rag.blocks.retrieval import KeywordOverlapRetriever
+from app.rag.blocks.retrieval.lexical_retrieval.bm25 import BM25Retriever
+from app.rag.schemas import RetrievalFilter
 
 pytestmark = pytest.mark.anyio
+PARAMS = {"top_k": 5, "k1": 1.5, "b": 0.75}
 
 
-async def test_chunks_sharing_words_come_first(services, db):
+@pytest.fixture
+def chunks(db):
     db.chunks.insert_many([
-        {"chunk_id": "c1", "doc_id": "d1", "text": "Dormitory applications open in January."},
-        {"chunk_id": "c2", "doc_id": "d1", "text": "Scholarships require documents."},
+        {"chunk_id": "c1", "doc_id": "d1", "text": "International students need a TOPIK score report."},
+        {"chunk_id": "c2", "doc_id": "d1", "text": "Submit the scholarship report before the deadline."},
         {"chunk_id": "c3", "doc_id": "d2", "text": "Dormitory rooms are assigned in February."},
     ])
-    retriever = KeywordOverlapRetriever({"top_k": 5}, services)
-    result = await retriever.retrieve("When do dormitory applications open?")
 
-    assert [c.chunk_id for c in result.candidates] == ["c1", "c3"]   # c2 shares no word
+
+async def test_rare_words_count_more(services, chunks):
+    result = await BM25Retriever(PARAMS, services).retrieve("TOPIK score report")
+    assert [c.chunk_id for c in result.candidates] == ["c1", "c2"]  # c1 has all three words; c2 only "report"; c3 none
     assert [c.rank for c in result.candidates] == [1, 2]
-    assert result.candidates[0].score == 1.0                       # all 3 words: dormitory, applications, open
-    assert result.details["query_words"] == ["applications", "dormitory", "open"]
+    assert result.candidates[0].score > result.candidates[1].score > 0
+    assert result.details["query_terms"] == ["report", "score", "topik"]
 
 
 async def test_top_k_is_respected(services, db):
     db.chunks.insert_many([{"chunk_id": f"c{i}", "doc_id": "d", "text": "dormitory"} for i in range(10)])
-    result = await KeywordOverlapRetriever({"top_k": 3}, services).retrieve("dormitory")
+    result = await BM25Retriever({**PARAMS, "top_k": 3}, services).retrieve("dormitory")
     assert len(result.candidates) == 3
+
+
+async def test_a_prefilter_is_never_silently_ignored(services, chunks):
+    with pytest.raises(NotImplementedError, match="prefiltering"):
+        await BM25Retriever(PARAMS, services).retrieve("TOPIK", RetrievalFilter(conditions={"campus": ["ERICA"]}))
 ```
 
-The `services` and `db` fixtures (in `backend/tests/conftest.py`) give you an in-memory MongoDB,
-so no Docker is needed. Run only your tests, from `backend/`:
+The `services` and `db` fixtures (`backend/tests/conftest.py`) give you an in-memory MongoDB, so no
+Docker is needed. Run, from `backend/`:
 
 ```bash
 conda activate RAG
-python -m pytest tests/test_keyword_overlap.py -v
+python -m pytest tests/test_bm25.py -v
 ```
 
-✅ `2 passed`.
+✅ `3 passed`.
 
-### Step 7 — Enable the method
+### Step 7 — Mark it implemented
 
-Your tests pass, so change `False` to `True` in your `Method(...)`:
+In `registry.py`, change `False` to `True` in the BM25 `Method(...)`:
 
 ```python
-Method("keyword_overlap", "Keyword overlap", KeywordOverlapRetriever, True, ...
+Method("bm25", "BM25", BM25Retriever, True, "Classic keyword ranking.", parameters={
 ```
 
-Then run **all** tests: `python -m pytest`.
+Run **all** tests: `python -m pytest`. One existing test will fail, on purpose:
+`test_planned_stages_are_skipped_without_fake_output` in `backend/tests/test_pipeline.py` lists
+`"lexical_retrieval"` as *not implemented*. It isn't anymore: its skip reason is now "Switched off in
+the configuration." Remove `"lexical_retrieval"` from that test's list and run `python -m pytest`
+again. ✅ Everything passes.
 
-One existing test will now fail, on purpose:
-`test_planned_stages_are_skipped_without_fake_output` in `backend/tests/test_pipeline.py`
-lists `"lexical_retrieval"` as a stage that is *not implemented*. It isn't anymore: its skip reason
-is now "Switched off in the configuration." Remove `"lexical_retrieval"` from that test's list,
-then run `python -m pytest` again. ✅ Everything passes.
+### Step 8 — Select it in the existing UI
 
-### Step 8 — Run the application
-
-The backend reloads automatically if you started it with `--reload`. Otherwise restart it. Then
-**reload the browser page**.
-
-In **Configuration**:
-- **Lexical Retrieval** is no longer grey. It is a normal card. Open it and choose
-  **Keyword overlap**: a **Top K** slider appears, drawn from your `Param`.
-- Turning on two retrievers at once shows a red message: *"Two retrievers are on: choose a Hybrid
-  Fusion method to merge them"*. Hybrid fusion is not implemented yet, so to try your method set
-  **Dense Retrieval → Off — skip this stage**.
+Restart the backend (or let `--reload` do it), then **reload the browser page**. In
+**Configuration → Candidate Retrieval**:
 
 ```text
-BEFORE                                       AFTER
-░ Lexical Retrieval   NOT IMPLEMENTED        ✓ Lexical Retrieval
-  [BM25 — BM25Retriever (planned)]             Method: [Keyword overlap ▾]   (BM25 — not implemented)
-                                               Top K:  ──●──────── 5
+BEFORE                                        AFTER
+░ Lexical Retrieval   NOT IMPLEMENTED         ✓ Lexical Retrieval
+  [BM25 — retrieval/lexical_retrieval/bm25.py]            Method: [BM25 ▾]
+                                                Top K ──●── 5   k1 ──●── 1.5   b ──●── 0.75
 ```
 
-### Step 9 — Inspect the output
+Choose **BM25**. You'll see a red message: *"Two retrievers are on: choose a Hybrid Fusion method to
+merge them"*. Fusion is not implemented yet, so set **Dense Retrieval → Off — skip this stage** to
+try BM25 alone.
 
-Ask: *How do I apply for a dormitory at the ERICA campus?* and open **Execution**:
+### Step 9 — Inspect the real execution
+
+Ask *What do international students need for the scholarship?* and open **Execution**:
 
 ```text
+CANDIDATE RETRIEVAL
 ░ Dense Retrieval        skipped — Switched off in the configuration.
-✓ Lexical Retrieval · Keyword overlap        3 ms
-    Input:      {"query": "How do I apply for a dormitory at the ERICA campus?", "filters": null}
-    Output:     5 candidates (cards with similarity scores) + {"details": {"query_words": [...]}}
-    Parameters: {"top_k": 5}
-✓ Chunk Lookup · MongoDB lookup              loads the text of YOUR candidates
-✓ … Context Builder, LLM Generation, Citation Verification …
+✓ Lexical Retrieval · BM25                         4 ms
+    Input:      {"query": "What do international students need for the scholarship?", "prefilter": null}
+    Output:     candidate cards with BM25 scores + {"details": {"query_terms": [...], "chunks_scored": 23}}
+    Parameters: {"top_k": 5, "k1": 1.5, "b": 0.75}
+✓ Metadata Enrichment · MongoDB lookup             loads the text of YOUR candidates
+✓ … Evidence Selection, Context Construction, Generation …
 ```
 
-Check that:
-- the candidates' scores are the overlap shares you expect (1.0 = every question word appears);
-- **Chunk Lookup** received exactly your chunk IDs;
-- the answer cites chunks your method found.
+Check that `query_terms` are the words you expect, that Metadata Enrichment received exactly your
+chunk IDs, and that the answer's sources are chunks BM25 found. Then compare with Dense Retrieval
+on a few questions from `data/eval/sample_questions.jsonl`. That comparison is retrieval evaluation.
 
-Then compare with **Dense Retrieval** on a few questions. Which finds the right chunk more often?
-That comparison is your research result.
-
-### Step 10 — Troubleshooting
+### Troubleshooting
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| `TypeError: Can't instantiate abstract class KeywordOverlapRetriever without an implementation for abstract method 'retrieve'` | method missing or misspelled | name it exactly `retrieve`, with `async def` |
-| `TypeError: Registry error: KeywordOverlapRetriever must inherit from BaseLexicalRetriever` | wrong parent class, or registered in the wrong `Stage` | `class KeywordOverlapRetriever(BaseLexicalRetriever)` inside `lexical_retrieval` |
-| `TypeError: Registry error: duplicate method id 'keyword_overlap'` | the ID already exists | pick a unique `method_id` |
-| `ImportError: cannot import name 'KeywordOverlapRetriever'` | class not in that file, or name mismatch | check spelling in `retrieval.py` and in the `import` in `registry.py` |
-| `TypeError: … got an unexpected keyword argument` / `missing … argument` | signature differs from the abstract method | copy `retrieve(self, query, filters=None)` exactly |
-| `KeyError: 'top_k'` | parameter not registered | add `"top_k": Param(...)` to the `Method` |
-| `AttributeError: 'list' object has no attribute 'candidates'` | wrong output type | return `RetrievalResult(candidates=[...])`, not a list |
-| `KeyError`/`TypeError` in Chunk Lookup, or "missing in MongoDB" | invalid result schema: wrong IDs or plain dicts | build `Candidate(rank, chunk_id, doc_id, score)` with real `chunk_id`s |
-| method is greyed out in the UI | `implemented=False` | step 7 |
-| method missing in the UI | not registered, backend not restarted, or page not reloaded | see [04_METHOD_REGISTRY.md › Debugging](04_METHOD_REGISTRY.md#debugging-my-method-does-not-show-up-in-the-ui) |
-| Send is blocked with a red message | a combination rule | read it, e.g. switch Dense Retrieval off |
+| `TypeError: Can't instantiate abstract class BM25Retriever without an implementation for abstract method 'retrieve'` | method missing or misspelled | name it exactly `retrieve`, with `async def` |
+| `TypeError: Registry error: … must inherit from BaseLexicalRetriever` | wrong parent class, or registered in the wrong `Stage` | inherit from the class in the same folder's `base.py` |
+| `TypeError: Registry error: duplicate method id …` | ID already used | choose a unique `method_id` |
+| `ImportError: cannot import name …` | file/class name mismatch | check the file name and the import line in `registry.py` |
+| `TypeError: … unexpected keyword argument` / `missing … argument` | signature differs from `base.py` | copy the signature exactly |
+| `KeyError: 'k1'` | hyperparameter not registered | add it to `parameters={...}` |
+| `TypeError: BaseModel.__init__() takes 1 positional argument …` | `Candidate(...)` without keywords | `Candidate(rank=..., chunk_id=..., doc_id=..., score=...)` |
+| `ValidationError: … Field required` | a schema field is missing | give every field `schemas.py` lists |
+| Metadata Enrichment fails: "missing in MongoDB" | invalid result: fake or wrong chunk IDs | return real `chunk_id`s from the database |
+| method greyed out | `implemented=False` | step 7 |
+| method missing in the UI | not registered, backend not restarted, page not reloaded | [04_METHOD_REGISTRY.md › Debugging](04_METHOD_REGISTRY.md#debugging-my-method-does-not-show-up-in-the-ui) |
+| Send blocked with a red message | a combination rule | read it (e.g. switch Dense Retrieval off) |
 | `RuntimeWarning: coroutine … was never awaited` | `def` instead of `async def` | online methods are `async def` |
 
 ---
 
 ## Guides for the other future methods
 
-Every one of these already has an abstract class, a skeleton with TODO steps and a registry entry
-with `implemented=False`. Follow the same steps 1–9: replace the `raise NotImplementedError(...)`
-with real code, test it, set `implemented=True`, and update the "planned stages" test list.
+Each of these already has a folder, an abstract class, a skeleton file with TODO steps, and a
+registry entry with `implemented=False`. Use the same steps 1–9: replace the
+`raise NotImplementedError(...)` with real code, write tests, set `implemented=True`, remove the
+block from the "planned stages" test list, select it, and inspect it.
 
-### Query Rewriting — `LLMQueryRewriter(BaseQueryRewriter)` in `query_processing.py`
-- **Where it runs:** first, before retrieval. Its output is the `query` both retrievers search
-  with. The original question is still used in the prompt.
-- **Method:** `async def rewrite(self, question: str) -> str`.
-- **Reuse:** `self.services.ollama.pick_model(...)` and `chat_stream(...)` in `app/ollama.py`.
-  Collect the pieces into one string.
-- **Test:** with the `ollama` + `fake_ollama` fixtures, set `fake_ollama.answer` and check the
-  returned string. Also test that an empty answer falls back to the question.
+### Query Rewriting
 
-### Metadata Filtering — `ExactMetadataFilter(BaseMetadataFilter)` in `query_processing.py`
-- **Where it runs:** before retrieval. Its output (`{"campus": ["ERICA", "ALL"]}`) is passed as
-  `filters` to the retrievers. `QdrantDenseRetriever` already turns it into a Qdrant filter.
-- **You also need:** the field in the Qdrant payload. Today the payload has only
-  `chunk_id`/`doc_id`, so add the document's metadata (e.g. `metadata.extra["campus"]` from front
-  matter) in `Database.replace_index()`, then **re-index**.
-- **Input:** constraints from Query Understanding / Constraint Validation (implement
-  `RuleBasedQueryUnderstanding` first, or read a fixed value from `self.params` for a start).
-- **Test:** index two documents with different campuses; with the filter, only one campus comes back.
+| | |
+|---|---|
+| Folder | `blocks/query_processing/query_rewriting/` → `llm_rewriter.py` (or `multi_query.py`) |
+| Inherit | `BaseQueryRewriter` |
+| Implement | `async def rewrite(self, question: str) -> RewrittenQuery` |
+| Input → output | the question → `RewrittenQuery(query=..., alternatives=[...])` |
+| Where it runs | before prefiltering and retrieval. Retrieval uses `query`; the prompt still uses the original question |
+| Reuse | `self.services.ollama.pick_model(...)` and `chat_stream(...)` (`app/ollama.py`); collect the pieces into one string |
+| Registry | `Method("llm_rewrite", …)`; its `temperature` parameter is already registered |
+| Test | use the `ollama` + `fake_ollama` fixtures: set `fake_ollama.answer`, check `query`; an empty answer falls back to the question |
+| Inspect | Query Rewriting's output, then Dense Retrieval's `input.query` must be the rewritten text |
 
-### BM25 — `BM25Retriever(BaseLexicalRetriever)` in `retrieval.py`
-- **Where it runs:** Lexical Retrieval, like the tutorial. Start from your `KeywordOverlapRetriever`.
-- **Formula:** `score = Σ IDF(t) · tf·(k1+1) / (tf + k1·(1 − b + b·len/avg_len))`, with
-  `IDF(t) = ln(1 + (N − df + 0.5)/(df + 0.5))`. The parameters `k1`, `b` and `top_k` are already
-  registered.
-- **Test:** a chunk containing a rare word ranks above one containing only common words.
+### Metadata Prefiltering
 
-### Hybrid Fusion — `ReciprocalRankFusion(BaseHybridFusion)` in `retrieval.py`
-- **Where it runs:** after both retrievers. The runner calls `fuse(dense.candidates, lexical.candidates)`,
-  and only when dense, lexical *and* fusion are all on (the validator enforces this).
-- **Method:** for every `chunk_id`, `score = Σ 1/(rrf_k + rank)` over the lists it appears in;
-  sort, keep `top_k`, renumber `rank` from 1, and return a `RetrievalResult`.
-- **Test:** a chunk ranked 2nd in both lists beats a chunk ranked 1st in only one list.
+| | |
+|---|---|
+| Folder | `blocks/metadata_filtering/metadata_prefiltering/` → `qdrant_prefilter.py` |
+| Inherit | `BaseMetadataPrefilter` |
+| Implement | `async def build_filter(self, criteria: FilterCriteria) -> RetrievalFilter \| None` |
+| Input → output | validated `FilterCriteria` (campus, audience, academic year, document type, effective date) → a **predicate** `RetrievalFilter(conditions={field: allowed values}, include_unknown=...)`, or `None` when there are no conditions |
+| Where it runs | before candidate retrieval. The runner passes your predicate **into** `retrieve(query, prefilter)`, and `QdrantDenseRetriever` already turns it into a Qdrant `query_filter` (`to_qdrant_filter` in `retrieval/dense_retrieval/qdrant_cosine.py`) |
 
-### Cross-Encoder Reranking — `CrossEncoderReranker(BaseReranker)` in `reranking.py`
-- **Where it runs:** after Chunk Lookup, before Evidence Selection. It receives `Evidence` with
-  text.
-- **Method:** `async def rerank(self, query, evidence) -> list[Evidence]`. Score
-  `(query, e.text)` pairs with `sentence_transformers.CrossEncoder`, sort, keep `top_n`, and
-  renumber `rank` (`dataclasses.replace(e, rank=i)`). The model downloads ~90 MB once. Load it in
-  a cached function, like `load_sentence_transformer` in `embedding.py`.
-- **Test:** monkeypatch the model loader with a fake whose `predict()` returns fixed scores; check
-  the new order.
+How to build the predicate, step by step:
+1. **Make the field searchable.** The Qdrant payload today is `{chunk_id, doc_id}`. In
+   `ingestion/vector_indexing/qdrant_indexer.py` / `Database.replace_index()`, add the document's metadata to
+   each point (e.g. `campus` from front matter, `documents.metadata.campus`). Then **re-index**.
+2. **Get criteria.** They come from Query Understanding (`analysis.criteria`). Implement that block
+   first, or for an experiment, read a fixed value from a `Param` of your prefilter. Never invent
+   user attributes.
+3. **Allow university-wide documents:**
+   `RetrievalFilter(conditions={"campus": [criteria.campus, "ALL"]}, include_unknown=True)`.
+   `include_unknown=True` keeps chunks whose campus is missing (unknown ≠ ineligible).
+4. **Do not** call the retriever yourself, and do not filter a result list. That would be
+   postfiltering.
 
-### Evidence Sufficiency — `ScoreThresholdGate(BaseSufficiencyGate)` in `evidence.py`
-- **Where it runs:** after Evidence Selection. If it returns `sufficient=False`, the runner skips
-  the Context Builder, Generation and Citation Verification, and the Response Guard gives the honest
-  "not enough information" answer. That logic already exists in `run_rag()`.
-- **Method:** `async def check(self, question, evidence) -> SufficiencyDecision`.
-- **Choose `min_score` by measuring**, not guessing: `data/eval/sample_questions.jsonl` has 14
-  labelled questions (12 answerable, 2 not). Print the best score for each and pick a value that
-  separates them. Say in your report that it was tuned on that small set.
-- **Test:** evidence with scores `[0.2, 0.1]` and `min_score=0.5` gives `sufficient=False`; in a
-  pipeline test the LLM is then not called (`fake_ollama.requests == []`).
+Test ideas: with a predicate on one document, Dense Retrieval still returns `top_k` candidates, all
+eligible (see `test_prefiltering_is_a_predicate_applied_inside_retrieval` in
+`backend/tests/test_pipeline.py`). Also test empty criteria → `None`, and unknown metadata.
+Inspect: Prefiltering's output (the predicate), then Dense Retrieval's `input.prefilter` and
+`output.applied_filter` must show the same predicate.
+
+### Metadata Postfiltering
+
+| | |
+|---|---|
+| Folder | `blocks/metadata_filtering/metadata_postfiltering/` → `candidate_postfilter.py` |
+| Inherit | `BaseMetadataPostfilter` |
+| Implement | `async def filter_candidates(self, candidates: list[Candidate], criteria: FilterCriteria) -> PostfilterResult` |
+| Input → output | the **already retrieved** candidates + criteria → `PostfilterResult(kept=[...], removed=[RemovedCandidate(chunk_id=..., reason=...)])` |
+| Where it runs | after candidate retrieval, before metadata enrichment and reranking. It never searches the collection |
+| Reuse | `self.services.db.get_documents([c.doc_id for c in candidates])` → each document's `metadata` |
+
+Rules:
+- Keep the original order and ranks of the survivors.
+- Give a human-readable `reason` for every removed candidate (it is shown in the trace).
+- If nothing survives, return an empty `kept` list, and the pipeline abstains. **Never relax the
+  conditions** to fill the list.
+
+**Candidate starvation (synthetic example):** an ERICA student asks *"Can I borrow a laptop?"*. With
+Top K = 5, all five candidates are Seoul library rules, and the ERICA rule is ranked 7th.
+Postfiltering removes all five, so the student gets no answer although the right document exists.
+Write this as a test: index 6 "Seoul" chunks and 1 less similar "ERICA" chunk, retrieve with
+`top_k=5`, postfilter for ERICA, and assert `kept == []`. Then compare with your prefilter, which
+finds the ERICA chunk. Report this difference. It is exactly the Prefiltering vs Postfiltering
+lesson.
+
+Inspect: Postfiltering's input candidate IDs, `removed` (IDs and reasons) and `kept`. Metadata
+Enrichment must then receive only the `kept` IDs.
+
+### Hybrid Retrieval (Fusion)
+
+| | |
+|---|---|
+| Folder | `blocks/retrieval/hybrid_fusion/` → `rrf.py` |
+| Inherit | `BaseHybridFusion` |
+| Implement | `async def fuse(self, dense: RetrievalResult, lexical: RetrievalResult) -> RetrievalResult` |
+| Algorithm | for every `chunk_id`: `score = Σ 1/(rrf_k + rank)` over the lists it appears in; sort; keep `top_k`; renumber `rank` from 1 |
+| Where it runs | after both retrievers, only when dense, lexical *and* fusion are on (the validator enforces this) |
+| Prefilter | both inputs were searched with the same predicate. Keep `applied_filter=dense.applied_filter`, and make sure your lexical retriever supports prefiltering before combining them with a prefilter |
+| Test | a chunk ranked 2nd in both lists beats a chunk ranked 1st in only one list |
+
+### Cross-Encoder Reranking
+
+| | |
+|---|---|
+| Folder | `blocks/evidence/reranking/` → `cross_encoder.py` |
+| Inherit | `BaseReranker` |
+| Implement | `async def rerank(self, query: str, evidence: list[Evidence]) -> list[Evidence]` |
+| Input → output | the query + `Evidence` (with text) → the same evidence, reordered, `rank` renumbered (`e.model_copy(update={"rank": i})`), at most `top_n` |
+| Algorithm | `sentence_transformers.CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2").predict([(query, e.text) for e in evidence])`. The model downloads ~90 MB once; load it in a cached function, like `load_sentence_transformer` in `ingestion/embedding/bge_embedder.py` |
+| Where it runs | after metadata enrichment, before evidence selection |
+| Test | monkeypatch your model loader with a fake whose `predict()` returns fixed scores; check the new order |
+
+### Evidence Sufficiency
+
+| | |
+|---|---|
+| Folder | `blocks/evidence/evidence_sufficiency/` → `sufficiency_checker.py` |
+| Inherit | `BaseSufficiencyChecker` |
+| Implement | `async def check(self, question: str, evidence: list[Evidence]) -> SufficiencyDecision` |
+| Input → output | the question + selected evidence → `SufficiencyDecision(sufficient=..., reason=...)` |
+| Where it runs | after evidence selection. If `sufficient=False`, the runner skips Context Construction and Generation and **abstains**. That logic already exists in `run_rag()` |
+| Choosing `min_score` | measure, don't guess: `data/eval/sample_questions.jsonl` has 14 labelled questions (12 answerable, 2 not). Print the best score for each and pick a value that separates them. Report that it was tuned on that small set |
+| Test | evidence with scores `[0.2, 0.1]` and `min_score=0.5` → `sufficient=False`; in a pipeline test the LLM is not called (`fake_ollama.requests == []`) |
 
 ---
 
 ## Beginner checklist
 
-- [ ] I found the right abstract class and copied its method name and signature exactly.
-- [ ] My class inherits from it and reads settings from `self.params`, tools from `self.services`.
-- [ ] It returns the promised type (`RetrievalResult`, `list[Evidence]`, …) built from real data.
-- [ ] I registered a `Method(...)` with a unique ID, a description and its `Param`s, starting at `implemented=False`.
-- [ ] I wrote a test, and `python -m pytest tests/test_<mine>.py` passes.
+- [ ] I opened the block folder, read `base.py`, and copied the method name and signature exactly.
+- [ ] My class lives in its own file in that folder, inherits from the base class, reads settings
+      from `self.params` and tools from `self.services`.
+- [ ] It returns the promised type (`RetrievalResult`, `PostfilterResult`, …), built from real data with keywords.
+- [ ] It never silently ignores eligibility conditions (prefilter predicates, postfilter criteria).
+- [ ] It is registered with a unique `method_id` and its `Param`s, starting at `implemented=False`.
+- [ ] My test passes: `python -m pytest tests/test_<mine>.py`.
 - [ ] I set `implemented=True`, updated the planned-stages test, and the whole suite passes.
-- [ ] I restarted the backend, reloaded the page, selected my method, and checked the Execution tab.
-- [ ] I compared it with the existing method on a few real questions and wrote down what changed.
+- [ ] I restarted the backend, reloaded the page, selected my method, and inspected its real input and output.
+- [ ] I compared it with the existing method on real questions and wrote down what changed.

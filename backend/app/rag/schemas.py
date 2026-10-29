@@ -1,30 +1,38 @@
-"""The data that flows between pipeline blocks.
+"""The data that flows between pipeline blocks (Pydantic models).
 
-Each block's abstract method says which of these types it receives and returns, so you
-always know what you get and what you must give back. They are plain dataclasses: create
-them like `Candidate(rank=1, chunk_id="…", doc_id="…", score=0.83)`.
+Each block's `base.py` says which of these types it receives and returns, so you always know
+what you get and what you must give back. Create them with keywords, e.g.
+`Candidate(rank=1, chunk_id="…", doc_id="…", score=0.83)`.
 """
 
 from __future__ import annotations
 
 import hashlib
 import uuid
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
+
+from pydantic import BaseModel, Field
 
 if TYPE_CHECKING:  # only for type hints; avoids import cycles
     from app.config import Settings
     from app.database import Database
     from app.ollama import OllamaClient
-    from app.rag.blocks.embedding import BaseEmbedder
+    from app.rag.blocks.ingestion.embedding.base import BaseEmbedder
+
+# What the model writes when the evidence does not answer the question (see context_construction),
+# and what the user then sees (abstention).
+INSUFFICIENT_MARKER = "INSUFFICIENT_CONTEXT"
+INSUFFICIENT_ANSWER = (
+    "I could not find enough information in the indexed HYU documents to answer this question. "
+    "Please check the official Hanyang University website or ask the relevant office."
+)
+
+# =========================================================================== ingestion (offline)
 
 
-# --------------------------------------------------------------------------- offline (ingestion)
-
-
-@dataclass
-class Section:
+class Section(BaseModel):
     """A piece of a document under one heading (or one PDF page)."""
 
     heading: str | None
@@ -32,30 +40,27 @@ class Section:
     page: int | None = None
 
 
-@dataclass
-class ParsedDocument:
-    """Output of a parser: the readable content of one file."""
+class ParsedDocument(BaseModel):
+    """Output of parsing: the readable content of one file."""
 
     path: Path
     source_uri: str  # path relative to data/, e.g. "raw/handbook.pdf"
     file_type: str  # "pdf" | "txt" | "md" | "html"
     title: str
     sections: list[Section]
-    declared_metadata: dict[str, str] = field(default_factory=dict)  # e.g. Markdown front matter
+    declared_metadata: dict[str, str] = Field(default_factory=dict)  # e.g. Markdown front matter
 
 
-@dataclass
-class DocumentMetadata:
-    """Output of a metadata extractor. Unknown values stay None/empty — never guessed."""
+class DocumentMetadata(BaseModel):
+    """Output of metadata extraction. Unknown values stay missing — never guessed."""
 
     title: str
     language: str
-    extra: dict[str, str] = field(default_factory=dict)
+    extra: dict[str, str] = Field(default_factory=dict)
 
 
-@dataclass
-class Chunk:
-    """Output of a chunker: one searchable piece of a document."""
+class Chunk(BaseModel):
+    """Output of chunking: one searchable piece of a document."""
 
     text: str
     section: str | None
@@ -63,19 +68,53 @@ class Chunk:
     token_count: int
 
 
-# --------------------------------------------------------------------------- online (questions)
+# =========================================================================== question answering (online)
 
 
-@dataclass
-class QueryAnalysis:
-    """Output of query understanding (future): what the question asks for."""
+class FilterCriteria(BaseModel):
+    """Metadata conditions a student's question requires (eligibility). None = no condition.
 
-    constraints: dict[str, str] = field(default_factory=dict)  # e.g. {"campus": "ERICA"}
+    Only fill these from what the question or the student actually states — never invent them.
+    """
+
+    campus: str | None = None  # e.g. "SEOUL", "ERICA"
+    audience: str | None = None  # e.g. "undergraduate", "international"
+    academic_year: str | None = None  # e.g. "2026"
+    document_type: str | None = None  # e.g. "handbook", "notice"
+    effective_date: str | None = None  # e.g. "2026-03-01"
+
+    def conditions(self) -> dict[str, str]:
+        """Only the conditions that are set."""
+        return {k: v for k, v in self.model_dump().items() if v is not None}
 
 
-@dataclass
-class Candidate:
-    """One retrieved chunk ID with its score (output of dense/lexical retrieval and fusion)."""
+class QueryAnalysis(BaseModel):
+    """Output of query understanding: what the question asks for."""
+
+    intent: str | None = None
+    criteria: FilterCriteria = Field(default_factory=FilterCriteria)
+
+
+class RewrittenQuery(BaseModel):
+    """Output of query rewriting. `query` is used for retrieval; the original question is kept for the prompt."""
+
+    query: str
+    alternatives: list[str] = Field(default_factory=list)  # extra queries (multi-query rewriting)
+
+
+class RetrievalFilter(BaseModel):
+    """Output of metadata PREFILTERING: an eligibility predicate that retrieval applies DURING search.
+
+    conditions: payload field → allowed values, e.g. {"campus": ["SEOUL", "ALL"]}
+    include_unknown: also allow chunks whose field is missing (unknown ≠ ineligible)
+    """
+
+    conditions: dict[str, list[str]]
+    include_unknown: bool = True
+
+
+class Candidate(BaseModel):
+    """One retrieved chunk ID with its score (output of candidate retrieval)."""
 
     rank: int
     chunk_id: str
@@ -83,16 +122,27 @@ class Candidate:
     score: float
 
 
-@dataclass
-class RetrievalResult:
-    """Output of a retriever."""
+class RetrievalResult(BaseModel):
+    """Output of dense retrieval, lexical retrieval and hybrid fusion."""
 
     candidates: list[Candidate]
-    details: dict[str, Any] = field(default_factory=dict)  # extra information shown in the trace
+    applied_filter: RetrievalFilter | None = None  # the prefilter predicate that was really used
+    details: dict[str, Any] = Field(default_factory=dict)  # extra information shown in the trace
 
 
-@dataclass
-class Evidence:
+class RemovedCandidate(BaseModel):
+    chunk_id: str
+    reason: str
+
+
+class PostfilterResult(BaseModel):
+    """Output of metadata POSTFILTERING: which retrieved candidates survived and which were removed."""
+
+    kept: list[Candidate]
+    removed: list[RemovedCandidate] = Field(default_factory=list)
+
+
+class Evidence(BaseModel):
     """A candidate plus its text and source (output of metadata enrichment)."""
 
     rank: int
@@ -105,20 +155,18 @@ class Evidence:
     section: str | None = None
     page_number: int | None = None
     token_count: int = 0
-    label: str = ""  # "E1", "E2", … set by the context builder
+    label: str = ""  # "E1", "E2", … set by context construction
 
 
-@dataclass
-class SufficiencyDecision:
-    """Output of a sufficiency gate (future): may we answer with this evidence?"""
+class SufficiencyDecision(BaseModel):
+    """Output of evidence sufficiency: may we answer with this evidence? (If not: abstain.)"""
 
     sufficient: bool
     reason: str
 
 
-@dataclass
-class PromptContext:
-    """Output of the context builder: everything the generator needs."""
+class PromptContext(BaseModel):
+    """Output of context construction: everything generation needs."""
 
     messages: list[dict[str, str]]  # [{"role": "system", ...}, {"role": "user", ...}]
     context_text: str
@@ -126,17 +174,20 @@ class PromptContext:
     token_count: int
 
 
-@dataclass
-class GenerationResult:
-    """Output of a generator."""
+class GenerationResult(BaseModel):
+    """Output of generation."""
 
     answer: str
     model: str
     first_token_ms: float | None = None
 
 
-@dataclass
-class Citation:
+class SourceReference(BaseModel):
+    """A source shown under the answer. `cited` = the answer contains this source's [E#] label.
+
+    This is source ATTRIBUTION (where the text came from), not proof that the sentence is true.
+    """
+
     label: str
     cited: bool
     chunk_id: str
@@ -149,25 +200,15 @@ class Citation:
     excerpt: str
 
 
-@dataclass
-class CitationResult:
-    """Output of a citation verifier."""
-
-    answer: str  # the answer with invalid markers removed
-    citations: list[Citation]
-    invalid_markers: list[str]
-
-
-@dataclass
-class FinalAnswer:
-    """Output of the response guard: what the user sees."""
+class FinalAnswer(BaseModel):
+    """What the user sees."""
 
     answer: str
     outcome: str  # "answered" | "insufficient_context"
-    citations: list[Citation]
+    sources: list[SourceReference] = Field(default_factory=list)
 
 
-# --------------------------------------------------------------------------- shared services
+# =========================================================================== shared services
 
 
 @dataclass
@@ -180,7 +221,7 @@ class Services:
     embedder: BaseEmbedder | None = None
 
 
-# --------------------------------------------------------------------------- stable IDs
+# =========================================================================== stable IDs
 
 ID_NAMESPACE = uuid.UUID("5d0f3d1e-6a4b-4f43-9c1e-8a3b2f6c7d10")
 
