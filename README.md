@@ -49,8 +49,17 @@ flowchart LR
 
 ## Quick start
 
-From the `hyu-compass/` folder. The full tutorial with explanations is in
-[docs/01_GETTING_STARTED.md](docs/01_GETTING_STARTED.md).
+Needs Conda, Docker Desktop (running), Node.js 20+ and Ollama. From the `hyu-compass/` folder:
+
+```bash
+./setup.sh       # once: .env files, Python + npm packages, MongoDB + Qdrant, Ollama model, sample index
+./start.sh       # start databases, backend and frontend → http://127.0.0.1:5173 (logs in .run/)
+./stop.sh        # stop everything; data is kept (--keep-db leaves the databases running)
+./uninstall.sh   # remove containers, node_modules, caches; data is kept (--delete-data asks, then deletes it)
+```
+
+The same steps by hand (the full tutorial with explanations is in
+[docs/01_GETTING_STARTED.md](docs/01_GETTING_STARTED.md)):
 
 ```bash
 cp .env.example .env && cp backend/.env.example backend/.env   # then set a password in both

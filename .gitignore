@@ -21,6 +21,7 @@ frontend/dist/
 frontend/*.tsbuildinfo
 
 # Logs, OS and editor files
+.run/
 *.log
 .DS_Store
 .idea/
