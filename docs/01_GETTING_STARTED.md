@@ -1,7 +1,9 @@
 # 01 · Getting Started
 
 This tutorial takes you from a fresh copy of the repository to your first answered question.
-It takes about 20 minutes the first time, mostly downloads.
+It takes about 20 minutes the first time, mostly downloads. (Shortcut: `./setup.sh` then
+`./start.sh` do steps 2–8 for you; this page explains what they do.) Section 12 sets up the
+benchmark runner.
 
 Every command says **which folder to run it from**. `hyu-compass/` means the project root, the
 folder that contains `README.md` and `docker-compose.yml`.
@@ -114,6 +116,17 @@ ollama pull qwen3:4b
 Tip: set it as the default in `backend/.env` with `OLLAMA_CHAT_MODEL=qwen3:4b`. Otherwise the
 first installed model is used. You can always pick another one in the app.
 
+The two **backbone models of our experiments** (needed for the generation benchmark and the
+LLM-based methods such as query rewriting, ≈ 3.8 GB + 3.3 GB):
+
+```bash
+ollama pull llama2:7b
+ollama pull qwen3.5:4b
+```
+
+The app never replaces a missing model silently: if a selected model is not installed, the request
+is refused with the `ollama pull …` command to run.
+
 ## 6. Add documents and run ingestion
 
 **Ingestion** reads the documents, cuts them into chunks, turns every chunk into a vector and
@@ -183,7 +196,7 @@ npm run dev
 ## 9. Ask your first question
 
 1. In the four status dots at the top right, MongoDB, Qdrant, Ollama and Index should be green.
-   Open **Configuration → LLM Generation** and pick your model (e.g. `qwen3:4b`).
+   Open **Configuration → Generation** and pick your model (e.g. `qwen3:4b`).
 2. Click the example question **"How many credits can a first-year student register for?"**.
 3. Watch the left panel switch to **Execution**: the stages turn green one after another.
 4. The answer appears in the chat with a source card such as
@@ -201,7 +214,8 @@ From `hyu-compass/`:
 ```bash
 conda activate RAG
 cd backend && python -m pytest          # backend tests (no Docker or Ollama needed)
-cd ../frontend && npm test && npm run build
+cd .. && python -m pytest evaluation/tests   # metric and runner tests (no Docker or Ollama needed)
+cd frontend && npm test && npm run build
 ```
 
 ✅ Every test reports `passed` and the build ends with `✓ built in …`.
@@ -217,7 +231,11 @@ cd ../frontend && npm test && npm run build
 | Chat: *"No documents are indexed yet"* | ingestion has not been run | `python scripts/ingest.py --path data/samples` |
 | Chat: *"Cannot reach Ollama"* | Ollama is not running | open the Ollama app or run `ollama serve` |
 | Chat: *"No Ollama models are installed"* | no model downloaded | `ollama pull qwen3:4b` |
-| Chat: *"The model used all 'Max generated tokens' before answering"* | thinking models (qwen3) spend tokens on hidden reasoning | Configuration tab → **LLM Generation** → **Max generated tokens** → 2048 |
+| Chat: *"The model used all 'Max generated tokens' before answering"* | a thinking model (qwen3) spent the tokens on hidden reasoning | Configuration tab → **Generation** → **Max generated tokens** → 2048 (Thinking is *off* by default) |
+| Chat: *"Ollama model '…' is not installed. Run: ollama pull …"* | a selected model (generation or an auxiliary LLM) is missing | run the command shown, or choose an installed model |
+| Chat: *"Index '…' was built with the '…' embedding"* | the selected index needs another embedding method | choose that index again in **Index to search** (it copies its settings in) |
+| Chat: *"This index has no HNSW graph"* | `search_mode: hnsw` on a small index | use `exact`, or an index built with indexing threshold 1 (preset O8) |
+| Chat: *"… does not fit the context window"* | evidence + max tokens > context window | select less evidence or raise **Context window** (Generation → Advanced) |
 | UI: *"Cannot reach the backend"* | backend not running | start it (step 7) |
 | `ModuleNotFoundError: No module named 'app'` | uvicorn started from the wrong folder | run it from `hyu-compass/backend/` |
 | `ModuleNotFoundError` for fastapi, qdrant_client, … | wrong Python environment | `conda activate RAG` |
@@ -230,3 +248,20 @@ Qdrant can run inside the backend process: set `QDRANT_PATH=qdrant_data` in `bac
 folder is created inside `backend/`). Only one program can open that folder at a time, so stop the
 backend before running `scripts/ingest.py`, or re-index from the app's Configuration tab (Ingestion section) instead.
 MongoDB still needs Docker (or a local MongoDB installation).
+
+## 12. Benchmarks (optional)
+
+The benchmark runner (`evaluation/`, see [06_BENCHMARK_AND_EVALUATION.md](06_BENCHMARK_AND_EVALUATION.md))
+uses the same Conda environment. From `hyu-compass/`:
+
+```bash
+conda activate RAG
+python -m pip install -r evaluation/requirements.txt      # pyyaml (+ pytrec-eval for the tests)
+python -m evaluation.runner --download scifact,nfcorpus,arguana   # ≈ 30 MB, checksums verified
+python -m evaluation.runner --suite all --dry-run          # check everything, run nothing
+python -m evaluation.runner --suite all --smoke            # a few minutes: 5 queries per task
+```
+
+✅ The dry run lists every task as `READY`, `NOT_APPLICABLE` or `SHARED`; the smoke run ends with
+`Reports: evaluation/results/smoke/summary.md`. The full run (`--suite all`) takes hours on a laptop.
+

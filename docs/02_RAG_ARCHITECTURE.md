@@ -24,8 +24,8 @@ flowchart TB
     PRE --> CR
     subgraph CR["Candidate Retrieval"]
       DR[Dense Retrieval]
-      LR["Lexical Retrieval (future)"]
-      HF["Hybrid Retrieval / Fusion (future)"]
+      LR["Lexical Retrieval (optional)"]
+      HF["Hybrid Retrieval / Fusion (optional)"]
     end
     CR --> POST["Metadata Postfiltering (optional)"] --> EN[Metadata Enrichment] --> RR["Reranking (optional)"] --> ES[Evidence Selection]
     ES --> SUF["Evidence Sufficiency (optional)"] --> CC[Context Construction] --> G["Generation (Ollama)"] --> A[Final answer + source references]
@@ -33,9 +33,11 @@ flowchart TB
   V -. searched by .-> DR
 ```
 
-Blocks marked *optional* or *future* are **registered but not implemented yet**. The UI shows them
-greyed out, and the pipeline skips them. Implementing them is our course work
-([05_ADD_NEW_METHOD.md](05_ADD_NEW_METHOD.md)).
+Blocks marked *optional* are implemented but **off in the basic RAG (B0)**: switch them on in the
+Configuration tab or choose an experiment preset. A switched-off block is skipped and shown as
+skipped in the Execution tab. Adding further methods is our course work
+([05_ADD_NEW_METHOD.md](05_ADD_NEW_METHOD.md)); measuring them is
+[06_BENCHMARK_AND_EVALUATION.md](06_BENCHMARK_AND_EVALUATION.md).
 
 ### Where the code is
 
@@ -50,36 +52,40 @@ backend/app/
 └── rag/
     ├── schemas.py       the data passed between blocks (Candidate, Evidence, FilterCriteria, …)
     ├── registry.py      THE list of blocks, methods and hyperparameters
-    ├── pipeline.py      run_ingestion() and run_rag(): call the blocks in order
+    ├── presets.py       named experiment configurations (B0, O0–O8, R0–R14)
+    ├── text.py          query-term coverage (Lesson 5), shared by a reranker and the gate
+    ├── pipeline.py      run_ingestion(), index_documents() and run_rag(): call the blocks in order
     └── blocks/
         ├── pipeline_block.py         what every block has in common (self.params, self.services)
         │
         ├── ingestion/                OFFLINE · "Ingestion"
         │   ├── document_loading/     base.py · local_loader.py ✓ · web_loader.py
         │   ├── parsing/              base.py · basic_parser.py ✓
-        │   ├── chunking/             base.py · section_chunker.py ✓ · recursive_chunker.py · semantic_chunker.py
+        │   ├── chunking/             base.py · section_chunker.py ✓ · fixed_chunker.py ✓ · recursive_chunker.py ✓
+        │   │                         · whole_document.py ✓ · semantic_chunker.py
         │   ├── metadata_extraction/  base.py · basic_extractor.py ✓ · llm_extractor.py
-        │   ├── embedding/            base.py · bge_embedder.py ✓ · ollama_embedder.py
+        │   ├── embedding/            base.py · bge_embedder.py ✓ · minilm_embedder.py ✓ · ollama_embedder.py
         │   └── vector_indexing/      base.py · qdrant_indexer.py ✓
         │
         ├── query_processing/         ONLINE · "Query Processing"
-        │   ├── query_understanding/  base.py · llm_understanding.py
-        │   └── query_rewriting/      base.py · llm_rewriter.py · multi_query.py
+        │   ├── query_understanding/  base.py · stated_criteria.py ✓ · llm_understanding.py
+        │   └── query_rewriting/      base.py · llm_rewriter.py ✓ · multi_query.py ✓ · hyde.py ✓
         │
         ├── metadata_filtering/       ONLINE · "Metadata Filtering"
-        │   ├── metadata_prefiltering/   base.py · qdrant_prefilter.py       (runs BEFORE retrieval)
-        │   └── metadata_postfiltering/  base.py · candidate_postfilter.py   (runs AFTER retrieval)
+        │   ├── metadata_prefiltering/   base.py · qdrant_prefilter.py ✓     (runs BEFORE retrieval)
+        │   └── metadata_postfiltering/  base.py · candidate_postfilter.py ✓ (runs AFTER retrieval)
         │
         ├── retrieval/                ONLINE · "Candidate Retrieval"
         │   ├── dense_retrieval/      base.py · qdrant_cosine.py ✓
-        │   ├── lexical_retrieval/    base.py · bm25.py
-        │   └── hybrid_fusion/        base.py · rrf.py
+        │   ├── lexical_retrieval/    base.py · bm25.py ✓
+        │   └── hybrid_fusion/        base.py · rrf.py ✓
         │
         ├── evidence/                 ONLINE · "Evidence"
         │   ├── metadata_enrichment/  base.py · mongodb_enrichment.py ✓
-        │   ├── reranking/            base.py · cross_encoder.py · metadata_reranker.py
+        │   ├── reranking/            base.py · coverage_reranker.py ✓ · cross_encoder.py ✓ · rankgpt.py ✓
+        │   │                         · metadata_reranker.py
         │   ├── evidence_selection/   base.py · top_k_selector.py ✓ · token_budget_selector.py ✓
-        │   └── evidence_sufficiency/ base.py · sufficiency_checker.py
+        │   └── evidence_sufficiency/ base.py · sufficiency_checker.py ✓
         │
         └── grounded_generation/      ONLINE · "Grounded Generation"
             ├── context_construction/ base.py · standard_context.py ✓
@@ -90,8 +96,11 @@ The folders show **where code lives**; `run_rag()` decides **when it runs**. The
 filtering blocks share a folder because they solve the same problem, but prefiltering runs before
 retrieval and postfiltering after it.
 
-✓ = implemented (the working basic RAG). Every other algorithm file is a **teaching skeleton** with
-TODO steps that raises `NotImplementedError`.
+✓ = implemented and tested. The few files without ✓ (web loader, semantic chunker, LLM metadata
+extraction, Ollama embeddings, LLM query understanding, metadata-aware reranking) are **teaching
+skeletons** with TODO steps that raise `NotImplementedError`; the UI shows them greyed out.
+Next to the app, `evaluation/` (repository root) measures every method on BEIR with the same code —
+see [06_BENCHMARK_AND_EVALUATION.md](06_BENCHMARK_AND_EVALUATION.md).
 
 ---
 
@@ -101,10 +110,10 @@ TODO steps that raises `NotImplementedError`.
 |---|---|---|
 | Document Loading (`ingestion/document_loading/`) | `local_loader.py` · `LocalFolderLoader` | finds PDF, TXT, Markdown, HTML files; lists skipped ones |
 | Parsing (`ingestion/parsing/`) | `basic_parser.py` · `BasicDocumentParser` | file → title + **sections** (heading, text, page) |
-| Chunking (`ingestion/chunking/`) | `section_chunker.py` · `SectionTokenChunker` | sections → chunks of at most `chunk_size` tokens |
+| Chunking (`ingestion/chunking/`) | `section_chunker.py` · `SectionTokenChunker` (default); also fixed-size, recursive, whole-document | sections → chunks of at most `chunk_size` tokens, each with its source span |
 | Metadata Extraction (`ingestion/metadata_extraction/`) | `basic_extractor.py` · `BasicMetadataExtractor` | title, language, fields the file declares (front matter) |
-| Embedding (`ingestion/embedding/`) | `bge_embedder.py` · `SentenceTransformerEmbedder` | text → 384-number vector (BAAI/bge-small-en-v1.5) |
-| Vector Indexing (`ingestion/vector_indexing/`) | `qdrant_indexer.py` · `QdrantMongoIndexer` | text → MongoDB, vectors → Qdrant |
+| Embedding (`ingestion/embedding/`) | `bge_embedder.py` · `SentenceTransformerEmbedder` (default); also `minilm_embedder.py` | text → 384-number vector (BAAI/bge-small-en-v1.5) |
+| Vector Indexing (`ingestion/vector_indexing/`) | `qdrant_indexer.py` · `QdrantMongoIndexer` | text → MongoDB, vectors + metadata payload → Qdrant; writes a **manifest** |
 
 **Parsing** splits at headings ("Credit Limits", "How to Apply"), so an answer can say *where* a
 fact came from. PDFs get one section per page, so the page number is kept.
@@ -130,7 +139,9 @@ Dense retrieval refuses to search if the stored vector size doesn't match.
 
 **Vector Indexing — MongoDB and Qdrant.** MongoDB stores readable records (`documents`, `chunks`
 with their text, `traces`). Qdrant stores one **point** per chunk: the vector plus the payload
-`{chunk_id, doc_id}`. They are linked by IDs: the Qdrant point ID *is* the `chunk_id`, which comes
+`{chunk_id, doc_id}` and the document's metadata fields (lowercase lists, used by prefiltering).
+After indexing, `index_documents()` stores a **manifest** (how the index was built: settings, embedding
+model and revision, counts, timings, HNSW status) in the database's `manifest` collection. They are linked by IDs: the Qdrant point ID *is* the `chunk_id`, which comes
 from `doc_id` + position + text (`make_chunk_id` in `rag/schemas.py`). So re-ingesting the same
 files gives the same IDs.
 
@@ -140,21 +151,38 @@ files gives the same IDs.
 
 | # | Block (folder) | Status | Input → Output |
 |---|---|---|---|
-| 1 | Query Understanding (`query_processing/query_understanding/`) | planned | question → `QueryAnalysis` (intent, `FilterCriteria`) |
-| 2 | Query Rewriting (`query_processing/query_rewriting/`) | planned | question → `RewrittenQuery` |
-| 3 | **Metadata Prefiltering** (`metadata_filtering/metadata_prefiltering/`) | planned | `FilterCriteria` → `RetrievalFilter` (a predicate) |
-| 4 | Dense Retrieval (`retrieval/dense_retrieval/`) | **working** | query + predicate → `RetrievalResult` (Top K `Candidate`s) |
-| 5 | Lexical Retrieval (`retrieval/lexical_retrieval/`) | planned | query + predicate → `RetrievalResult` |
-| 6 | Hybrid Retrieval / Fusion (`retrieval/hybrid_fusion/`) | planned | two `RetrievalResult`s → one |
-| 7 | **Metadata Postfiltering** (`metadata_filtering/metadata_postfiltering/`) | planned | `Candidate`s + `FilterCriteria` → `PostfilterResult` |
-| 8 | Metadata Enrichment (`evidence/metadata_enrichment/`) | **working** | `Candidate`s → `Evidence` (text, title, section, page) |
-| 9 | Reranking (`evidence/reranking/`) | planned | `Evidence` → reordered `Evidence` |
-| 10 | Evidence Selection (`evidence/evidence_selection/`) | **working** | `Evidence` → the K best-ranked evidence (baseline) |
-| 11 | Evidence Sufficiency (`evidence/evidence_sufficiency/`) | planned | `Evidence` → `SufficiencyDecision` |
+| 1 | Query Understanding (`query_processing/query_understanding/`) | optional (stated criteria) | question → `QueryAnalysis` (intent, `FilterCriteria`) |
+| 2 | Query Rewriting (`query_processing/query_rewriting/`) | optional (LLM rewrite, multi-query, HyDE) | question → `RewrittenQuery` |
+| 3 | **Metadata Prefiltering** (`metadata_filtering/metadata_prefiltering/`) | optional | `FilterCriteria` → `RetrievalFilter` (a predicate) |
+| 4 | Dense Retrieval (`retrieval/dense_retrieval/`) | **on by default** | query + predicate → `RetrievalResult` (Top K `Candidate`s) |
+| 5 | Lexical Retrieval (`retrieval/lexical_retrieval/`) | optional (BM25) | query + predicate → `RetrievalResult` |
+| 6 | Hybrid Retrieval / Fusion (`retrieval/hybrid_fusion/`) | optional (RRF) | two `RetrievalResult`s → one |
+| 7 | **Metadata Postfiltering** (`metadata_filtering/metadata_postfiltering/`) | optional | `Candidate`s + `FilterCriteria` → `PostfilterResult` |
+| 8 | Metadata Enrichment (`evidence/metadata_enrichment/`) | **on** | `Candidate`s → `Evidence` (text, title, section, page) |
+| 9 | Reranking (`evidence/reranking/`) | optional (coverage, cross-encoder, RankGPT) | `Evidence` → reordered `Evidence` |
+| 10 | Evidence Selection (`evidence/evidence_selection/`) | **on** (Top-K; or token budget) | `Evidence` → the evidence for the prompt |
+| 11 | Evidence Sufficiency (`evidence/evidence_sufficiency/`) | optional (threshold gate) | `Evidence` → `SufficiencyDecision` |
 | 12 | Context Construction (`grounded_generation/context_construction/`) | **working** | question + `Evidence` → `PromptContext` (`[E1]` labels) |
 | 13 | Generation (`grounded_generation/generation/`) | **working** | `PromptContext` → `GenerationResult` (streamed) |
 
-Steps 4–6 together are **Candidate Retrieval**. The UI groups them under that name.
+Steps 4–6 together are **Candidate Retrieval**. The UI groups them under that name. "Optional" stages
+are off in B0 (the basic RAG) and can be switched on per question in the Configuration tab, or all at
+once with an **experiment preset** (`backend/app/rag/presets.py`, e.g. *R2 — Hybrid RRF*).
+
+### Before retrieval: query understanding and rewriting
+
+**Query Understanding → Stated criteria** turns what the student states ("I study at ERICA") into
+`FilterCriteria`; both metadata filters use them. **Query Rewriting** changes only what is
+*searched*, never the question that is answered:
+
+- **LLM rewrite** — one concise search query. A deterministic check (`validate_rewrite()` in
+  `query_rewriting/base.py`) makes sure every number, date, quoted phrase, name and negation is kept;
+  otherwise the original question is searched. The trace's *Details* tab shows the rejected rewrite.
+- **Multi-query** — the LLM writes several queries; each retriever runs **once per query** and the
+  rankings are merged with RRF. More searches, more LLM tokens.
+- **HyDE** — the LLM writes a *hypothetical* answer passage; dense retrieval embeds that passage
+  (like a document) instead of the question. The passage may be wrong: it is only a search vector and
+  is never evidence or a source.
 
 ### Candidate retrieval: dense, lexical, hybrid
 
@@ -165,11 +193,16 @@ chunk vectors with the highest **cosine similarity**:
 cos(q, c) = (q · c) / (|q| × |c|)        1.0 = same direction, 0.0 = unrelated
 ```
 
-Our vectors have length 1, so this is simply the dot product.
+Our vectors have length 1, so this is simply the dot product. `search_mode` *exact* compares the
+question with every vector; *hnsw* walks Qdrant's HNSW graph (approximate, faster on big indexes) and
+refuses to run if the index has no graph.
 
-**Lexical Retrieval** (future: BM25) ranks chunks by shared *words*. It is strong for exact terms
-like "TOPIK" or "add/drop", where meaning-based search can be vague. **Hybrid Retrieval** merges
-both candidate lists, e.g. with Reciprocal Rank Fusion: `score = Σ 1/(k + rank)`.
+**Lexical Retrieval** (`BM25Retriever`) ranks chunks by shared *words*: rare words count more
+(idf), repeated words saturate (`k1`), long chunks are penalized (`b`). It indexes the same
+"heading + text" as dense retrieval. It is strong for exact terms like "TOPIK" or "add/drop", where
+meaning-based search can be vague. BM25 scores are unbounded — never compare them with cosine values.
+**Hybrid Retrieval** (`ReciprocalRankFusion`) merges both candidate lists by rank only:
+`score = Σ 1/(k + rank)` with k = 60; each fused candidate keeps its original ranks in `scores`.
 
 **Top K** (default 5): a larger K makes it more likely the right chunk is a candidate, but the model
 also gets more unrelated text.
@@ -213,9 +246,12 @@ student's conditions to fill the list.
 | Off | On | Filter the retrieved candidates afterwards |
 | On | On | Retrieval-time eligibility, plus an extra check afterwards |
 
-Both blocks read the **same** `FilterCriteria` (from Query Understanding), so they cannot
-contradict each other. The criteria only come from what the question or student actually states;
-the system never invents user attributes. Both blocks are planned and disabled for now.
+Both blocks read the **same** `FilterCriteria` (from Query Understanding → *Stated criteria*) and
+build the **same** predicate with `FilterCriteria.to_filter()`, so they cannot contradict each other.
+The criteria only come from what the student actually states; the system never invents user
+attributes. Policy settings (both blocks): documents that do not state a field stay eligible
+(`include_unknown`), and campus-wide documents (`campus: ALL`) count for every campus. Dense
+retrieval sends the predicate to Qdrant; BM25 applies the same predicate while ranking.
 
 ### Metadata Enrichment, Reranking, Evidence Selection
 
@@ -223,8 +259,11 @@ the system never invents user attributes. Both blocks are planned and disabled f
 section, page and document title are loaded from MongoDB. A chunk in Qdrant that is missing in
 MongoDB is an error: re-index.
 
-**Reranking** (future, e.g. a cross-encoder that reads question and chunk *together*) puts the most
-relevant evidence first.
+**Reranking** reorders the top `rerank_depth` candidates (the rest keep their order behind them):
+*query-term coverage* (Lesson 5: share of question words in the chunk), a *cross-encoder*
+(`ms-marco-MiniLM-L6-v2` reads question and chunk **together** — more accurate, one model call per
+pair), or *RankGPT* (a local LLM orders the passages; its output is validated: missing, duplicate and
+invalid IDs are detected, retried once, then repaired or the original order is kept).
 
 **Evidence Selection** decides how much of the retrieved evidence goes into the prompt. The
 baseline is **Top-K** (`TopKSelector`, default): the list is already best first, so it simply keeps
@@ -236,9 +275,12 @@ Configuration tab to compare the two.
 
 ### Evidence Sufficiency and Abstention
 
-**Evidence Sufficiency** (future) asks: is this evidence good enough to answer at all? If not, the
-system **abstains**: it does not call the model and answers *"I could not find enough information…"*.
-The basic system already abstains in two cases:
+**Evidence Sufficiency** (`ScoreThresholdChecker`, optional) asks: is this evidence good enough to
+answer at all? It proceeds when a signal reaches a threshold — by default Lesson 5's best query-term
+coverage ≥ 0.30 (or the best dense similarity). It is a **heuristic**: a high score means "looks
+related", not "supports the answer". If it says no, the system **abstains**: it does not call the
+model and answers *"I could not find enough information…"*. Even without the gate, the system
+abstains in two cases:
 - no evidence was retrieved → the model is not called;
 - the model replies `INSUFFICIENT_CONTEXT` (the prompt tells it to when the evidence is missing).
 
@@ -317,15 +359,16 @@ A **skipped** stage really did not run: no input, no output, no time. Each answe
 
 ## A complete worked example (a real run)
 
-Sample documents indexed (5 documents, 23 chunks), model `qwen3:4b`, default settings.
+Sample documents indexed (5 documents, 23 chunks), preset B0 (default settings), model `qwen3:4b`
+with *Max generated tokens* 2048.
 
 **Question:** *How many credits can a first-year student register for?*
 
 | Block | Method | What happened |
 |---|---|---|
-| Query Understanding, Query Rewriting, Metadata Prefiltering | — | skipped: not implemented yet |
+| Query Understanding, Query Rewriting, Metadata Prefiltering | — | skipped: switched off |
 | Dense Retrieval | `qdrant_cosine` | Top K 5, no prefilter; best: chunk `165c3154…`, similarity **0.8354** |
-| Lexical Retrieval, Hybrid Fusion, Metadata Postfiltering | — | skipped: not implemented yet |
+| Lexical Retrieval, Hybrid Fusion, Metadata Postfiltering | — | skipped: switched off |
 | Metadata Enrichment | `mongodb_lookup` | 5 chunk texts loaded from MongoDB |
 | Reranking | — | skipped |
 | Evidence Selection | `top_k` | Top K 3: the 3 best of the 5 chunks are kept |
@@ -333,7 +376,7 @@ Sample documents indexed (5 documents, 23 chunks), model `qwen3:4b`, default set
 | Context Construction | `standard_context` | 3 evidence blocks, **242 tokens** |
 | Generation | `ollama_chat` | streamed answer |
 
-> **Answer:** First-year students can register for up to 18 credits in their first semester. **[E1]**
+> **Answer:** 18 credits **[E1]**
 > **Source:** E1 · Course Registration Handbook (Sample) · Credit Limits
 
 Almost all the time is spent in generation. The first question after starting the backend also

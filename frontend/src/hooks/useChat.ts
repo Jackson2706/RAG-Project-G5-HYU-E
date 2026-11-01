@@ -43,7 +43,7 @@ export function useChat() {
   const patch = (id: string, change: Partial<ChatMessage> | ((m: ChatMessage) => Partial<ChatMessage>)) =>
     setMessages((ms) => ms.map((m) => (m.id === id ? { ...m, ...(typeof change === "function" ? change(m) : change) } : m)));
 
-  const send = useCallback(async (question: string, config: StageChoices) => {
+  const send = useCallback(async (question: string, config: StageChoices, indexId = "default") => {
     const answerId = newId();
     setMessages((ms) => [...ms, { id: newId(), role: "user", content: question }, { id: answerId, role: "assistant", content: "", status: "streaming" }]);
     const controller = new AbortController();
@@ -51,7 +51,7 @@ export function useChat() {
     setBusy(true);
     let requestId = "";
     try {
-      await streamChat(question, config, (event) => {
+      await streamChat(question, config, indexId, (event) => {
         if (event.type === "started") {
           requestId = event.request_id;
           setTraces((t) => ({ ...t, [requestId]: { requestId, question, status: "running", stages: {} } }));

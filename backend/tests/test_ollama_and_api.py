@@ -14,8 +14,10 @@ from app.ollama import OllamaClient, OllamaError
 async def test_ollama_lists_models_and_streams_answers(ollama, fake_ollama):
     assert [m["name"] for m in await ollama.list_models()] == ["test-model"]
     fake_ollama.answer = "Hello there"
-    pieces = [p async for p in ollama.chat_stream(await ollama.pick_model("", ""), [], 0.1, 50)]
-    assert "".join(pieces) == "Hello there"
+    usage = {}
+    pieces = [p async for p in ollama.chat_stream(await ollama.pick_model("", ""), [], {"temperature": 0.1, "num_predict": 50}, usage=usage)]
+    assert "".join(pieces) == "Hello there" and usage["done_reason"] == "stop"
+    assert fake_ollama.requests[-1]["options"] == {"temperature": 0.1, "num_predict": 50}
 
 
 @pytest.mark.anyio
@@ -33,15 +35,34 @@ async def test_ollama_errors_are_clear(ollama, fake_ollama):
 @pytest.mark.anyio
 async def test_hidden_reasoning_of_thinking_models_is_removed(ollama, fake_ollama):
     fake_ollama.answer = "Let me think about [E9] first </think> The answer is 18 [E1]."
-    pieces = [p async for p in ollama.chat_stream({"name": "qwen3:4b", "capabilities": ["thinking"]}, [], 0.1, 50)]
+    pieces = [p async for p in ollama.chat_stream({"name": "qwen3:4b", "capabilities": ["thinking"]}, [], {"num_predict": 50})]
     assert "".join(pieces) == "The answer is 18 [E1]." and fake_ollama.requests[-1]["think"] is False
+
+
+@pytest.mark.anyio
+async def test_a_cut_off_answer_is_returned_but_unfinished_reasoning_is_an_error(ollama, fake_ollama):
+    qwen = {"name": "qwen3.5:4b", "capabilities": ["thinking"]}
+    fake_ollama.answer, fake_ollama.done_reason = "a long rewritten search query that hit the", "length"
+    usage = {}
+    pieces = [p async for p in ollama.chat_stream(qwen, [], {"num_predict": 8}, usage=usage)]
+    assert "".join(pieces) == fake_ollama.answer and usage["done_reason"] == "length"
+    fake_ollama.answer = "<think> still reasoning about"
+    with pytest.raises(OllamaError, match="Max generated tokens"):
+        [p async for p in ollama.chat_stream(qwen, [], {"num_predict": 8})]
+
+
+@pytest.mark.anyio
+async def test_thinking_on_for_a_model_that_cannot_think_is_an_error(ollama, fake_ollama):
+    with pytest.raises(OllamaError, match="does not support thinking"):
+        [p async for p in ollama.chat_stream({"name": "llama2:7b", "capabilities": ["completion"]}, [], {}, think="on")]
+    assert fake_ollama.requests == []
 
 
 @pytest.mark.anyio
 async def test_ollama_http_error():
     client = OllamaClient("http://x", transport=httpx.MockTransport(lambda r: httpx.Response(500, json={"error": "boom"})))
     with pytest.raises(OllamaError, match="500"):
-        [p async for p in client.chat_stream({"name": "m", "capabilities": []}, [], 0.1, 10)]
+        [p async for p in client.chat_stream({"name": "m", "capabilities": []}, [], {"num_predict": 10})]
 
 
 # ------------------------------------------------------------------ API
@@ -59,20 +80,22 @@ def test_registry_endpoint(api):
     assert len(stages) == 19
     assert stages["dense_retrieval"]["implemented"] and stages["dense_retrieval"]["methods"][0]["parameters"]["top_k"]["default"] == 5
     assert stages["dense_retrieval"]["group"] == "Candidate Retrieval" and stages["dense_retrieval"]["folder"] == "app/rag/blocks/retrieval/dense_retrieval/"
-    assert not stages["reranking"]["implemented"] and stages["reranking"]["base_class"] == "BaseReranker"
-    for name in ("metadata_prefiltering", "metadata_postfiltering"):  # the two filtering placements, both planned
-        assert stages[name]["optional"] and not stages[name]["implemented"]
+    assert stages["reranking"]["implemented"] and stages["reranking"]["base_class"] == "BaseReranker"
+    for name in ("metadata_prefiltering", "metadata_postfiltering"):  # the two filtering placements, both optional
+        assert stages[name]["optional"] and stages[name]["implemented"] and stages[name]["default_method"] is None
+    assert not next(m for m in stages["chunking"]["methods"] if m["method_id"] == "semantic")["implemented"]
+    assert stages["dense_retrieval"]["methods"][0]["parameters"]["search_mode"]["advanced"]
     assert "citation_verification" not in stages and "response_guard" not in stages
 
 
 def test_config_validation_endpoint(api):
-    bad = api.post("/api/pipeline/config/validate", json={"dense_retrieval": {"method": "qdrant_cosine", "params": {"top_k": 500}}}).json()
-    assert not bad["valid"] and bad["errors"][0] == {"stage_id": "dense_retrieval", "param": "top_k", "message": "Top K must be at most 20"}
+    bad = api.post("/api/pipeline/config/validate", json={"dense_retrieval": {"method": "qdrant_cosine", "params": {"top_k": 5000}}}).json()
+    assert not bad["valid"] and bad["errors"][0] == {"stage_id": "dense_retrieval", "param": "top_k", "message": "Top K must be at most 1000"}
     assert api.post("/api/pipeline/config/validate", json={}).json()["valid"]
 
 
 def test_chat_rejects_planned_methods_before_running(api, fake_ollama):
-    res = api.post("/api/chat", json={"question": "hi", "stages": {"reranking": {"method": "cross_encoder"}}})
+    res = api.post("/api/chat", json={"question": "hi", "stages": {"reranking": {"method": "metadata_aware"}}})
     assert res.status_code == 422 and "not implemented" in res.json()["detail"]["errors"][0]["message"]
     assert fake_ollama.requests == []
 

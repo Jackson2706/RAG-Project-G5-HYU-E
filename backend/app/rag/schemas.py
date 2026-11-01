@@ -50,6 +50,21 @@ class ParsedDocument(BaseModel):
     sections: list[Section]
     declared_metadata: dict[str, str] = Field(default_factory=dict)  # e.g. Markdown front matter
 
+    def section_starts(self) -> list[int]:
+        """Character position of each section inside `full_text()` (sections are joined by a blank line)."""
+        starts, position = [], 0
+        for section in self.sections:
+            starts.append(position)
+            position += len(section.text) + len(SECTION_SEPARATOR)
+        return starts
+
+    def full_text(self) -> str:
+        """The whole document as one string. Chunk spans (`Chunk.start`, `Chunk.end`) point into it."""
+        return SECTION_SEPARATOR.join(section.text for section in self.sections)
+
+
+SECTION_SEPARATOR = "\n\n"
+
 
 class DocumentMetadata(BaseModel):
     """Output of metadata extraction. Unknown values stay missing — never guessed."""
@@ -60,12 +75,17 @@ class DocumentMetadata(BaseModel):
 
 
 class Chunk(BaseModel):
-    """Output of chunking: one searchable piece of a document."""
+    """Output of chunking: one searchable piece of a document.
+
+    `start`/`end` is the chunk's source span: document.full_text()[start:end] == text.
+    """
 
     text: str
     section: str | None
     page_number: int | None
     token_count: int
+    start: int | None = None
+    end: int | None = None
 
 
 # =========================================================================== question answering (online)
@@ -85,7 +105,33 @@ class FilterCriteria(BaseModel):
 
     def conditions(self) -> dict[str, str]:
         """Only the conditions that are set."""
-        return {k: v for k, v in self.model_dump().items() if v is not None}
+        return {k: v for k, v in self.model_dump().items() if v not in (None, "")}
+
+    def to_filter(self, include_unknown: bool = True, campus_wide_value: str | None = "all") -> RetrievalFilter | None:
+        """The eligibility predicate for these criteria, or None when no condition is set.
+
+        Prefiltering and Postfiltering both use this, so a placement comparison uses the SAME predicate.
+        `campus_wide_value`: a document for every campus (campus: ALL) is also eligible for a campus.
+        """
+        conditions = {field: [normalize_value(value)] for field, value in self.conditions().items()}
+        if not conditions:
+            return None
+        if "campus" in conditions and campus_wide_value:
+            conditions["campus"].append(campus_wide_value)
+        return RetrievalFilter(conditions=conditions, include_unknown=include_unknown)
+
+
+def normalize_value(value: str) -> str:
+    """Metadata values are compared case-insensitively ("ERICA" == "erica")."""
+    return value.strip().lower()
+
+
+def metadata_values(raw: Any) -> list[str]:
+    """Declared metadata → list of normalized values. "[undergraduate, international]" → two values."""
+    if raw is None:
+        return []
+    items = raw if isinstance(raw, list) else str(raw).strip().strip("[]").split(",")
+    return [normalize_value(str(item).strip().strip("'\"")) for item in items if str(item).strip().strip("'\"")]
 
 
 class QueryAnalysis(BaseModel):
@@ -96,10 +142,19 @@ class QueryAnalysis(BaseModel):
 
 
 class RewrittenQuery(BaseModel):
-    """Output of query rewriting. `query` is used for retrieval; the original question is kept for the prompt."""
+    """Output of query rewriting. `query` is used for retrieval; the original question is kept for the prompt.
+
+    alternatives:   extra search queries (multi-query); retrieval runs once per query and the
+                    rankings are merged with Reciprocal Rank Fusion.
+    embedding_text: a text to embed INSTEAD of the query for dense retrieval (HyDE). It is a search
+                    representation only: never evidence, never cited.
+    validation:     what the rewrite check found (passed, missing terms, fallback reason).
+    """
 
     query: str
-    alternatives: list[str] = Field(default_factory=list)  # extra queries (multi-query rewriting)
+    alternatives: list[str] = Field(default_factory=list)
+    embedding_text: str | None = None
+    validation: dict[str, Any] = Field(default_factory=dict)
 
 
 class RetrievalFilter(BaseModel):
@@ -112,14 +167,42 @@ class RetrievalFilter(BaseModel):
     conditions: dict[str, list[str]]
     include_unknown: bool = True
 
+    def matches(self, metadata: dict[str, Any]) -> bool:
+        """True if a document with this metadata is eligible. Same rule as the Qdrant filter:
+        every condition must match one allowed value (a missing field passes if include_unknown)."""
+        for field, allowed in self.conditions.items():
+            values = metadata_values(metadata.get(field))
+            if not values:
+                if not self.include_unknown:
+                    return False
+            elif not set(values) & set(allowed):
+                return False
+        return True
+
+    def explain(self, metadata: dict[str, Any]) -> str | None:
+        """Why a document is NOT eligible (None if it is)."""
+        for field, allowed in self.conditions.items():
+            values = metadata_values(metadata.get(field))
+            if not values and not self.include_unknown:
+                return f"{field} is unknown"
+            if values and not set(values) & set(allowed):
+                return f"{field}={'/'.join(values)} not in {allowed}"
+        return None
+
 
 class Candidate(BaseModel):
-    """One retrieved chunk ID with its score (output of candidate retrieval)."""
+    """One retrieved chunk ID with its score (output of candidate retrieval).
+
+    `score` is the score of the CURRENT ranking (cosine, BM25, RRF, …). `scores` keeps every score
+    the candidate received so far, by name, e.g. {"dense": 0.83, "bm25": 12.4, "rrf": 0.032};
+    scores of different kinds are never compared with each other.
+    """
 
     rank: int
     chunk_id: str
     doc_id: str
     score: float
+    scores: dict[str, float] = Field(default_factory=dict)
 
 
 class RetrievalResult(BaseModel):
@@ -140,6 +223,7 @@ class PostfilterResult(BaseModel):
 
     kept: list[Candidate]
     removed: list[RemovedCandidate] = Field(default_factory=list)
+    details: dict[str, Any] = Field(default_factory=dict)  # e.g. how many came in, whether the list starved
 
 
 class Evidence(BaseModel):
@@ -155,6 +239,7 @@ class Evidence(BaseModel):
     section: str | None = None
     page_number: int | None = None
     token_count: int = 0
+    scores: dict[str, float] = Field(default_factory=dict)  # see Candidate.scores
     label: str = ""  # "E1", "E2", … set by context construction
 
 
@@ -163,6 +248,7 @@ class SufficiencyDecision(BaseModel):
 
     sufficient: bool
     reason: str
+    signals: dict[str, Any] = Field(default_factory=dict)  # the observed values the decision used
 
 
 class PromptContext(BaseModel):
@@ -180,6 +266,7 @@ class GenerationResult(BaseModel):
     answer: str
     model: str
     first_token_ms: float | None = None
+    usage: dict[str, Any] = Field(default_factory=dict)  # token counts and timings reported by Ollama
 
 
 class SourceReference(BaseModel):

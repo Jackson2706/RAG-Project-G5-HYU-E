@@ -66,6 +66,7 @@ class FakeOllama:
         self.models = [{"name": "test-model", "details": {"parameter_size": "1B"}, "capabilities": ["completion"]}]
         self.answer = "Need-based scholarships require a household income certificate [E1]."
         self.fail: str | None = None  # "connect" or "500"
+        self.done_reason = "stop"  # "length" = the answer hit num_predict
         self.requests: list[dict] = []
 
     def handler(self, request: httpx.Request) -> httpx.Response:
@@ -79,7 +80,7 @@ class FakeOllama:
                 return httpx.Response(500, json={"error": "model crashed"})
             words = self.answer.split(" ")
             lines = [json.dumps({"message": {"content": w + (" " if i < len(words) - 1 else "")}, "done": False}) for i, w in enumerate(words)]
-            lines.append(json.dumps({"message": {"content": ""}, "done": True, "done_reason": "stop"}))
+            lines.append(json.dumps({"message": {"content": ""}, "done": True, "done_reason": self.done_reason}))
             return httpx.Response(200, content="\n".join(lines).encode())
         return httpx.Response(404)
 
@@ -93,7 +94,7 @@ def anyio_backend():
 def fake_model(monkeypatch):
     """Every test uses FakeModel instead of downloading BAAI/bge-small-en-v1.5."""
     model = FakeModel()
-    monkeypatch.setattr("app.rag.blocks.ingestion.embedding.bge_embedder.load_sentence_transformer", lambda name, revision: model)
+    monkeypatch.setattr("app.rag.blocks.ingestion.embedding.bge_embedder.load_sentence_transformer", lambda name, revision, device="cpu": model)
     return model
 
 

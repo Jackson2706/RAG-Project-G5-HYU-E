@@ -6,6 +6,8 @@ Each block folder (ingestion/chunking/, retrieval/dense_retrieval/, …) has a `
     self.params     its hyperparameters, already validated by app/rag/registry.py
     self.services   shared tools: self.services.db, .embedder, .ollama, .settings
     self.method_id  its ID in the registry (set by the registry when it creates the block)
+    self.trace_details  optional: extra facts about the last call (e.g. an LLM's raw output and how it
+                    was checked). The pipeline shows them in the Execution tab next to the output.
 """
 
 from __future__ import annotations
@@ -21,3 +23,4 @@ class PipelineBlock(ABC):
         self.params = params
         self.services = services
         self.method_id = ""
+        self.trace_details: dict[str, Any] = {}

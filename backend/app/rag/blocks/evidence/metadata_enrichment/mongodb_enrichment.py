@@ -21,6 +21,6 @@ class MongoChunkLookup(BaseMetadataEnricher):
             Evidence(rank=c.rank, chunk_id=c.chunk_id, doc_id=c.doc_id, score=c.score, text=chunks[c.chunk_id]["text"],
                      title=documents[c.doc_id]["title"], source_uri=documents[c.doc_id]["source_uri"],
                      section=chunks[c.chunk_id].get("section"), page_number=chunks[c.chunk_id].get("page_number"),
-                     token_count=chunks[c.chunk_id].get("token_count", 0))
+                     token_count=chunks[c.chunk_id].get("token_count", 0), scores=dict(c.scores))
             for c in candidates
         ]  # fmt: skip

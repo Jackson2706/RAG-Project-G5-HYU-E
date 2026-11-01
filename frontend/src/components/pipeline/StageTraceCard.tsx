@@ -97,10 +97,12 @@ export function StageTraceCard({ stage, record }: { stage: StageDef; record?: St
               <TabsTrigger value="input">Input</TabsTrigger>
               <TabsTrigger value="output">Output</TabsTrigger>
               <TabsTrigger value="params">Parameters</TabsTrigger>
+              {record.details != null && <TabsTrigger value="details">Details</TabsTrigger>}
             </TabsList>
             <TabsContent value="input" className="mt-2"><JsonView value={record.input} label="Input" /></TabsContent>
             <TabsContent value="output" className="mt-2"><Output output={record.output} /></TabsContent>
             <TabsContent value="params" className="mt-2"><JsonView value={record.params} label="Parameters used" /></TabsContent>
+            {record.details != null && <TabsContent value="details" className="mt-2"><JsonView value={record.details} label="Details" /></TabsContent>}
           </Tabs>
         </div>
       )}

@@ -100,23 +100,26 @@ class BaseDenseRetriever(PipelineBlock):
             during the search (only eligible chunks may be ranked)
     Output: RetrievalResult with Candidates (rank, chunk_id, doc_id, score), best first, and the
             filter that was really applied. Hyperparameters such as top_k are in self.params.
+    embedding_text: when given (HyDE), embed this hypothetical passage as a DOCUMENT instead of the
+            query. It only moves the search vector; it is never returned as evidence.
     """
 
     @abstractmethod
-    async def retrieve(self, query: str, prefilter: RetrievalFilter | None = None) -> RetrievalResult: ...
+    async def retrieve(self, query: str, prefilter: RetrievalFilter | None = None, embedding_text: str | None = None) -> RetrievalResult: ...
 ```
 
 `qdrant_cosine.py` (shortened):
 
 ```python
 class QdrantDenseRetriever(BaseDenseRetriever):
-    async def retrieve(self, query: str, prefilter: RetrievalFilter | None = None) -> RetrievalResult:
+    async def retrieve(self, query: str, prefilter: RetrievalFilter | None = None, embedding_text: str | None = None) -> RetrievalResult:
         db, embedder = self.services.db, self.services.embedder         # shared tools
-        vector = embedder.embed_query(query)
+        vector = embedder.embed_documents([embedding_text])[0] if embedding_text else embedder.embed_query(query)
+        params = models.SearchParams(exact=True)                        # or the HNSW graph (search_mode "hnsw")
         qdrant_filter = to_qdrant_filter(prefilter) if prefilter else None  # prefilter goes INTO the search
-        points = db.search(vector, self.params["top_k"], qdrant_filter)    # hyperparameter from the registry
-        candidates = [Candidate(rank=i + 1, chunk_id=str(p.id), doc_id=p.payload["doc_id"], score=round(float(p.score), 4))
-                      for i, p in enumerate(points)]
+        points = db.search(vector, self.params["top_k"], qdrant_filter, params)  # hyperparameter from the registry
+        candidates = [Candidate(rank=i + 1, chunk_id=str(p.id), doc_id=p.payload["doc_id"], score=round(float(p.score), 4),
+                                scores={"dense": round(float(p.score), 4)}) for i, p in enumerate(points)]
         return RetrievalResult(candidates=candidates, applied_filter=prefilter, details={...})
 ```
 
@@ -132,10 +135,10 @@ classDiagram
     }
     class BaseDenseRetriever {
         <<abstract>>
-        +retrieve(query, prefilter) RetrievalResult
+        +retrieve(query, prefilter, embedding_text) RetrievalResult
     }
     class QdrantDenseRetriever {
-        +retrieve(query, prefilter) RetrievalResult
+        +retrieve(query, prefilter, embedding_text) RetrievalResult
     }
     class BaseMetadataPrefilter {
         <<abstract>>
@@ -172,18 +175,21 @@ Habits every algorithm follows:
 
 ### Planned methods are skeletons
 
-Example: `metadata_filtering/metadata_postfiltering/candidate_postfilter.py`:
+Example: `ingestion/chunking/semantic_chunker.py`:
 
 ```python
-class CandidateMetadataPostfilter(BaseMetadataPostfilter):
-    async def filter_candidates(self, candidates: list[Candidate], criteria: FilterCriteria) -> PostfilterResult:
+class SemanticChunker(BaseChunker):
+    def chunk(self, document: ParsedDocument) -> list[Chunk]:
         # TODO:
-        # 1. If criteria.conditions() is empty, keep every candidate.
-        # 2. Load each candidate's document: self.services.db.get_documents([c.doc_id for c in candidates]).
-        # 3. Compare document["metadata"] with each condition ...
-        # 4. Return PostfilterResult(kept=[...], removed=[RemovedCandidate(chunk_id=..., reason=...)]).
-        raise NotImplementedError("Metadata postfiltering is not implemented yet.")
+        # 1. Split each section into sentences.
+        # 2. Embed every sentence with self.services.embedder.embed_documents(...).
+        # 3. Start a new chunk where two neighbouring sentences are not similar.
+        raise NotImplementedError("Semantic chunking is not implemented yet.")
 ```
+
+The other skeletons: `document_loading/web_loader.py`, `metadata_extraction/llm_extractor.py`,
+`embedding/ollama_embedder.py`, `query_understanding/llm_understanding.py`,
+`reranking/metadata_reranker.py`.
 
 A skeleton is **not** a working method. It is registered with `implemented=False`, the registry
 refuses to create it, and the UI shows it greyed out. To implement it, replace the `raise` with real
@@ -195,21 +201,21 @@ code, test it, and flip the flag ([05_ADD_NEW_METHOD.md](05_ADD_NEW_METHOD.md)).
 |---|---|---|---|---|---|
 | offline | `ingestion/document_loading/` | `BaseDocumentLoader` | `load(folder)` | folder → (files, skipped) | `local_loader` ✓, `web_loader` |
 | offline | `ingestion/parsing/` | `BaseDocumentParser` | `parse(path)` | file → `ParsedDocument` | `basic_parser` ✓ |
-| offline | `ingestion/chunking/` | `BaseChunker` | `chunk(document)` | `ParsedDocument` → `list[Chunk]` | `section_chunker` ✓, `recursive_chunker`, `semantic_chunker` |
+| offline | `ingestion/chunking/` | `BaseChunker` | `chunk(document)` | `ParsedDocument` → `list[Chunk]` | `section_chunker` ✓, `fixed_chunker` ✓, `recursive_chunker` ✓, `whole_document` ✓, `semantic_chunker` |
 | offline | `ingestion/metadata_extraction/` | `BaseMetadataExtractor` | `extract(document)` | → `DocumentMetadata` | `basic_extractor` ✓, `llm_extractor` |
-| offline | `ingestion/embedding/` | `BaseEmbedder` | `embed_documents`, `embed_query`, `dimension`, `token_offsets` | texts → vectors | `bge_embedder` ✓, `ollama_embedder` |
-| offline | `ingestion/vector_indexing/` | `BaseVectorIndexer` | `index(...)` | records + vectors → stored | `qdrant_indexer` ✓ |
-| online | `query_processing/query_understanding/` | `BaseQueryUnderstanding` | `analyze(question)` | → `QueryAnalysis` | `llm_understanding` |
-| online | `query_processing/query_rewriting/` | `BaseQueryRewriter` | `rewrite(question)` | → `RewrittenQuery` | `llm_rewriter`, `multi_query` |
-| online | `metadata_filtering/metadata_prefiltering/` | `BaseMetadataPrefilter` | `build_filter(criteria)` | `FilterCriteria` → `RetrievalFilter` | `qdrant_prefilter` |
-| online | `retrieval/dense_retrieval/` | `BaseDenseRetriever` | `retrieve(query, prefilter)` | → `RetrievalResult` | `qdrant_cosine` ✓ |
-| online | `retrieval/lexical_retrieval/` | `BaseLexicalRetriever` | `retrieve(query, prefilter)` | → `RetrievalResult` | `bm25` |
-| online | `retrieval/hybrid_fusion/` | `BaseHybridFusion` | `fuse(dense, lexical)` | 2 × `RetrievalResult` → 1 | `rrf` |
-| online | `metadata_filtering/metadata_postfiltering/` | `BaseMetadataPostfilter` | `filter_candidates(candidates, criteria)` | → `PostfilterResult` | `candidate_postfilter` |
+| offline | `ingestion/embedding/` | `BaseEmbedder` | `embed_documents`, `embed_query`, `dimension`, `token_offsets` | texts → vectors | `bge_embedder` ✓, `minilm_embedder` ✓, `ollama_embedder` |
+| offline | `ingestion/vector_indexing/` | `BaseVectorIndexer` | `index(...)` | records + vectors → stored (+ status) | `qdrant_indexer` ✓ |
+| online | `query_processing/query_understanding/` | `BaseQueryUnderstanding` | `analyze(question)` | → `QueryAnalysis` | `stated_criteria` ✓, `llm_understanding` |
+| online | `query_processing/query_rewriting/` | `BaseQueryRewriter` | `rewrite(question)` | → `RewrittenQuery` | `llm_rewriter` ✓, `multi_query` ✓, `hyde` ✓ |
+| online | `metadata_filtering/metadata_prefiltering/` | `BaseMetadataPrefilter` | `build_filter(criteria)` | `FilterCriteria` → `RetrievalFilter` | `qdrant_prefilter` ✓ |
+| online | `retrieval/dense_retrieval/` | `BaseDenseRetriever` | `retrieve(query, prefilter, embedding_text)` | → `RetrievalResult` | `qdrant_cosine` ✓ |
+| online | `retrieval/lexical_retrieval/` | `BaseLexicalRetriever` | `retrieve(query, prefilter)` | → `RetrievalResult` | `bm25` ✓ |
+| online | `retrieval/hybrid_fusion/` | `BaseHybridFusion` | `fuse(dense, lexical)` | 2 × `RetrievalResult` → 1 | `rrf` ✓ |
+| online | `metadata_filtering/metadata_postfiltering/` | `BaseMetadataPostfilter` | `filter_candidates(candidates, criteria)` | → `PostfilterResult` | `candidate_postfilter` ✓ |
 | online | `evidence/metadata_enrichment/` | `BaseMetadataEnricher` | `enrich(candidates)` | `Candidate`s → `Evidence` | `mongodb_enrichment` ✓ |
-| online | `evidence/reranking/` | `BaseReranker` | `rerank(query, evidence)` | → reordered `Evidence` | `cross_encoder`, `metadata_reranker` |
+| online | `evidence/reranking/` | `BaseReranker` | `rerank(query, evidence)` | → reordered `Evidence` | `coverage_reranker` ✓, `cross_encoder` ✓, `rankgpt` ✓, `metadata_reranker` |
 | online | `evidence/evidence_selection/` | `BaseEvidenceSelector` | `select(evidence)` | → fewer `Evidence` | `top_k_selector` ✓, `token_budget_selector` ✓ |
-| online | `evidence/evidence_sufficiency/` | `BaseSufficiencyChecker` | `check(question, evidence)` | → `SufficiencyDecision` | `sufficiency_checker` |
+| online | `evidence/evidence_sufficiency/` | `BaseSufficiencyChecker` | `check(question, evidence)` | → `SufficiencyDecision` | `sufficiency_checker` ✓ |
 | online | `grounded_generation/context_construction/` | `BaseContextBuilder` | `build(question, evidence)` | → `PromptContext` | `standard_context` ✓ |
 | online | `grounded_generation/generation/` | `BaseGenerator` | `generate(prompt, on_token)` | → `GenerationResult` | `ollama_generator` ✓ |
 
@@ -242,8 +248,8 @@ registered class at startup (`check_registry()` in `registry.py`).
 
 **Running a skeleton / asking the registry for a planned method:**
 ```text
-NotImplementedError: Cross-encoder reranking is not implemented yet.
-NotImplementedError: 'Cross-encoder' (reranking) is registered as not implemented and cannot run
+NotImplementedError: Semantic chunking is not implemented yet.
+NotImplementedError: 'Semantic chunking' (chunking) is registered as not implemented and cannot run
 ```
 
 **Building a schema wrong:**
@@ -260,5 +266,14 @@ instead of `RetrievalResult`) makes the *next* block fail, and the Execution tab
 stage. Always return the type `base.py` promises, and test it.
 
 The backend tests check these rules: `backend/tests/test_blocks.py` (folder layout, abstract classes
-cannot be created, missing methods fail) and `backend/tests/test_registry.py` (every registered
-class inherits from the right abstract class).
+cannot be created, missing methods fail), `backend/tests/test_registry.py` (every registered
+class inherits from the right abstract class) and `backend/tests/test_methods.py` (every baseline
+method on small synthetic inputs).
+
+### Two optional helpers every block has
+
+- `self.trace_details` — a dict a block may fill with extra facts about its last call (RankGPT puts its
+  raw LLM output and the validation outcome here). The Execution tab shows it in a **Details** tab.
+- Rerankers inherit `self.reordered(head, tail, new_scores, score_name)` from `BaseReranker`: it
+  renumbers ranks, keeps each item's previous rank in `scores["rank_before"]` and leaves the
+  un-reranked tail in its order.

@@ -1,0 +1,12 @@
+# GENERATION: both backbones answer from the SAME retrieved contexts (retrieved once with B0, cached).
+backbones: ["llama2:7b", "qwen3.5:4b"]
+# Shared settings for a controlled comparison. 4096 = Llama 2's context window, so neither model
+# gets more evidence than the other. Temperature 0 + fixed seed: as repeatable as Ollama allows.
+generation: {temperature: 0.0, top_p: 0.9, top_k: 40, context_window: 4096, max_tokens: 512, seed: 42, thinking: "off", timeout_s: 600}
+retrieval_preset: B0_BASIC_DENSE_RAG
+# Answer quality (correctness, completeness, grounding, citation support) is ONLY computed for cases
+# whose annotation_status is "annotated". Other cases still give latency, abstention and marker validity.
+annotations: evaluation/annotations/qa_annotations.jsonl
+cases:
+  beir: {datasets: [scifact, nfcorpus, arguana], per_dataset: 10}   # first 10 test queries (sorted IDs)
+  hyu_fixture: data/eval/sample_questions.jsonl                     # 14 questions with author-written answerable labels

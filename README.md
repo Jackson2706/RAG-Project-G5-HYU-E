@@ -18,9 +18,13 @@ like `[E1]` that point to the document text they came from.
 - **Ingests** English documents (PDF, TXT, Markdown, HTML) from `data/raw/`.
 - **Answers** questions with source references, and abstains honestly when the documents don't contain the answer.
 - **Shows the whole pipeline.** Choose a method and its settings for each block in the
-  *Configuration* tab. The *Execution* tab shows every block's real input, output, parameters and
-  time. Future blocks (query rewriting, BM25, reranking…) appear greyed out, so you can see the
-  roadmap.
+  *Configuration* tab — or a whole **experiment preset** (B0 basic RAG, O0–O8 offline, R0–R14 online:
+  BM25, hybrid RRF, cross-encoder, query rewriting, HyDE, metadata pre/postfiltering, a sufficiency
+  gate, RankGPT…). The *Execution* tab shows every block's real input, output, parameters and time.
+- **Measures itself.** `python -m evaluation.runner --suite all` runs every baseline on the BEIR
+  benchmarks SciFact, NFCorpus and ArguAna (no UI, no FastAPI, the same code as the app), compares
+  Llama 2 and Qwen 3.5 on identical evidence, and writes reports with per-query results and failure
+  analysis.
 - **Easy to extend.** Every pipeline block is a folder inside a group folder of
   `backend/app/rag/blocks/` (`ingestion/`, `query_processing/`, `metadata_filtering/`, `retrieval/`,
   `evidence/`, `grounded_generation/`), e.g. `blocks/retrieval/dense_retrieval/`. It holds an
@@ -86,3 +90,5 @@ Read them in order:
 3. [Abstract classes](docs/03_ABSTRACT_CLASSES.md): how each block is defined and implemented.
 4. [Method registry](docs/04_METHOD_REGISTRY.md): how methods and settings reach the UI.
 5. [Add a new method](docs/05_ADD_NEW_METHOD.md): a hands-on tutorial (start here to contribute).
+6. [Benchmarks and evaluation](docs/06_BENCHMARK_AND_EVALUATION.md): BEIR, the baselines, metrics,
+   one-command experiments and how to read the reports.

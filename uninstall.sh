@@ -45,7 +45,7 @@ fi
 
 step "Removing installed and generated files"
 rm -rf frontend/node_modules frontend/dist frontend/*.tsbuildinfo .run backend/.pytest_cache
-find backend scripts -name __pycache__ -type d -prune -exec rm -rf {} +
+find backend scripts evaluation -name __pycache__ -type d -prune -exec rm -rf {} +
 echo "Removed frontend/node_modules, frontend/dist, .run/ and Python caches."
 
 step "Done"
@@ -53,8 +53,11 @@ cat <<'EOF'
 Kept on purpose — remove them yourself only if you are sure:
   .env, backend/.env                    rm .env backend/.env   (passwords; a kept data volume still needs the same password)
   Docker images                         docker image rm mongo:8.0.32 qdrant/qdrant:v1.19.0
-  Ollama model                          ollama rm qwen3:4b
-  Embedding model cache                 rm -rf ~/.cache/huggingface/hub/models--BAAI--bge-small-en-v1.5
+  Ollama models                         ollama rm qwen3:4b   (and llama2:7b, qwen3.5:4b if you pulled them)
+  Embedding/reranker model cache        rm -rf ~/.cache/huggingface/hub/models--BAAI--bge-small-en-v1.5
+                                        (also models--sentence-transformers--all-MiniLM-L6-v2, models--cross-encoder--ms-marco-MiniLM-L6-v2)
+  BEIR datasets and benchmark results   evaluation/datasets/, evaluation/results/
+                                        (benchmark indexes live in the database volumes: removed only by --delete-data)
   Conda environment (shared!)           conda env remove -n RAG
 
 Reinstall any time with:  ./setup.sh

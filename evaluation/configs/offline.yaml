@@ -1,0 +1,22 @@
+# OFFLINE baselines (O0–O8): each builds its own index revision per dataset from the SAME BEIR corpus,
+# then is evaluated with the SAME online method (R0 dense retrieval, exact search) at benchmark depth.
+# Presets come from backend/app/rag/presets.py; this file only says what to run where.
+datasets: [scifact, nfcorpus, arguana]
+split: test
+depth:
+  documents: 100     # ranked BEIR documents scored (MAP@100, Recall@100)
+  chunks: 600        # chunks retrieved in Protocol B to assemble up to 100 distinct documents
+experiments:
+  # Protocol A: BEIR documents are the retrieval units (no chunking) — reported separately.
+  - {id: PA_WHOLE_DOCUMENT, preset: PROTOCOL_A_WHOLE_DOCUMENT, index: whole_document, protocol: A}
+  # Protocol B: HYU-style chunking; chunk rankings are mapped to BEIR document IDs.
+  - {id: O0_SECTION_AWARE_256_32, preset: O0_SECTION_AWARE_256_32, index: o0, protocol: B}
+  - {id: O1_FIXED_256_32, preset: O1_FIXED_256_32, index: o1, protocol: B}
+  - {id: O2_NO_OVERLAP, preset: O2_NO_OVERLAP, index: o2, protocol: B}
+  - {id: O3_SMALL_CHUNKS, preset: O3_SMALL_CHUNKS, index: o3, protocol: B}
+  - {id: O4_LARGE_CHUNKS, preset: O4_LARGE_CHUNKS, index: o4, protocol: B}
+  - {id: O5_RECURSIVE, preset: O5_RECURSIVE, index: o5, protocol: B}
+  - {id: O6_ALTERNATIVE_EMBEDDING, preset: O6_ALTERNATIVE_EMBEDDING, index: o6, protocol: B}
+  # O7/O8 search the SAME vectors (one index with a built HNSW graph): exact vs approximate.
+  - {id: O7_EXACT_SEARCH, preset: O7_EXACT_SEARCH, index: hnsw, protocol: B, latency_repeats: 3, store_chunks: true}
+  - {id: O8_HNSW_ANN, preset: O8_HNSW_ANN, index: hnsw, protocol: B, latency_repeats: 3, store_chunks: true, ann_reference: O7_EXACT_SEARCH}

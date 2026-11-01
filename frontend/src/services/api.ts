@@ -1,5 +1,5 @@
 // Every call the frontend makes to FastAPI (backend/app/api.py).
-import type { ConfigError, Health, IndexInfo, OllamaModel, StageChoices, StageDef, StreamEvent, Trace } from "@/types/api";
+import type { ConfigError, Health, IndexInfo, IndexRevision, OllamaModel, Preset, StageChoices, StageDef, StreamEvent, Trace } from "@/types/api";
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let res: Response;
@@ -26,6 +26,8 @@ const post = <T>(path: string, data: unknown) => request<T>(path, { method: "POS
 export const api = {
   health: () => request<Health>("/api/health"),
   registry: () => request<{ stages: StageDef[] }>("/api/pipeline/registry"),
+  presets: () => request<{ presets: Preset[] }>("/api/pipeline/presets"),
+  indexes: () => request<{ indexes: IndexRevision[]; default: string }>("/api/indexes"),
   validate: (stages: StageChoices) => post<{ valid: boolean; errors: ConfigError[] }>("/api/pipeline/config/validate", stages),
   models: () => request<{ models: OllamaModel[]; default: string | null }>("/api/ollama/models"),
   ingest: (folder: string, stages: StageChoices) =>
@@ -45,13 +47,13 @@ export function parseEvents(buffer: string): { events: StreamEvent[]; rest: stri
  * Ask a question and receive live events. We use fetch() instead of EventSource because we
  * need to POST the question and the chosen methods in the request body.
  */
-export async function streamChat(question: string, stages: StageChoices, onEvent: (e: StreamEvent) => void, signal: AbortSignal) {
+export async function streamChat(question: string, stages: StageChoices, indexId: string, onEvent: (e: StreamEvent) => void, signal: AbortSignal) {
   let res: Response;
   try {
     res = await fetch("/api/chat/stream", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question, stages }),
+      body: JSON.stringify({ question, stages, index_id: indexId }),
       signal,
     });
   } catch (err) {
