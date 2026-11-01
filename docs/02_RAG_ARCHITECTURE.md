@@ -78,7 +78,7 @@ backend/app/
         ├── evidence/                 ONLINE · "Evidence"
         │   ├── metadata_enrichment/  base.py · mongodb_enrichment.py ✓
         │   ├── reranking/            base.py · cross_encoder.py · metadata_reranker.py
-        │   ├── evidence_selection/   base.py · token_budget_selector.py ✓
+        │   ├── evidence_selection/   base.py · top_k_selector.py ✓ · token_budget_selector.py ✓
         │   └── evidence_sufficiency/ base.py · sufficiency_checker.py
         │
         └── grounded_generation/      ONLINE · "Grounded Generation"
@@ -149,7 +149,7 @@ files gives the same IDs.
 | 7 | **Metadata Postfiltering** (`metadata_filtering/metadata_postfiltering/`) | planned | `Candidate`s + `FilterCriteria` → `PostfilterResult` |
 | 8 | Metadata Enrichment (`evidence/metadata_enrichment/`) | **working** | `Candidate`s → `Evidence` (text, title, section, page) |
 | 9 | Reranking (`evidence/reranking/`) | planned | `Evidence` → reordered `Evidence` |
-| 10 | Evidence Selection (`evidence/evidence_selection/`) | **working** | `Evidence` → the evidence that fits the token budget |
+| 10 | Evidence Selection (`evidence/evidence_selection/`) | **working** | `Evidence` → the K best-ranked evidence (baseline) |
 | 11 | Evidence Sufficiency (`evidence/evidence_sufficiency/`) | planned | `Evidence` → `SufficiencyDecision` |
 | 12 | Context Construction (`grounded_generation/context_construction/`) | **working** | question + `Evidence` → `PromptContext` (`[E1]` labels) |
 | 13 | Generation (`grounded_generation/generation/`) | **working** | `PromptContext` → `GenerationResult` (streamed) |
@@ -226,8 +226,13 @@ MongoDB is an error: re-index.
 **Reranking** (future, e.g. a cross-encoder that reads question and chunk *together*) puts the most
 relevant evidence first.
 
-**Evidence Selection** (`TokenBudgetSelector`) keeps chunks in rank order until
-`max_evidence_tokens` (default 2000) would be exceeded, which keeps prompts short for small models.
+**Evidence Selection** decides how much of the retrieved evidence goes into the prompt. The
+baseline is **Top-K** (`TopKSelector`, default): the list is already best first, so it simply keeps
+the first `top_k` chunks (default 3) and drops the rest. Retrieval fetches a few more candidates
+(Dense Retrieval Top K = 5) than the prompt receives, so later blocks such as reranking have room to
+reorder before the cut. The alternative **Token budget** (`TokenBudgetSelector`) keeps chunks in rank
+order until `max_evidence_tokens` (default 2000) would be exceeded; switch to it in the
+Configuration tab to compare the two.
 
 ### Evidence Sufficiency and Abstention
 
@@ -323,13 +328,12 @@ Sample documents indexed (5 documents, 23 chunks), model `qwen3:4b`, default set
 | Lexical Retrieval, Hybrid Fusion, Metadata Postfiltering | — | skipped: not implemented yet |
 | Metadata Enrichment | `mongodb_lookup` | 5 chunk texts loaded from MongoDB |
 | Reranking | — | skipped |
-| Evidence Selection | `token_budget` | all 5 chunks fit the 2000-token budget |
+| Evidence Selection | `top_k` | Top K 3: the 3 best of the 5 chunks are kept |
 | Evidence Sufficiency | — | skipped |
-| Context Construction | `standard_context` | 5 evidence blocks, **347 tokens** |
+| Context Construction | `standard_context` | 3 evidence blocks, **242 tokens** |
 | Generation | `ollama_chat` | streamed answer |
 
-> **Answer:** The maximum number of credits a first-year student can register for is 18 credits
-> in their first semester. **[E1]**
+> **Answer:** First-year students can register for up to 18 credits in their first semester. **[E1]**
 > **Source:** E1 · Course Registration Handbook (Sample) · Credit Limits
 
 Almost all the time is spent in generation. The first question after starting the backend also

@@ -131,6 +131,7 @@ The working hyperparameters today:
 | Chunking | `section_tokens` | `chunk_size` | 256 | 64–512 tokens | ingestion |
 | Chunking | `section_tokens` | `chunk_overlap` | 32 | 0–128 tokens | ingestion |
 | Dense Retrieval | `qdrant_cosine` | `top_k` | 5 | 1–20 | runtime |
+| Evidence Selection | `top_k` | `top_k` | 3 | 1–20 | runtime |
 | Evidence Selection | `token_budget` | `max_evidence_tokens` | 2000 | 200–8000 | runtime |
 | Generation | `ollama_chat` | `model` | "" (default model) | installed models | runtime |
 | Generation | `ollama_chat` | `temperature` | 0.2 | 0–2 | runtime |

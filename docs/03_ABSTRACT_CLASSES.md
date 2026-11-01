@@ -208,7 +208,7 @@ code, test it, and flip the flag ([05_ADD_NEW_METHOD.md](05_ADD_NEW_METHOD.md)).
 | online | `metadata_filtering/metadata_postfiltering/` | `BaseMetadataPostfilter` | `filter_candidates(candidates, criteria)` | → `PostfilterResult` | `candidate_postfilter` |
 | online | `evidence/metadata_enrichment/` | `BaseMetadataEnricher` | `enrich(candidates)` | `Candidate`s → `Evidence` | `mongodb_enrichment` ✓ |
 | online | `evidence/reranking/` | `BaseReranker` | `rerank(query, evidence)` | → reordered `Evidence` | `cross_encoder`, `metadata_reranker` |
-| online | `evidence/evidence_selection/` | `BaseEvidenceSelector` | `select(evidence)` | → fewer `Evidence` | `token_budget_selector` ✓ |
+| online | `evidence/evidence_selection/` | `BaseEvidenceSelector` | `select(evidence)` | → fewer `Evidence` | `top_k_selector` ✓, `token_budget_selector` ✓ |
 | online | `evidence/evidence_sufficiency/` | `BaseSufficiencyChecker` | `check(question, evidence)` | → `SufficiencyDecision` | `sufficiency_checker` |
 | online | `grounded_generation/context_construction/` | `BaseContextBuilder` | `build(question, evidence)` | → `PromptContext` | `standard_context` ✓ |
 | online | `grounded_generation/generation/` | `BaseGenerator` | `generate(prompt, on_token)` | → `GenerationResult` | `ollama_generator` ✓ |

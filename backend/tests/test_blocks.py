@@ -9,12 +9,14 @@ from app.rag.blocks.ingestion.document_loading.local_loader import LocalFolderLo
 from app.rag.blocks.ingestion.embedding.bge_embedder import SentenceTransformerEmbedder
 from app.rag.blocks.ingestion.embedding.bge_embedder import load_sentence_transformer as real_model_loader  # saved before the fake replaces it
 from app.rag.blocks.ingestion.parsing.basic_parser import BasicDocumentParser
+from app.rag.blocks.evidence.evidence_selection.token_budget_selector import TokenBudgetSelector
+from app.rag.blocks.evidence.evidence_selection.top_k_selector import TopKSelector
 from app.rag.blocks.pipeline_block import PipelineBlock
 from app.rag.blocks.evidence.reranking.base import BaseReranker
 from app.rag.blocks.evidence.reranking.cross_encoder import CrossEncoderReranker
 from app.rag.blocks.retrieval.dense_retrieval.base import BaseDenseRetriever
 from app.rag.registry import PIPELINE
-from app.rag.schemas import ParsedDocument, RetrievalResult, Section, make_chunk_id, make_doc_id
+from app.rag.schemas import Evidence, ParsedDocument, RetrievalResult, Section, make_chunk_id, make_doc_id
 from tests.conftest import SAMPLES
 
 pytestmark = pytest.mark.anyio
@@ -153,6 +155,27 @@ def test_embedder_shapes(services, fake_model):
     vectors = embedder.embed_documents(["one text", "two texts"])
     assert len(vectors) == 2 and all(len(v) == fake_model.dim == embedder.dimension() for v in vectors)
     assert len(embedder.embed_query("a question")) == fake_model.dim
+
+
+# ------------------------------------------------------------------ evidence selection
+
+
+def _evidence(n: int, tokens: int = 100) -> list[Evidence]:
+    return [Evidence(rank=i, chunk_id=f"c{i}", doc_id="d", score=1 - i / 10, text="…", title="T", source_uri="x.md",
+                     token_count=tokens) for i in range(1, n + 1)]
+
+
+async def test_top_k_selector_keeps_the_k_best_in_order(services):
+    selector = TopKSelector({"top_k": 3}, services)
+    assert [e.chunk_id for e in await selector.select(_evidence(5))] == ["c1", "c2", "c3"]
+    assert len(await selector.select(_evidence(2))) == 2  # fewer than K: keep all
+    assert await selector.select([]) == []
+
+
+async def test_token_budget_selector_stops_before_the_budget(services):
+    selector = TokenBudgetSelector({"max_evidence_tokens": 250}, services)
+    assert [e.chunk_id for e in await selector.select(_evidence(5))] == ["c1", "c2"]
+    assert len(await TokenBudgetSelector({"max_evidence_tokens": 50}, services).select(_evidence(3))) == 1  # first is always kept
 
 
 def test_ids_are_stable():

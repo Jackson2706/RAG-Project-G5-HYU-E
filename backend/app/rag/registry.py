@@ -63,6 +63,7 @@ from app.rag.blocks.evidence.reranking.cross_encoder import CrossEncoderReranker
 from app.rag.blocks.evidence.reranking.metadata_reranker import MetadataAwareReranker
 from app.rag.blocks.evidence.evidence_selection.base import BaseEvidenceSelector
 from app.rag.blocks.evidence.evidence_selection.token_budget_selector import TokenBudgetSelector
+from app.rag.blocks.evidence.evidence_selection.top_k_selector import TopKSelector
 from app.rag.blocks.evidence.evidence_sufficiency.base import BaseSufficiencyChecker
 from app.rag.blocks.evidence.evidence_sufficiency.sufficiency_checker import ScoreThresholdChecker
 
@@ -263,7 +264,11 @@ PIPELINE: list[Stage] = [
               Method("metadata_aware", "Metadata-aware", MetadataAwareReranker, False, "Prefer chunks matching the student's situation."),
           ]),
     Stage("evidence_selection", "Evidence Selection", "online", BaseEvidenceSelector,
-          "Choose which evidence goes into the prompt.", default_method="token_budget", methods=[
+          "Choose which evidence goes into the prompt.", default_method="top_k", methods=[
+              Method("top_k", "Top-K", TopKSelector, True, "Keep the K best-ranked evidence chunks.", parameters={
+                  "top_k": Param("integer", 3, "Top K evidence", "How many of the best-ranked chunks go into the prompt.",
+                                 min=1, max=20),
+              }),
               Method("token_budget", "Token budget", TokenBudgetSelector, True, "Keep evidence in rank order within a token budget.", parameters={
                   "max_evidence_tokens": Param("integer", 2000, "Evidence token budget", "Maximum total tokens of evidence sent to the LLM.",
                                                min=200, max=8000, step=100),
