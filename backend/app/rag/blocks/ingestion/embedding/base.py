@@ -29,3 +29,8 @@ class BaseEmbedder(PipelineBlock):
 
     def count_tokens(self, text: str) -> int:
         return len(self.token_offsets(text))
+
+    def contract(self) -> dict:
+        """How vectors are made (model, revision, dimension, prefixes…). Stored in the index manifest so an
+        index is only ever searched with the embedder that built it."""
+        return {"method": self.method_id, "dimension": self.dimension()}

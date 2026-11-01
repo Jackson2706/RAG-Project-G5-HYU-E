@@ -14,6 +14,7 @@ class BaseChunker(PipelineBlock):
     Input:  ParsedDocument
     Output: list[Chunk] (text, section, page_number, token_count)
     Token counts must come from the embedder's tokenizer: self.services.embedder.token_offsets(text).
+    Every chunk records its source span: document.full_text()[chunk.start:chunk.end] == chunk.text.
     """
 
     @abstractmethod

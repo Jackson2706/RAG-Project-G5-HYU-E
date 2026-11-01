@@ -57,8 +57,8 @@ if conda env list | awk '{print $1}' | grep -qx "$ENV_NAME"; then
 else
   conda create -y -n "$ENV_NAME" "python=$PYTHON_VERSION"
 fi
-conda run -n "$ENV_NAME" --no-capture-output python -m pip install -q -r backend/requirements.txt
-echo "Python packages installed."
+conda run -n "$ENV_NAME" --no-capture-output python -m pip install -q -r backend/requirements.txt -r evaluation/requirements.txt
+echo "Python packages installed (app + benchmark runner)."
 
 step "Frontend packages"
 (cd frontend && npm ci --no-audit --no-fund)

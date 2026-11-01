@@ -27,7 +27,7 @@ export default function App() {
 
   const send = (question: string) => {
     setTab("execution"); // watch the stages run
-    void chat.send(question, config.choices!); // the exact methods + parameters for this request
+    void chat.send(question, config.choices!, config.indexId); // the exact methods + parameters (and index) for this request
   };
 
   const inspect = (requestId: string) => {

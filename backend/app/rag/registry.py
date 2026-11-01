@@ -22,14 +22,17 @@ from app.rag.blocks.ingestion.document_loading.web_loader import WebsiteLoader
 from app.rag.blocks.ingestion.parsing.base import BaseDocumentParser
 from app.rag.blocks.ingestion.parsing.basic_parser import BasicDocumentParser
 from app.rag.blocks.ingestion.chunking.base import BaseChunker
+from app.rag.blocks.ingestion.chunking.fixed_chunker import FixedTokenChunker
 from app.rag.blocks.ingestion.chunking.recursive_chunker import RecursiveChunker
 from app.rag.blocks.ingestion.chunking.section_chunker import SectionTokenChunker
 from app.rag.blocks.ingestion.chunking.semantic_chunker import SemanticChunker
+from app.rag.blocks.ingestion.chunking.whole_document import WholeDocumentChunker
 from app.rag.blocks.ingestion.metadata_extraction.base import BaseMetadataExtractor
 from app.rag.blocks.ingestion.metadata_extraction.basic_extractor import BasicMetadataExtractor
 from app.rag.blocks.ingestion.metadata_extraction.llm_extractor import LLMMetadataExtractor
 from app.rag.blocks.ingestion.embedding.base import BaseEmbedder
 from app.rag.blocks.ingestion.embedding.bge_embedder import SentenceTransformerEmbedder
+from app.rag.blocks.ingestion.embedding.minilm_embedder import MiniLMEmbedder
 from app.rag.blocks.ingestion.embedding.ollama_embedder import OllamaEmbedder
 from app.rag.blocks.ingestion.vector_indexing.base import BaseVectorIndexer
 from app.rag.blocks.ingestion.vector_indexing.qdrant_indexer import QdrantMongoIndexer
@@ -37,7 +40,9 @@ from app.rag.blocks.ingestion.vector_indexing.qdrant_indexer import QdrantMongoI
 # ---- blocks/query_processing/
 from app.rag.blocks.query_processing.query_understanding.base import BaseQueryUnderstanding
 from app.rag.blocks.query_processing.query_understanding.llm_understanding import LLMQueryUnderstanding
+from app.rag.blocks.query_processing.query_understanding.stated_criteria import StatedCriteria
 from app.rag.blocks.query_processing.query_rewriting.base import BaseQueryRewriter
+from app.rag.blocks.query_processing.query_rewriting.hyde import HyDERewriter
 from app.rag.blocks.query_processing.query_rewriting.llm_rewriter import LLMQueryRewriter
 from app.rag.blocks.query_processing.query_rewriting.multi_query import MultiQueryRewriter
 
@@ -59,8 +64,10 @@ from app.rag.blocks.retrieval.hybrid_fusion.rrf import ReciprocalRankFusion
 from app.rag.blocks.evidence.metadata_enrichment.base import BaseMetadataEnricher
 from app.rag.blocks.evidence.metadata_enrichment.mongodb_enrichment import MongoChunkLookup
 from app.rag.blocks.evidence.reranking.base import BaseReranker
+from app.rag.blocks.evidence.reranking.coverage_reranker import CoverageReranker
 from app.rag.blocks.evidence.reranking.cross_encoder import CrossEncoderReranker
 from app.rag.blocks.evidence.reranking.metadata_reranker import MetadataAwareReranker
+from app.rag.blocks.evidence.reranking.rankgpt import RankGPTReranker
 from app.rag.blocks.evidence.evidence_selection.base import BaseEvidenceSelector
 from app.rag.blocks.evidence.evidence_selection.token_budget_selector import TokenBudgetSelector
 from app.rag.blocks.evidence.evidence_selection.top_k_selector import TopKSelector
@@ -95,6 +102,7 @@ class Param:
     step: float | None = None
     options: tuple[str, ...] | None = None
     scope: Literal["runtime", "ingestion", "index"] = "runtime"
+    advanced: bool = False  # shown under "Advanced settings" in the UI
 
     def validate(self, value: Any) -> Any:
         """Return the value with the right Python type, or raise ValueError with a readable message."""
@@ -169,6 +177,40 @@ GROUPS = {
 
 # --------------------------------------------------------------------------- the registry (in pipeline order)
 
+def _chunk_params() -> dict[str, Param]:
+    return {
+        "chunk_size": Param("integer", 256, "Chunk size (tokens)", "Maximum tokens per chunk. Smaller = more precise matches, less context per chunk.",
+                            min=64, max=512, step=16, scope="ingestion"),
+        "chunk_overlap": Param("integer", 32, "Chunk overlap (tokens)", "Tokens repeated between neighbouring chunks.",
+                               min=0, max=128, step=8, scope="ingestion"),
+    }  # fmt: skip
+
+
+def _llm_params(max_tokens: int, max_tokens_limit: int = 1024) -> dict[str, Param]:
+    """Settings of an auxiliary LLM call (rewriting, HyDE, RankGPT). Thinking is always off for these calls."""
+    return {
+        "model": Param("string", "", "Auxiliary LLM", "Installed Ollama model for this step. Empty = the default model.", ui="ollama_model"),
+        "temperature": Param("float", 0.0, "Temperature", "0 = most repeatable output.", min=0, max=1, step=0.05, advanced=True),
+        "max_tokens": Param("integer", max_tokens, "Max generated tokens", "Upper limit on the LLM output.", min=16, max=max_tokens_limit,
+                            step=16, advanced=True),
+    }  # fmt: skip
+
+
+def _filter_params() -> dict[str, Param]:
+    """Shared by prefiltering and postfiltering, so a placement comparison uses the same predicate."""
+    return {
+        "include_unknown": Param("boolean", True, "Keep documents with unknown values",
+                                 "A document that does not state a field (e.g. no campus) stays eligible.", ui="toggle"),
+        "include_campus_wide": Param("boolean", True, "Campus-wide documents count",
+                                     "A document for ALL campuses is eligible for any campus.", ui="toggle"),
+    }  # fmt: skip
+
+
+def _rerank_depth(default: int) -> Param:
+    return Param("integer", default, "Rerank depth", "How many of the top candidates are reordered; the rest keep their order behind them.",
+                 ui="number", min=1, max=1000)  # fmt: skip
+
+
 PIPELINE: list[Stage] = [
     # ======================= OFFLINE: ingestion and indexing =======================
     Stage("document_loading", "Document Loading", "offline", BaseDocumentLoader,
@@ -183,13 +225,13 @@ PIPELINE: list[Stage] = [
     Stage("chunking", "Chunking", "offline", BaseChunker,
           "Split documents into small pieces that can be searched.", default_method="section_tokens", methods=[
               Method("section_tokens", "Section + token windows", SectionTokenChunker, True,
-                     "One chunk per section; long sections become overlapping token windows.", parameters={
-                         "chunk_size": Param("integer", 256, "Chunk size (tokens)", "Maximum tokens per chunk. Smaller = more precise matches, less context per chunk.",
-                                             min=64, max=512, step=16, scope="ingestion"),
-                         "chunk_overlap": Param("integer", 32, "Chunk overlap (tokens)", "Tokens repeated between neighbouring windows of a long section.",
-                                                min=0, max=128, step=8, scope="ingestion"),
-                     }),
-              Method("recursive", "Recursive splitting", RecursiveChunker, False, "Split at paragraphs, then lines, sentences, words."),
+                     "One chunk per section; long sections become overlapping token windows.", parameters=_chunk_params()),
+              Method("fixed_tokens", "Fixed-size token windows", FixedTokenChunker, True,
+                     "Windows of N tokens over the whole document, ignoring section boundaries.", parameters=_chunk_params()),
+              Method("recursive", "Recursive splitting", RecursiveChunker, True,
+                     "Split at paragraphs, then lines, sentences, words; merge up to the token limit.", parameters=_chunk_params()),
+              Method("whole_document", "No chunking (whole document)", WholeDocumentChunker, True,
+                     "One unit per document (BEIR document-level protocol). Long documents are truncated by the embedder."),
               Method("semantic", "Semantic chunking", SemanticChunker, False, "Cut where the topic changes."),
           ]),
     Stage("metadata_extraction", "Metadata Extraction", "offline", BaseMetadataExtractor,
@@ -200,58 +242,88 @@ PIPELINE: list[Stage] = [
     Stage("embedding", "Embedding", "offline", BaseEmbedder,
           "Turn text into vectors. The same method embeds documents and questions.", default_method="bge_small_en", methods=[
               Method("bge_small_en", "BAAI/bge-small-en-v1.5", SentenceTransformerEmbedder, True, "Local Sentence Transformers model, 384 numbers per text."),
+              Method("minilm_l6", "all-MiniLM-L6-v2", MiniLMEmbedder, True, "Alternative 384-dimensional model (needs its own index)."),
               Method("ollama_embedding", "Ollama embeddings", OllamaEmbedder, False, "Vectors from an Ollama embedding model."),
           ]),
     Stage("vector_indexing", "Vector Indexing", "offline", BaseVectorIndexer,
           "Store chunks in MongoDB and their vectors in Qdrant.", default_method="qdrant_mongodb", methods=[
-              Method("qdrant_mongodb", "Qdrant + MongoDB", QdrantMongoIndexer, True, "Replaces the whole index (cosine distance)."),
+              Method("qdrant_mongodb", "Qdrant + MongoDB", QdrantMongoIndexer, True, "Replaces the whole index (cosine distance).", parameters={
+                  "hnsw_m": Param("integer", 16, "HNSW m", "Links per vector in the HNSW graph (Qdrant default 16).",
+                                  ui="number", min=4, max=64, scope="index", advanced=True),
+                  "hnsw_ef_construct": Param("integer", 100, "HNSW ef_construct", "Search breadth while building the graph (Qdrant default 100).",
+                                             ui="number", min=16, max=512, scope="index", advanced=True),
+                  "indexing_threshold_kb": Param("integer", 20000, "Indexing threshold (KB)",
+                                                 "Qdrant builds the HNSW graph only above this size; smaller indexes are full-scanned. 1 = always build.",
+                                                 ui="number", min=1, max=1000000, scope="index", advanced=True),
+              }),
           ]),
     # ======================= ONLINE: question answering =======================
     Stage("query_understanding", "Query Understanding", "online", BaseQueryUnderstanding,
           "Find what the question asks for, including metadata criteria it states (campus, audience).",
           default_method=None, optional=True, methods=[
+              Method("stated_criteria", "Stated criteria (manual)", StatedCriteria, True,
+                     "The criteria the student states, set here. No LLM, no guessing.", parameters={
+                         field: Param("string", "", label, f"Only {hint} documents (empty = no condition).", ui="text")
+                         for field, label, hint in (("campus", "Campus", "this campus's (e.g. SEOUL, ERICA)"),
+                                                    ("audience", "Audience", "this audience's (e.g. international)"),
+                                                    ("academic_year", "Academic year", "this year's (e.g. 2026)"),
+                                                    ("document_type", "Document type", "this type of (e.g. handbook)"))
+                     }),
               Method("llm_understanding", "LLM understanding", LLMQueryUnderstanding, False, "The LLM extracts intent and criteria."),
           ]),
     Stage("query_rewriting", "Query Rewriting", "online", BaseQueryRewriter,
           "Turn the question into a better search query.", default_method=None, optional=True, methods=[
-              Method("llm_rewrite", "LLM rewrite", LLMQueryRewriter, False, "The LLM rewrites the question.",
-                     parameters={"temperature": Param("float", 0.0, "Temperature", "Randomness of the rewrite.", min=0, max=1, step=0.05)}),
-              Method("multi_query", "Multi-query", MultiQueryRewriter, False, "Several paraphrases of the question.",
-                     parameters={"num_queries": Param("integer", 3, "Number of queries", "Paraphrases to generate.", min=2, max=6)}),
+              Method("llm_rewrite", "LLM rewrite", LLMQueryRewriter, True, "The LLM rewrites the question; checked, else the original is used.",
+                     parameters=_llm_params(64)),
+              Method("multi_query", "Multi-query", MultiQueryRewriter, True, "Several search queries, each searched, merged with RRF.", parameters={
+                  **_llm_params(192),
+                  "num_queries": Param("integer", 3, "Number of queries", "Extra search queries to generate.", min=2, max=6),
+                  "include_original": Param("boolean", True, "Also search the original question", "Keep the question as one of the queries.", ui="toggle"),
+                  "rrf_k": Param("integer", 60, "RRF k", "Fusion constant for merging the per-query rankings.", min=1, max=200, advanced=True),
+              }),
+              Method("hyde", "HyDE", HyDERewriter, True, "Embed an LLM-written hypothetical passage instead of the question.",
+                     parameters=_llm_params(160)),
           ]),
     Stage("metadata_prefiltering", "Metadata Prefiltering", "online", BaseMetadataPrefilter,
           "Restrict candidate retrieval to eligible documents: the predicate is applied DURING the search.",
           default_method=None, optional=True, methods=[
-              Method("qdrant_prefilter", "Qdrant payload filter", QdrantMetadataPrefilter, False, "Eligibility predicate on Qdrant payload fields."),
+              Method("qdrant_prefilter", "Qdrant payload filter", QdrantMetadataPrefilter, True,
+                     "Eligibility predicate on Qdrant payload fields (BM25 applies the same predicate).", parameters=_filter_params()),
           ]),
     Stage("dense_retrieval", "Dense Retrieval", "online", BaseDenseRetriever,
           "Find the chunks whose meaning is closest to the question.", default_method="qdrant_cosine", optional=True,
           methods=[
               Method("qdrant_cosine", "Qdrant cosine", QdrantDenseRetriever, True, "Embed the question and find the nearest chunk vectors.", parameters={
-                  "top_k": Param("integer", 5, "Top K", "How many of the most similar chunks to retrieve.", min=1, max=20),
+                  "top_k": Param("integer", 5, "Top K", "How many of the most similar chunks to retrieve (benchmarks use up to 1000).",
+                                 ui="number", min=1, max=1000),
+                  "search_mode": Param("enum", "exact", "Search mode", "exact = compare with every vector; hnsw = approximate HNSW graph search.",
+                                       ui="select", options=("exact", "hnsw"), advanced=True),
+                  "hnsw_ef": Param("integer", 100, "HNSW ef", "Search breadth for hnsw mode: larger = closer to exact, slower.",
+                                   ui="number", min=4, max=1024, advanced=True),
               }),
           ]),
     Stage("lexical_retrieval", "Lexical Retrieval", "online", BaseLexicalRetriever,
           "Find chunks that share words with the question.", default_method=None, optional=True,
           methods=[
-              Method("bm25", "BM25", BM25Retriever, False, "Classic keyword ranking.", parameters={
-                  "top_k": Param("integer", 5, "Top K", "How many chunks to retrieve.", min=1, max=20),
-                  "k1": Param("float", 1.5, "k1", "How fast repeated words stop adding score.", min=0, max=3, step=0.1),
-                  "b": Param("float", 0.75, "b", "How much long chunks are penalized.", min=0, max=1, step=0.05),
+              Method("bm25", "BM25", BM25Retriever, True, "Classic keyword ranking (Okapi BM25).", parameters={
+                  "top_k": Param("integer", 5, "Top K", "How many chunks to retrieve.", ui="number", min=1, max=1000),
+                  "k1": Param("float", 1.2, "k1", "How fast repeated words stop adding score (Lucene default 1.2).", min=0, max=3, step=0.1, advanced=True),
+                  "b": Param("float", 0.75, "b", "How much long chunks are penalized.", min=0, max=1, step=0.05, advanced=True),
               }),
           ]),
     Stage("hybrid_fusion", "Hybrid Retrieval (Fusion)", "online", BaseHybridFusion,
           "Merge dense and lexical candidates into one list.", default_method=None, optional=True,
           methods=[
-              Method("rrf", "Reciprocal Rank Fusion", ReciprocalRankFusion, False, "score = Σ 1/(k + rank).", parameters={
-                  "rrf_k": Param("integer", 60, "RRF k", "Larger k = top ranks matter less.", min=1, max=200),
-                  "top_k": Param("integer", 5, "Top K", "How many merged chunks to keep.", min=1, max=20),
+              Method("rrf", "Reciprocal Rank Fusion", ReciprocalRankFusion, True, "score = Σ 1/(k + rank).", parameters={
+                  "rrf_k": Param("integer", 60, "RRF k", "Larger k = top ranks matter less.", min=1, max=200, advanced=True),
+                  "top_k": Param("integer", 5, "Top K", "How many merged chunks to keep.", ui="number", min=1, max=1000),
               }),
           ]),
     Stage("metadata_postfiltering", "Metadata Postfiltering", "online", BaseMetadataPostfilter,
           "Remove ineligible candidates AFTER candidate retrieval (cannot bring back chunks that were not retrieved).",
           default_method=None, optional=True, methods=[
-              Method("candidate_postfilter", "Candidate metadata check", CandidateMetadataPostfilter, False, "Check each candidate's document metadata."),
+              Method("candidate_postfilter", "Candidate metadata check", CandidateMetadataPostfilter, True,
+                     "Check each candidate's document metadata; report removals and starvation.", parameters=_filter_params()),
           ]),
     Stage("metadata_enrichment", "Metadata Enrichment", "online", BaseMetadataEnricher,
           "Load chunk text, section, page and document title from MongoDB.", default_method="mongodb_lookup", methods=[
@@ -259,25 +331,47 @@ PIPELINE: list[Stage] = [
           ]),
     Stage("reranking", "Reranking", "online", BaseReranker,
           "Put the most relevant evidence first.", default_method=None, optional=True, methods=[
-              Method("cross_encoder", "Cross-encoder", CrossEncoderReranker, False, "Scores question and chunk together.",
-                     parameters={"top_n": Param("integer", 5, "Keep top N", "Evidence kept after reranking.", min=1, max=20)}),
+              Method("coverage", "Query-term coverage", CoverageReranker, True, "Lesson 5: share of question words found in the chunk.",
+                     parameters={"rerank_depth": _rerank_depth(20)}),
+              Method("cross_encoder", "Cross-encoder", CrossEncoderReranker, True, "ms-marco-MiniLM-L6-v2 scores question and chunk together.",
+                     parameters={
+                         "rerank_depth": _rerank_depth(20),
+                         "batch_size": Param("integer", 32, "Batch size", "Pairs scored per model call.", ui="number", min=1, max=256, advanced=True),
+                         "device": Param("enum", "auto", "Device", "auto = Apple GPU (mps) when available.", ui="select",
+                                         options=("auto", "cpu", "mps"), advanced=True),
+                     }),
+              Method("rankgpt", "RankGPT (LLM listwise)", RankGPTReranker, True, "A local LLM orders the passages; the order is validated.",
+                     parameters={
+                         **_llm_params(160, 512),
+                         "rerank_depth": _rerank_depth(10),
+                         "max_words": Param("integer", 80, "Words per passage", "Each passage is cut to this length in the prompt.",
+                                            ui="number", min=20, max=300, advanced=True),
+                     }),
               Method("metadata_aware", "Metadata-aware", MetadataAwareReranker, False, "Prefer chunks matching the student's situation."),
           ]),
     Stage("evidence_selection", "Evidence Selection", "online", BaseEvidenceSelector,
           "Choose which evidence goes into the prompt.", default_method="top_k", methods=[
-              Method("top_k", "Top-K", TopKSelector, True, "Keep the K best-ranked evidence chunks.", parameters={
+              Method("top_k", "Top-K (baseline)", TopKSelector, True, "Keep the K best-ranked evidence chunks.", parameters={
                   "top_k": Param("integer", 3, "Top K evidence", "How many of the best-ranked chunks go into the prompt.",
                                  min=1, max=20),
               }),
               Method("token_budget", "Token budget", TokenBudgetSelector, True, "Keep evidence in rank order within a token budget.", parameters={
                   "max_evidence_tokens": Param("integer", 2000, "Evidence token budget", "Maximum total tokens of evidence sent to the LLM.",
                                                min=200, max=8000, step=100),
+                  "deduplicate": Param("boolean", False, "Skip duplicate text", "Do not spend budget on a chunk identical to a selected one.",
+                                       ui="toggle", advanced=True),
               }),
           ]),
     Stage("evidence_sufficiency", "Evidence Sufficiency", "online", BaseSufficiencyChecker,
           "Decide whether the evidence is good enough to answer; if not, abstain.", default_method=None, optional=True, methods=[
-              Method("score_threshold", "Score threshold", ScoreThresholdChecker, False, "Best similarity must reach a minimum.",
-                     parameters={"min_score": Param("float", 0.5, "Minimum score", "Lowest acceptable best similarity.", min=0, max=1, step=0.01)}),
+              Method("score_threshold", "Threshold gate", ScoreThresholdChecker, True, "Proceed when the evidence signal reaches a threshold (a heuristic).",
+                     parameters={
+                         "signal": Param("enum", "query_coverage", "Signal", "query_coverage (Lesson 5) or dense_similarity (best cosine).",
+                                         ui="select", options=("query_coverage", "dense_similarity")),
+                         "threshold": Param("float", 0.30, "Threshold", "Proceed when the signal is at least this value.", min=0, max=1, step=0.01),
+                         "on_missing_signal": Param("enum", "abstain", "If the signal is missing", "abstain or proceed.",
+                                                    ui="select", options=("abstain", "proceed"), advanced=True),
+                     }),
           ]),
     Stage("context_construction", "Context Construction", "online", BaseContextBuilder,
           "Write the evidence into the prompt as [E1], [E2], …", default_method="standard_context", methods=[
@@ -288,8 +382,20 @@ PIPELINE: list[Stage] = [
               Method("ollama_chat", "Ollama chat", OllamaGenerator, True, "Streams the answer from a local Ollama model.", parameters={
                   "model": Param("string", "", "Ollama model", "An installed Ollama model. Empty = the default model.", ui="ollama_model"),
                   "temperature": Param("float", 0.2, "Temperature", "Randomness of the answer. It does not add knowledge.", min=0, max=2, step=0.05),
-                  "max_tokens": Param("integer", 1024, "Max generated tokens", "Upper limit on answer length. Thinking models (qwen3) need about 2048.",
-                                      min=64, max=4096, step=64),
+                  "max_tokens": Param("integer", 1024, "Max generated tokens", "Upper limit on answer length.", min=64, max=4096, step=64),
+                  "context_window": Param("integer", 4096, "Context window (tokens)",
+                                          "Prompt + answer must fit. Use the same value for every model in a comparison (Llama 2: 4096).",
+                                          ui="number", min=1024, max=32768, step=512, advanced=True),
+                  "top_p": Param("float", 0.9, "Top P", "Sample only from the most likely tokens covering this probability.", min=0.05, max=1,
+                                 step=0.05, advanced=True),
+                  "top_k": Param("integer", 40, "Top K tokens", "Sample only from this many most likely tokens.", ui="number", min=1, max=200,
+                                 advanced=True),
+                  "seed": Param("integer", -1, "Seed", "-1 = random; a fixed seed makes runs more repeatable.", ui="number", min=-1,
+                                max=2**31 - 1, advanced=True),
+                  "thinking": Param("enum", "off", "Thinking", "off / on (reasoning is never shown) / model_default.", ui="select",
+                                    options=("off", "on", "model_default"), advanced=True),
+                  "timeout_s": Param("integer", 300, "Timeout (s)", "Give up when the model takes longer.", ui="number", min=10, max=3600,
+                                     advanced=True),
               }),
           ]),
 ]
@@ -379,6 +485,15 @@ def _combination_errors(config: dict[str, dict]) -> list[dict]:
         errors.append({"stage_id": "hybrid_fusion", "param": None, "message": "Two retrievers are on: choose a Hybrid Fusion method to merge them"})
     elif fusion and not (dense and lexical):
         errors.append({"stage_id": "hybrid_fusion", "param": None, "message": "Hybrid Fusion needs both dense and lexical retrieval"})
+    if config["query_rewriting"]["method"] == "hyde" and not dense:
+        errors.append({"stage_id": "query_rewriting", "param": None, "message": "HyDE only changes dense retrieval: switch on Dense Retrieval"})
+    gate = config["evidence_sufficiency"]
+    if gate["method"] and gate["params"].get("signal") == "dense_similarity" and not dense:
+        errors.append({"stage_id": "evidence_sufficiency", "param": "signal", "message": "The dense_similarity signal needs Dense Retrieval"})
+    for stage_id in ("metadata_prefiltering", "metadata_postfiltering"):
+        if config[stage_id]["method"] and not config["query_understanding"]["method"]:
+            errors.append({"stage_id": stage_id, "param": None,
+                           "message": f"{STAGES[stage_id].name} needs criteria: switch on Query Understanding (e.g. Stated criteria)"})
     return errors
 
 
@@ -414,7 +529,7 @@ def registry_json() -> dict[str, Any]:
                  "class_name": m.cls.__name__, "file": inspect.getfile(m.cls).split("app/rag/blocks/")[-1],
                  "parameters": {name: {"type": p.type, "default": p.default, "label": p.label, "description": p.description,
                                        "ui": p.ui, "min": p.min, "max": p.max, "step": p.step,
-                                       "options": list(p.options) if p.options else None, "scope": p.scope}
+                                       "options": list(p.options) if p.options else None, "scope": p.scope, "advanced": p.advanced}
                                 for name, p in m.parameters.items()}}
                 for m in stage.methods
             ],

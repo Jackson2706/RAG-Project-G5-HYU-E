@@ -39,23 +39,23 @@ def test_blocks_follow_the_course_pipeline():
 
 def test_defaults_are_valid_and_planned_stages_are_off():
     config = validate_config({})
-    assert config["dense_retrieval"] == {"method": "qdrant_cosine", "params": {"top_k": 5}}
+    assert config["dense_retrieval"] == {"method": "qdrant_cosine", "params": {"top_k": 5, "search_mode": "exact", "hnsw_ef": 100}}
     for stage_id in ("metadata_prefiltering", "metadata_postfiltering", "reranking"):
         assert config[stage_id] == {"method": None, "params": {}}
     assert config["chunking"]["params"] == {"chunk_size": 256, "chunk_overlap": 32}
 
 
 def test_planned_methods_cannot_be_selected_or_created(services):
-    assert "not implemented yet" in errors_of({"metadata_prefiltering": {"method": "qdrant_prefilter"}})
-    assert "not implemented yet" in errors_of({"metadata_postfiltering": {"method": "candidate_postfilter"}})
+    assert "not implemented yet" in errors_of({"chunking": {"method": "semantic"}})
+    assert "not implemented yet" in errors_of({"reranking": {"method": "metadata_aware"}})
     with pytest.raises(NotImplementedError):
-        create_block("metadata_prefiltering", "qdrant_prefilter", {}, services)
+        create_block("chunking", "semantic", {}, services)
     with pytest.raises(NotImplementedError):
-        create_block("metadata_postfiltering", "candidate_postfilter", {}, services)
+        create_block("reranking", "metadata_aware", {}, services)
 
 
 @pytest.mark.parametrize("params, message", [
-    ({"top_k": 0}, "at least 1"), ({"top_k": 99}, "at most 20"), ({"top_k": 2.5}, "whole number"),
+    ({"top_k": 0}, "at least 1"), ({"top_k": 1001}, "at most 1000"), ({"top_k": 2.5}, "whole number"),
     ({"top_k": "five"}, "number"), ({"topk": 5}, "no parameter 'topk'"),
 ])  # fmt: skip
 def test_hyperparameters_are_validated(params, message):
@@ -67,6 +67,11 @@ def test_combination_rules():
     assert "at least one retriever" in errors_of({"dense_retrieval": {"method": None}})
     assert "needs a method" in errors_of({"generation": {"method": None}})
     assert "Unknown stage" in errors_of({"citation_verification": {}})
+    assert "HyDE only changes dense retrieval" in errors_of({"query_rewriting": {"method": "hyde"}, "dense_retrieval": {"method": None},
+                                                             "lexical_retrieval": {"method": "bm25"}})
+    assert "needs criteria" in errors_of({"metadata_prefiltering": {"method": "qdrant_prefilter"}})
+    assert "needs Dense Retrieval" in errors_of({"evidence_sufficiency": {"method": "score_threshold", "params": {"signal": "dense_similarity"}},
+                                                 "dense_retrieval": {"method": None}, "lexical_retrieval": {"method": "bm25"}})
 
 
 def test_registry_json_is_serializable_and_marks_status():

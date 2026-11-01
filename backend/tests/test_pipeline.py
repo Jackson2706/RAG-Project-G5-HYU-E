@@ -4,11 +4,9 @@ import pytest
 from qdrant_client import models
 
 from app.rag.blocks.retrieval.dense_retrieval.base import BaseDenseRetriever
-from app.rag.blocks.metadata_filtering.metadata_postfiltering.base import BaseMetadataPostfilter
-from app.rag.blocks.metadata_filtering.metadata_prefiltering.base import BaseMetadataPrefilter
 from app.rag.pipeline import run_ingestion, run_rag
 from app.rag.registry import STAGES, Method, Param, validate_config
-from app.rag.schemas import INSUFFICIENT_ANSWER, Candidate, PostfilterResult, RemovedCandidate, RetrievalFilter, RetrievalResult
+from app.rag.schemas import INSUFFICIENT_ANSWER, Candidate, RetrievalResult
 
 pytestmark = pytest.mark.anyio
 QUESTION = "What documents do I need for the need-based scholarship?"
@@ -76,25 +74,25 @@ async def test_trace_shows_real_inputs_outputs_methods_and_params(ingested, serv
     ran = [r["stage_id"] for r in trace["stages"] if r["status"] == "completed"]
     assert ran == ["dense_retrieval", "metadata_enrichment", "evidence_selection", "context_construction", "generation"]
     dense = s["dense_retrieval"]
-    assert dense["method_id"] == "qdrant_cosine" and dense["params"] == {"top_k": 2} and dense["input"]["query"] == QUESTION
+    assert dense["method_id"] == "qdrant_cosine" and dense["params"]["top_k"] == 2 and dense["input"]["queries"] == [QUESTION]
     assert len(dense["output"]["candidates"]) == 2 and dense["duration_ms"] is not None
     assert [e["chunk_id"] for e in s["metadata_enrichment"]["output"]] == [c["chunk_id"] for c in dense["output"]["candidates"]]
     assert s["generation"]["method_id"] == "ollama_chat" and s["generation"]["output"]["model"] == "test-model"
 
 
-async def test_planned_stages_are_skipped_without_fake_output(ingested, services):
+async def test_switched_off_stages_are_skipped_without_fake_output(ingested, services):
     trace = await run_rag(QUESTION, validate_config({}), services)
     s = stages_of(trace)
     for stage_id in ("query_understanding", "query_rewriting", "metadata_prefiltering", "lexical_retrieval", "hybrid_fusion",
                      "metadata_postfiltering", "reranking", "evidence_sufficiency"):  # fmt: skip
         assert s[stage_id]["status"] == "skipped" and s[stage_id]["output"] is None and s[stage_id]["method_id"] is None
-        assert s[stage_id]["summary"] == "Not implemented yet."
+        assert s[stage_id]["summary"] == "Switched off in the configuration."
 
 
 class FirstChunkRetriever(BaseDenseRetriever):
     """A test method: always returns the first stored chunk."""
 
-    async def retrieve(self, query, prefilter=None):
+    async def retrieve(self, query, prefilter=None, embedding_text=None):
         chunk = self.services.db.chunks.find_one(sort=[("chunk_id", 1)])
         return RetrievalResult(candidates=[Candidate(rank=1, chunk_id=chunk["chunk_id"], doc_id=chunk["doc_id"], score=1.0)], details={"note": "test"})
 
@@ -115,34 +113,17 @@ def one_document(db) -> str:
     return db.documents.find_one({"source_uri": {"$regex": "erica_housing"}})["doc_id"]
 
 
-class OnlyOneDocumentPrefilter(BaseMetadataPrefilter):
-    """Test prefilter: an eligibility predicate on the doc_id payload field."""
-
-    async def build_filter(self, criteria):
-        return RetrievalFilter(conditions={"doc_id": [self.params["doc_id"]]}, include_unknown=False)
-
-
-class DropOneDocumentPostfilter(BaseMetadataPostfilter):
-    """Test postfilter: removes candidates of one document from the retrieved list."""
-
-    async def filter_candidates(self, candidates, criteria):
-        drop = self.params["doc_id"]
-        return PostfilterResult(kept=[c for c in candidates if c.doc_id != drop],
-                                removed=[RemovedCandidate(chunk_id=c.chunk_id, reason="test: ineligible document") for c in candidates if c.doc_id == drop])  # fmt: skip
-
-
-def doc_param(default: str) -> dict:
-    return {"doc_id": Param("string", default, "Document", "test", ui="text")}
+ERICA_ONLY = {"query_understanding": {"method": "stated_criteria", "params": {"campus": "ERICA"}}}
+STRICT = {"include_unknown": False, "include_campus_wide": False}  # only documents that say campus: ERICA
 
 
 async def test_prefiltering_is_a_predicate_applied_inside_retrieval(ingested, db, services):
     erica = one_document(db)
-    with temporarily_registered("metadata_prefiltering", Method("only_one_doc", "Only one doc", OnlyOneDocumentPrefilter, True, "test", doc_param(erica))):
-        trace = await run_rag(QUESTION, validate_config({"metadata_prefiltering": {"method": "only_one_doc"},
-                                                         "dense_retrieval": {"method": "qdrant_cosine", "params": {"top_k": 3}}}), services)  # fmt: skip
+    trace = await run_rag(QUESTION, validate_config({**ERICA_ONLY, "metadata_prefiltering": {"method": "qdrant_prefilter", "params": STRICT},
+                                                     "dense_retrieval": {"method": "qdrant_cosine", "params": {"top_k": 3}}}), services)  # fmt: skip
     s = stages_of(trace)
     predicate = s["metadata_prefiltering"]["output"]
-    assert predicate == {"conditions": {"doc_id": [erica]}, "include_unknown": False}
+    assert predicate == {"conditions": {"campus": ["erica"]}, "include_unknown": False}
     dense = s["dense_retrieval"]
     assert dense["input"]["prefilter"] == predicate and dense["output"]["applied_filter"] == predicate  # retrieval reports the predicate it used
     # The question is about scholarships, yet every candidate is from the eligible document: Qdrant searched only that subset,
@@ -151,19 +132,26 @@ async def test_prefiltering_is_a_predicate_applied_inside_retrieval(ingested, db
     assert s["metadata_postfiltering"]["status"] == "skipped"  # enabled independently
 
 
+async def test_bm25_applies_the_same_prefilter_while_ranking(ingested, db, services):
+    erica = one_document(db)
+    trace = await run_rag(QUESTION, validate_config({**ERICA_ONLY, "metadata_prefiltering": {"method": "qdrant_prefilter", "params": STRICT},
+                                                     "dense_retrieval": {"method": None}, "lexical_retrieval": {"method": "bm25"}}), services)  # fmt: skip
+    lexical = stages_of(trace)["lexical_retrieval"]["output"]
+    assert lexical["candidates"] and {c["doc_id"] for c in lexical["candidates"]} == {erica}
+
+
 async def test_postfiltering_removes_from_the_retrieved_list_and_can_starve(ingested, db, services):
-    plain = await run_rag(QUESTION, validate_config({"dense_retrieval": {"method": "qdrant_cosine", "params": {"top_k": 3}}}), services)
-    retrieved = stages_of(plain)["dense_retrieval"]["output"]["candidates"]
-    top_doc = retrieved[0]["doc_id"]
-    with temporarily_registered("metadata_postfiltering", Method("drop_doc", "Drop doc", DropOneDocumentPostfilter, True, "test", doc_param(top_doc))):
-        trace = await run_rag(QUESTION, validate_config({"metadata_postfiltering": {"method": "drop_doc"},
-                                                         "dense_retrieval": {"method": "qdrant_cosine", "params": {"top_k": 3}}}), services)  # fmt: skip
+    erica = one_document(db)
+    trace = await run_rag(QUESTION, validate_config({**ERICA_ONLY, "metadata_postfiltering": {"method": "candidate_postfilter", "params": STRICT},
+                                                     "dense_retrieval": {"method": "qdrant_cosine", "params": {"top_k": 3}}}), services)  # fmt: skip
     s = stages_of(trace)
     post = s["metadata_postfiltering"]
     assert post["input"]["candidates"] == s["dense_retrieval"]["output"]["candidates"]  # it received the retrieved candidates
     kept_ids = [c["chunk_id"] for c in post["output"]["kept"]]
-    assert all(c["doc_id"] != top_doc for c in post["output"]["kept"])
+    assert all(c["doc_id"] == erica for c in post["output"]["kept"])
+    assert all("campus=" in r["reason"] for r in post["output"]["removed"])
     assert len(kept_ids) + len(post["output"]["removed"]) == 3  # nothing new was searched: fewer than top_k may remain
+    assert post["output"]["details"]["starved"] == (len(kept_ids) < 3)
     assert [e["chunk_id"] for e in s["metadata_enrichment"]["output"]] == kept_ids
     assert s["metadata_prefiltering"]["status"] == "skipped"
 
@@ -171,7 +159,7 @@ async def test_postfiltering_removes_from_the_retrieved_list_and_can_starve(inge
 async def test_disabled_filtering_does_not_change_dense_retrieval(ingested, services):
     a = await run_rag(QUESTION, validate_config({}), services)
     b = await run_rag(QUESTION, validate_config({"metadata_prefiltering": {"method": None}, "metadata_postfiltering": {"method": None}}), services)
-    assert stages_of(a)["dense_retrieval"]["output"] == stages_of(b)["dense_retrieval"]["output"]
+    assert stages_of(a)["dense_retrieval"]["output"]["candidates"] == stages_of(b)["dense_retrieval"]["output"]["candidates"]
     assert stages_of(a)["dense_retrieval"]["input"]["prefilter"] is None
 
 

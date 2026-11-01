@@ -1,4 +1,4 @@
-"""PLANNED — build a predicate on Qdrant payload fields (campus, audience, …)."""
+"""IMPLEMENTED — turn the metadata criteria into a predicate that retrieval applies DURING the search."""
 
 from __future__ import annotations
 
@@ -7,12 +7,14 @@ from app.rag.schemas import FilterCriteria, RetrievalFilter
 
 
 class QdrantMetadataPrefilter(BaseMetadataPrefilter):
+    """Hyperparameters:
+    include_unknown      a document that does not state the field (e.g. no campus) stays eligible
+                         (unknown ≠ ineligible). Off = such documents are excluded.
+    include_campus_wide  a document for every campus (campus: ALL) is eligible for any campus.
+
+    Dense retrieval sends the predicate to Qdrant as a payload filter; BM25 applies the same predicate
+    while ranking. Only eligible chunks are ranked, so Top K is filled with eligible chunks.
+    """
+
     async def build_filter(self, criteria: FilterCriteria) -> RetrievalFilter | None:
-        # TODO:
-        # 1. Make sure the fields exist in the Qdrant payload: add them in
-        #    ingestion/vector_indexing/qdrant_indexer.py (from document metadata), then re-index.
-        # 2. For each condition in criteria.conditions(), allow the value AND university-wide documents,
-        #    e.g. {"campus": [criteria.campus, "ALL"]}.
-        # 3. Return RetrievalFilter(conditions=..., include_unknown=True), or None if criteria is empty.
-        #    QdrantDenseRetriever already applies RetrievalFilter inside the Qdrant search.
-        raise NotImplementedError("Metadata prefiltering is not implemented yet.")
+        return criteria.to_filter(self.params["include_unknown"], "all" if self.params["include_campus_wide"] else None)

@@ -1,0 +1,41 @@
+# ONLINE baselines (R0–R14) on BEIR: the index is fixed (O0 = B0's offline settings, exact search),
+# the queries are fixed, only the online methods change. Retrieval-only: no answer is generated.
+datasets: [scifact, nfcorpus, arguana]
+split: test
+index: o0
+depth:
+  documents: 100     # documents scored
+  chunks: 600        # Protocol B: candidates per retriever (and the fused list length)
+  units_protocol_a: 100
+  rerank: 100        # reranking depth (cross-encoder, coverage) in retrieval units
+# LLM-based methods (rewriting, multi-query, HyDE, RankGPT, full system) run on the first N test
+# queries (sorted by query ID) of each dataset; B0 is scored on the same subset for paired comparisons.
+llm_query_limit: 100
+auxiliary_llm: "qwen3.5:4b"   # ONE auxiliary model for every LLM-based retrieval method (thinking off)
+experiments:
+  - {id: B0_BASIC_DENSE_RAG, preset: B0_BASIC_DENSE_RAG, protocols: [A, B]}
+  - {id: R0_DENSE, same_as: B0_BASIC_DENSE_RAG}   # identical configuration: results are shared, not recomputed
+  - {id: R1_BM25, preset: R1_BM25, protocols: [A, B]}
+  - {id: R2_HYBRID_RRF, preset: R2_HYBRID_RRF, protocols: [A, B]}            # equal per-branch depth
+  - {id: R2_HYBRID_RRF_MATCHED_BUDGET, preset: R2_HYBRID_RRF, protocols: [B], # half depth per branch: same total as B0
+     branch_depth_factor: 0.5}
+  - {id: R3_COVERAGE_RERANK, preset: R3_COVERAGE_RERANK, protocols: [A, B]}
+  - {id: R4_CROSS_ENCODER, preset: R4_CROSS_ENCODER, protocols: [A, B]}
+  - {id: R5_HYBRID_CROSS_ENCODER, preset: R5_HYBRID_CROSS_ENCODER, protocols: [A, B]}
+  - {id: R6_QUERY_REWRITING, preset: R6_QUERY_REWRITING, protocols: [B], llm: true}
+  - {id: R7_MULTI_QUERY, preset: R7_MULTI_QUERY, protocols: [B], llm: true}
+  - {id: R8_HYDE, preset: R8_HYDE, protocols: [B], llm: true}
+  - {id: R9_PREFILTERING, not_applicable: "BEIR has no eligibility metadata; evaluated on the HYU metadata fixture instead"}
+  - {id: R10_POSTFILTERING, not_applicable: "BEIR has no eligibility metadata; evaluated on the HYU metadata fixture instead"}
+  - {id: R11_TOKEN_BUDGET_SELECTION, preset: R11_TOKEN_BUDGET_SELECTION, protocols: [B]}
+  - {id: R12_SUFFICIENCY_GATE, preset: R12_SUFFICIENCY_GATE, protocols: [B]}  # BEIR: decision rates only (no sufficiency labels)
+  - {id: R13_RANKGPT, preset: R13_RANKGPT, protocols: [B], llm: true, overrides: {reranking: {params: {rerank_depth: 20}}}}
+  - {id: R14_FULL_ADVANCED, preset: R14_FULL_ADVANCED, protocols: [B], llm: true}
+  - {id: PROPOSED_APPROACH, not_applicable: "Reserved: the team has not defined its proposed approach yet"}
+# Controlled fixture on the 5 synthetic HYU sample documents (not a benchmark: labels written by the
+# project authors). Used for prefiltering vs postfiltering and for the sufficiency gate.
+fixture:
+  index: hyu_samples
+  metadata_queries: evaluation/fixtures/hyu_metadata_queries.jsonl
+  gate_questions: data/eval/sample_questions.jsonl
+  candidate_cutoff: 2          # the same Top K for R0, R9 and R10, small enough to show starvation

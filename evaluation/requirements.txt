@@ -1,0 +1,6 @@
+# Extra packages for the benchmark runner. Install into the existing Conda environment only:
+#   conda activate RAG && python -m pip install -r evaluation/requirements.txt
+# (backend/requirements.txt must be installed too.)
+pyyaml==6.0.3
+# Optional: the official TREC evaluator, used ONLY by the tests to cross-check our metric code.
+pytrec-eval-terrier==0.5.11

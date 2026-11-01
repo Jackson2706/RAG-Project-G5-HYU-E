@@ -30,6 +30,8 @@ class Settings(BaseSettings):
     embedding_revision: str | None = "5c38ec7c405ec4b44b94cc5a9bb96e735b38267a"
     # BGE expects this prefix on search questions (not on documents).
     query_instruction: str = "Represent this sentence for searching relevant passages: "
+    # "cpu", "mps" (Apple GPU) or "auto" (= mps when available). The app uses cpu; the benchmark runner uses auto.
+    embedding_device: str = "cpu"
 
     # Ollama
     ollama_base_url: str = "http://127.0.0.1:11434"

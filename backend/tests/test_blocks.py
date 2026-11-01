@@ -13,7 +13,7 @@ from app.rag.blocks.evidence.evidence_selection.token_budget_selector import Tok
 from app.rag.blocks.evidence.evidence_selection.top_k_selector import TopKSelector
 from app.rag.blocks.pipeline_block import PipelineBlock
 from app.rag.blocks.evidence.reranking.base import BaseReranker
-from app.rag.blocks.evidence.reranking.cross_encoder import CrossEncoderReranker
+from app.rag.blocks.ingestion.chunking.semantic_chunker import SemanticChunker
 from app.rag.blocks.retrieval.dense_retrieval.base import BaseDenseRetriever
 from app.rag.registry import PIPELINE
 from app.rag.schemas import Evidence, ParsedDocument, RetrievalResult, Section, make_chunk_id, make_doc_id
@@ -87,7 +87,7 @@ async def test_a_correct_subclass_works(services):
 
 async def test_skeletons_refuse_to_run(services):
     with pytest.raises(NotImplementedError):
-        await CrossEncoderReranker({}, services).rerank("q", [])
+        SemanticChunker({}, services).chunk(None)
 
 
 # ------------------------------------------------------------------ loading & parsing
@@ -173,9 +173,9 @@ async def test_top_k_selector_keeps_the_k_best_in_order(services):
 
 
 async def test_token_budget_selector_stops_before_the_budget(services):
-    selector = TokenBudgetSelector({"max_evidence_tokens": 250}, services)
+    selector = TokenBudgetSelector({"max_evidence_tokens": 250, "deduplicate": False}, services)
     assert [e.chunk_id for e in await selector.select(_evidence(5))] == ["c1", "c2"]
-    assert len(await TokenBudgetSelector({"max_evidence_tokens": 50}, services).select(_evidence(3))) == 1  # first is always kept
+    assert len(await TokenBudgetSelector({"max_evidence_tokens": 50, "deduplicate": False}, services).select(_evidence(3))) == 1  # first is always kept
 
 
 def test_ids_are_stable():

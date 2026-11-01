@@ -14,6 +14,7 @@ export interface ParamDef {
   step: number | null;
   options: string[] | null;
   scope: "runtime" | "ingestion" | "index";
+  advanced: boolean; // shown under "Advanced settings"
 }
 
 /** One algorithm for a block (registry.py → Method). */
@@ -64,6 +65,7 @@ export interface StageRecord {
   summary: string;
   duration_ms: number | null;
   error: string | null;
+  details?: unknown; // extra facts a block reported (e.g. an LLM's raw output and how it was checked)
 }
 
 /** A source shown under the answer (source attribution, not claim verification). */
@@ -116,6 +118,30 @@ export interface Health {
   qdrant: { ok: boolean; error?: string };
   ollama: { ok: boolean; error?: string; models?: number };
   index: IndexInfo | null;
+}
+
+/** A named experiment configuration (backend/app/rag/presets.py), validated by the registry. */
+export interface Preset {
+  id: string; // e.g. "R2_HYBRID_RRF"
+  kind: "baseline" | "offline" | "online" | "proposed";
+  name: string;
+  description: string;
+  enabled: boolean;
+  config: StageChoices | null; // complete validated configuration (null if disabled or invalid)
+  errors: ConfigError[];
+}
+
+/** One index revision (GET /api/indexes): the app's index or a benchmark index. */
+export interface IndexRevision {
+  index_id: string; // "default" = the app's own index
+  manifest: {
+    built_at?: string;
+    corpus?: { dataset?: string; source?: unknown; smoke_slice?: boolean };
+    config?: StageChoices; // the offline stages it was built with
+    embedding_contract?: { method?: string; model?: string; dimension?: number };
+    vector_index?: { hnsw_built?: boolean };
+  } | null;
+  info: IndexInfo;
 }
 
 export interface OllamaModel {

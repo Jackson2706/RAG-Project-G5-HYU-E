@@ -16,6 +16,13 @@ export function StageConfigCard({ stage, config, system }: { stage: StageDef; co
   const errors = config.errors.filter((e) => e.stage_id === stage.stage_id);
   const stageError = errors.find((e) => !e.param);
   const params = Object.entries(method?.parameters ?? {});
+  const control = ([name, def]: (typeof params)[number]) => (
+    <ParamControl key={name} id={`${stage.stage_id}-${name}`} name={name} def={def} value={choice.params[name] ?? def.default}
+                  error={errors.find((e) => e.param === name)?.message} system={system}
+                  onChange={(v) => config.setParam(stage.stage_id, name, v)} />
+  );
+  const advanced = params.filter(([, d]) => d.advanced);
+  const advancedError = advanced.some(([name]) => errors.some((e) => e.param === name));
 
   return (
     <details className={cn("group rounded-xl border bg-card", errors.length ? "border-danger/60" : "border-border")} data-testid={`stage-config-${stage.stage_id}`}>
@@ -49,11 +56,16 @@ export function StageConfigCard({ stage, config, system }: { stage: StageDef; co
           )}
         </div>
         {stageError && <p role="alert" className="rounded-md bg-danger/10 px-2 py-1.5 text-xs text-danger">{stageError.message}</p>}
-        {params.map(([name, def]) => (
-          <ParamControl key={name} id={`${stage.stage_id}-${name}`} name={name} def={def} value={choice.params[name] ?? def.default}
-                        error={errors.find((e) => e.param === name)?.message} system={system}
-                        onChange={(v) => config.setParam(stage.stage_id, name, v)} />
-        ))}
+        {params.filter(([, d]) => !d.advanced).map(control)}
+        {advanced.length > 0 && (
+          <details className="group/adv rounded-md border border-border" open={advancedError} data-testid={`advanced-${stage.stage_id}`}>
+            <summary className="flex cursor-pointer list-none items-center gap-1 px-2 py-1.5 text-xs font-medium [&::-webkit-details-marker]:hidden">
+              <ChevronRight className="h-3.5 w-3.5 text-muted-foreground transition-transform group-open/adv:rotate-90" aria-hidden />
+              Advanced settings ({advanced.length})
+            </summary>
+            <div className="space-y-3 border-t border-border px-2 py-2">{advanced.map(control)}</div>
+          </details>
+        )}
         {method && params.length === 0 && <p className="text-[11px] text-muted-foreground">This method has no settings.</p>}
         <button type="button" className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground" onClick={() => config.resetStage(stage)}>
           <RotateCcw className="h-3 w-3" /> Reset stage to defaults

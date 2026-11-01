@@ -44,6 +44,7 @@ class Param:            # one hyperparameter
     min / max / step     # allowed range (numbers)
     options              # allowed values (enum)
     scope: "runtime" | "ingestion" | "index" = "runtime"
+    advanced: bool = False   # True = shown under "Advanced settings" (folded) in the UI
 
 @dataclass(frozen=True)
 class Method:           # one algorithm (= one file in the block's folder)
@@ -83,20 +84,26 @@ Stage("dense_retrieval", "Dense Retrieval", "online", BaseDenseRetriever,
       "Find the chunks whose meaning is closest to the question.", default_method="qdrant_cosine", optional=True,
       methods=[
           Method("qdrant_cosine", "Qdrant cosine", QdrantDenseRetriever, True, "Embed the question and find the nearest chunk vectors.", parameters={
-              "top_k": Param("integer", 5, "Top K", "How many of the most similar chunks to retrieve.", min=1, max=20),
+              "top_k": Param("integer", 5, "Top K", "How many of the most similar chunks to retrieve (benchmarks use up to 1000).",
+                             ui="number", min=1, max=1000),
+              "search_mode": Param("enum", "exact", "Search mode", "exact = compare with every vector; hnsw = approximate HNSW graph search.",
+                                   ui="select", options=("exact", "hnsw"), advanced=True),
+              "hnsw_ef": Param("integer", 100, "HNSW ef", "Search breadth for hnsw mode: larger = closer to exact, slower.",
+                               ui="number", min=4, max=1024, advanced=True),
           }),
       ]),
 ```
 
-A planned block, Metadata Prefiltering:
+A planned method next to working ones (Chunking), and a shared parameter set:
 
 ```python
-Stage("metadata_prefiltering", "Metadata Prefiltering", "online", BaseMetadataPrefilter,
-      "Restrict candidate retrieval to eligible documents: the predicate is applied DURING the search.",
-      default_method=None, optional=True, methods=[
-          Method("qdrant_prefilter", "Qdrant payload filter", QdrantMetadataPrefilter, False, "Eligibility predicate on Qdrant payload fields."),
-      ]),
+Method("recursive", "Recursive splitting", RecursiveChunker, True, "...", parameters=_chunk_params()),
+Method("semantic", "Semantic chunking", SemanticChunker, False, "Cut where the topic changes."),
 ```
+
+Small helper functions (`_chunk_params()`, `_llm_params()`, `_filter_params()`, `_rerank_depth()`)
+return the parameter definitions several methods share, so e.g. prefiltering and postfiltering have
+exactly the same policy settings.
 
 The order of `PIPELINE` is the order the UI shows: offline blocks first, then online. The order of
 execution is written out in `run_rag()`.
@@ -118,33 +125,102 @@ execution is written out in `run_rag()`.
 |---|---|---|---|
 | `runtime` | used while answering | Top K, temperature | the next question |
 | `ingestion` | used while indexing | chunk size, chunk overlap | after **re-indexing** |
-| `index` | changes the stored vectors | (none yet; e.g. another embedding model) | needs a fresh index |
+| `index` | changes how vectors are stored/indexed | HNSW `m`, `ef_construct`, indexing threshold | needs a fresh index |
 
 Non-runtime parameters get a yellow **re-index needed** badge. The Configuration tab also warns when
 your chunk settings differ from how the current index was built (`index_info()` in `database.py`).
 Stored vectors are never changed silently.
 
-The working hyperparameters today:
+Every implemented hyperparameter (generated from `registry.py`):
 
-| Block | Method | Parameter | Default | Range | Scope |
-|---|---|---|---|---|---|
-| Chunking | `section_tokens` | `chunk_size` | 256 | 64–512 tokens | ingestion |
-| Chunking | `section_tokens` | `chunk_overlap` | 32 | 0–128 tokens | ingestion |
-| Dense Retrieval | `qdrant_cosine` | `top_k` | 5 | 1–20 | runtime |
-| Evidence Selection | `top_k` | `top_k` | 3 | 1–20 | runtime |
-| Evidence Selection | `token_budget` | `max_evidence_tokens` | 2000 | 200–8000 | runtime |
-| Generation | `ollama_chat` | `model` | "" (default model) | installed models | runtime |
-| Generation | `ollama_chat` | `temperature` | 0.2 | 0–2 | runtime |
-| Generation | `ollama_chat` | `max_tokens` | 1024 | 64–4096 | runtime |
+| Block | Method | Parameter | Default | Range / options | Scope | Basic/Advanced |
+|---|---|---|---|---|---|---|
+| Chunking | `section_tokens` | `chunk_size` | 256 | 64–512 | ingestion | basic |
+| Chunking | `section_tokens` | `chunk_overlap` | 32 | 0–128 | ingestion | basic |
+| Chunking | `fixed_tokens` | `chunk_size` | 256 | 64–512 | ingestion | basic |
+| Chunking | `fixed_tokens` | `chunk_overlap` | 32 | 0–128 | ingestion | basic |
+| Chunking | `recursive` | `chunk_size` | 256 | 64–512 | ingestion | basic |
+| Chunking | `recursive` | `chunk_overlap` | 32 | 0–128 | ingestion | basic |
+| Vector Indexing | `qdrant_mongodb` | `hnsw_m` | 16 | 4–64 | index | advanced |
+| Vector Indexing | `qdrant_mongodb` | `hnsw_ef_construct` | 100 | 16–512 | index | advanced |
+| Vector Indexing | `qdrant_mongodb` | `indexing_threshold_kb` | 20000 | 1–1e+06 | index | advanced |
+| Query Understanding | `stated_criteria` | `campus` | "" | text | runtime | basic |
+| Query Understanding | `stated_criteria` | `audience` | "" | text | runtime | basic |
+| Query Understanding | `stated_criteria` | `academic_year` | "" | text | runtime | basic |
+| Query Understanding | `stated_criteria` | `document_type` | "" | text | runtime | basic |
+| Query Rewriting | `llm_rewrite` | `model` | "" | installed Ollama models | runtime | basic |
+| Query Rewriting | `llm_rewrite` | `temperature` | 0.0 | 0–1 | runtime | advanced |
+| Query Rewriting | `llm_rewrite` | `max_tokens` | 64 | 16–1024 | runtime | advanced |
+| Query Rewriting | `multi_query` | `model` | "" | installed Ollama models | runtime | basic |
+| Query Rewriting | `multi_query` | `temperature` | 0.0 | 0–1 | runtime | advanced |
+| Query Rewriting | `multi_query` | `max_tokens` | 192 | 16–1024 | runtime | advanced |
+| Query Rewriting | `multi_query` | `num_queries` | 3 | 2–6 | runtime | basic |
+| Query Rewriting | `multi_query` | `include_original` | true | text | runtime | basic |
+| Query Rewriting | `multi_query` | `rrf_k` | 60 | 1–200 | runtime | advanced |
+| Query Rewriting | `hyde` | `model` | "" | installed Ollama models | runtime | basic |
+| Query Rewriting | `hyde` | `temperature` | 0.0 | 0–1 | runtime | advanced |
+| Query Rewriting | `hyde` | `max_tokens` | 160 | 16–1024 | runtime | advanced |
+| Metadata Prefiltering | `qdrant_prefilter` | `include_unknown` | true | text | runtime | basic |
+| Metadata Prefiltering | `qdrant_prefilter` | `include_campus_wide` | true | text | runtime | basic |
+| Dense Retrieval | `qdrant_cosine` | `top_k` | 5 | 1–1000 | runtime | basic |
+| Dense Retrieval | `qdrant_cosine` | `search_mode` | exact | exact / hnsw | runtime | advanced |
+| Dense Retrieval | `qdrant_cosine` | `hnsw_ef` | 100 | 4–1024 | runtime | advanced |
+| Lexical Retrieval | `bm25` | `top_k` | 5 | 1–1000 | runtime | basic |
+| Lexical Retrieval | `bm25` | `k1` | 1.2 | 0–3 | runtime | advanced |
+| Lexical Retrieval | `bm25` | `b` | 0.75 | 0–1 | runtime | advanced |
+| Hybrid Retrieval (Fusion) | `rrf` | `rrf_k` | 60 | 1–200 | runtime | advanced |
+| Hybrid Retrieval (Fusion) | `rrf` | `top_k` | 5 | 1–1000 | runtime | basic |
+| Metadata Postfiltering | `candidate_postfilter` | `include_unknown` | true | text | runtime | basic |
+| Metadata Postfiltering | `candidate_postfilter` | `include_campus_wide` | true | text | runtime | basic |
+| Reranking | `coverage` | `rerank_depth` | 20 | 1–1000 | runtime | basic |
+| Reranking | `cross_encoder` | `rerank_depth` | 20 | 1–1000 | runtime | basic |
+| Reranking | `cross_encoder` | `batch_size` | 32 | 1–256 | runtime | advanced |
+| Reranking | `cross_encoder` | `device` | auto | auto / cpu / mps | runtime | advanced |
+| Reranking | `rankgpt` | `model` | "" | installed Ollama models | runtime | basic |
+| Reranking | `rankgpt` | `temperature` | 0.0 | 0–1 | runtime | advanced |
+| Reranking | `rankgpt` | `max_tokens` | 160 | 16–512 | runtime | advanced |
+| Reranking | `rankgpt` | `rerank_depth` | 10 | 1–1000 | runtime | basic |
+| Reranking | `rankgpt` | `max_words` | 80 | 20–300 | runtime | advanced |
+| Evidence Selection | `top_k` | `top_k` | 3 | 1–20 | runtime | basic |
+| Evidence Selection | `token_budget` | `max_evidence_tokens` | 2000 | 200–8000 | runtime | basic |
+| Evidence Selection | `token_budget` | `deduplicate` | false | text | runtime | advanced |
+| Evidence Sufficiency | `score_threshold` | `signal` | query_coverage | query_coverage / dense_similarity | runtime | basic |
+| Evidence Sufficiency | `score_threshold` | `threshold` | 0.3 | 0–1 | runtime | basic |
+| Evidence Sufficiency | `score_threshold` | `on_missing_signal` | abstain | abstain / proceed | runtime | advanced |
+| Generation | `ollama_chat` | `model` | "" | installed Ollama models | runtime | basic |
+| Generation | `ollama_chat` | `temperature` | 0.2 | 0–2 | runtime | basic |
+| Generation | `ollama_chat` | `max_tokens` | 1024 | 64–4096 | runtime | basic |
+| Generation | `ollama_chat` | `context_window` | 4096 | 1024–32768 | runtime | advanced |
+| Generation | `ollama_chat` | `top_p` | 0.9 | 0.05–1 | runtime | advanced |
+| Generation | `ollama_chat` | `top_k` | 40 | 1–200 | runtime | advanced |
+| Generation | `ollama_chat` | `seed` | -1 | -1–2.14748e+09 | runtime | advanced |
+| Generation | `ollama_chat` | `thinking` | off | off / on / model_default | runtime | advanced |
+| Generation | `ollama_chat` | `timeout_s` | 300 | 10–3600 | runtime | advanced |
 
-Planned methods declare their expected parameters (e.g. BM25's `k1` and `b`) so you can see the
-extension point. Their controls stay hidden until the method is implemented.
+Planned methods may declare their expected parameters too; their controls stay hidden until the
+method is implemented. *Advanced* parameters are folded under "Advanced settings" in each card.
 
-**Metadata criteria are not UI settings today.** The `FilterCriteria` schema (campus, audience,
-academic year, document type, effective date) is filled by Query Understanding from what the
-question states. If your prefilter or postfilter needs its own controls (e.g. "include
-university-wide documents"), register them as `Param`s of that method. They appear only once it is
-implemented.
+**Metadata criteria** (campus, audience, academic year, document type) are the parameters of
+Query Understanding → *Stated criteria*: what the student states. Both metadata filters read them
+from there, so prefiltering and postfiltering always enforce the same conditions.
+
+## Experiment presets
+
+`backend/app/rag/presets.py` names complete configurations: `B0_BASIC_DENSE_RAG`, the offline
+baselines `O0`–`O8` (plus `PROTOCOL_A_WHOLE_DOCUMENT`) and the online baselines `R0`–`R14`, and a
+disabled `PROPOSED_APPROACH`. A preset stores **only** method IDs and parameter values; everything else
+comes from the registry, and `preset_config(id, overrides)` validates it with `validate_config()`:
+
+```python
+{"id": "R2_HYBRID_RRF", "kind": "online", "name": "R2 — Hybrid (dense + BM25, RRF)",
+ "description": "Both retrievers, merged by Reciprocal Rank Fusion (k = 60).",
+ "stages": {"dense_retrieval": {"method": "qdrant_cosine", "params": {"top_k": 10}},
+            "lexical_retrieval": {"method": "bm25", "params": {"top_k": 10}},
+            "hybrid_fusion": {"method": "rrf", "params": {"rrf_k": 60, "top_k": 20}}}}
+```
+
+`GET /api/pipeline/presets` sends them (with their validated configs) to the **Experiment preset**
+menu; the benchmark runner (`evaluation/`) runs the same presets.
 
 ## The configuration a request carries
 
@@ -171,10 +247,18 @@ What is checked:
 - required blocks have a method (only optional blocks may be off);
 - every parameter exists, has the right type and is within `min`/`max` (or in `options`);
 - combinations: `chunk_overlap < chunk_size`; at least one retriever is on; two retrievers need a
-  Hybrid Fusion method; fusion needs both retrievers.
+  Hybrid Fusion method; fusion needs both retrievers; HyDE needs dense retrieval; the gate's
+  `dense_similarity` signal needs dense retrieval; prefiltering/postfiltering need Query
+  Understanding (their criteria).
+
+Before a question runs, the API also checks what needs the running services (`check_runnable()` in
+`api.py`): the selected **index** exists and was built with the selected embedding method (vectors of
+different models cannot be compared), and every selected **Ollama model** is installed (otherwise the
+message says `ollama pull …`). Problems that only appear while running are errors of that stage:
+e.g. HNSW search on an index without a graph, or a prompt that does not fit the context window.
 
 ```json
-{"valid": false, "errors": [{"stage_id": "dense_retrieval", "param": "top_k", "message": "Top K must be at most 20"}]}
+{"valid": false, "errors": [{"stage_id": "dense_retrieval", "param": "top_k", "message": "Top K must be at most 1000"}]}
 ```
 
 The UI shows each message under the right control and blocks sending until it is fixed.
@@ -209,6 +293,10 @@ postfiltered = await step("metadata_postfiltering", lambda b: b.filter_candidate
 | `optional: true` | dropdown has "Off — skip this stage" |
 | method `implemented: false` | option shown but disabled, "— not implemented" |
 | `group` (from the folder) | a heading such as **Candidate Retrieval** above the blocks of `blocks/retrieval/` |
+| `Param.advanced` | folded under "Advanced settings (n)" |
+| presets (`presets.py`) | the **Experiment preset** menu: loads a preset; *Reset to preset*, *Save custom*, *Export/Import JSON* |
+| index revisions (`GET /api/indexes`) | the **Index to search** menu; a warning when offline settings differ from how that index was built |
+| `trace_details` of a block | a **Details** tab in the Execution view |
 | `Param.ui` | slider / number / toggle / select / text / Ollama model menu (`ParamControl.tsx`) |
 | `Param.scope` ≠ runtime | yellow "re-index needed" badge |
 | validation errors | red text under the control; Send is blocked |

@@ -27,3 +27,8 @@ frontend/*.tsbuildinfo
 .idea/
 .vscode/
 .claude
+
+# Benchmark data and bulky per-query results (re-created by python -m evaluation.runner)
+evaluation/datasets/
+evaluation/results/*/raw/
+evaluation/results/smoke/
