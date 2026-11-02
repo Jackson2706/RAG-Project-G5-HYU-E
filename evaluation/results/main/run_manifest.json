@@ -1,0 +1,465 @@
+{
+  "run_id": "main",
+  "started_at": "2026-11-01T06:13:40.918726+00:00",
+  "argv": [
+    "--suite",
+    "all",
+    "--run-id",
+    "main"
+  ],
+  "git": {
+    "commit": "203186968a038c8e6ca7d2b6d456fd477c905faf",
+    "dirty": true
+  },
+  "machine": {
+    "platform": "macOS-27.0.1-arm64-arm-64bit-Mach-O",
+    "machine": "arm64",
+    "processor": "arm",
+    "memory_bytes": 17179869184
+  },
+  "python": "3.13.12",
+  "ollama_version": "0.40.13",
+  "packages": {
+    "torch": "2.14.1",
+    "sentence-transformers": "6.1.0",
+    "transformers": "5.18.0",
+    "qdrant-client": "1.20.0",
+    "pymongo": "4.19.0",
+    "numpy": "2.5.3",
+    "pyyaml": "6.0.3"
+  },
+  "split": "test",
+  "smoke": false,
+  "max_queries": null,
+  "configs": {
+    "offline": {
+      "datasets": [
+        "scifact",
+        "nfcorpus",
+        "arguana"
+      ],
+      "split": "test",
+      "depth": {
+        "documents": 100,
+        "chunks": 600
+      },
+      "experiments": [
+        {
+          "id": "PA_WHOLE_DOCUMENT",
+          "preset": "PROTOCOL_A_WHOLE_DOCUMENT",
+          "index": "whole_document",
+          "protocol": "A"
+        },
+        {
+          "id": "O0_SECTION_AWARE_256_32",
+          "preset": "O0_SECTION_AWARE_256_32",
+          "index": "o0",
+          "protocol": "B"
+        },
+        {
+          "id": "O1_FIXED_256_32",
+          "preset": "O1_FIXED_256_32",
+          "index": "o1",
+          "protocol": "B"
+        },
+        {
+          "id": "O2_NO_OVERLAP",
+          "preset": "O2_NO_OVERLAP",
+          "index": "o2",
+          "protocol": "B"
+        },
+        {
+          "id": "O3_SMALL_CHUNKS",
+          "preset": "O3_SMALL_CHUNKS",
+          "index": "o3",
+          "protocol": "B"
+        },
+        {
+          "id": "O4_LARGE_CHUNKS",
+          "preset": "O4_LARGE_CHUNKS",
+          "index": "o4",
+          "protocol": "B"
+        },
+        {
+          "id": "O5_RECURSIVE",
+          "preset": "O5_RECURSIVE",
+          "index": "o5",
+          "protocol": "B"
+        },
+        {
+          "id": "O6_ALTERNATIVE_EMBEDDING",
+          "preset": "O6_ALTERNATIVE_EMBEDDING",
+          "index": "o6",
+          "protocol": "B"
+        },
+        {
+          "id": "O7_EXACT_SEARCH",
+          "preset": "O7_EXACT_SEARCH",
+          "index": "hnsw",
+          "protocol": "B",
+          "latency_repeats": 3,
+          "store_chunks": true
+        },
+        {
+          "id": "O8_HNSW_ANN",
+          "preset": "O8_HNSW_ANN",
+          "index": "hnsw",
+          "protocol": "B",
+          "latency_repeats": 3,
+          "store_chunks": true,
+          "ann_reference": "O7_EXACT_SEARCH"
+        }
+      ]
+    },
+    "online": {
+      "datasets": [
+        "scifact",
+        "nfcorpus",
+        "arguana"
+      ],
+      "split": "test",
+      "index": "o0",
+      "depth": {
+        "documents": 100,
+        "chunks": 600,
+        "units_protocol_a": 100,
+        "rerank": 100
+      },
+      "llm_query_limit": 100,
+      "auxiliary_llm": "qwen3.5:4b",
+      "experiments": [
+        {
+          "id": "B0_BASIC_DENSE_RAG",
+          "preset": "B0_BASIC_DENSE_RAG",
+          "protocols": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "id": "R0_DENSE",
+          "same_as": "B0_BASIC_DENSE_RAG"
+        },
+        {
+          "id": "R1_BM25",
+          "preset": "R1_BM25",
+          "protocols": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "id": "R2_HYBRID_RRF",
+          "preset": "R2_HYBRID_RRF",
+          "protocols": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "id": "R2_HYBRID_RRF_MATCHED_BUDGET",
+          "preset": "R2_HYBRID_RRF",
+          "protocols": [
+            "B"
+          ],
+          "branch_depth_factor": 0.5
+        },
+        {
+          "id": "R3_COVERAGE_RERANK",
+          "preset": "R3_COVERAGE_RERANK",
+          "protocols": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "id": "R4_CROSS_ENCODER",
+          "preset": "R4_CROSS_ENCODER",
+          "protocols": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "id": "R5_HYBRID_CROSS_ENCODER",
+          "preset": "R5_HYBRID_CROSS_ENCODER",
+          "protocols": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "id": "R6_QUERY_REWRITING",
+          "preset": "R6_QUERY_REWRITING",
+          "protocols": [
+            "B"
+          ],
+          "llm": true
+        },
+        {
+          "id": "R7_MULTI_QUERY",
+          "preset": "R7_MULTI_QUERY",
+          "protocols": [
+            "B"
+          ],
+          "llm": true
+        },
+        {
+          "id": "R8_HYDE",
+          "preset": "R8_HYDE",
+          "protocols": [
+            "B"
+          ],
+          "llm": true
+        },
+        {
+          "id": "R9_PREFILTERING",
+          "not_applicable": "BEIR has no eligibility metadata; evaluated on the HYU metadata fixture instead"
+        },
+        {
+          "id": "R10_POSTFILTERING",
+          "not_applicable": "BEIR has no eligibility metadata; evaluated on the HYU metadata fixture instead"
+        },
+        {
+          "id": "R11_TOKEN_BUDGET_SELECTION",
+          "preset": "R11_TOKEN_BUDGET_SELECTION",
+          "protocols": [
+            "B"
+          ]
+        },
+        {
+          "id": "R12_SUFFICIENCY_GATE",
+          "preset": "R12_SUFFICIENCY_GATE",
+          "protocols": [
+            "B"
+          ]
+        },
+        {
+          "id": "R13_RANKGPT",
+          "preset": "R13_RANKGPT",
+          "protocols": [
+            "B"
+          ],
+          "llm": true,
+          "overrides": {
+            "reranking": {
+              "params": {
+                "rerank_depth": 20
+              }
+            }
+          }
+        },
+        {
+          "id": "R14_FULL_ADVANCED",
+          "preset": "R14_FULL_ADVANCED",
+          "protocols": [
+            "B"
+          ],
+          "llm": true
+        },
+        {
+          "id": "PROPOSED_APPROACH",
+          "not_applicable": "Reserved: the team has not defined its proposed approach yet"
+        }
+      ],
+      "fixture": {
+        "index": "hyu_samples",
+        "metadata_queries": "evaluation/fixtures/hyu_metadata_queries.jsonl",
+        "gate_questions": "data/eval/sample_questions.jsonl",
+        "candidate_cutoff": 2
+      }
+    },
+    "generation": {
+      "backbones": [
+        "llama2:7b",
+        "qwen3.5:4b"
+      ],
+      "generation": {
+        "temperature": 0.0,
+        "top_p": 0.9,
+        "top_k": 40,
+        "context_window": 4096,
+        "max_tokens": 512,
+        "seed": 42,
+        "thinking": "off",
+        "timeout_s": 600
+      },
+      "retrieval_preset": "B0_BASIC_DENSE_RAG",
+      "annotations": "evaluation/annotations/qa_annotations.jsonl",
+      "cases": {
+        "beir": {
+          "datasets": [
+            "scifact",
+            "nfcorpus",
+            "arguana"
+          ],
+          "per_dataset": 10
+        },
+        "hyu_fixture": "data/eval/sample_questions.jsonl"
+      }
+    }
+  },
+  "datasets": {
+    "scifact": {
+      "dataset": "scifact",
+      "url": "https://public.ukp.informatik.tu-darmstadt.de/thakur/BEIR/datasets/scifact.zip",
+      "md5": "5f7d1de60b170fc8027bb7898e2efca1",
+      "md5_verified": true,
+      "downloaded_at": "2026-11-01T05:49:35.698517+00:00",
+      "license": "CC BY-NC 2.0",
+      "splits": [
+        "train",
+        "test"
+      ]
+    },
+    "nfcorpus": {
+      "dataset": "nfcorpus",
+      "url": "https://public.ukp.informatik.tu-darmstadt.de/thakur/BEIR/datasets/nfcorpus.zip",
+      "md5": "a89dba18a62ef92f7d323ec890a0d38d",
+      "md5_verified": true,
+      "downloaded_at": "2026-11-01T05:49:40.726337+00:00",
+      "license": "CC BY-SA 4.0",
+      "splits": [
+        "train",
+        "dev",
+        "test"
+      ]
+    },
+    "arguana": {
+      "dataset": "arguana",
+      "url": "https://public.ukp.informatik.tu-darmstadt.de/thakur/BEIR/datasets/arguana.zip",
+      "md5": "8ad3e3c2a5867cdced806d6503f29b99",
+      "md5_verified": true,
+      "downloaded_at": "2026-11-01T05:49:44.178788+00:00",
+      "license": "CC BY-SA 4.0",
+      "splits": [
+        "test"
+      ]
+    }
+  },
+  "tasks": [
+    "offline/scifact/PA_WHOLE_DOCUMENT__A",
+    "offline/scifact/O0_SECTION_AWARE_256_32__B",
+    "offline/scifact/O1_FIXED_256_32__B",
+    "offline/scifact/O2_NO_OVERLAP__B",
+    "offline/scifact/O3_SMALL_CHUNKS__B",
+    "offline/scifact/O4_LARGE_CHUNKS__B",
+    "offline/scifact/O5_RECURSIVE__B",
+    "offline/scifact/O6_ALTERNATIVE_EMBEDDING__B",
+    "offline/scifact/O7_EXACT_SEARCH__B",
+    "offline/scifact/O8_HNSW_ANN__B",
+    "offline/nfcorpus/PA_WHOLE_DOCUMENT__A",
+    "offline/nfcorpus/O0_SECTION_AWARE_256_32__B",
+    "offline/nfcorpus/O1_FIXED_256_32__B",
+    "offline/nfcorpus/O2_NO_OVERLAP__B",
+    "offline/nfcorpus/O3_SMALL_CHUNKS__B",
+    "offline/nfcorpus/O4_LARGE_CHUNKS__B",
+    "offline/nfcorpus/O5_RECURSIVE__B",
+    "offline/nfcorpus/O6_ALTERNATIVE_EMBEDDING__B",
+    "offline/nfcorpus/O7_EXACT_SEARCH__B",
+    "offline/nfcorpus/O8_HNSW_ANN__B",
+    "offline/arguana/PA_WHOLE_DOCUMENT__A",
+    "offline/arguana/O0_SECTION_AWARE_256_32__B",
+    "offline/arguana/O1_FIXED_256_32__B",
+    "offline/arguana/O2_NO_OVERLAP__B",
+    "offline/arguana/O3_SMALL_CHUNKS__B",
+    "offline/arguana/O4_LARGE_CHUNKS__B",
+    "offline/arguana/O5_RECURSIVE__B",
+    "offline/arguana/O6_ALTERNATIVE_EMBEDDING__B",
+    "offline/arguana/O7_EXACT_SEARCH__B",
+    "offline/arguana/O8_HNSW_ANN__B",
+    "retrieval/scifact/B0_BASIC_DENSE_RAG__A",
+    "retrieval/scifact/B0_BASIC_DENSE_RAG__B",
+    "retrieval/scifact/R0_DENSE__-",
+    "retrieval/scifact/R1_BM25__A",
+    "retrieval/scifact/R1_BM25__B",
+    "retrieval/scifact/R2_HYBRID_RRF__A",
+    "retrieval/scifact/R2_HYBRID_RRF__B",
+    "retrieval/scifact/R2_HYBRID_RRF_MATCHED_BUDGET__B",
+    "retrieval/scifact/R3_COVERAGE_RERANK__A",
+    "retrieval/scifact/R3_COVERAGE_RERANK__B",
+    "retrieval/scifact/R4_CROSS_ENCODER__A",
+    "retrieval/scifact/R4_CROSS_ENCODER__B",
+    "retrieval/scifact/R5_HYBRID_CROSS_ENCODER__A",
+    "retrieval/scifact/R5_HYBRID_CROSS_ENCODER__B",
+    "retrieval/scifact/R6_QUERY_REWRITING__B",
+    "retrieval/scifact/R7_MULTI_QUERY__B",
+    "retrieval/scifact/R8_HYDE__B",
+    "retrieval/scifact/R9_PREFILTERING__-",
+    "retrieval/scifact/R10_POSTFILTERING__-",
+    "retrieval/scifact/R11_TOKEN_BUDGET_SELECTION__B",
+    "retrieval/scifact/R12_SUFFICIENCY_GATE__B",
+    "retrieval/scifact/R13_RANKGPT__B",
+    "retrieval/scifact/R14_FULL_ADVANCED__B",
+    "retrieval/scifact/PROPOSED_APPROACH__-",
+    "retrieval/nfcorpus/B0_BASIC_DENSE_RAG__A",
+    "retrieval/nfcorpus/B0_BASIC_DENSE_RAG__B",
+    "retrieval/nfcorpus/R0_DENSE__-",
+    "retrieval/nfcorpus/R1_BM25__A",
+    "retrieval/nfcorpus/R1_BM25__B",
+    "retrieval/nfcorpus/R2_HYBRID_RRF__A",
+    "retrieval/nfcorpus/R2_HYBRID_RRF__B",
+    "retrieval/nfcorpus/R2_HYBRID_RRF_MATCHED_BUDGET__B",
+    "retrieval/nfcorpus/R3_COVERAGE_RERANK__A",
+    "retrieval/nfcorpus/R3_COVERAGE_RERANK__B",
+    "retrieval/nfcorpus/R4_CROSS_ENCODER__A",
+    "retrieval/nfcorpus/R4_CROSS_ENCODER__B",
+    "retrieval/nfcorpus/R5_HYBRID_CROSS_ENCODER__A",
+    "retrieval/nfcorpus/R5_HYBRID_CROSS_ENCODER__B",
+    "retrieval/nfcorpus/R6_QUERY_REWRITING__B",
+    "retrieval/nfcorpus/R7_MULTI_QUERY__B",
+    "retrieval/nfcorpus/R8_HYDE__B",
+    "retrieval/nfcorpus/R9_PREFILTERING__-",
+    "retrieval/nfcorpus/R10_POSTFILTERING__-",
+    "retrieval/nfcorpus/R11_TOKEN_BUDGET_SELECTION__B",
+    "retrieval/nfcorpus/R12_SUFFICIENCY_GATE__B",
+    "retrieval/nfcorpus/R13_RANKGPT__B",
+    "retrieval/nfcorpus/R14_FULL_ADVANCED__B",
+    "retrieval/nfcorpus/PROPOSED_APPROACH__-",
+    "retrieval/arguana/B0_BASIC_DENSE_RAG__A",
+    "retrieval/arguana/B0_BASIC_DENSE_RAG__B",
+    "retrieval/arguana/R0_DENSE__-",
+    "retrieval/arguana/R1_BM25__A",
+    "retrieval/arguana/R1_BM25__B",
+    "retrieval/arguana/R2_HYBRID_RRF__A",
+    "retrieval/arguana/R2_HYBRID_RRF__B",
+    "retrieval/arguana/R2_HYBRID_RRF_MATCHED_BUDGET__B",
+    "retrieval/arguana/R3_COVERAGE_RERANK__A",
+    "retrieval/arguana/R3_COVERAGE_RERANK__B",
+    "retrieval/arguana/R4_CROSS_ENCODER__A",
+    "retrieval/arguana/R4_CROSS_ENCODER__B",
+    "retrieval/arguana/R5_HYBRID_CROSS_ENCODER__A",
+    "retrieval/arguana/R5_HYBRID_CROSS_ENCODER__B",
+    "retrieval/arguana/R6_QUERY_REWRITING__B",
+    "retrieval/arguana/R7_MULTI_QUERY__B",
+    "retrieval/arguana/R8_HYDE__B",
+    "retrieval/arguana/R9_PREFILTERING__-",
+    "retrieval/arguana/R10_POSTFILTERING__-",
+    "retrieval/arguana/R11_TOKEN_BUDGET_SELECTION__B",
+    "retrieval/arguana/R12_SUFFICIENCY_GATE__B",
+    "retrieval/arguana/R13_RANKGPT__B",
+    "retrieval/arguana/R14_FULL_ADVANCED__B",
+    "retrieval/arguana/PROPOSED_APPROACH__-",
+    "fixture/hyu_fixture/R0_DENSE__-",
+    "fixture/hyu_fixture/R9_PREFILTERING__-",
+    "fixture/hyu_fixture/R10_POSTFILTERING__-",
+    "fixture/hyu_fixture/R12_SUFFICIENCY_GATE__-",
+    "generation/cases/GEN_llama2:7b__-",
+    "generation/cases/GEN_qwen3.5:4b__-"
+  ],
+  "sessions": [
+    {
+      "started_at": "2026-11-01T06:13:40.918726+00:00",
+      "argv": [
+        "--suite",
+        "all",
+        "--run-id",
+        "main"
+      ],
+      "git": {
+        "commit": "203186968a038c8e6ca7d2b6d456fd477c905faf",
+        "dirty": true
+      }
+    }
+  ]
+}
