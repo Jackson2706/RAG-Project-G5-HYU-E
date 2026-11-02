@@ -102,7 +102,9 @@ Top 3 evidence chunks to the model. When a query's chunk list yields fewer than 
 documents, the report counts it in `depth_shortfall_queries`.
 
 Like BEIR, the evaluator removes a query's own ID from its ranking (`ignore_identical_ids`):
-1,298 ArguAna queries are themselves documents of the corpus.
+1,298 ArguAna queries are themselves documents of the corpus. In Protocol A, which retrieves exactly 100
+documents, those queries are then scored on 99 documents (reported as `depth_shortfall_queries`; it
+only affects rank 100).
 
 ---
 
