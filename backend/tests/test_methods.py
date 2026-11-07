@@ -272,6 +272,12 @@ def test_same_predicate_for_both_filter_placements():
     assert FilterCriteria().to_filter() is None
 
 
+def test_unknown_values_are_excluded_when_include_unknown_is_off():
+    strict = FilterCriteria(campus="ERICA", audience="international").to_filter(include_unknown=False)
+    assert strict.explain({"campus": "ERICA"}) == "audience is unknown" and not strict.matches({"campus": "ERICA"})
+    assert strict.explain({"campus": "ERICA", "audience": "international"}) is None and strict.matches({"campus": "erica", "audience": "international"})
+
+
 async def test_evidence_selection_methods(services):
     items = evidence(["one two", "one two", "three four five six"])
     assert [e.chunk_id for e in await TopKSelector({"top_k": 2}, services).select(items)] == ["c1", "c2"]

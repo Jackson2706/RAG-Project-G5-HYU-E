@@ -37,6 +37,10 @@ class SentenceTransformerEmbedder(BaseEmbedder):
         s = self.services.settings
         return (self.MODEL, self.REVISION) if self.MODEL else (s.embedding_model, s.embedding_revision)
 
+    def _query_prefix(self) -> str:
+        """BGE expects an instruction prefix on search questions (not on documents)."""
+        return self.services.settings.query_instruction if self.QUERY_PREFIX is None else self.QUERY_PREFIX
+
     @property
     def model(self):
         name, revision = self._model_id()
@@ -56,9 +60,7 @@ class SentenceTransformerEmbedder(BaseEmbedder):
         return vectors
 
     def embed_query(self, question: str) -> list[float]:
-        # BGE expects an instruction prefix on search questions (not on documents).
-        prefix = self.services.settings.query_instruction if self.QUERY_PREFIX is None else self.QUERY_PREFIX
-        return self.embed_documents([prefix + question])[0]
+        return self.embed_documents([self._query_prefix() + question])[0]
 
     def token_offsets(self, text: str) -> list[tuple[int, int]]:
         encoded = self.model.tokenizer(text, add_special_tokens=False, return_offsets_mapping=True, verbose=False)
@@ -66,8 +68,7 @@ class SentenceTransformerEmbedder(BaseEmbedder):
 
     def contract(self) -> dict[str, Any]:
         name, revision = self._model_id()
-        prefix = self.services.settings.query_instruction if self.QUERY_PREFIX is None else self.QUERY_PREFIX
         return {"method": self.method_id, "model": name, "revision": revision, "dimension": self.dimension(),
                 "normalize": True, "similarity": "cosine", "max_seq_length": getattr(self.model, "max_seq_length", None),
-                "query_prefix": prefix, "document_prefix": "", "document_text": "section heading + newline + chunk text",
+                "query_prefix": self._query_prefix(), "document_prefix": "", "document_text": "section heading + newline + chunk text",
                 "device": resolve_device(self.services.settings.embedding_device)}  # fmt: skip

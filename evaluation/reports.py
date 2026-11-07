@@ -14,7 +14,7 @@ import csv
 import json
 import random
 import statistics
-from collections import Counter, defaultdict
+from collections import Counter
 from pathlib import Path
 
 from evaluation import ROOT, beir
@@ -71,7 +71,7 @@ def write_csv(path: Path, rows: list[dict]) -> None:
 # --------------------------------------------------------------------------------------------- retrieval
 
 
-def retrieval_tables(run_dir: Path, status: dict, split: str, smoke: bool) -> tuple[list, list, list, list, dict]:
+def retrieval_tables(run_dir: Path, status: dict, split: str) -> tuple[list, list, list, list, dict]:
     """Rows for retrieval_comparison / offline_comparison / per_query / failure_analysis, plus raw aggregates."""
     qrels_cache: dict[str, dict] = {}
     comparison, offline_rows, per_query_rows, failure_rows = [], [], [], []
@@ -195,8 +195,13 @@ def retrieval_tables(run_dir: Path, status: dict, split: str, smoke: bool) -> tu
             relevant = {d for d, g in qrels[q].items() if g > 0}
             base_found = bool(set(clean_ranking(base[q]["ranking"], q)[:100]) & relevant)
             labels = classify_retrieval({**mine[q], "qid": q}, relevant, base[q], base_found)
-            change = "improved" if pm[q]["nDCG@10"] is not None and pb[q]["nDCG@10"] is not None and pm[q]["nDCG@10"] > pb[q]["nDCG@10"] + 1e-9 else \
-                     "regressed" if pm[q]["nDCG@10"] is not None and pb[q]["nDCG@10"] is not None and pm[q]["nDCG@10"] < pb[q]["nDCG@10"] - 1e-9 else "unchanged"  # fmt: skip
+            mine_ndcg, base_ndcg = pm[q]["nDCG@10"], pb[q]["nDCG@10"]
+            change = "unchanged"  # also when nDCG is undefined for this query
+            if mine_ndcg is not None and base_ndcg is not None:
+                if mine_ndcg > base_ndcg + 1e-9:
+                    change = "improved"
+                elif mine_ndcg < base_ndcg - 1e-9:
+                    change = "regressed"
             if labels:
                 failure_rows.append({"suite": row["suite"], "dataset": row["dataset"], "protocol": row["protocol"], "experiment": row["experiment"], "qid": q,
                                      "primary": labels[0], "category": CATEGORIES[labels[0]], "secondary": labels[1:],
@@ -416,7 +421,7 @@ def write_reports(run_dir: Path) -> None:
     status = json.loads((run_dir / "status.json").read_text()) if (run_dir / "status.json").exists() else {}
     manifest = json.loads((run_dir / "run_manifest.json").read_text()) if (run_dir / "run_manifest.json").exists() else {}
     split = manifest.get("split", "test")
-    comparison, offline_rows, per_query, failures, records = retrieval_tables(run_dir, status, split, manifest.get("smoke", False))
+    comparison, offline_rows, per_query, failures, records = retrieval_tables(run_dir, status, split)
     ann = ann_rows(records)
     filters, gates, fixture_failures = fixture_tables(run_dir, status)
     annotations = ROOT / ((manifest.get("configs") or {}).get("generation", {}).get("annotations") or "evaluation/annotations/qa_annotations.jsonl")

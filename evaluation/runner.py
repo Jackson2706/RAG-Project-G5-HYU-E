@@ -32,6 +32,7 @@ import yaml
 
 from evaluation import ROOT, beir
 from evaluation.indexes import ensure_folder_index, ensure_index, index_id
+from evaluation.reports import load_jsonl, write_reports
 
 from app.config import get_settings  # noqa: E402  (evaluation/__init__ puts backend/ on the path)
 from app.database import Database
@@ -143,6 +144,14 @@ def depth_overrides(base: dict, task: Task, depth: dict, aux_model: str | None) 
     return deep_merge(o, task.overrides)
 
 
+def retrieval_config(run: Run, task: Task) -> dict:
+    """The validated configuration of an offline/retrieval task: its preset plus benchmark depths and the auxiliary LLM.
+    The dry run checks exactly this configuration, so a READY task is the one that really runs."""
+    depth = (run.offline if task.suite == "offline" else run.online)["depth"]
+    aux = run.online.get("auxiliary_llm") if task.options.get("llm") else None
+    return preset_config(task.preset, depth_overrides(preset_config(task.preset), task, depth, aux))
+
+
 # --------------------------------------------------------------------------------------------- the run context
 
 
@@ -190,10 +199,10 @@ class Run:
         corpus = self.dataset(dataset)[0]
         idx = index_id(dataset, key, self.args.smoke)
         source = json.loads((beir.dataset_dir(dataset) / "SOURCE.json").read_text())
-        db, how = ensure_index(self.services, idx, self.index_config(key), beir.to_parsed_documents(dataset, corpus),
-                               {"dataset": dataset, "documents": len(corpus), "source": source, "smoke_slice": self.args.smoke,
-                                "parser": "evaluation/beir.py to_parsed_documents (title + text, one section)"},
-                               force=self.args.force and key not in self._built)  # fmt: skip
+        db, _ = ensure_index(self.services, idx, self.index_config(key), beir.to_parsed_documents(dataset, corpus),
+                             {"dataset": dataset, "documents": len(corpus), "source": source, "smoke_slice": self.args.smoke,
+                              "parser": "evaluation/beir.py to_parsed_documents (title + text, one section)"},
+                             force=self.args.force and key not in self._built)  # fmt: skip
         self._built.add(key)
         return db
 
@@ -209,10 +218,7 @@ class Run:
 
 def read_done(path: Path) -> set[str]:
     """Queries with a completed result. Failed queries are retried by --resume (the newer line wins in the reports)."""
-    if not path.exists():
-        return set()
-    records = [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
-    return {r["qid"] for r in records if r.get("status") == "completed"}
+    return {r["qid"] for r in load_jsonl(path) if r.get("status") == "completed"}
 
 
 def append(path: Path, record: dict) -> None:
@@ -272,9 +278,7 @@ async def run_retrieval_task(run: Run, task: Task) -> dict:
     corpus, queries, qrels = run.dataset(task.dataset)
     depth = (run.offline if task.suite == "offline" else run.online)["depth"]
     db = run.index(task.dataset, task.index_key)
-    base = preset_config(task.preset)
-    aux = run.online.get("auxiliary_llm") if task.options.get("llm") else None
-    config = preset_config(task.preset, depth_overrides(base, task, depth, aux))
+    config = retrieval_config(run, task)
     doc_map = {d["doc_id"]: beir.beir_id(d["source_uri"]) for d in db.documents.find({}, {"_id": 0, "doc_id": 1, "source_uri": 1})}
     services = Services(db=db, ollama=run.ollama, settings=run.settings)
     path = run.raw_file(task)
@@ -300,10 +304,6 @@ async def run_retrieval_task(run: Run, task: Task) -> dict:
             print(f"    {task.key}: {n}/{len(qids)} queries ({rate:.1f}/s, {failures} failed)", flush=True)
     return {"queries": len(read_done(path)), "failed_queries": failures, "index_id": db.index_id, "config": config,
             "index_manifest": db.get_manifest(), "storage": db.storage_info()}  # fmt: skip
-
-
-def load_jsonl(path: Path) -> list[dict]:
-    return [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
 
 
 async def run_fixture_task(run: Run, task: Task) -> dict:
@@ -347,7 +347,7 @@ async def generation_cases(run: Run) -> list[dict]:
     retrieved ONCE (B0) and cached, so both models get identical contexts."""
     cache = run.raw / "generation" / "contexts.jsonl"
     cache.parent.mkdir(parents=True, exist_ok=True)
-    cached = {c["case_id"]: c for c in load_jsonl(cache)} if cache.exists() else {}
+    cached = {c["case_id"]: c for c in load_jsonl(cache)}  # empty when the file does not exist yet
     spec = run.generation["cases"]
     per_dataset = 1 if run.args.smoke else spec["beir"]["per_dataset"]
     wanted: list[tuple[str, str, str, Database]] = []
@@ -415,10 +415,8 @@ def check_task(run: Run, task: Task, installed: set[str] | None) -> tuple[str, s
         if task.preset and task.preset not in PRESETS_BY_ID:
             return "FAILED", f"unknown preset {task.preset}"
         if task.suite in ("offline", "retrieval"):
-            base = preset_config(task.preset)
-            depth = (run.offline if task.suite == "offline" else run.online)["depth"]
+            retrieval_config(run, task)  # raises ConfigError when the configuration is invalid
             aux = run.online.get("auxiliary_llm") if task.options.get("llm") else None
-            preset_config(task.preset, depth_overrides(base, task, depth, aux))
             if not beir.is_downloaded(task.dataset):
                 return "BLOCKED", f"dataset not downloaded (python -m evaluation.runner --download {task.dataset})"
             if aux and installed is not None and aux not in installed:
@@ -534,8 +532,6 @@ async def main_async(args) -> int:
             run.status[t.key] = {"status": "FAILED", "reason": f"{exc.__class__.__name__}: {exc}"}
         run.save_status()
         print(f"  → {run.status[t.key]['status']} {run.status[t.key].get('reason', '')}", flush=True)
-    from evaluation.reports import write_reports
-
     write_reports(run.dir)
     print(f"\nReports: {(run.dir / 'summary.md').relative_to(ROOT)}")
     return 0

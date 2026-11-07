@@ -168,19 +168,12 @@ class RetrievalFilter(BaseModel):
     include_unknown: bool = True
 
     def matches(self, metadata: dict[str, Any]) -> bool:
-        """True if a document with this metadata is eligible. Same rule as the Qdrant filter:
-        every condition must match one allowed value (a missing field passes if include_unknown)."""
-        for field, allowed in self.conditions.items():
-            values = metadata_values(metadata.get(field))
-            if not values:
-                if not self.include_unknown:
-                    return False
-            elif not set(values) & set(allowed):
-                return False
-        return True
+        """True if a document with this metadata is eligible (the rule is in explain() below)."""
+        return self.explain(metadata) is None
 
     def explain(self, metadata: dict[str, Any]) -> str | None:
-        """Why a document is NOT eligible (None if it is)."""
+        """Why a document is NOT eligible (None if it is). Same rule as the Qdrant filter:
+        every condition must match one allowed value (a missing field passes if include_unknown)."""
         for field, allowed in self.conditions.items():
             values = metadata_values(metadata.get(field))
             if not values and not self.include_unknown:

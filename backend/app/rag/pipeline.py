@@ -243,17 +243,18 @@ async def run_rag(question: str, config: dict, services: Services, emit: Callabl
         blocks = {s.stage_id: create_block(s.stage_id, config[s.stage_id]["method"], config[s.stage_id]["params"], services)
                   for s in PIPELINE if s.phase == "online" and config[s.stage_id]["method"]}  # fmt: skip
 
-        stopped: list[str] = []  # becomes non-empty once `stop_after` has run
+        stopped = False  # becomes True once the `stop_after` stage is reached
 
         async def step(stage_id: str, work: Callable[[Any], Awaitable[Any]], input: Any, default: Any = None) -> Any:
             """Run one stage through its block (or record why it was skipped) and trace it."""
+            nonlocal stopped
             stage = STAGES[stage_id]
             block = blocks.get(stage_id)
             if stopped:
                 tracer.skip(stage_id, stage.name, f"Not run: this run stops after {STAGES[stop_after].name}.")
                 return default
             if stage_id == stop_after:
-                stopped.append(stage_id)  # this stage still runs (if it is on); the following ones do not
+                stopped = True  # this stage still runs (if it is on); the following ones do not
             if block is None:
                 reason = "Switched off in the configuration." if any(m.implemented for m in stage.methods) else "Not implemented yet."
                 tracer.skip(stage_id, stage.name, reason)
