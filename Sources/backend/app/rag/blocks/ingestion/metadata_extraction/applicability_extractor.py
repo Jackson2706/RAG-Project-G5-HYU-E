@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json
 import re
 from collections.abc import Callable
 from datetime import date
+from pathlib import Path
 from typing import Any
 
 from app.rag.applicability import CONSTRAINT_ATTRIBUTES, VOCABULARY, ChunkCondition, term_of
@@ -14,6 +16,12 @@ from app.rag.blocks.ingestion.metadata_extraction.base import BaseMetadataExtrac
 from app.rag.blocks.ingestion.metadata_extraction.basic_extractor import BasicMetadataExtractor
 from app.rag.schemas import DocumentMetadata, ParsedDocument
 
+
+# The LLM is asked only about chunks the rules left untagged AND that contain one of these cues (cost control).
+LLM_CUE = re.compile(r"eligib|\bapplicants?\b|\bonly\b|\bmust\b|\brequired\b|\bstudents? (?:who|with|in)\b|undergraduate|"
+                     r"\bgraduate\b|\bexchange\b|\bvisa\b|\bTOPIK\b|\benrolled\b|leave of absence|\bsemester\b|\byear\b",
+                     re.IGNORECASE)
+LLM_NUM_CTX, LLM_SEED = 4096, 42
 
 NATIONAL_RULES = (
     r"\bpart[- ]time (?:employment|work permits?)\b",
@@ -322,56 +330,87 @@ def tag_chunk(
 class ApplicabilityExtractor(BaseMetadataExtractor):
     """Basic document metadata plus a separate chunk-tagging entry point for T09 ingestion."""
 
+    cache_path: Path | None = None  # LLM answer cache; set by scripts/ingest_snapshot.py
+    summary: dict[str, Any] = {}
+
     def extract(self, document: ParsedDocument) -> DocumentMetadata:
         return BasicMetadataExtractor(self.params, self.services).extract(document)
 
-    def tag_chunks(self, chunks: list[dict]) -> list[ChunkCondition]:
-        if not self.params.get("llm_fallback", True):
-            self.trace_details = {"llm_fallback": "disabled"}
-            return [tag_chunk(chunk) for chunk in chunks]
+    def tag_chunks(self, chunks: list[dict], cache_path: Path | None = None) -> list[ChunkCondition]:
+        """Tag every chunk with rules; ask the auxiliary LLM only for untagged chunks with an LLM_CUE.
 
-        loop = asyncio.new_event_loop()
-        selected_model: dict | None = None
+        cache_path: JSONL of earlier LLM answers keyed by sha256(model + prompt), so a re-run makes no new calls.
+        After the call, self.summary has the counts and LLM settings for the index manifest.
+        """
+        use_llm = self.params.get("llm_fallback", True)
+        model_name = self.params.get("model", "qwen3.5:4b")
+        cache_path = cache_path or self.cache_path
+        cache = _read_cache(cache_path)
+        counts = {"llm_candidates": 0, "llm_called": 0, "llm_cache_hits": 0, "llm_accepted": 0, "llm_rejected": {}}
+        loop = asyncio.new_event_loop() if use_llm else None
+        selected: dict = {}
         fallback_details: list[dict[str, Any]] = []
 
         async def complete(prompt: str, details: dict[str, Any]) -> str:
-            nonlocal selected_model
-            ollama = self.services.ollama
-            if selected_model is None:
-                default_model = getattr(self.services.settings, "ollama_chat_model", "qwen3.5:4b")
-                selected_model = await ollama.pick_model(self.params.get("model", "qwen3.5:4b"), default_model)
-            messages = [{"role": "user", "content": prompt}]
-            options = {
-                "temperature": self.params.get("temperature", 0.0),
-                "num_predict": self.params.get("max_tokens", 256),
-                "num_ctx": 4096,
-                "seed": 42,
-            }
-            output, usage = await ollama.complete(selected_model, messages, options)
-            details.update(
-                model=selected_model["name"],
-                prompt_tokens=usage.get("prompt_eval_count"),
-                output_tokens=usage.get("eval_count"),
-            )
+            if not selected:
+                selected.update(await self.services.ollama.pick_model(model_name, ""))
+            options = {"temperature": self.params.get("temperature", 0.0), "num_predict": self.params.get("max_tokens", 256),
+                       "num_ctx": LLM_NUM_CTX, "seed": LLM_SEED}  # fmt: skip
+            output, usage = await self.services.ollama.complete(selected, [{"role": "user", "content": prompt}], options, think="off")
+            details.update(model=selected["name"], prompt_tokens=usage.get("prompt_eval_count"), output_tokens=usage.get("eval_count"))
             return output
+
+        def make_llm(details: dict[str, Any]) -> Callable[[str], str]:
+            def llm(prompt: str) -> str:
+                key = hashlib.sha256((model_name + prompt).encode()).hexdigest()
+                if key in cache:
+                    counts["llm_cache_hits"] += 1
+                    return cache[key]
+                counts["llm_called"] += 1
+                output = loop.run_until_complete(complete(prompt, details))  # type: ignore[union-attr]
+                cache[key] = output
+                _append_cache(cache_path, key, output)
+                return output
+
+            return llm
 
         try:
             tagged = []
             for index, chunk in enumerate(chunks):
                 details: dict[str, Any] = {"chunk_index": index, "doc_id": chunk.get("doc_id")}
-
-                def llm(prompt: str, details: dict[str, Any] = details) -> str:
-                    try:
-                        asyncio.get_running_loop()
-                    except RuntimeError:
-                        return loop.run_until_complete(complete(prompt, details))
-                    raise RuntimeError("tag_chunks cannot make an Ollama fallback call inside a running event loop")
-
-                result = tag_chunk(chunk, llm=llm, trace_details=details)
+                ask = use_llm and LLM_CUE.search(chunk["text"]) is not None
+                result = tag_chunk(chunk, llm=make_llm(details) if ask else None, trace_details=details)
                 if "llm_fallback" in details:
+                    counts["llm_candidates"] += 1
+                    fallback = details["llm_fallback"]
+                    if fallback.get("status") == "accepted":
+                        counts["llm_accepted"] += 1
+                    else:
+                        reasons = list(fallback.get("rejected_fields", {}).values()) or [fallback.get("reason", fallback.get("status"))]
+                        for reason in reasons:
+                            counts["llm_rejected"][reason] = counts["llm_rejected"].get(reason, 0) + 1
                     fallback_details.append(details)
                 tagged.append(result)
-            self.trace_details = {"llm_fallbacks": fallback_details}
-            return tagged
         finally:
-            loop.close()
+            if loop is not None:
+                loop.close()
+        self.trace_details = {"llm_fallbacks": fallback_details[:50]}
+        self.summary = {**counts, "llm": {"enabled": use_llm, "role": "auxiliary", "model": model_name,
+                                          "digest": selected.get("digest"), "temperature": self.params.get("temperature", 0.0),
+                                          "num_ctx": LLM_NUM_CTX, "seed": LLM_SEED, "thinking": "off"}}  # fmt: skip
+        return tagged
+
+
+def _read_cache(path: Path | None) -> dict[str, str]:
+    if path is None or not path.exists():
+        return {}
+    with open(path, encoding="utf-8") as f:
+        return {row["key"]: row["output"] for row in map(json.loads, f) if row}
+
+
+def _append_cache(path: Path | None, key: str, output: str) -> None:
+    if path is None:
+        return
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "a", encoding="utf-8") as f:
+        f.write(json.dumps({"key": key, "output": output}) + "\n")

@@ -35,6 +35,28 @@ def _with_embedder(config: dict, services: Services) -> Services:
 # =========================================================================== offline: ingestion and indexing
 
 
+def _tag_chunks(extractor: Any, chunks: list[dict], inputs: list[dict], timings: dict) -> dict:
+    """AAES offline step: one validated ChunkCondition per chunk, stored as chunk["applicability"].
+    A chunk whose tags do not validate stops the build (never stored silently)."""
+    from app.rag.applicability import VOCABULARY_VERSION
+
+    if not hasattr(extractor, "tag_chunks"):
+        raise ValueError(f"Metadata extraction method '{extractor.method_id}' cannot tag chunks; use applicability_extractor")
+    start = time.perf_counter()
+    conditions = extractor.tag_chunks(inputs)
+    for chunk, condition in zip(chunks, conditions, strict=True):
+        condition.validate(chunk["text"])
+        chunk["applicability"] = condition.to_dict()
+        chunk["vocabulary_version"] = VOCABULARY_VERSION
+    timings["tag_ms"] = (time.perf_counter() - start) * 1000
+    methods = [m for c in conditions for a, m in c.extraction_method.items() if a in c.constraints]
+    return {"vocabulary_version": VOCABULARY_VERSION, "chunks": len(chunks),
+            "rule_tagged": sum(any(c.extraction_method.get(a) == "rule" for a in c.constraints) for c in conditions),
+            "llm_tagged": sum(any(c.extraction_method.get(a) == "llm" for a in c.constraints) for c in conditions),
+            "constraint_fields_by_method": {m: methods.count(m) for m in set(methods)},
+            **getattr(extractor, "summary", {})}  # fmt: skip
+
+
 def run_ingestion(folder: Path, config: dict, services: Services) -> dict:
     """Document Loading → Parsing, then index_documents() (Chunking → … → Vector Indexing).
 
@@ -65,7 +87,8 @@ def run_ingestion(folder: Path, config: dict, services: Services) -> dict:
 
 
 def index_documents(documents: list[ParsedDocument], config: dict, services: Services, *, source_hashes: dict[str, str] | None = None,
-                    corpus: dict | None = None, parse_ms: float = 0.0) -> dict:
+                    corpus: dict | None = None, parse_ms: float = 0.0,
+                    tag_input: Callable[[ParsedDocument, Any], dict] | None = None) -> dict:
     """Chunking → Metadata Extraction → Embedding → Vector Indexing for already parsed documents.
 
     Used by run_ingestion() (files from the data directory) and by the benchmark runner (BEIR records), so both
@@ -77,7 +100,7 @@ def index_documents(documents: list[ParsedDocument], config: dict, services: Ser
     block = {s: create_block(s, config[s]["method"], config[s]["params"], services)
              for s in ("chunking", "metadata_extraction", "vector_indexing")}  # fmt: skip
     timings = {"parse_ms": parse_ms, "chunk_ms": 0.0, "metadata_ms": 0.0}
-    records, chunks, errors, bad_spans = [], [], [], 0
+    records, chunks, errors, bad_spans, tag_inputs = [], [], [], 0, []
     for parsed in documents:
         try:
             start = time.perf_counter()
@@ -104,8 +127,11 @@ def index_documents(documents: list[ParsedDocument], config: dict, services: Ser
             chunks.append({"chunk_id": make_chunk_id(doc_id, index, c.text), "doc_id": doc_id, "chunk_index": index, "text": c.text,
                            "section": c.section, "page_number": c.page_number, "token_count": c.token_count,
                            "start": c.start, "end": c.end})  # fmt: skip
+            if tag_input is not None:
+                tag_inputs.append(tag_input(parsed, c))
     if not chunks:
         raise ValueError("No chunks were produced. " + "; ".join(errors))
+    applicability = _tag_chunks(block["metadata_extraction"], chunks, tag_inputs, timings) if tag_input is not None else None
     # Embed "heading + text", so a chunk also matches words from its section title.
     start = time.perf_counter()
     texts = [f"{c['section']}\n{c['text']}" if c["section"] else c["text"] for c in chunks]
@@ -127,6 +153,7 @@ def index_documents(documents: list[ParsedDocument], config: dict, services: Ser
         "embedding_contract": contract, "documents": len(records), "chunks": len(chunks), "vector_index": status,
         "chunk_id_sha256": hashlib.sha256("".join(c["chunk_id"] for c in chunks).encode()).hexdigest(),
         "source_spans_valid": len(chunks) - bad_spans, "source_spans_invalid": bad_spans, "truncated_by_embedder": truncated,
+        "applicability": applicability,
         "timings": timings, "embedding_texts_per_s": round(len(texts) / (timings["embed_ms"] / 1000), 1) if timings["embed_ms"] else None,
     }  # fmt: skip
     db.save_manifest(manifest)

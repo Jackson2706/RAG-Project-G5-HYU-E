@@ -86,3 +86,16 @@ keeps a field only when the attribute exists, all values belong to that attribut
 the evidence quote is an exact substring of the chunk text. Unknown fields, invalid values, missing
 quotes and invented quotes are dropped and explained in the block's `trace_details`. Missing JSON,
 invalid JSON and LLM-call errors produce no fallback tags and never stop offline tagging.
+
+## Index
+
+Each chunk of the HYU snapshot index carries one validated `ChunkCondition`.
+
+- MongoDB stores the full form (`chunk["applicability"]`). Qdrant stores the compact filterable
+  copy from `ChunkCondition.to_payload()`.
+- `superseded_by` is converted from the snapshot doc_id to the index doc_id of the newer version.
+- The index manifest's `applicability` block records:
+  - the vocabulary version;
+  - the counts by extraction method, LLM calls, cache hits, and accepts and rejects with reasons;
+  - the auxiliary LLM settings: model, digest, temperature, `num_ctx`, seed, thinking off.
+

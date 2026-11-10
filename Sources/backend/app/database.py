@@ -30,6 +30,15 @@ BENCH_DB_PREFIX = "hyu_bench_"
 BENCH_COLLECTION_PREFIX = "bench_"
 
 
+def _applicability_payload(chunk: dict) -> dict:
+    """Compact, filterable copy of a chunk's AAES tags (the app_* keys); empty for untagged indexes."""
+    if not chunk.get("applicability"):
+        return {}
+    from app.rag.applicability import ChunkCondition
+
+    return ChunkCondition.from_dict(chunk["applicability"]).to_payload()
+
+
 class Database:
     def __init__(self, mongo: MongoDatabase, qdrant: QdrantClient, collection: str, index_id: str = DEFAULT_INDEX) -> None:
         self.documents = mongo["documents"]
@@ -120,7 +129,8 @@ class Database:
                 self.collection,
                 points=[
                     models.PointStruct(id=c["chunk_id"], vector=v,
-                                       payload={**metadata.get(c["doc_id"], {}), "chunk_id": c["chunk_id"], "doc_id": c["doc_id"]})
+                                       payload={**metadata.get(c["doc_id"], {}), **_applicability_payload(c),
+                                                "chunk_id": c["chunk_id"], "doc_id": c["doc_id"]})
                     for c, v in zip(batch, vectors[start : start + 256], strict=True)
                 ],
             )

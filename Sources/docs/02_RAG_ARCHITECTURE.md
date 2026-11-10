@@ -147,6 +147,32 @@ files gives the same IDs.
 
 ---
 
+### The HYU snapshot index (with AAES applicability tags)
+
+`scripts/ingest_snapshot.py` indexes a frozen crawl snapshot as its own **index revision**
+(`hyu_bench_<id>` in MongoDB, `bench_<id>` in Qdrant). The app's default index is never touched.
+
+1. **BUILD**: `app/rag/snapshot.py` turns each snapshot row into a ParsedDocument.
+   - Headers are English only; a Korean heading stays in the body.
+   - A section is cut at a span boundary before it grows past 320 tokens, so table rows stay whole.
+   - The chunker is `section_tokens` at 320/48 bge tokens.
+   - `index_documents(..., tag_input=...)` tags every chunk with `applicability_extractor`.
+     - Rules come first. The LLM is asked only for untagged chunks that contain a cue word, and its
+       answers are cached in `Report/data/HYU/cache/llm_tags.jsonl`.
+     - Tags are stored in two places:
+       - MongoDB chunk: `applicability` (the full `ChunkCondition`) and `vocabulary_version`;
+       - Qdrant payload: `app_<attribute>`, `app_scope`, `app_campus`, `app_term`, `app_superseded`.
+2. **VERIFY**: re-reads both databases and runs pass/fail checks:
+   - counts, dimension 384, unique IDs;
+   - at most 512 embedded tokens and 0 truncated;
+   - valid tags on every chunk, 0 unmasked e-mails, no Hangul in headers;
+   - the default index is unchanged.
+
+   Writes `Report/results/index_reports/<index_id>.{json,md}`. The status becomes `verified` only
+   if every check passes.
+3. **PUBLISH** (`--publish`): marks a verified index `published`. Select it with `index_id`
+   (`GET /api/indexes`).
+
 ## Part B — Online: question answering (`run_rag()` in `rag/pipeline.py`)
 
 | # | Block (folder) | Status | Input → Output |
