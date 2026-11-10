@@ -693,3 +693,25 @@ unconditioned, which is the error AAES must avoid.
 - ≥ 5 from `llm_unconditioned`;
 
 so recall is measured where the tagger said "no conditions".
+
+## 2026-11-10 (before the tag audit)
+
+**A9 topik_level is ordinal.** A threshold ("TOPIK 3 or above", "level 4 or higher", "Lv4~6",
+"5+") is stored as every level from N to 6.
+- The rules recognise these forms.
+- An LLM answer whose evidence quote is a threshold is expanded the same way.
+- An LLM answer that allows every value of an attribute is no constraint, and is refused.
+- r1 stored "3 or above" as "3" (or as all levels) on about 40 LLM chunks. The audit therefore runs
+  on r2, rebuilt from the LLM cache.
+
+**A10 Audit scoring.**
+- Recall is reported twice: raw on the sample, and weighted by bucket sizes over all chunks.
+- The G2 table gives Wilson 95% intervals.
+- The sample includes ≥ 6 chunks whose topik_level came from the LLM.
+- The sheet has two free-text columns, `out_of_vocabulary_condition` and `audience`
+  (applicant / admitted / enrolled). They are not scored; they feed vocabulary v1.
+
+**A11 Before G2.**
+- T11 (labeling guideline, drafted by Claude Code with vocabulary v0) and T12 (labeling tools,
+  Codex, after T10) may start before G2.
+- No labels are produced until vocabulary v1 is approved. T11 is updated after G2.
