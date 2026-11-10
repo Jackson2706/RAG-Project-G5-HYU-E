@@ -36,6 +36,6 @@ experiments:
 # project authors). Used for prefiltering vs postfiltering and for the sufficiency gate.
 fixture:
   index: hyu_samples
-  metadata_queries: evaluation/fixtures/hyu_metadata_queries.jsonl
-  gate_questions: data/eval/sample_questions.jsonl
+  metadata_queries: Sources/evaluation/fixtures/hyu_metadata_queries.jsonl
+  gate_questions: data/HYU/labels/legacy/sample_questions.jsonl
   candidate_cutoff: 2          # the same Top K for R0, R9 and R10, small enough to show starvation

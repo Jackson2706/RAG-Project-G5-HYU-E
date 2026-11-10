@@ -1,9 +1,9 @@
 # Controlled fixtures (not benchmarks)
 
 `hyu_metadata_queries.jsonl` tests **where** metadata filtering is applied (Prefiltering vs
-Postfiltering) on the five synthetic HYU sample documents in `data/samples/`.
+Postfiltering) on the five synthetic HYU sample documents in `data/HYU/synthetic_fixture/`.
 
-- `question` and `relevant` reuse the labels of `data/eval/sample_questions.jsonl` (written by the
+- `question` and `relevant` reuse the labels of `data/HYU/labels/legacy/sample_questions.jsonl` (written by the
   project authors for the synthetic documents — not independent human judgments).
 - `criteria` are the conditions a student states (e.g. "I study at ERICA").
 - Whether a document is **eligible** is NOT written here: the runner computes it from each document's

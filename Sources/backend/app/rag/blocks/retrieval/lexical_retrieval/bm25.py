@@ -100,7 +100,7 @@ class BM25Retriever(BaseLexicalRetriever):
     async def retrieve(self, query: str, prefilter: RetrievalFilter | None = None) -> RetrievalResult:
         index = get_lexical_index(self.services.db)
         if not index.chunk_ids:
-            raise RuntimeError("No documents are indexed yet. Run: python scripts/ingest.py --path data/raw")
+            raise RuntimeError("No documents are indexed yet. Run: python scripts/ingest.py --path HYU/raw")
         start = time.perf_counter()
         words = tokenize(query)
         scores = bm25_scores(index, words, self.params["k1"], self.params["b"])

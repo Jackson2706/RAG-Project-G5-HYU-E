@@ -1,12 +1,12 @@
 # 01 · Getting Started
 
 This tutorial takes you from a fresh copy of the repository to your first answered question.
-It takes about 20 minutes the first time, mostly downloads. (Shortcut: `./setup.sh` then
-`./start.sh` do steps 2–8 for you; this page explains what they do.) Section 12 sets up the
+It takes about 20 minutes the first time, mostly downloads. (Shortcut: `cd Sources`, then
+`./setup.sh` and `./start.sh` do steps 2–8 for you; this page explains what they do.) Section 12 sets up the
 benchmark runner.
 
-Every command says **which folder to run it from**. `hyu-compass/` means the project root, the
-folder that contains `README.md` and `docker-compose.yml`.
+Every command says **which folder to run it from**. `hyu-compass/` is the repository root;
+`hyu-compass/Sources/` contains the app, evaluator, Docker Compose file, and shell scripts.
 
 You will need **three terminal windows** at the end:
 
@@ -50,7 +50,7 @@ different setup.
 
 ## 3. Python dependencies
 
-From `hyu-compass/`:
+From `hyu-compass/Sources/`:
 
 ```bash
 conda activate RAG
@@ -64,7 +64,7 @@ python -m pip install -r backend/requirements.txt
 The databases need a password. We keep secrets in `.env` files, which git ignores, so you choose
 your own.
 
-From `hyu-compass/`:
+From `hyu-compass/Sources/`:
 
 ```bash
 cp .env.example .env
@@ -74,7 +74,7 @@ cp backend/.env.example backend/.env
 Open **both** files and replace `change-me-locally` with the same password of your choice. The
 `MONGODB_URI` line in `backend/.env` contains the password too.
 
-Then start the databases (from `hyu-compass/`):
+Then start the databases (from `hyu-compass/Sources/`):
 
 ```bash
 docker compose up -d
@@ -90,7 +90,7 @@ What just happened:
 - Their data is kept in Docker **volumes** (`hyu-compass_mongodb_data`, `hyu-compass_qdrant_data`).
   Stopping the containers keeps the data.
 
-| You want to… | Command (from `hyu-compass/`) |
+| You want to… | Command (from `hyu-compass/Sources/`) |
 |---|---|
 | stop the databases | `docker compose down` |
 | start them again | `docker compose up -d` |
@@ -132,32 +132,32 @@ is refused with the `ollama pull …` command to run.
 **Ingestion** reads the documents, cuts them into chunks, turns every chunk into a vector and
 stores everything in MongoDB and Qdrant. Questions can only be answered after this step.
 
-To practise, use the five sample documents (from `hyu-compass/`):
+To practise, use the five sample documents (from `hyu-compass/Sources/`):
 
 ```bash
 conda activate RAG
-python scripts/ingest.py --path data/samples
+python scripts/ingest.py --path HYU/synthetic_fixture
 ```
 
 ✅ **Success looks like:**
 
 ```text
-Ingesting data/samples (chunk size 256, overlap 32) …
-  ✓ samples/course_registration.md           6 chunks  Course Registration Handbook (Sample)
-  ✓ samples/erica_housing.md                 5 chunks  ERICA Campus Housing Notice (Sample)
-  ✓ samples/orientation_guide.md             6 chunks  New Student Orientation Guide (Sample)
-  ✓ samples/scholarships.html                5 chunks  Scholarship Application Guide (Sample)
-  ✓ samples/student_services.txt             1 chunks  Student Services Overview (Sample)
+Ingesting HYU/synthetic_fixture (chunk size 256, overlap 32) …
+  ✓ HYU/synthetic_fixture/course_registration.md    6 chunks  Course Registration Handbook (Sample)
+  ✓ HYU/synthetic_fixture/erica_housing.md          5 chunks  ERICA Campus Housing Notice (Sample)
+  ✓ HYU/synthetic_fixture/orientation_guide.md      6 chunks  New Student Orientation Guide (Sample)
+  ✓ HYU/synthetic_fixture/scholarships.html         5 chunks  Scholarship Application Guide (Sample)
+  ✓ HYU/synthetic_fixture/student_services.txt      1 chunks  Student Services Overview (Sample)
 Done: 5 documents, 23 chunks, 384-dimensional vectors.
 ```
 
 The first run downloads the embedding model (~130 MB) and takes longer.
 
-**Your real documents:** copy PDF, TXT, Markdown or HTML files into `data/raw/` (sub-folders are
+**Your real documents:** copy PDF, TXT, Markdown or HTML files into `data/HYU/raw/` (sub-folders are
 fine), then run:
 
 ```bash
-python scripts/ingest.py --path data/raw
+python scripts/ingest.py --path HYU/raw
 ```
 
 Ingestion **replaces** the whole index with the folder you give it. You can also change the chunk
@@ -165,7 +165,7 @@ settings: `--chunk-size 128 --chunk-overlap 16`.
 
 ## 7. Start the backend
 
-In **terminal 2** (stays open), from `hyu-compass/`:
+In **terminal 2** (stays open), from `hyu-compass/Sources/`:
 
 ```bash
 conda activate RAG
@@ -183,7 +183,7 @@ Check it in your browser:
 
 ## 8. Start the frontend
 
-In **terminal 3** (stays open), from `hyu-compass/`:
+In **terminal 3** (stays open), from `hyu-compass/Sources/`:
 
 ```bash
 cd frontend
@@ -209,26 +209,26 @@ say it could not find enough information instead of guessing.
 
 ## 10. Run the tests
 
-From `hyu-compass/`:
+Run each command from `hyu-compass/`:
 
 ```bash
 conda activate RAG
-cd backend && python -m pytest          # backend tests (no Docker or Ollama needed)
-cd .. && python -m pytest evaluation/tests   # metric and runner tests (no Docker or Ollama needed)
-cd frontend && npm test && npm run build
+(cd Sources/backend && pytest -q)                    # backend tests (no Docker or Ollama needed)
+(cd Sources && pytest -q evaluation/tests)           # metric and runner tests (no Docker or Ollama needed)
+(cd Sources/frontend && npm test && npm run typecheck)
 ```
 
-✅ Every test reports `passed` and the build ends with `✓ built in …`.
+✅ The test commands report `passed`, and the typecheck exits without errors.
 
 ## 11. Common errors and fixes
 
 | What you see | Why | Fix |
 |---|---|---|
 | `docker: command not found` | Docker Desktop is not installed or not running | Install/open Docker Desktop |
-| `set MONGO_ROOT_USERNAME in .env` | `.env` is missing | `cp .env.example .env` (from `hyu-compass/`) |
+| `set MONGO_ROOT_USERNAME in .env` | `.env` is missing | `cp .env.example .env` (from `hyu-compass/Sources/`) |
 | `/api/health` → mongodb `Authentication failed` | passwords in `.env` and `backend/.env` differ | make them equal. If you changed the password *after* the first `docker compose up`, the old one is still stored in the volume: use the old one, or reset with `docker compose down -v` (deletes data) |
 | `/api/health` → mongodb or qdrant `Connection refused` | databases not started | `docker compose up -d` |
-| Chat: *"No documents are indexed yet"* | ingestion has not been run | `python scripts/ingest.py --path data/samples` |
+| Chat: *"No documents are indexed yet"* | ingestion has not been run | `python scripts/ingest.py --path HYU/synthetic_fixture` |
 | Chat: *"Cannot reach Ollama"* | Ollama is not running | open the Ollama app or run `ollama serve` |
 | Chat: *"No Ollama models are installed"* | no model downloaded | `ollama pull qwen3:4b` |
 | Chat: *"The model used all 'Max generated tokens' before answering"* | a thinking model (qwen3) spent the tokens on hidden reasoning | Configuration tab → **Generation** → **Max generated tokens** → 2048 (Thinking is *off* by default) |
@@ -237,22 +237,22 @@ cd frontend && npm test && npm run build
 | Chat: *"This index has no HNSW graph"* | `search_mode: hnsw` on a small index | use `exact`, or an index built with indexing threshold 1 (preset O8) |
 | Chat: *"… does not fit the context window"* | evidence + max tokens > context window | select less evidence or raise **Context window** (Generation → Advanced) |
 | UI: *"Cannot reach the backend"* | backend not running | start it (step 7) |
-| `ModuleNotFoundError: No module named 'app'` | uvicorn started from the wrong folder | run it from `hyu-compass/backend/` |
+| `ModuleNotFoundError: No module named 'app'` | uvicorn started from the wrong folder | run it from `hyu-compass/Sources/backend/` |
 | `ModuleNotFoundError` for fastapi, qdrant_client, … | wrong Python environment | `conda activate RAG` |
 | Port 8000/5173 already in use | an old server is still running | close the other terminal, or stop it with Ctrl+C |
 | Embedding model download fails | no internet on first run | connect once; afterwards it is cached |
 
 ### Running without Docker (fallback)
 
-Qdrant can run inside the backend process: set `QDRANT_PATH=qdrant_data` in `backend/.env` (the
-folder is created inside `backend/`). Only one program can open that folder at a time, so stop the
+Qdrant can run inside the backend process: set `QDRANT_PATH=qdrant_data` in `Sources/backend/.env` (the
+folder is created inside `Sources/backend/`). Only one program can open that folder at a time, so stop the
 backend before running `scripts/ingest.py`, or re-index from the app's Configuration tab (Ingestion section) instead.
 MongoDB still needs Docker (or a local MongoDB installation).
 
 ## 12. Benchmarks (optional)
 
-The benchmark runner (`evaluation/`, see [06_BENCHMARK_AND_EVALUATION.md](06_BENCHMARK_AND_EVALUATION.md))
-uses the same Conda environment. From `hyu-compass/`:
+The benchmark runner (`Sources/evaluation/`, see [06_BENCHMARK_AND_EVALUATION.md](06_BENCHMARK_AND_EVALUATION.md))
+uses the same Conda environment. From `hyu-compass/Sources/`:
 
 ```bash
 conda activate RAG
@@ -263,5 +263,5 @@ python -m evaluation.runner --suite all --smoke            # a few minutes: 5 qu
 ```
 
 ✅ The dry run lists every task as `READY`, `NOT_APPLICABLE` or `SHARED`; the smoke run ends with
-`Reports: evaluation/results/smoke/summary.md`. The full run (`--suite all`) takes hours on a laptop.
+`Reports: results/smoke/summary.md`. The full run (`--suite all`) takes hours on a laptop.
 

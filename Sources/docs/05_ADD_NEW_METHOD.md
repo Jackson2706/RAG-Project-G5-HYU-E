@@ -6,18 +6,18 @@ won't touch the pipeline runner, the API or the React code. At the end you find 
 methods that are still skeletons, and pointers to the implemented baselines you can learn from.
 
 > **Before you start:** the app runs ([01_GETTING_STARTED.md](01_GETTING_STARTED.md)), `python -m pytest`
-> passes in `backend/`, and you have read [03_ABSTRACT_CLASSES.md](03_ABSTRACT_CLASSES.md) and
+> passes in `Sources/backend/`, and you have read [03_ABSTRACT_CLASSES.md](03_ABSTRACT_CLASSES.md) and
 > [04_METHOD_REGISTRY.md](04_METHOD_REGISTRY.md).
 
 **The recipe for every method:**
 
 | # | What | Where |
 |---|---|---|
-| 1 | Open the block folder and read `base.py` | `backend/app/rag/blocks/<group>/<block>/` |
+| 1 | Open the block folder and read `base.py` | `Sources/backend/app/rag/blocks/<group>/<block>/` |
 | 2 | Create the algorithm's file (a subclass) | same folder, one file per algorithm |
 | 3 | Implement the abstract method | your class |
-| 4 | Register it (start with `implemented=False`) with its hyperparameters | `backend/app/rag/registry.py` |
-| 5 | Write a test | `backend/tests/` |
+| 4 | Register it (start with `implemented=False`) with its hyperparameters | `Sources/backend/app/rag/registry.py` |
+| 5 | Write a test | `Sources/backend/tests/` |
 | 6 | Mark it implemented | `registry.py` |
 | 7–8 | Select it in the UI and inspect its real input and output | browser |
 | 9 | Measure it against B0 | a preset + `python -m evaluation.runner` |
@@ -41,7 +41,7 @@ diverse:  c1 c3 c5   (max 1 per document) → 3 documents
 
 ### Step 1 — Open the folder and read `base.py`
 
-`backend/app/rag/blocks/evidence/evidence_selection/base.py`:
+`Sources/backend/app/rag/blocks/evidence/evidence_selection/base.py`:
 
 ```python
 class BaseEvidenceSelector(PipelineBlock):
@@ -58,7 +58,7 @@ short examples.
 
 ### Steps 2 and 3 — Create the subclass and implement `select`
 
-Create `backend/app/rag/blocks/evidence/evidence_selection/diverse_selector.py`:
+Create `Sources/backend/app/rag/blocks/evidence/evidence_selection/diverse_selector.py`:
 
 ```python
 """IMPLEMENTED — keep the best evidence, but at most N chunks per document."""
@@ -95,7 +95,7 @@ input order is kept (rank order), and the output is real `Evidence` objects — 
 
 ### Step 4 — Register the class and its hyperparameters
 
-In `backend/app/rag/registry.py`, add the import next to the other evidence-selection imports:
+In `Sources/backend/app/rag/registry.py`, add the import next to the other evidence-selection imports:
 
 ```python
 from app.rag.blocks.evidence.evidence_selection.diverse_selector import DiverseDocumentSelector
@@ -118,7 +118,7 @@ default is outside its range.
 
 ### Step 5 — Add a test
 
-Create `backend/tests/test_diverse_selector.py`:
+Create `Sources/backend/tests/test_diverse_selector.py`:
 
 ```python
 import pytest
@@ -150,8 +150,8 @@ async def test_fewer_documents_than_top_k_and_empty_input(services):
     assert await selector.select([]) == []
 ```
 
-The `services` fixture (`backend/tests/conftest.py`) uses an in-memory MongoDB and a fake embedding
-model, so no Docker is needed. Run, from `backend/`:
+The `services` fixture (`Sources/backend/tests/conftest.py`) uses an in-memory MongoDB and a fake embedding
+model, so no Docker is needed. Run, from `Sources/backend/`:
 
 ```bash
 conda activate RAG
@@ -182,7 +182,7 @@ Then switch back to *Top-K (baseline)* and ask again: the answer's sources show 
 
 ### Step 9 — Measure it
 
-Give it a preset in `backend/app/rag/presets.py` (in the online section):
+Give it a preset in `Sources/backend/app/rag/presets.py` (in the online section):
 
 ```python
     {"id": "R15_DIVERSE_SELECTION", "kind": "online", "name": "R15 — Diverse evidence selection",
@@ -190,19 +190,19 @@ Give it a preset in `backend/app/rag/presets.py` (in the online section):
      "stages": {"evidence_selection": {"method": "diverse_documents", "params": {"top_k": 3, "max_per_document": 1}}}},
 ```
 
-and one line in `evaluation/configs/online.yaml` under `experiments:`:
+and one line in `Sources/evaluation/configs/online.yaml` under `experiments:`:
 
 ```yaml
   - {id: R15_DIVERSE_SELECTION, preset: R15_DIVERSE_SELECTION, protocols: [B]}
 ```
 
-Run it (the SciFact O0 index is reused if it exists, otherwise built first):
+Run it from `Sources/` (the SciFact O0 index is reused if it exists, otherwise built first):
 
 ```bash
 python -m evaluation.runner --suite retrieval --dataset scifact --experiment B0_BASIC_DENSE_RAG,R15_DIVERSE_SELECTION --run-id tutorial
 ```
 
-Open `evaluation/results/tutorial/retrieval_comparison.csv` and compare the two rows: the ranking
+Open `results/tutorial/retrieval_comparison.csv` and compare the two rows: the ranking
 metrics (nDCG@10, Recall@100) are **identical** — evidence selection does not change the ranking —
 while `duplicate_doc_rate_in_selection` and `selected_doc_recall` show what your method changes.
 That separation (ranking vs selection) is exactly why the report keeps them in different columns.
@@ -226,7 +226,7 @@ That separation (ranking vs selection) is exactly why the report keeps them in d
 
 ## Learn from the implemented baselines
 
-Every method below is a complete, tested example of the recipe (tests: `backend/tests/test_methods.py`).
+Every method below is a complete, tested example of the recipe (tests: `Sources/backend/tests/test_methods.py`).
 
 | You want to… | Read |
 |---|---|
@@ -251,7 +251,7 @@ Each has a folder, an abstract class, a skeleton with TODO steps and a registry 
 | Idea | split each section into sentences; embed them (`self.services.embedder.embed_documents`); start a new chunk where neighbouring sentences are not similar |
 | Parameters | `similarity_threshold` (e.g. 0.6), `max_tokens` (`scope="ingestion"`) |
 | Must keep | real token counts and source spans (`start`, `end`) like the other chunkers — the manifest reports invalid spans |
-| Measure | add an O-preset (copy O5) and a line in `evaluation/configs/offline.yaml` |
+| Measure | add an O-preset (copy O5) and a line in `Sources/evaluation/configs/offline.yaml` |
 
 ### LLM query understanding (`query_processing/query_understanding/llm_understanding.py`)
 

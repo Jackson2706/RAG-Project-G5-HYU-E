@@ -1,6 +1,6 @@
 # 04 · The Method Registry
 
-`backend/app/rag/registry.py` is the **single list** of every pipeline block, every algorithm for
+`Sources/backend/app/rag/registry.py` is the **single list** of every pipeline block, every algorithm for
 each block, its implementation status and its hyperparameters. Nothing else in the project keeps
 such a list. The API, the UI and the pipeline runner all read it.
 
@@ -206,7 +206,7 @@ from there, so prefiltering and postfiltering always enforce the same conditions
 
 ## Experiment presets
 
-`backend/app/rag/presets.py` names complete configurations: `B0_BASIC_DENSE_RAG`, the offline
+`Sources/backend/app/rag/presets.py` names complete configurations: `B0_BASIC_DENSE_RAG`, the offline
 baselines `O0`–`O8` (plus `PROTOCOL_A_WHOLE_DOCUMENT`) and the online baselines `R0`–`R14`, and a
 disabled `PROPOSED_APPROACH`. A preset stores **only** method IDs and parameter values; everything else
 comes from the registry, and `preset_config(id, overrides)` validates it with `validate_config()`:
@@ -220,7 +220,7 @@ comes from the registry, and `preset_config(id, overrides)` validates it with `v
 ```
 
 `GET /api/pipeline/presets` sends them (with their validated configs) to the **Experiment preset**
-menu; the benchmark runner (`evaluation/`) runs the same presets.
+menu; the benchmark runner (`Sources/evaluation/`) runs the same presets.
 
 ## The configuration a request carries
 
@@ -265,7 +265,7 @@ The UI shows each message under the right control and blocks sending until it is
 
 ## How the runner uses the registry
 
-In `run_rag()` (`backend/app/rag/pipeline.py`):
+In `run_rag()` (`Sources/backend/app/rag/pipeline.py`):
 
 ```python
 blocks = {s.stage_id: create_block(s.stage_id, config[s.stage_id]["method"], config[s.stage_id]["params"], services)
@@ -286,7 +286,7 @@ postfiltered = await step("metadata_postfiltering", lambda b: b.filter_candidate
 
 ## How React renders it
 
-| Registry information | UI result (file in `frontend/src/components/pipeline/`) |
+| Registry information | UI result (file in `Sources/frontend/src/components/pipeline/`) |
 |---|---|
 | block has no implemented method | darkened block, "Not implemented", disabled method list (`DisabledStage.tsx`) |
 | block has an implemented method | normal card with a method dropdown (`StageConfigCard.tsx`) |

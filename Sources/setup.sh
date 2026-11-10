@@ -8,7 +8,7 @@
 # 3. installs the Python packages into the Conda environment `RAG` (creates it only if missing)
 # 4. installs the frontend packages (npm ci)
 # 5. starts MongoDB + Qdrant (docker compose) and downloads an Ollama model if none is installed
-# 6. indexes data/samples, but only when the index is still empty
+# 6. indexes the synthetic HYU fixture, but only when the index is still empty
 set -euo pipefail
 cd "$(dirname "$0")"
 
@@ -81,9 +81,9 @@ step "Document index"
 chunks=$(cd backend && conda run -n "$ENV_NAME" python -c \
   "from app.config import get_settings; from app.database import Database; print(Database.connect(get_settings()).chunks.count_documents({}))" 2>/dev/null | tail -1) || chunks=error
 case "$chunks" in
-  0) conda run -n "$ENV_NAME" --no-capture-output python scripts/ingest.py --path data/samples ;;
-  error) warn "Could not read the index. Check the logs above, then run: conda run -n $ENV_NAME python scripts/ingest.py --path data/samples" ;;
-  *) echo "Index already has $chunks chunks; not re-indexing. (To index your own files: conda run -n $ENV_NAME python scripts/ingest.py --path data/raw)" ;;
+  0) conda run -n "$ENV_NAME" --no-capture-output python scripts/ingest.py --path HYU/synthetic_fixture ;;
+  error) warn "Could not read the index. Check the logs above, then run: conda run -n $ENV_NAME python scripts/ingest.py --path HYU/synthetic_fixture" ;;
+  *) echo "Index already has $chunks chunks; not re-indexing. (To index your own files: conda run -n $ENV_NAME python scripts/ingest.py --path HYU/raw)" ;;
 esac
 
 step "Setup complete"

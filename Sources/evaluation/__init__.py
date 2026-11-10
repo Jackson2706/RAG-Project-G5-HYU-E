@@ -1,6 +1,6 @@
 """HYU Compass headless evaluation: BEIR benchmarks and RAG evaluation without the UI or FastAPI.
 
-Run from the project root (hyu-compass/) with the Conda environment `RAG`:
+Run from the Sources/ folder with the Conda environment `RAG`:
 
     python -m evaluation.runner --suite all --dry-run
     python -m evaluation.runner --suite all

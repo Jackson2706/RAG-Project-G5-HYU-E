@@ -6,7 +6,7 @@ how to run every experiment with one command, and how to read the results. Read
 same pipeline the app runs.
 
 > **One implementation of every algorithm.** The benchmark runner imports the app's registry,
-> presets and `run_rag()` (from `backend/app/`). There is no second BM25, no second retriever, no
+> presets and `run_rag()` (from `Sources/backend/app/`). There is no second BM25, no second retriever, no
 > second pipeline. If a method works in the UI, the benchmark measures exactly that code.
 
 ---
@@ -19,13 +19,13 @@ flowchart LR
     B["BEIR: SciFact · NFCorpus · ArguAna<br/>(corpus, queries, qrels)"]
     F["HYU fixture: 5 synthetic documents<br/>+ author-written labels"]
   end
-  subgraph app["backend/app (the app's code)"]
+  subgraph app["Sources/backend/app (the app's code)"]
     P["presets.py → registry.py<br/>validate_config()"]
     I["index_documents()<br/>(chunk → embed → index)"]
     R["run_rag(…, stop_after=…)"]
     A["answer_from_evidence()"]
   end
-  subgraph eval["evaluation/"]
+  subgraph eval["Sources/evaluation/"]
     RUN["runner.py"] --> RAW["results/&lt;run&gt;/raw/*.jsonl<br/>(per query)"]
     RAW --> REP["reports.py + metrics/ + failure_analysis.py"]
     REP --> OUT["summary.md · *.csv · results.json"]
@@ -67,11 +67,12 @@ simply never judged — it is not necessarily irrelevant.
 the right documents were *retrieved*, but not whether a generated *answer* is correct. Answer
 quality therefore needs separate, human annotations (section 9) — we never compute it from qrels.
 
-**Download** (once; files stay in `evaluation/datasets/`, which is not committed to Git). Each
+**Download** (once; files stay in `data/benchmarks/`, which is not committed to Git). Each
 archive's MD5 checksum is checked against the value published in the BEIR README:
 
 ```bash
 conda activate RAG
+cd Sources
 python -m evaluation.runner --download scifact,nfcorpus,arguana
 ```
 
@@ -110,7 +111,7 @@ only affects rank 100).
 
 ## 4. The baselines
 
-All presets live in `backend/app/rag/presets.py`. A preset only stores method IDs and parameter
+All presets live in `Sources/backend/app/rag/presets.py`. A preset only stores method IDs and parameter
 values; the registry validates it. You can select every preset in the UI (**Configuration →
 Experiment preset**) and run it in the benchmark.
 
@@ -151,7 +152,7 @@ as the overlap of the HNSW top-k with the exact top-k on identical vectors and q
 
 ### Online baselines (all on the O0 index, exact search)
 
-| Preset | What changes | Implemented in (`backend/app/rag/blocks/…`) | Main hyperparameters |
+| Preset | What changes | Implemented in (`Sources/backend/app/rag/blocks/…`) | Main hyperparameters |
 |---|---|---|---|
 | R0 Dense | — (= B0; results shared) | `retrieval/dense_retrieval/qdrant_cosine.py` | `top_k`, `search_mode`, `hnsw_ef` |
 | R1 BM25 | lexical retrieval only | `retrieval/lexical_retrieval/bm25.py` | `top_k`, `k1` 1.2, `b` 0.75 |
@@ -180,8 +181,8 @@ student states. Both filters build their predicate with the same `FilterCriteria
 
 ## 5. Running experiments
 
-Start MongoDB and Qdrant (`./start.sh` or `docker compose up -d`) and, for LLM methods, Ollama.
-Everything below runs from the `hyu-compass/` folder with `conda activate RAG`.
+Start MongoDB and Qdrant from `Sources/` (`./start.sh` or `docker compose up -d`) and, for LLM methods, Ollama.
+Everything below runs from `hyu-compass/Sources/` with `conda activate RAG`.
 
 ```bash
 # 1. Check every configuration, dataset and model — nothing heavy is loaded
@@ -212,7 +213,7 @@ python -m evaluation.reports --run-id main
 Options: `--split` (default `test`), `--run-id` (results folder, default `main`),
 `--max-queries N` (limit per task; recorded in the manifest).
 
-**What `--suite all` runs** is declared in `evaluation/configs/` *before* running:
+**What `--suite all` runs** is declared in `Sources/evaluation/configs/` *before* running:
 
 | File | Declares |
 |---|---|
@@ -247,8 +248,8 @@ benchmark index (its offline settings are copied in so the query embedding match
 
 ## 6. The metrics
 
-All retrieval metrics are computed per query from the saved rankings (`evaluation/metrics/retrieval.py`)
-and averaged over queries. They match the official `pytrec_eval` (tested in `evaluation/tests/`)
+All retrieval metrics are computed per query from the saved rankings (`Sources/evaluation/metrics/retrieval.py`)
+and averaged over queries. They match the official `pytrec_eval` (tested in `Sources/evaluation/tests/`)
 and reproduce the Lesson 6 slide examples exactly.
 
 | Metric | Question it answers | Definition |
@@ -336,9 +337,9 @@ is LLM-based.
 
 Answer correctness, relevance, completeness, reference coverage, exact match, token F1, grounding
 support, citation precision and citation coverage all need **human labels per case**.
-`evaluation/annotations/qa_annotations.jsonl` lists every generation case as `pending`; follow
-`evaluation/annotations/README.md` to annotate. Annotated cases are scored automatically on the next
-`python -m evaluation.reports`. The metric code (`evaluation/metrics/answer.py`, `attribution.py`)
+`data/HYU/labels/legacy/qa_annotations.jsonl` lists every generation case as `pending`; follow
+`data/HYU/labels/legacy/README.md` to annotate. Annotated cases are scored automatically on the next
+`python -m evaluation.reports`. The metric code (`Sources/evaluation/metrics/answer.py`, `attribution.py`)
 is already tested on the Lesson 6 examples (grounding 3/4, citation precision 1/3, coverage 1/4).
 
 Two different things, never mixed: **marker validity** (does `[E2]` point to a real evidence block?
@@ -349,12 +350,12 @@ Two different things, never mixed: **marker validity** (does `[E2]` point to a r
 ## 10. Prefiltering vs Postfiltering and the gate (HYU fixture)
 
 BEIR has no eligibility metadata, so R9/R10 are `NOT_APPLICABLE` there. They run on a **controlled
-fixture**: the five synthetic HYU sample documents (`data/samples/`) and
-`evaluation/fixtures/hyu_metadata_queries.jsonl` (10 questions with stated criteria). Eligibility is
+fixture**: the five synthetic HYU sample documents (`data/HYU/synthetic_fixture/`) and
+`Sources/evaluation/fixtures/hyu_metadata_queries.jsonl` (10 questions with stated criteria). Eligibility is
 computed from each document's declared metadata by the pipeline's own predicate. R0, R9 and R10 use
 the same candidate cutoff (Top 2), so postfiltering's **starvation** becomes visible.
 
-The **gate** (R12) is scored on the 14 questions of `data/eval/sample_questions.jsonl` with a derived
+The **gate** (R12) is scored on the 14 questions of `data/HYU/labels/legacy/sample_questions.jsonl` with a derived
 label: sufficient = the question is answerable **and** a relevant document is among the selected
 evidence. Convention (Lesson 6): actual positive = sufficient, predicted positive = proceed.
 These labels were written by the project authors — the numbers show behaviour, not real-world accuracy.
@@ -363,7 +364,7 @@ These labels were written by the project authors — the numbers show behaviour,
 
 ## 11. Reading the reports
 
-`evaluation/results/<run-id>/`:
+`results/<run-id>/`:
 
 | File | Content |
 |---|---|
@@ -379,7 +380,7 @@ These labels were written by the project authors — the numbers show behaviour,
 
 ### Failure categories
 
-`evaluation/failure_analysis.py` labels each failed query with the **earliest** observable faulty
+`Sources/evaluation/failure_analysis.py` labels each failed query with the **earliest** observable faulty
 stage (plus secondary labels):
 
 | Category | How it is detected |
@@ -401,8 +402,8 @@ stage (plus secondary labels):
 
 1. Implement it as one or more methods in the right block folders (see
    [05_ADD_NEW_METHOD.md](05_ADD_NEW_METHOD.md)) and register them in `registry.py` with tests.
-2. In `backend/app/rag/presets.py`, give `PROPOSED_APPROACH` its `stages` and remove `"enabled": False`.
-3. In `evaluation/configs/online.yaml`, replace its `not_applicable` line with
+2. In `Sources/backend/app/rag/presets.py`, give `PROPOSED_APPROACH` its `stages` and remove `"enabled": False`.
+3. In `Sources/evaluation/configs/online.yaml`, replace its `not_applicable` line with
    `{id: PROPOSED_APPROACH, preset: PROPOSED_APPROACH, protocols: [B]}` (add `llm: true` if it calls an LLM).
 4. Tune on a development split only (`--split dev` on NFCorpus, or SciFact `train`), freeze the
    values, then run `python -m evaluation.runner --suite retrieval --experiment PROPOSED_APPROACH`.

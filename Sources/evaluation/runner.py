@@ -9,7 +9,7 @@
 
 Each task (experiment × dataset × protocol) ends as COMPLETED, NOT_APPLICABLE, BLOCKED (a model or
 service is missing) or FAILED (an error) — with the reason. Per-query results are appended to
-evaluation/results/<run-id>/raw/ as they are produced, so an interrupted run can be resumed.
+results/<run-id>/raw/ as they are produced, so an interrupted run can be resumed.
 Metrics and reports are computed from those files by evaluation/reports.py.
 """
 
@@ -34,7 +34,7 @@ from evaluation import ROOT, beir
 from evaluation.indexes import ensure_folder_index, ensure_index, index_id
 from evaluation.reports import load_jsonl, write_reports
 
-from app.config import get_settings  # noqa: E402  (evaluation/__init__ puts backend/ on the path)
+from app.config import DATA_DIR, REPO_ROOT, RESULTS_DIR, get_settings  # noqa: E402  (evaluation/__init__ puts backend/ on the path)
 from app.database import Database
 from app.ollama import OllamaClient, OllamaError
 from app.rag.pipeline import answer_from_evidence, run_rag
@@ -43,7 +43,7 @@ from app.rag.registry import ConfigError, create_block
 from app.rag.schemas import Evidence, FilterCriteria, Services
 
 EVAL_DIR = ROOT / "evaluation"
-CONFIG_DIR, RESULTS_DIR = EVAL_DIR / "configs", EVAL_DIR / "results"
+CONFIG_DIR = EVAL_DIR / "configs"
 SMOKE_QUERIES, SMOKE_EXTRA_DOCS = 5, 300
 STOP_AFTER = "evidence_sufficiency"  # retrieval-only: never generate an answer for BEIR ranking metrics
 
@@ -310,16 +310,16 @@ async def run_fixture_task(run: Run, task: Task) -> dict:
     """R0 / R9 / R10 on the metadata fixture, or R12's gate on the HYU sample questions."""
     fixture = run.online["fixture"]
     offline = preset_config("O0_SECTION_AWARE_256_32")
-    db, _ = ensure_folder_index(run.services, fixture["index"], offline, ROOT / "data" / "samples", force=run.args.force)
+    db, _ = ensure_folder_index(run.services, fixture["index"], offline, DATA_DIR / "HYU" / "synthetic_fixture", force=run.args.force)
     documents = {d["doc_id"]: d for d in db.documents.find({}, {"_id": 0})}
     services = Services(db=db, ollama=run.ollama, settings=run.settings)
     path = run.raw_file(task)
     done = read_done(path)
     cutoff = fixture["candidate_cutoff"]
     if task.experiment == "R12_SUFFICIENCY_GATE":
-        cases = [{"qid": q["qid"], **q} for q in load_jsonl(ROOT / fixture["gate_questions"])]
+        cases = [{"qid": q["qid"], **q} for q in load_jsonl(REPO_ROOT / fixture["gate_questions"])]
     else:
-        cases = [{"qid": c["case_id"], **c} for c in load_jsonl(ROOT / fixture["metadata_queries"])]
+        cases = [{"qid": c["case_id"], **c} for c in load_jsonl(REPO_ROOT / fixture["metadata_queries"])]
     for case in cases:
         if case["qid"] in done:
             continue
@@ -357,8 +357,8 @@ async def generation_cases(run: Run) -> list[dict]:
         _, queries, _ = run.dataset(ds)
         db = run.index(ds, run.online["index"])
         wanted += [(f"{ds}:{q}", ds, queries[q], db) for q in sorted(queries)[:per_dataset]]
-    hyu_db, _ = ensure_folder_index(run.services, run.online["fixture"]["index"], preset_config("O0_SECTION_AWARE_256_32"), ROOT / "data" / "samples")
-    hyu = load_jsonl(ROOT / spec["hyu_fixture"])[: 2 if run.args.smoke else None]
+    hyu_db, _ = ensure_folder_index(run.services, run.online["fixture"]["index"], preset_config("O0_SECTION_AWARE_256_32"), DATA_DIR / "HYU" / "synthetic_fixture")
+    hyu = load_jsonl(REPO_ROOT / spec["hyu_fixture"])[: 2 if run.args.smoke else None]
     wanted += [(f"hyu_fixture:{q['qid']}", "hyu_fixture", q["question"], hyu_db) for q in hyu]
     config = preset_config(run.generation["retrieval_preset"])
     for case_id, ds, question, db in wanted:
@@ -481,7 +481,7 @@ async def main_async(args) -> int:
     except OllamaError:
         installed = None
     health = run.db.check()
-    print(f"Run '{run.run_id}' → {run.dir.relative_to(ROOT)}   split={run.split}   smoke={args.smoke}")
+    print(f"Run '{run.run_id}' → {run.dir}   split={run.split}   smoke={args.smoke}")
     print(f"MongoDB: {'ok' if health['mongodb']['ok'] else 'NOT reachable'} · Qdrant: {'ok' if health['qdrant']['ok'] else 'NOT reachable'}"
           f" · Ollama: {', '.join(sorted(installed)) if installed is not None else 'NOT reachable'}")  # fmt: skip
     for t in tasks:
@@ -533,7 +533,7 @@ async def main_async(args) -> int:
         run.save_status()
         print(f"  → {run.status[t.key]['status']} {run.status[t.key].get('reason', '')}", flush=True)
     write_reports(run.dir)
-    print(f"\nReports: {(run.dir / 'summary.md').relative_to(ROOT)}")
+    print(f"\nReports: {run.dir / 'summary.md'}")
     return 0
 
 
@@ -547,7 +547,7 @@ def main() -> int:
     parser.add_argument("--smoke", action="store_true", help=f"{SMOKE_QUERIES} queries on a small corpus slice, separate indexes and run")
     parser.add_argument("--resume", action="store_true", help="continue tasks of an existing run (skip finished queries)")
     parser.add_argument("--force", action="store_true", help="recompute tasks and rebuild their indexes")
-    parser.add_argument("--run-id", help="results folder name under evaluation/results/ (default: main, or smoke)")
+    parser.add_argument("--run-id", help="results folder name under results/ (default: main, or smoke)")
     parser.add_argument("--max-queries", type=int, help="limit queries per task (recorded in the run manifest)")
     parser.add_argument("--download", help="download BEIR datasets (comma-separated) and exit")
     args = parser.parse_args()

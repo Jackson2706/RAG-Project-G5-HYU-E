@@ -47,7 +47,7 @@ Dense Retrieval, Lexical Retrieval and Hybrid Fusion are all in `blocks/retrieva
 also decides the heading the UI shows above those blocks (`GROUPS` in `registry.py`).
 
 ```text
-backend/app/
+Sources/backend/app/
 ├── main.py  config.py  api.py  database.py  ollama.py  tracing.py
 └── rag/
     ├── schemas.py       the data passed between blocks (Candidate, Evidence, FilterCriteria, …)
@@ -99,7 +99,7 @@ retrieval and postfiltering after it.
 ✓ = implemented and tested. The few files without ✓ (web loader, semantic chunker, LLM metadata
 extraction, Ollama embeddings, LLM query understanding, metadata-aware reranking) are **teaching
 skeletons** with TODO steps that raise `NotImplementedError`; the UI shows them greyed out.
-Next to the app, `evaluation/` (repository root) measures every method on BEIR with the same code —
+Next to the app, `Sources/evaluation/` measures every method on BEIR with the same code —
 see [06_BENCHMARK_AND_EVALUATION.md](06_BENCHMARK_AND_EVALUATION.md).
 
 ---
@@ -131,7 +131,7 @@ chunk 2:              t5 t6 t7 t8 t9 t10      ← t5 t6 appear twice (the overla
 ```
 
 Chunk size and overlap are **ingestion** settings: they only change after **re-indexing**
-(Configuration tab → Ingestion → *Re-index*, or `python scripts/ingest.py --chunk-size 128 …`).
+(Configuration tab → Ingestion → *Re-index*, or, from `Sources/`, `python scripts/ingest.py --chunk-size 128 …`).
 
 **Embedding.** Texts with similar meaning get vectors pointing in similar directions. The **same**
 model must embed documents and questions, because each model has its own "coordinate system".
@@ -167,7 +167,7 @@ files gives the same IDs.
 
 Steps 4–6 together are **Candidate Retrieval**. The UI groups them under that name. "Optional" stages
 are off in B0 (the basic RAG) and can be switched on per question in the Configuration tab, or all at
-once with an **experiment preset** (`backend/app/rag/presets.py`, e.g. *R2 — Hybrid RRF*).
+once with an **experiment preset** (`Sources/backend/app/rag/presets.py`, e.g. *R2 — Hybrid RRF*).
 
 ### Before retrieval: query understanding and rewriting
 

@@ -7,12 +7,17 @@ of the registered methods in app/rag/registry.py.
 
 from __future__ import annotations
 
+import os
 from functools import lru_cache
 from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BACKEND_DIR = Path(__file__).resolve().parent.parent
 PROJECT_ROOT = BACKEND_DIR.parent
+REPO_ROOT = PROJECT_ROOT.parent
+DATA_DIR = Path(os.environ.get("HYU_DATA_DIR", REPO_ROOT / "data"))
+RESULTS_DIR = Path(os.environ.get("HYU_RESULTS_DIR", REPO_ROOT / "results"))
+REPORT_DIR = Path(os.environ.get("HYU_REPORT_DIR", REPO_ROOT / "Report"))
 
 
 class Settings(BaseSettings):
@@ -38,7 +43,7 @@ class Settings(BaseSettings):
     ollama_chat_model: str = ""  # empty = first installed model
     ollama_timeout: float = 120.0
 
-    data_dir: Path = PROJECT_ROOT / "data"
+    data_dir: Path = DATA_DIR
     cors_origins: list[str] = ["http://127.0.0.1:5173", "http://localhost:5173"]
 
 

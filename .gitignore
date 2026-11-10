@@ -1,6 +1,8 @@
 # Secrets and local settings (copy from the *.env.example files)
+# Any .env anywhere (public repo); .env.example files stay tracked
 .env
-backend/.env
+Sources/.env
+Sources/backend/.env
 
 # Python
 __pycache__/
@@ -13,12 +15,16 @@ __pycache__/
 venv/
 
 # Embedded Qdrant data (only when QDRANT_PATH is used instead of Docker)
-backend/qdrant_data/
+Sources/backend/qdrant_data/
 
 # Frontend
-frontend/node_modules/
-frontend/dist/
-frontend/*.tsbuildinfo
+Sources/frontend/node_modules/
+Sources/frontend/dist/
+Sources/frontend/*.tsbuildinfo
+node_modules/
+dist/
+*.tsbuildinfo
+.vite/
 
 # Logs, OS and editor files
 .run/
@@ -28,7 +34,10 @@ frontend/*.tsbuildinfo
 .vscode/
 .claude
 
-# Benchmark data and bulky per-query results (re-created by python -m evaluation.runner)
-evaluation/datasets/
-evaluation/results/*/raw/
-evaluation/results/smoke/
+# Crawled and benchmark data, report inputs, and bulky per-query results
+data/HYU/raw/
+data/benchmarks/*/*
+!data/benchmarks/*/SOURCE.md
+results/*/raw/
+results/smoke*/
+Report/course/

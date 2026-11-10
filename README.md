@@ -15,21 +15,21 @@ like `[E1]` that point to the document text they came from.
 
 ## What the app does
 
-- **Ingests** English documents (PDF, TXT, Markdown, HTML) from `data/raw/`.
+- **Ingests** English documents (PDF, TXT, Markdown, HTML) from `data/HYU/raw/`.
 - **Answers** questions with source references, and abstains honestly when the documents don't contain the answer.
 - **Shows the whole pipeline.** Choose a method and its settings for each block in the
   *Configuration* tab — or a whole **experiment preset** (B0 basic RAG, O0–O8 offline, R0–R14 online:
   BM25, hybrid RRF, cross-encoder, query rewriting, HyDE, metadata pre/postfiltering, a sufficiency
   gate, RankGPT…). The *Execution* tab shows every block's real input, output, parameters and time.
-- **Measures itself.** `python -m evaluation.runner --suite all` runs every baseline on the BEIR
+- **Measures itself.** `cd Sources && python -m evaluation.runner --suite all` runs every baseline on the BEIR
   benchmarks SciFact, NFCorpus and ArguAna (no UI, no FastAPI, the same code as the app), compares
   Llama 2 and Qwen 3.5 on identical evidence, and writes reports with per-query results and failure
   analysis.
 - **Easy to extend.** Every pipeline block is a folder inside a group folder of
-  `backend/app/rag/blocks/` (`ingestion/`, `query_processing/`, `metadata_filtering/`, `retrieval/`,
+  `Sources/backend/app/rag/blocks/` (`ingestion/`, `query_processing/`, `metadata_filtering/`, `retrieval/`,
   `evidence/`, `grounded_generation/`), e.g. `blocks/retrieval/dense_retrieval/`. It holds an
   abstract class (`base.py`) and one file per algorithm. One registry file
-  (`backend/app/rag/registry.py`) lists all methods and hyperparameters, and the UI is built from it.
+  (`Sources/backend/app/rag/registry.py`) lists all methods and hyperparameters, and the UI is built from it.
   To add a method you write a subclass, register it, and test it.
 
 ## Architecture
@@ -51,11 +51,22 @@ flowchart LR
 | Databases | MongoDB (documents, chunks, traces) and Qdrant (vectors), via Docker Compose |
 | LLM | Ollama, running locally |
 
+## Repository layout
+
+```text
+hyu-compass/
+├── Sources/    backend, frontend, evaluation, scripts, docs, and shell commands
+├── data/HYU/   raw sources, snapshots, labels, and the synthetic fixture
+├── results/    one folder per evaluation run
+└── Report/     report prose, slides, figures, tables, and notes
+```
+
 ## Quick start
 
 Needs Conda, Docker Desktop (running), Node.js 20+ and Ollama. From the `hyu-compass/` folder:
 
 ```bash
+cd Sources
 ./setup.sh       # once: .env files, Python + npm packages, MongoDB + Qdrant, Ollama model, sample index
 ./start.sh       # start databases, backend and frontend → http://127.0.0.1:5173 (logs in .run/)
 ./stop.sh        # stop everything; data is kept (--keep-db leaves the databases running)
@@ -63,32 +74,33 @@ Needs Conda, Docker Desktop (running), Node.js 20+ and Ollama. From the `hyu-com
 ```
 
 The same steps by hand (the full tutorial with explanations is in
-[docs/01_GETTING_STARTED.md](docs/01_GETTING_STARTED.md)):
+[Sources/docs/01_GETTING_STARTED.md](Sources/docs/01_GETTING_STARTED.md)):
 
 ```bash
+cd Sources
 cp .env.example .env && cp backend/.env.example backend/.env   # then set a password in both
 docker compose up -d                                          # MongoDB + Qdrant
 ollama pull qwen3:4b                                          # once, if you have no model
 
 conda activate RAG
 python -m pip install -r backend/requirements.txt             # once
-python scripts/ingest.py --path data/samples                  # index the sample documents
-cd backend && python -m uvicorn app.main:app --reload         # backend (keep running)
+python scripts/ingest.py --path HYU/synthetic_fixture         # index the sample documents
+(cd backend && python -m uvicorn app.main:app --reload)       # backend (keep running)
 
-cd frontend && npm ci && npm run dev                          # in a second terminal → http://127.0.0.1:5173
+(cd frontend && npm ci && npm run dev)                        # in a second terminal → http://127.0.0.1:5173
 ```
 
-> The five files in `data/samples/` are **invented** practice documents, not real HYU policy.
-> Put real, approved documents in `data/raw/`.
+> The five files in `data/HYU/synthetic_fixture/` are **invented** practice documents, not real HYU policy.
+> Put real, approved documents in `data/HYU/raw/` and ingest them with `--path HYU/raw`.
 
 ## Documentation
 
 Read them in order:
 
-1. [Getting started](docs/01_GETTING_STARTED.md): install and run everything, step by step.
-2. [RAG architecture](docs/02_RAG_ARCHITECTURE.md): every block, why it exists, and where its code is.
-3. [Abstract classes](docs/03_ABSTRACT_CLASSES.md): how each block is defined and implemented.
-4. [Method registry](docs/04_METHOD_REGISTRY.md): how methods and settings reach the UI.
-5. [Add a new method](docs/05_ADD_NEW_METHOD.md): a hands-on tutorial (start here to contribute).
-6. [Benchmarks and evaluation](docs/06_BENCHMARK_AND_EVALUATION.md): BEIR, the baselines, metrics,
+1. [Getting started](Sources/docs/01_GETTING_STARTED.md): install and run everything, step by step.
+2. [RAG architecture](Sources/docs/02_RAG_ARCHITECTURE.md): every block, why it exists, and where its code is.
+3. [Abstract classes](Sources/docs/03_ABSTRACT_CLASSES.md): how each block is defined and implemented.
+4. [Method registry](Sources/docs/04_METHOD_REGISTRY.md): how methods and settings reach the UI.
+5. [Add a new method](Sources/docs/05_ADD_NEW_METHOD.md): a hands-on tutorial (start here to contribute).
+6. [Benchmarks and evaluation](Sources/docs/06_BENCHMARK_AND_EVALUATION.md): BEIR, the baselines, metrics,
    one-command experiments and how to read the reports.

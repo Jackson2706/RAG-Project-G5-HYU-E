@@ -31,7 +31,7 @@ class ChatRequest(BaseModel):
 
 
 class IngestRequest(BaseModel):
-    folder: str = Field(default="raw", description="Folder inside data/, e.g. 'raw' or 'samples'")
+    folder: str = Field(default="HYU/raw", description="Folder relative to DATA_DIR, e.g. 'HYU/raw' or 'HYU/synthetic_fixture'")
     stages: StageChoices = Field(default_factory=dict, description="Offline methods and parameters (e.g. chunk size)")
 
 
@@ -150,7 +150,7 @@ async def documents(request: Request):
 
 @router.post("/ingest")
 async def ingest(body: IngestRequest, request: Request):
-    """Re-ingest data/<folder> with the offline methods in `stages`. Replaces the whole index."""
+    """Re-ingest DATA_DIR/<folder> with the offline methods in `stages`. Replaces the whole index."""
     config = checked(body.stages)
     data_dir = get_settings().data_dir.resolve()
     folder = (data_dir / body.folder).resolve()

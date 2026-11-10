@@ -81,7 +81,7 @@ the React code stay as they are.
 
 ## 4. How one block folder looks
 
-Take Dense Retrieval, `backend/app/rag/blocks/retrieval/dense_retrieval/`:
+Take Dense Retrieval, `Sources/backend/app/rag/blocks/retrieval/dense_retrieval/`:
 
 ```text
 retrieval/dense_retrieval/
@@ -265,9 +265,9 @@ Returning the wrong type (e.g. a list
 instead of `RetrievalResult`) makes the *next* block fail, and the Execution tab shows it on that
 stage. Always return the type `base.py` promises, and test it.
 
-The backend tests check these rules: `backend/tests/test_blocks.py` (folder layout, abstract classes
-cannot be created, missing methods fail), `backend/tests/test_registry.py` (every registered
-class inherits from the right abstract class) and `backend/tests/test_methods.py` (every baseline
+The backend tests check these rules: `Sources/backend/tests/test_blocks.py` (folder layout, abstract classes
+cannot be created, missing methods fail), `Sources/backend/tests/test_registry.py` (every registered
+class inherits from the right abstract class) and `Sources/backend/tests/test_methods.py` (every baseline
 method on small synthetic inputs).
 
 ### Two optional helpers every block has

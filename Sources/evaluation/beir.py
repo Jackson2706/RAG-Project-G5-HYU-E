@@ -1,7 +1,7 @@
 """BEIR datasets: download (only when asked), checksum verification, loading, and conversion.
 
 Files stay exactly as published (corpus.jsonl, queries.jsonl, qrels/<split>.tsv) in
-evaluation/datasets/<name>/, which is not committed to Git. Original document and query IDs are kept.
+data/benchmarks/<name>/, which is not committed to Git. Original document and query IDs are kept.
 """
 
 from __future__ import annotations
@@ -14,9 +14,10 @@ import zipfile
 from datetime import UTC, datetime
 from pathlib import Path
 
+from app.config import DATA_DIR
 from app.rag.schemas import ParsedDocument, Section
 
-DATASETS_DIR = Path(__file__).resolve().parent / "datasets"
+DATASETS_DIR = DATA_DIR / "benchmarks"
 BASE_URL = "https://public.ukp.informatik.tu-darmstadt.de/thakur/BEIR/datasets"
 
 # MD5 checksums as published in the BEIR README (github.com/beir-cellar/beir).

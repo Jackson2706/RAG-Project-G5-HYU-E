@@ -19,14 +19,14 @@ import numpy as np
 import pytest
 from qdrant_client import QdrantClient
 
-from app.config import PROJECT_ROOT, Settings
+from app.config import DATA_DIR, Settings
 from app.database import Database
 from app.ollama import OllamaClient
 from app.rag.pipeline import run_ingestion
 from app.rag.registry import validate_config
 from app.rag.schemas import Services
 
-SAMPLES = PROJECT_ROOT / "data" / "samples"
+SAMPLES = DATA_DIR / "HYU" / "synthetic_fixture"
 WORD = re.compile(r"\w+(?:[-']\w+)*|[^\w\s]")
 
 # mongomock 4.3 is older than PyMongo 4.19, which passes an extra `sort` argument to bulk updates.

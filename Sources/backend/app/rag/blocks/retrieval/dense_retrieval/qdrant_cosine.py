@@ -35,7 +35,7 @@ class QdrantDenseRetriever(BaseDenseRetriever):
         db, embedder = self.services.db, self.services.embedder
         stored = db.vector_size()
         if stored is None:
-            raise RuntimeError("No documents are indexed yet. Run: python scripts/ingest.py --path data/raw")
+            raise RuntimeError("No documents are indexed yet. Run: python scripts/ingest.py --path HYU/raw")
         start = time.perf_counter()
         # HyDE: a hypothetical passage is embedded like a document (no query instruction).
         vector = embedder.embed_documents([embedding_text])[0] if embedding_text else embedder.embed_query(query)
