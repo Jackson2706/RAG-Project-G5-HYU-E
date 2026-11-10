@@ -11,7 +11,7 @@ from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
-from app.config import get_settings
+from app.config import get_settings, resolve_ingest_folder
 from app.database import DEFAULT_INDEX, Database
 from app.ollama import OllamaError
 from app.rag.pipeline import run_ingestion, run_rag
@@ -31,7 +31,7 @@ class ChatRequest(BaseModel):
 
 
 class IngestRequest(BaseModel):
-    folder: str = Field(default="HYU/raw", description="Folder relative to DATA_DIR, e.g. 'HYU/raw' or 'HYU/synthetic_fixture'")
+    folder: str = Field(default="HYU/raw", description="Folder relative to DATA_DIR, e.g. 'HYU/raw', or 'sample_data' for the sample documents")
     stages: StageChoices = Field(default_factory=dict, description="Offline methods and parameters (e.g. chunk size)")
 
 
@@ -152,9 +152,8 @@ async def documents(request: Request):
 async def ingest(body: IngestRequest, request: Request):
     """Re-ingest DATA_DIR/<folder> with the offline methods in `stages`. Replaces the whole index."""
     config = checked(body.stages)
-    data_dir = get_settings().data_dir.resolve()
-    folder = (data_dir / body.folder).resolve()
-    if not folder.is_relative_to(data_dir) or not folder.is_dir():
+    folder = resolve_ingest_folder(body.folder, get_settings().data_dir)
+    if folder is None or not folder.is_dir():
         raise HTTPException(400, f"'{body.folder}' is not a folder under the configured data directory")
     try:
         return await asyncio.to_thread(run_ingestion, folder, config, services(request))

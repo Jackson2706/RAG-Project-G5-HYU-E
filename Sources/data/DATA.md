@@ -1,6 +1,7 @@
 # Data: provenance and reproduction
 
-Everything the code reads lives in `Sources/data/`. Paths are resolved by `DATA_DIR` in
+Everything the code reads lives in `Sources/data/`, except the 5 invented sample documents of the
+app's default index, which are in `Sources/backend/sample_data/` (ingest folder name `sample_data`). Paths are resolved by `DATA_DIR` in
 `Sources/backend/app/config.py`, which can be overridden with `HYU_DATA_DIR`. Results, index
 reports and audit notes live in `Report/results/` and `Report/notes/`.
 
@@ -14,8 +15,7 @@ Sources/data/
 │   ├── crawl_report.json      report of the LAST crawl invocation (the ERICA resume run)
 │   ├── snapshots/hyu-20261110-97dc1269/   documents.jsonl, crawl_report.json, SNAPSHOT.sha256 (committed)
 │   ├── cache/llm_tags.jsonl   LLM applicability answers, keyed by model digest + prompt version + text sha (gitignored)
-│   ├── labels/                GUIDELINES.md (labeling guideline), legacy/ (older BEIR answer-annotation stubs)
-│   └── synthetic_fixture/     5 invented practice documents for the app's default index (not HYU policy)
+│   ├── labels/                GUIDELINES.md (labeling guideline), legacy/sample_questions.jsonl (14 questions on the sample documents)
 └── benchmarks/<dataset>/      downloaded datasets; only SOURCE.md is committed
 ```
 
@@ -103,15 +103,19 @@ synthetic fixture: 5 documents, 23 chunks) is separate and never touched.
 |---|---|---|---|---|
 | r1 | first build | vocabulary v0, prompt v2, qwen3.5:4b `7f3251fa6878…`, 772 LLM calls | 695 / 400 / 165 / 581 / 26 / 0 | published, kept for rollback |
 | r2 | TOPIK thresholds were stored as a single level ("3 or above" → `3`) on about 40 LLM chunks (A9) | same + ordinal TOPIK rule and LLM post-check; **0 new LLM calls** (all cache hits) | 900 / 400 / 26 / 522 / 19 / 0 | published, kept for rollback |
-| r3 | planned: postcheck fixes and vocabulary v1 (A13) | vocabulary v1, `postcheck_version` | — | not built; becomes the HYU default |
+| r3 | vocabulary v1 (A17) and the postcheck fixes (A13) | vocabulary v1, prompt v3 (re-called), postcheck p1 | see its verification report | becomes the HYU default once published |
 
 All three revisions use 1,867 chunks from 362 documents: max 344 embedded tokens, 0 truncated, and
 `llm_errors` = 0.
 
 **Versions:**
-- vocabulary `v0` (`app/rag/applicability.py`; v1 is pending at G2);
-- LLM prompt `TAG_PROMPT_VERSION = "v2"`;
-- the postcheck is unversioned before r3;
+- **vocabulary:** `v0` for r1/r2; `v1` for r3 (`app/rag/applicability.py`, PLAYBOOK A17):
+  - adds `korean_standard`, `academic_status=applicant` and alternative condition sets (`any_of`);
+  - drops `student_type=short_term`;
+- **LLM prompt:** `v2` for r1/r2, `v3` for r3. Both answer sets stay in the cache file, so r2 remains
+  reproducible;
+- **postcheck:** unversioned for r1/r2, `p1` for r3 (mappings, normalized quote match, labeled
+  rejections, preference rule);
 - the LLM settings are temperature 0, seed 42, `num_ctx` 4096, thinking off.
 
 ## 6. Known gaps
@@ -126,12 +130,22 @@ All three revisions use 1,867 chunks from 362 documents: max 344 embedded tokens
   - The Seoul `/counseling` tabs leave their `Kor Eng Chn` labels as noise.
 - **The 2025 and 2026 NHI premium notices are not linked as versions.** Their titles differ by
   "(UPDATED: date)", and their texts differ too much for the near-duplicate rule.
-- **One raw file was deleted from disk (2026-11-10, about 21:05, outside the project's tools):**
-  the 70 MB Seoul Major Guidebook PDF, `raw/a8/a800a6ab…61ace.pdf`.
-  - The snapshot text extracted from it is intact.
-  - `crawler.run --dry-run` currently fails on the missing file.
-  - It can be restored only by re-fetching that one URL. That needs human approval, because the
-    snapshot is frozen.
+- **The TOPIK-or-English exception is missed when it sits in another chunk.** Alternative condition
+  sets (`any_of`) are only built when one chunk joins the groups with "or". The ERICA Visa page puts
+  the English-track exception to its Korean requirement in a different chunk from the TOPIK
+  work-hours table, so that table's rows stay TOPIK-only. Answers must recover the exception at
+  answer time (Step 3); the tags do not.
+- **Three files disappeared from disk on 2026-11-10 at about 21:03–21:06, outside the project's
+  tools:**
+  - the raw PDF `raw/a8/a800a6ab…61ace.pdf` (the 70 MB Seoul Major Guidebook);
+  - the sample-document folder (restored from git);
+  - `libtorch_cpu.dylib` in the RAG env (torch reinstalled).
+
+  The cause is being investigated: the Trash, cleaner apps, iCloud Desktop sync.
+  - The snapshot text extracted from the PDF is intact.
+  - `crawler.run --dry-run` reports the missing raw file as a warning (A16).
+  - The PDF is restored only if a one-URL re-fetch gives the same sha256. Otherwise this entry
+    reads "raw missing, upstream changed".
 
 ## 7. Benchmarks (`benchmarks/<dataset>/`, downloaded, only `SOURCE.md` committed)
 

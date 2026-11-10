@@ -1,7 +1,7 @@
 # Controlled fixtures (not benchmarks)
 
 `hyu_metadata_queries.jsonl` tests **where** metadata filtering is applied (Prefiltering vs
-Postfiltering) on the five synthetic HYU sample documents in `Sources/data/HYU/synthetic_fixture/`.
+Postfiltering) on the five synthetic HYU sample documents in `Sources/backend/sample_data/`.
 
 - `question` and `relevant` reuse the labels of `Sources/data/HYU/labels/legacy/sample_questions.jsonl` (written by the
   project authors for the synthetic documents — not independent human judgments).

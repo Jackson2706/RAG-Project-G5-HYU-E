@@ -18,6 +18,17 @@ REPO_ROOT = PROJECT_ROOT.parent
 REPORT_DIR = Path(os.environ.get("HYU_REPORT_DIR", REPO_ROOT / "Report"))
 DATA_DIR = Path(os.environ.get("HYU_DATA_DIR", PROJECT_ROOT / "data"))  # Sources/data (PLAYBOOK A12)
 RESULTS_DIR = Path(os.environ.get("HYU_RESULTS_DIR", REPORT_DIR / "results"))
+SAMPLE_DATA_DIR = BACKEND_DIR / "sample_data"  # 5 invented practice documents for the app's default index
+SAMPLE_FOLDER = "sample_data"  # the folder name ingest/API/UI use for it
+
+
+def resolve_ingest_folder(name: str, data_dir: Path | None = None) -> Path | None:
+    """"sample_data" → SAMPLE_DATA_DIR; any other name → a folder under the data directory; None if it escapes it."""
+    if name == SAMPLE_FOLDER:
+        return SAMPLE_DATA_DIR
+    root = (data_dir or DATA_DIR).resolve()
+    folder = (root / name).resolve()
+    return folder if folder.is_relative_to(root) else None
 
 
 def resolve_stored_path(path: str | Path) -> Path:

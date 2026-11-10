@@ -21,6 +21,20 @@ def test_dry_run_never_constructs_or_uses_transport(tmp_path, capsys):
     assert "count:" in output
 
 
+def test_dry_run_warns_about_a_missing_raw_file_instead_of_crashing(tmp_path, capsys):
+    rows = [
+        {"url": "https://oia.hanyang.ac.kr/sitemap.xml", "site": "seoul", "kind": "sitemap", "status": 200, "raw_path": "HYU/raw/aa/gone.xml"},
+        {"url": "https://oia.hanyang.ac.kr/x.pdf", "site": "seoul", "kind": "attachment", "status": 200, "raw_path": "HYU/raw/bb/gone.pdf"},
+    ]
+    (tmp_path / "HYU").mkdir()
+    (tmp_path / "HYU" / "manifest.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows))
+    assert main(["--site", "all", "--dry-run"], data_dir=tmp_path) == 0
+    output = capsys.readouterr().out
+    assert "WARNING: missing raw file HYU/raw/aa/gone.xml" in output
+    assert "WARNING: 2 raw file(s) in the manifest are missing on disk" in output
+    assert "count:" in output
+
+
 def test_studyerica_exits_two(capsys, tmp_path):
     assert main(["--site", "studyerica", "--dry-run"], data_dir=tmp_path) == 2
     assert "studyerica is disabled until Gate G2" in capsys.readouterr().err

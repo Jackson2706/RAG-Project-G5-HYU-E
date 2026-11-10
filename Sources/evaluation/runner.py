@@ -34,7 +34,7 @@ from evaluation import ROOT, beir
 from evaluation.indexes import ensure_folder_index, ensure_index, index_id
 from evaluation.reports import load_jsonl, write_reports
 
-from app.config import DATA_DIR, REPO_ROOT, RESULTS_DIR, get_settings  # noqa: E402  (evaluation/__init__ puts backend/ on the path)
+from app.config import REPO_ROOT, RESULTS_DIR, SAMPLE_DATA_DIR, get_settings  # noqa: E402  (evaluation/__init__ puts backend/ on the path)
 from app.database import Database
 from app.ollama import OllamaClient, OllamaError
 from app.rag.pipeline import answer_from_evidence, run_rag
@@ -310,7 +310,7 @@ async def run_fixture_task(run: Run, task: Task) -> dict:
     """R0 / R9 / R10 on the metadata fixture, or R12's gate on the HYU sample questions."""
     fixture = run.online["fixture"]
     offline = preset_config("O0_SECTION_AWARE_256_32")
-    db, _ = ensure_folder_index(run.services, fixture["index"], offline, DATA_DIR / "HYU" / "synthetic_fixture", force=run.args.force)
+    db, _ = ensure_folder_index(run.services, fixture["index"], offline, SAMPLE_DATA_DIR, force=run.args.force)
     documents = {d["doc_id"]: d for d in db.documents.find({}, {"_id": 0})}
     services = Services(db=db, ollama=run.ollama, settings=run.settings)
     path = run.raw_file(task)
@@ -357,7 +357,7 @@ async def generation_cases(run: Run) -> list[dict]:
         _, queries, _ = run.dataset(ds)
         db = run.index(ds, run.online["index"])
         wanted += [(f"{ds}:{q}", ds, queries[q], db) for q in sorted(queries)[:per_dataset]]
-    hyu_db, _ = ensure_folder_index(run.services, run.online["fixture"]["index"], preset_config("O0_SECTION_AWARE_256_32"), DATA_DIR / "HYU" / "synthetic_fixture")
+    hyu_db, _ = ensure_folder_index(run.services, run.online["fixture"]["index"], preset_config("O0_SECTION_AWARE_256_32"), SAMPLE_DATA_DIR)
     hyu = load_jsonl(REPO_ROOT / spec["hyu_fixture"])[: 2 if run.args.smoke else None]
     wanted += [(f"hyu_fixture:{q['qid']}", "hyu_fixture", q["question"], hyu_db) for q in hyu]
     config = preset_config(run.generation["retrieval_preset"])

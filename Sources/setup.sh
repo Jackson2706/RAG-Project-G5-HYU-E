@@ -81,8 +81,8 @@ step "Document index"
 chunks=$(cd backend && conda run -n "$ENV_NAME" python -c \
   "from app.config import get_settings; from app.database import Database; print(Database.connect(get_settings()).chunks.count_documents({}))" 2>/dev/null | tail -1) || chunks=error
 case "$chunks" in
-  0) conda run -n "$ENV_NAME" --no-capture-output python scripts/ingest.py --path HYU/synthetic_fixture ;;
-  error) warn "Could not read the index. Check the logs above, then run: conda run -n $ENV_NAME python scripts/ingest.py --path HYU/synthetic_fixture" ;;
+  0) conda run -n "$ENV_NAME" --no-capture-output python scripts/ingest.py --path sample_data ;;
+  error) warn "Could not read the index. Check the logs above, then run: conda run -n $ENV_NAME python scripts/ingest.py --path sample_data" ;;
   *) echo "Index already has $chunks chunks; not re-indexing. (To index your own files: conda run -n $ENV_NAME python scripts/ingest.py --path HYU/raw)" ;;
 esac
 

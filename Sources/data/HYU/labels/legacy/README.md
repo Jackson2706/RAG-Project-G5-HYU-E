@@ -1,3 +1,6 @@
+> Note (2026-11-10): `qa_annotations.jsonl` was removed (PLAYBOOK A15): all 44 entries were still `pending`.
+> `sample_questions.jsonl` (14 author-written questions on the sample documents) is kept; the online gate uses it.
+
 # Answer annotations (for generation quality)
 
 BEIR tells us which **documents** are relevant to a query. It does not give reference **answers**,

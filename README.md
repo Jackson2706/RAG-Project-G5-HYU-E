@@ -47,7 +47,7 @@ cd Sources
 ```
 
 The step-by-step version is in [Sources/docs/01_GETTING_STARTED.md](Sources/docs/01_GETTING_STARTED.md).
-The five documents in `Sources/data/HYU/synthetic_fixture/` are invented practice documents, not
+The five documents in `Sources/backend/sample_data/` are invented practice documents, not
 HYU policy.
 
 ## Evaluation

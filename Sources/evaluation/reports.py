@@ -287,8 +287,9 @@ def fixture_tables(run_dir: Path, status: dict) -> tuple[list, list, list]:
     return filter_rows, gate_rows, failures
 
 
-def generation_tables(run_dir: Path, status: dict, annotations_path: Path) -> tuple[list, list, dict]:
-    annotations = {a["case_id"]: a for a in load_jsonl(annotations_path) if a.get("annotation_status") == "annotated"}
+def generation_tables(run_dir: Path, status: dict, annotations_path: Path | None) -> tuple[list, list, dict]:
+    rows = load_jsonl(annotations_path) if annotations_path else []
+    annotations = {a["case_id"]: a for a in rows if a.get("annotation_status") == "annotated"}
     rows, failures, per_case = [], [], {}
     for key, info in sorted(status.items()):
         if not key.startswith("generation/"):
@@ -400,7 +401,7 @@ def summary_markdown(manifest: dict, status: dict, comparison: list, offline_row
                          "answers_citing_a_source_rate", "invalid_markers_total", "generation_ms_p50", "generation_ms_p95", "output_tokens_mean",
                          "annotated_cases", "correctness", "grounding_support", "citation_precision"]),
                   "Correctness, relevance, completeness, grounding and citation support need annotated cases "
-                  "(Sources/data/HYU/labels/legacy/). With 0 annotated cases they are N/A — BEIR qrels are not reference answers.", ""]  # fmt: skip
+                  "(`annotations` in generation.yaml; null today). With 0 annotated cases they are N/A — BEIR qrels are not reference answers.", ""]  # fmt: skip
     if failures:
         by = Counter((f.get("dataset", ""), f.get("protocol", "-"), f["experiment"], f["category"]) for f in failures)
         lines += ["## Report D — Failure categories (earliest observable stage)", "",
@@ -425,10 +426,8 @@ def write_reports(run_dir: Path) -> None:
     comparison, offline_rows, per_query, failures, records = retrieval_tables(run_dir, status, split)
     ann = ann_rows(records)
     filters, gates, fixture_failures = fixture_tables(run_dir, status)
-    annotations = resolve_stored_path(
-        (manifest.get("configs") or {}).get("generation", {}).get("annotations")
-        or "Sources/data/HYU/labels/legacy/qa_annotations.jsonl"
-    )
+    stored = (manifest.get("configs") or {}).get("generation", {}).get("annotations")
+    annotations = resolve_stored_path(stored) if stored else None  # null = no answer annotations: metrics N/A
     generation, generation_failures, _ = generation_tables(run_dir, status, annotations)
     failures += fixture_failures + generation_failures
     write_csv(run_dir / "retrieval_comparison.csv", comparison)

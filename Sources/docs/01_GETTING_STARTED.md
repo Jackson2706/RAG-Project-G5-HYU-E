@@ -136,18 +136,18 @@ To practise, use the five sample documents (from `hyu-compass/Sources/`):
 
 ```bash
 conda activate RAG
-python scripts/ingest.py --path HYU/synthetic_fixture
+python scripts/ingest.py --path sample_data
 ```
 
 ✅ **Success looks like:**
 
 ```text
-Ingesting HYU/synthetic_fixture (chunk size 256, overlap 32) …
-  ✓ HYU/synthetic_fixture/course_registration.md    6 chunks  Course Registration Handbook (Sample)
-  ✓ HYU/synthetic_fixture/erica_housing.md          5 chunks  ERICA Campus Housing Notice (Sample)
-  ✓ HYU/synthetic_fixture/orientation_guide.md      6 chunks  New Student Orientation Guide (Sample)
-  ✓ HYU/synthetic_fixture/scholarships.html         5 chunks  Scholarship Application Guide (Sample)
-  ✓ HYU/synthetic_fixture/student_services.txt      1 chunks  Student Services Overview (Sample)
+Ingesting sample_data (chunk size 256, overlap 32) …
+  ✓ sample_data/course_registration.md    6 chunks  Course Registration Handbook (Sample)
+  ✓ sample_data/erica_housing.md          5 chunks  ERICA Campus Housing Notice (Sample)
+  ✓ sample_data/orientation_guide.md      6 chunks  New Student Orientation Guide (Sample)
+  ✓ sample_data/scholarships.html         5 chunks  Scholarship Application Guide (Sample)
+  ✓ sample_data/student_services.txt      1 chunks  Student Services Overview (Sample)
 Done: 5 documents, 23 chunks, 384-dimensional vectors.
 ```
 
@@ -228,7 +228,7 @@ conda activate RAG
 | `set MONGO_ROOT_USERNAME in .env` | `.env` is missing | `cp .env.example .env` (from `hyu-compass/Sources/`) |
 | `/api/health` → mongodb `Authentication failed` | passwords in `.env` and `backend/.env` differ | make them equal. If you changed the password *after* the first `docker compose up`, the old one is still stored in the volume: use the old one, or reset with `docker compose down -v` (deletes data) |
 | `/api/health` → mongodb or qdrant `Connection refused` | databases not started | `docker compose up -d` |
-| Chat: *"No documents are indexed yet"* | ingestion has not been run | `python scripts/ingest.py --path HYU/synthetic_fixture` |
+| Chat: *"No documents are indexed yet"* | ingestion has not been run | `python scripts/ingest.py --path sample_data` |
 | Chat: *"Cannot reach Ollama"* | Ollama is not running | open the Ollama app or run `ollama serve` |
 | Chat: *"No Ollama models are installed"* | no model downloaded | `ollama pull qwen3:4b` |
 | Chat: *"The model used all 'Max generated tokens' before answering"* | a thinking model (qwen3) spent the tokens on hidden reasoning | Configuration tab → **Generation** → **Max generated tokens** → 2048 (Thinking is *off* by default) |

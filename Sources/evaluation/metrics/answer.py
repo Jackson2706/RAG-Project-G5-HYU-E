@@ -1,7 +1,7 @@
 """Answer-quality metrics that need REFERENCE answers or labels (manually annotated cases only).
 
 BEIR qrels say which documents are relevant; they are not reference answers. These functions are
-only applied to annotated cases (Sources/data/HYU/labels/legacy/); otherwise results are NOT_APPLICABLE.
+only applied to annotated cases (`annotations` in configs/generation.yaml); otherwise results are NOT_APPLICABLE.
 """
 
 from __future__ import annotations

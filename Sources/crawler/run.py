@@ -63,6 +63,7 @@ def dry_run_plan(
     site_names: list[SiteConfig],
     from_fixtures: bool = False,
     data_dir: Path = DATA_DIR,
+    warnings: list[str] | None = None,
 ) -> dict[str, list[str]]:
     plan = {site.name: list(site.seeds) for site in site_names}
     if "seoul" in plan:
@@ -81,10 +82,19 @@ def dry_run_plan(
         raw_path = record.get("raw_path")
         if record.get("status") != 200 or not raw_path or record.get("site") not in plan:
             continue
-        raw = (Path(data_dir) / str(raw_path)).read_bytes()
-        if record.get("kind") == "sitemap" and record.get("site") == "seoul":
+        is_sitemap = record.get("kind") == "sitemap" and record.get("site") == "seoul"
+        is_erica_menu = canonical_uri(str(record.get("url"))) == "https://global.hanyang.ac.kr/eng/"
+        if not (is_sitemap or is_erica_menu):  # only these two raw files feed the plan
+            continue
+        path = Path(data_dir) / str(raw_path)
+        if not path.exists():  # a deleted raw file is reported, never a crash (PLAYBOOK A16)
+            if warnings is not None:
+                warnings.append(f"missing raw file {raw_path} for {record.get('url')}")
+            continue
+        raw = path.read_bytes()
+        if is_sitemap:
             plan["seoul"].extend(discover_sitemap(raw))
-        elif canonical_uri(str(record.get("url"))) == "https://global.hanyang.ac.kr/eng/":
+        else:
             plan["erica"].extend(discover_erica_menu(raw))
     for name, urls in plan.items():
         config = get_site(name)
@@ -99,8 +109,21 @@ def dry_run_plan(
     return plan
 
 
+def _missing_raw_files(data_dir: Path) -> list[str]:
+    """Raw paths of successful manifest rows whose file is gone (the snapshot does not need them, a rebuild does)."""
+    rows = read_manifest(data_dir / "HYU" / "manifest.jsonl")
+    paths = {str(r["raw_path"]) for r in rows if r.get("status") == 200 and r.get("raw_path")}
+    return sorted(p for p in paths if not (data_dir / p).exists())
+
+
 def print_dry_run(site_names: list[SiteConfig], from_fixtures: bool = False, data_dir: Path = DATA_DIR) -> None:
-    plan = dry_run_plan(site_names, from_fixtures, data_dir)
+    warnings: list[str] = []
+    plan = dry_run_plan(site_names, from_fixtures, data_dir, warnings)
+    missing = _missing_raw_files(Path(data_dir))
+    for line in warnings:
+        print(f"WARNING: {line}")
+    if missing:
+        print(f"WARNING: {len(missing)} raw file(s) in the manifest are missing on disk, e.g. {missing[0]}")
     for site in site_names:
         print(f"[{site.name}] allow: {', '.join(site.allow_patterns)}")
         print(f"[{site.name}] deny: {', '.join(site.deny_patterns)}; other hosts")

@@ -378,8 +378,9 @@ is LLM-based.
 
 Answer correctness, relevance, completeness, reference coverage, exact match, token F1, grounding
 support, citation precision and citation coverage all need **human labels per case**.
-`Sources/data/HYU/labels/legacy/qa_annotations.jsonl` lists every generation case as `pending`; follow
-`Sources/data/HYU/labels/legacy/README.md` to annotate. Annotated cases are scored automatically on the next
+`annotations` in `configs/generation.yaml` is `null`: BEIR has no reference answers, and the old
+`pending` stubs were removed (PLAYBOOK A15). Answer metrics stay N/A until it points to an annotated
+file (the P5 HYU labels). Annotated cases are scored automatically on the next
 `python -m evaluation.reports`. The metric code (`Sources/evaluation/metrics/answer.py`, `attribution.py`)
 is already tested on the Lesson 6 examples (grounding 3/4, citation precision 1/3, coverage 1/4).
 
@@ -391,7 +392,7 @@ Two different things, never mixed: **marker validity** (does `[E2]` point to a r
 ## 10. Prefiltering vs Postfiltering and the gate (HYU fixture)
 
 BEIR has no eligibility metadata, so R9/R10 are `NOT_APPLICABLE` there. They run on a **controlled
-fixture**: the five synthetic HYU sample documents (`Sources/data/HYU/synthetic_fixture/`) and
+fixture**: the five synthetic HYU sample documents (`Sources/backend/sample_data/`) and
 `Sources/evaluation/fixtures/hyu_metadata_queries.jsonl` (10 questions with stated criteria). Eligibility is
 computed from each document's declared metadata by the pipeline's own predicate. R0, R9 and R10 use
 the same candidate cutoff (Top 2), so postfiltering's **starvation** becomes visible.

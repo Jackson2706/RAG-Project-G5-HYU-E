@@ -5,7 +5,7 @@ Run from the Sources/ folder:
 
     conda activate RAG
     python scripts/ingest.py --path HYU/raw
-    python scripts/ingest.py --path HYU/synthetic_fixture --chunk-size 256 --chunk-overlap 32
+    python scripts/ingest.py --path sample_data --chunk-size 256 --chunk-overlap 32
 """
 
 import argparse
@@ -14,7 +14,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "backend"))  # so `import app` works
 
-from app.config import get_settings  # noqa: E402
+from app.config import get_settings, resolve_ingest_folder  # noqa: E402
 from app.database import Database  # noqa: E402
 from app.ollama import OllamaClient  # noqa: E402
 from app.rag.pipeline import run_ingestion  # noqa: E402
@@ -25,7 +25,7 @@ from app.rag.schemas import Services  # noqa: E402
 def main() -> None:
     chunking = default_config()["chunking"]
     parser = argparse.ArgumentParser(description="Ingest documents into HYU Compass")
-    parser.add_argument("--path", default="HYU/raw", help="folder relative to DATA_DIR (default: HYU/raw)")
+    parser.add_argument("--path", default="HYU/raw", help="folder relative to DATA_DIR, or sample_data (default: HYU/raw)")
     parser.add_argument("--chunk-size", type=int, default=chunking["params"]["chunk_size"])
     parser.add_argument("--chunk-overlap", type=int, default=chunking["params"]["chunk_overlap"])
     args = parser.parse_args()
@@ -42,7 +42,9 @@ def main() -> None:
             sys.exit(f"{name} is not reachable: {state['error']}\nStart the databases with: docker compose up -d")
     db.create_indexes()
 
-    folder = settings.data_dir / args.path
+    folder = resolve_ingest_folder(args.path, settings.data_dir)
+    if folder is None or not folder.is_dir():
+        sys.exit(f"'{args.path}' is not a folder under {settings.data_dir} (or sample_data)")
     print(f"Ingesting {args.path} (chunk size {args.chunk_size}, overlap {args.chunk_overlap}) …")
     services = Services(db=db, ollama=OllamaClient(settings.ollama_base_url), settings=settings)
     report = run_ingestion(folder, config, services)
