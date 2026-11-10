@@ -64,7 +64,15 @@ AUDIT_COLUMNS = tuple(
         f"{attribute}_missed",
     )
 )
-CSV_COLUMNS = (*BASE_COLUMNS, *AUDIT_COLUMNS, "reviewer", "notes")
+AUDIENCES = ("applicant", "admitted", "enrolled")
+CSV_COLUMNS = (
+    *BASE_COLUMNS,
+    *AUDIT_COLUMNS,
+    "out_of_vocabulary_condition",
+    "audience",
+    "reviewer",
+    "notes",
+)
 
 
 class AuditError(ValueError):
@@ -152,6 +160,7 @@ def audit_records(db: Database, snapshot_rows: list[dict]) -> list[dict]:
 
 FLOORS: tuple[tuple[str, int, Callable[[dict], bool]], ...] = (
     ("llm_extracted", 10, lambda row: "llm" in (row.get("applicability", {}).get("extraction_method") or {}).values()),
+    ("llm_topik_level", 6, lambda row: (row.get("applicability", {}).get("extraction_method") or {}).get("topik_level") == "llm"),
     ("table_row", 5, lambda row: row["_kind"] == "table_row"),
     ("conditioned", 20, lambda row: row.get("condition_status") == "conditioned"),
     ("rule_unconditioned", 8, lambda row: row.get("tag_bucket") == "rule_unconditioned"),
@@ -224,6 +233,8 @@ def csv_row(record: dict) -> dict[str, str]:
         "condition_status": record.get("condition_status", ""),
         "section": record.get("section") or "",
         "text": record.get("text") or "",
+        "out_of_vocabulary_condition": "",
+        "audience": "",
         "reviewer": "",
         "notes": "",
     }
@@ -236,14 +247,52 @@ def csv_row(record: dict) -> dict[str, str]:
     return row
 
 
-def write_sample_csv(records: list[dict], path: Path, force: bool = False) -> None:
-    if path.exists() and not force:
-        raise AuditError(f"Refusing to overwrite existing audit sheet: {path} (use --force)")
+def sidecar_path(path: Path) -> Path:
+    return path.with_suffix(".meta.json")
+
+
+def manifest_bucket_partition(db: Database) -> dict[str, int]:
+    manifest = db.get_manifest() or {}
+    partition = (manifest.get("applicability") or {}).get("partition")
+    if not isinstance(partition, dict):
+        raise AuditError(f"Index {db.index_id} manifest has no applicability.partition")
+    missing = [bucket for bucket in BUCKETS if bucket not in partition]
+    invalid = [
+        bucket
+        for bucket in BUCKETS
+        if bucket in partition and (not isinstance(partition[bucket], int) or partition[bucket] < 0)
+    ]
+    if missing or invalid:
+        details = []
+        if missing:
+            details.append(f"missing {', '.join(missing)}")
+        if invalid:
+            details.append(f"invalid sizes for {', '.join(invalid)}")
+        raise AuditError(f"Index {db.index_id} manifest applicability.partition is incomplete: {'; '.join(details)}")
+    return {bucket: partition[bucket] for bucket in BUCKETS}
+
+
+def sample_metadata(index_id: str, seed: int, records: list[dict], bucket_partition: dict[str, int]) -> dict:
+    return {
+        "index_id": index_id,
+        "seed": seed,
+        "n": len(records),
+        "stratum_counts": stratum_counts(records),
+        "bucket_partition": bucket_partition,
+    }
+
+
+def write_sample_csv(records: list[dict], path: Path, metadata: dict, force: bool = False) -> None:
+    meta_path = sidecar_path(path)
+    existing = next((candidate for candidate in (path, meta_path) if candidate.exists()), None)
+    if existing and not force:
+        raise AuditError(f"Refusing to overwrite existing audit file: {existing} (use --force)")
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=CSV_COLUMNS)
         writer.writeheader()
         writer.writerows(csv_row(record) for record in records)
+    meta_path.write_text(json.dumps(metadata, indent=2) + "\n", encoding="utf-8")
 
 
 def _split(cell: str | None) -> list[str]:
@@ -266,6 +315,10 @@ def read_reviewed_rows(path: Path) -> list[tuple[int, dict[str, str]]]:
 def validate_rows(rows: list[tuple[int, dict[str, str]]]) -> list[str]:
     errors = []
     for number, row in rows:
+        audience = _split(row.get("audience"))
+        invalid_audiences = sorted(value for value in audience if value not in AUDIENCES)
+        if invalid_audiences:
+            errors.append(f"row {number} audience: values outside the allowed list {invalid_audiences}")
         for attribute in ATTRIBUTES:
             pred = _split(row.get(f"{attribute}_pred"))
             correct = _split(row.get(f"{attribute}_correct"))
@@ -303,24 +356,112 @@ def _add(counts: dict, attribute: str, row_number: int, tp: int, fp: int, fn: in
         entry["rows"].add(row_number)
 
 
-def _metrics(counts: dict) -> dict:
+def wilson_interval(successes: float, n: int, z: float = 1.96) -> list[float] | None:
+    """Return a Wilson score interval for a proportion.
+
+    For 8 successes in 10 trials, the 95% interval is [0.490, 0.943] after
+    rounding to three decimals.
+    """
+    if n == 0:
+        return None
+    proportion = successes / n
+    denominator = 1 + z**2 / n
+    center = (proportion + z**2 / (2 * n)) / denominator
+    half = z * (proportion * (1 - proportion) / n + z**2 / (4 * n**2)) ** 0.5 / denominator
+    return [center - half, center + half]
+
+
+def bucket_weighted_recall(
+    counts_by_bucket: dict[str, dict[str, int]],
+    bucket_partition: dict[str, int],
+    sample_bucket_counts: dict[str, int],
+) -> float | None:
+    """Return recall after weighting reviewed buckets back to the index.
+
+    Suppose bucket A has 80 index chunks and 8 reviewed chunks with TP=4,
+    FN=4. Bucket B has 20 index chunks and 10 reviewed chunks with TP=9,
+    FN=1. Their weights are 10 and 2, so weighted recall is
+    (10*4 + 2*9) / (10*8 + 2*10) = 58/100 = 0.58.
+    """
+    numerator = 0.0
+    denominator = 0.0
+    for bucket in BUCKETS:
+        sampled = sample_bucket_counts.get(bucket, 0)
+        if sampled == 0:
+            continue
+        weight = bucket_partition.get(bucket, 0) / sampled
+        entry = counts_by_bucket.get(bucket) or {}
+        tp, fn = entry.get("tp", 0), entry.get("fn", 0)
+        numerator += weight * tp
+        denominator += weight * (tp + fn)
+    return numerator / denominator if denominator else None
+
+
+def _metric_entry(
+    entry: dict,
+    counts_by_bucket: dict[str, dict],
+    bucket_partition: dict[str, int],
+    sample_bucket_counts: dict[str, int],
+) -> dict:
+    tp, fp, fn = entry["tp"], entry["fp"], entry["fn"]
+    precision_n, recall_n = tp + fp, tp + fn
+    weighted_recall = bucket_weighted_recall(counts_by_bucket, bucket_partition, sample_bucket_counts)
+    # shortcut: Wilson on raw n for a weighted proportion; use a bootstrap if the gate is borderline
+    weighted_recall_ci = wilson_interval(weighted_recall * recall_n, recall_n) if weighted_recall is not None else None
+    return {
+        "tp": tp,
+        "fp": fp,
+        "fn": fn,
+        "precision": tp / precision_n if precision_n else None,
+        "precision_ci": wilson_interval(tp, precision_n),
+        "recall": tp / recall_n if recall_n else None,
+        "recall_ci": wilson_interval(tp, recall_n),
+        "weighted_recall": weighted_recall,
+        "weighted_recall_ci": weighted_recall_ci,
+        "occurrences": len(entry["rows"]),
+        "gated": len(entry["rows"]) >= 5,
+    }
+
+
+def _metrics(
+    counts: dict,
+    counts_by_bucket: dict[str, dict],
+    bucket_partition: dict[str, int],
+    sample_bucket_counts: dict[str, int],
+) -> dict:
     output = {}
     for attribute, entry in counts.items():
-        tp, fp, fn = entry["tp"], entry["fp"], entry["fn"]
-        occurrences = len(entry["rows"])
-        output[attribute] = {
-            "tp": tp,
-            "fp": fp,
-            "fn": fn,
-            "precision": tp / (tp + fp) if tp + fp else None,
-            "recall": tp / (tp + fn) if tp + fn else None,
-            "occurrences": occurrences,
-            "gated": occurrences >= 5,
-        }
+        bucket_entries = {bucket: bucket_counts[attribute] for bucket, bucket_counts in counts_by_bucket.items()}
+        output[attribute] = _metric_entry(entry, bucket_entries, bucket_partition, sample_bucket_counts)
     return output
 
 
-def score_rows(rows: list[tuple[int, dict[str, str]]]) -> dict:
+def _method_summary(
+    method_counts: dict,
+    method_bucket_counts: dict[str, dict],
+    bucket_partition: dict[str, int],
+    sample_bucket_counts: dict[str, int],
+) -> dict:
+    entry = {
+        key: sum(attribute[key] for attribute in method_counts.values())
+        for key in ("tp", "fp", "fn")
+    }
+    entry["rows"] = {
+        (attribute, row_number)
+        for attribute, counts in method_counts.items()
+        for row_number in counts["rows"]
+    }
+    bucket_entries = {
+        bucket: {
+            key: sum(attribute[key] for attribute in counts.values())
+            for key in ("tp", "fp", "fn")
+        }
+        for bucket, counts in method_bucket_counts.items()
+    }
+    return _metric_entry(entry, bucket_entries, bucket_partition, sample_bucket_counts)
+
+
+def score_rows(rows: list[tuple[int, dict[str, str]]], bucket_partition: dict[str, int] | None = None) -> dict:
     errors = validate_rows(rows)
     if errors:
         raise SheetValidationError(errors)
@@ -329,7 +470,20 @@ def score_rows(rows: list[tuple[int, dict[str, str]]]) -> dict:
     by_method = {method: _empty_counts() for method in ("rule", "llm")}
     by_bucket = {bucket: _empty_counts() for bucket in BUCKETS}
     by_campus = {campus: _empty_counts() for campus in VOCABULARY["campus"]}
+    by_method_bucket = {
+        method: {bucket: _empty_counts() for bucket in BUCKETS}
+        for method in ("rule", "llm")
+    }
+    by_campus_bucket = {
+        campus: {bucket: _empty_counts() for bucket in BUCKETS}
+        for campus in VOCABULARY["campus"]
+    }
     unknown, unknown_with_missed = 0, 0
+    out_of_vocabulary_conditions: Counter[str] = Counter()
+    audience_distribution = Counter({audience: 0 for audience in AUDIENCES})
+    sample_bucket_counts = Counter(row.get("tag_bucket", "") for _, row in rows)
+    if bucket_partition is None:
+        bucket_partition = {bucket: sample_bucket_counts[bucket] for bucket in BUCKETS}
 
     for number, row in rows:
         bucket, campus = row.get("tag_bucket", ""), row.get("campus", "")
@@ -337,6 +491,10 @@ def score_rows(rows: list[tuple[int, dict[str, str]]]) -> dict:
             raise SheetValidationError([f"row {number} tag_bucket: unknown bucket {bucket!r}"])
         if campus not in by_campus:
             raise SheetValidationError([f"row {number} campus: unknown campus {campus!r}"])
+        out_of_vocabulary = (row.get("out_of_vocabulary_condition") or "").strip()
+        if out_of_vocabulary:
+            out_of_vocabulary_conditions[out_of_vocabulary] += 1
+        audience_distribution.update(_split(row.get("audience")))
         row_has_missed = False
         for attribute in ATTRIBUTES:
             correct = _split(row.get(f"{attribute}_correct"))
@@ -346,40 +504,118 @@ def score_rows(rows: list[tuple[int, dict[str, str]]]) -> dict:
             _add(overall, attribute, number, tp, fp, fn)
             _add(by_bucket[bucket], attribute, number, tp, fp, fn)
             _add(by_campus[campus], attribute, number, tp, fp, fn)
+            _add(by_campus_bucket[campus][bucket], attribute, number, tp, fp, fn)
             if tp or fp:
                 family = _method_family(row.get(f"{attribute}_method"), bucket)
                 _add(by_method[family], attribute, number, tp, fp, 0)
+                _add(by_method_bucket[family][bucket], attribute, number, tp, fp, 0)
             if fn:
-                _add(by_method[_method_family(None, bucket)], attribute, number, 0, 0, fn)
+                family = _method_family(None, bucket)
+                _add(by_method[family], attribute, number, 0, 0, fn)
+                _add(by_method_bucket[family][bucket], attribute, number, 0, 0, fn)
                 row_has_missed = True
         if bucket == "llm_rejected":
             unknown += 1
             unknown_with_missed += row_has_missed
 
-    per_attribute = _metrics(overall)
+    per_attribute = _metrics(overall, by_bucket, bucket_partition, sample_bucket_counts)
     failing = [
         attribute
         for attribute, metric in per_attribute.items()
         if metric["gated"] and (metric["precision"] is None or metric["precision"] < 0.8
-                                or metric["recall"] is None or metric["recall"] < 0.7)
+                                or metric["weighted_recall"] is None or metric["weighted_recall"] < 0.7)
     ]
+    method_metrics = {
+        name: _metrics(counts, by_method_bucket[name], bucket_partition, sample_bucket_counts)
+        for name, counts in by_method.items()
+    }
+    method_summary = {
+        name: _method_summary(counts, by_method_bucket[name], bucket_partition, sample_bucket_counts)
+        for name, counts in by_method.items()
+    }
+    for metric in method_summary.values():
+        metric["passed"] = (
+            metric["precision"] is not None
+            and metric["precision"] >= 0.8
+            and metric["weighted_recall"] is not None
+            and metric["weighted_recall"] >= 0.7
+        )
     return {
         "reviewed_rows": len(rows),
         "per_attribute": per_attribute,
-        "by_method": {name: _metrics(counts) for name, counts in by_method.items()},
-        "by_bucket": {name: _metrics(counts) for name, counts in by_bucket.items()},
-        "by_campus": {name: _metrics(counts) for name, counts in by_campus.items()},
+        "by_method": method_metrics,
+        "by_bucket": {
+            name: _metrics(counts, {name: counts}, bucket_partition, sample_bucket_counts)
+            for name, counts in by_bucket.items()
+        },
+        "by_campus": {
+            name: _metrics(counts, by_campus_bucket[name], bucket_partition, sample_bucket_counts)
+            for name, counts in by_campus.items()
+        },
+        "method_summary": method_summary,
+        "not_sampled_buckets": [
+            bucket for bucket in BUCKETS
+            if bucket_partition.get(bucket, 0) > 0 and sample_bucket_counts[bucket] == 0
+        ],
+        "out_of_vocabulary_conditions": dict(sorted(out_of_vocabulary_conditions.items())),
+        "audience_distribution": dict(audience_distribution),
         "unknown_chunks": {"count": unknown, "with_any_missed": unknown_with_missed},
         "g2": {"passed": not failing, "failing_attributes": failing},
     }
 
 
+def read_sample_metadata(path: Path) -> dict:
+    meta_path = sidecar_path(path)
+    if not meta_path.exists():
+        raise AuditError(f"Audit metadata sidecar not found: {meta_path}. Run the sample command first.")
+    try:
+        metadata = json.loads(meta_path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError) as exc:
+        raise AuditError(f"Cannot read audit metadata sidecar {meta_path}: {exc}") from exc
+    partition = metadata.get("bucket_partition") if isinstance(metadata, dict) else None
+    if not isinstance(partition, dict) or any(
+        not isinstance(partition.get(bucket), int) or partition[bucket] < 0 for bucket in BUCKETS
+    ):
+        raise AuditError(f"Audit metadata sidecar {meta_path} has no valid six-bucket partition")
+    return metadata
+
+
 def score_csv(path: Path) -> dict:
-    return score_rows(read_reviewed_rows(path))
+    metadata = read_sample_metadata(path)
+    scores = score_rows(read_reviewed_rows(path), metadata["bucket_partition"])
+    scores["index_id"] = metadata.get("index_id")
+    scores["sample_n"] = metadata.get("n")
+    return scores
 
 
-def _format_ratio(value: float | None) -> str:
-    return "null" if value is None else f"{value:.3f}"
+def _format_metric(value: float | None, interval: list[float] | None) -> str:
+    if value is None or interval is None:
+        return "null [null]"
+    return f"{value:.3f} [{interval[0]:.3f}, {interval[1]:.3f}]"
+
+
+def _markdown_cell(value: str) -> str:
+    return value.replace("|", "\\|").replace("\n", " ")
+
+
+def _append_metric_table(lines: list[str], attributes: dict, include_gate: bool = False) -> None:
+    gate_heading = " | Gated" if include_gate else ""
+    gate_rule = "|---" if include_gate else ""
+    lines.extend(
+        [
+            f"| Attribute | TP | FP | FN | Precision (95% CI) | Recall raw (95% CI) | Recall weighted (95% CI) | Occurrences{gate_heading} |",
+            f"|---|---:|---:|---:|---:|---:|---:|---:{gate_rule}|",
+        ]
+    )
+    for attribute, metric in attributes.items():
+        gate = f" | {'yes' if metric['gated'] else 'no'}" if include_gate else ""
+        lines.append(
+            f"| {attribute} | {metric['tp']} | {metric['fp']} | {metric['fn']} | "
+            f"{_format_metric(metric['precision'], metric['precision_ci'])} | "
+            f"{_format_metric(metric['recall'], metric['recall_ci'])} | "
+            f"{_format_metric(metric['weighted_recall'], metric['weighted_recall_ci'])} | "
+            f"{metric['occurrences']}{gate} |"
+        )
 
 
 def scores_markdown(scores: dict) -> str:
@@ -388,14 +624,26 @@ def scores_markdown(scores: dict) -> str:
         "",
         f"Reviewed chunks: {scores['reviewed_rows']}",
         "",
-        "| Attribute | TP | FP | FN | Precision | Recall | Occurrences | Gated |",
-        "|---|---:|---:|---:|---:|---:|---:|---|",
+        "## G2",
+        "",
+        "| Attribute | Occurrences | Precision (95% CI) | Recall raw (95% CI) | Recall weighted (95% CI) | Result |",
+        "|---|---:|---:|---:|---:|---|",
     ]
     for attribute, metric in scores["per_attribute"].items():
+        if not metric["gated"]:
+            continue
+        passed = (
+            metric["precision"] is not None
+            and metric["precision"] >= 0.8
+            and metric["weighted_recall"] is not None
+            and metric["weighted_recall"] >= 0.7
+        )
         lines.append(
-            f"| {attribute} | {metric['tp']} | {metric['fp']} | {metric['fn']} | "
-            f"{_format_ratio(metric['precision'])} | {_format_ratio(metric['recall'])} | "
-            f"{metric['occurrences']} | {'yes' if metric['gated'] else 'no'} |"
+            f"| {attribute} | {metric['occurrences']} | "
+            f"{_format_metric(metric['precision'], metric['precision_ci'])} | "
+            f"{_format_metric(metric['recall'], metric['recall_ci'])} | "
+            f"{_format_metric(metric['weighted_recall'], metric['weighted_recall_ci'])} | "
+            f"{'PASS' if passed else 'FAIL'} |"
         )
     verdict = "PASS" if scores["g2"]["passed"] else "FAIL"
     failures = ", ".join(scores["g2"]["failing_attributes"]) or "none"
@@ -403,27 +651,51 @@ def scores_markdown(scores: dict) -> str:
     lines.extend(
         [
             "",
-            f"G2 verdict: **{verdict}**. Failing gated attributes: {failures}.",
-            f"Unknown (`llm_rejected`) chunks: {unknown['count']}; with any missed value: {unknown['with_any_missed']}.",
+            "| Method | Occurrences | Precision (95% CI) | Recall raw (95% CI) | Recall weighted (95% CI) | Result |",
+            "|---|---:|---:|---:|---:|---|",
         ]
     )
+    for method, metric in scores["method_summary"].items():
+        lines.append(
+            f"| {method} | {metric['occurrences']} | "
+            f"{_format_metric(metric['precision'], metric['precision_ci'])} | "
+            f"{_format_metric(metric['recall'], metric['recall_ci'])} | "
+            f"{_format_metric(metric['weighted_recall'], metric['weighted_recall_ci'])} | "
+            f"{'PASS' if metric['passed'] else 'FAIL'} |"
+        )
+    not_sampled = ", ".join(scores["not_sampled_buckets"]) or "none"
+    lines.extend(
+        [
+            "",
+            f"G2 verdict: **{verdict}**. Failing gated attributes: {failures}.",
+            f"Index buckets not sampled: {not_sampled}.",
+            f"Unknown (`llm_rejected`) chunks: {unknown['count']}; with any missed value: {unknown['with_any_missed']}.",
+            "",
+            "## All attributes",
+            "",
+        ]
+    )
+    _append_metric_table(lines, scores["per_attribute"], include_gate=True)
     for split_name in ("by_method", "by_bucket", "by_campus"):
-        lines.extend(["", f"## {split_name.replace('_', ' ').title()}", ""])
+        lines.extend(["", f"## {split_name.replace('_', ' ')}", ""])
         for group, attributes in scores[split_name].items():
-            lines.extend(
-                [
-                    f"### {group}",
-                    "",
-                    "| Attribute | TP | FP | FN | Precision | Recall | Occurrences |",
-                    "|---|---:|---:|---:|---:|---:|---:|",
-                ]
-            )
-            for attribute, metric in attributes.items():
-                lines.append(
-                    f"| {attribute} | {metric['tp']} | {metric['fp']} | {metric['fn']} | "
-                    f"{_format_ratio(metric['precision'])} | {_format_ratio(metric['recall'])} | {metric['occurrences']} |"
-                )
+            lines.extend([f"### {group}", ""])
+            _append_metric_table(lines, attributes)
             lines.append("")
+    lines.extend(["## Out-of-vocabulary conditions", ""])
+    if scores["out_of_vocabulary_conditions"]:
+        lines.extend(["| Condition | Reviewed chunks |", "|---|---:|"])
+        lines.extend(
+            f"| {_markdown_cell(condition)} | {count} |"
+            for condition, count in scores["out_of_vocabulary_conditions"].items()
+        )
+    else:
+        lines.append("None recorded.")
+    lines.extend(["", "## Audience distribution", "", "| Audience | Reviewed chunks |", "|---|---:|"])
+    lines.extend(
+        f"| {audience} | {count} |"
+        for audience, count in scores["audience_distribution"].items()
+    )
     return "\n".join(lines).rstrip() + "\n"
 
 
@@ -543,15 +815,23 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
         if args.command == "sample":
-            if args.out.exists() and not args.force:
-                raise AuditError(f"Refusing to overwrite existing audit sheet: {args.out} (use --force)")
+            existing = next((path for path in (args.out, sidecar_path(args.out)) if path.exists()), None)
+            if existing and not args.force:
+                raise AuditError(f"Refusing to overwrite existing audit file: {existing} (use --force)")
             db = connect_index(args.index_id)
             sample = sample_records(audit_records(db, load_snapshot_rows(db)), args.n, args.seed)
-            write_sample_csv(sample, args.out, args.force)
+            metadata = sample_metadata(
+                args.index_id,
+                args.seed,
+                sample,
+                manifest_bucket_partition(db),
+            )
+            write_sample_csv(sample, args.out, metadata, args.force)
             counts = stratum_counts(sample)
             for name in ("campus_seoul", "campus_erica", *(name for name, _, _ in FLOORS)):
                 print(f"{name}: {counts[name]}")
             print(f"Wrote {len(sample)} chunks to {args.out}")
+            print(f"Wrote sample metadata to {sidecar_path(args.out)}")
         elif args.command == "score":
             scores = score_csv(args.csv)
             write_scores(scores, args.out)

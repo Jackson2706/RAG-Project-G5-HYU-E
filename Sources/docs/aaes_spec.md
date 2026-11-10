@@ -117,11 +117,27 @@ leaves the index in `built` state.
 ## Tag audit
 
 `python -m labeling.audit_tags sample` writes the fixed, seeded 50-chunk review sheet without
-changing the index. A reviewer assigns every predicted value to `correct` or `wrong`, records true
-values absent from the prediction in `missed`, and signs the row in `reviewer`. Values in each cell
-are separated with `|`. `score` rejects an incomplete or out-of-vocabulary reviewed row before it
-writes precision and recall by attribute, rule/LLM extraction family, tag bucket, and campus. Site
-defaults and snapshot-derived fields belong to the deterministic rule family. `frequency` counts
-all indexed values and requirement phrases; its zero-count vocabulary entries are candidates for
-the Gate G2 vocabulary review, not automatic removals.
+changing the index. The sample keeps the campus, condition, table-row, and A6 bucket floors and
+adds at least six chunks whose `topik_level` was extracted by the LLM. Sampling also writes a
+`<csv stem>.meta.json` sidecar with the index ID, seed, sample size, achieved strata, and the full
+six-bucket partition from the index manifest. The last two fields are `stratum_counts` and
+`bucket_partition`. `score` requires this sidecar.
+
+A reviewer assigns every predicted value to `correct` or `wrong`, records true values absent from
+the prediction in `missed`, and signs the row in `reviewer`. Values in these cells are separated
+with `|`. The reviewer uses `out_of_vocabulary_condition` for an eligibility condition that the
+attribute vocabulary cannot express, such as `GPA >= 3.0` or `nationality`. The `audience` cell is
+blank when the text gives no audience; otherwise it contains `applicant`, `admitted`, `enrolled`,
+or several of these values separated with `|`. These two columns do not affect tag scores.
+
+`score` rejects an incomplete or invalid reviewed row before writing metrics by attribute,
+rule/LLM extraction family, tag bucket, and campus. Every precision and recall point estimate has
+a Wilson 95% interval. Recall is reported both raw and weighted by the index-to-sample ratio of
+each bucket. An index bucket with no reviewed chunk is reported as not sampled and left out of the
+weighted estimate. Gate G2 passes an attribute with at least five occurrences when precision is at
+least 0.8 and weighted recall is at least 0.7. The score report also counts the recorded
+out-of-vocabulary conditions and audience values. Site defaults and snapshot-derived fields belong
+to the deterministic rule family. `frequency` counts all indexed values and requirement phrases;
+its zero-count vocabulary entries are candidates for the Gate G2 vocabulary review, not automatic
+removals.
 

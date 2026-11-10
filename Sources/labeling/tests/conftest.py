@@ -35,6 +35,9 @@ def synthetic_index():
                 bucket, status = "llm_tagged", "conditioned"
                 constraints = {"student_type": ["exchange"]}
                 methods = {"student_type": "llm"}
+                if index < 14:
+                    constraints["topik_level"] = ["3"]
+                    methods["topik_level"] = "llm"
             elif index < 24:
                 bucket, status, constraints, methods = "rule_unconditioned", "unconditioned", {}, {}
             elif index < 32:
@@ -66,4 +69,22 @@ def synthetic_index():
             )
             offset = end + 1
         snapshots.append({"source_uri": uri, "text": "\n".join(text_parts), "spans": spans})
+    buckets = (
+        "rule_tagged",
+        "rule_unconditioned",
+        "llm_tagged",
+        "llm_unconditioned",
+        "llm_rejected",
+        "llm_errors",
+    )
+    db.save_manifest(
+        {
+            "applicability": {
+                "partition": {
+                    bucket: db.chunks.count_documents({"tag_bucket": bucket})
+                    for bucket in buckets
+                }
+            }
+        }
+    )
     return db, snapshots
