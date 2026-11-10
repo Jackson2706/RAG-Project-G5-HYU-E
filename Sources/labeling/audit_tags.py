@@ -2,9 +2,9 @@
 
 Run from ``Sources/``::
 
-    python -m labeling.audit_tags sample --index-id hyu_20261110_97dc1269_r1 --n 50 --seed 20261110
+    python -m labeling.audit_tags sample --index-id hyu_20261110_97dc1269_r3 --n 50 --seed 20261110
     python -m labeling.audit_tags score --csv ../Report/notes/tag_audit.csv
-    python -m labeling.audit_tags frequency --index-id hyu_20261110_97dc1269_r1
+    python -m labeling.audit_tags frequency --index-id hyu_20261110_97dc1269_r3
 """
 
 from __future__ import annotations
@@ -712,6 +712,8 @@ def frequency_data(db: Database) -> dict:
     }
     counts: dict[tuple[str, str], dict[str, Any]] = {}
     requirements: Counter[str] = Counter()
+    frequency_attributes = (*ATTRIBUTES, "korean_standard")
+    any_of_sets = 0
 
     def entry(attribute: str, value: str) -> dict[str, Any]:
         return counts.setdefault(
@@ -720,7 +722,7 @@ def frequency_data(db: Database) -> dict:
              "by_method": {"rule": 0, "llm": 0}, "by_campus": {"seoul": 0, "erica": 0}},
         )
 
-    for attribute in ATTRIBUTES:
+    for attribute in frequency_attributes:
         if attribute in VOCABULARY:
             for value in VOCABULARY[attribute]:
                 entry(attribute, value)
@@ -733,25 +735,34 @@ def frequency_data(db: Database) -> dict:
             raise AuditError(f"Chunk {chunk.get('chunk_id')} has no document campus")
         condition = chunk.get("applicability") or {}
         methods = condition.get("extraction_method") or {}
-        for attribute in ATTRIBUTES:
+        for attribute in frequency_attributes:
             for value in _values(condition, attribute):
                 item = entry(attribute, value)
                 item["count"] += 1
                 item["by_method"][_method_family(methods.get(attribute), chunk.get("tag_bucket"))] += 1
                 item["by_campus"][campus] += 1
+        alternatives = condition.get("any_of") or []
+        any_of_sets += len(alternatives)
+        for group in alternatives:
+            for attribute, values in group.items():
+                for value in values:
+                    item = entry(attribute, value)
+                    item["count"] += 1
+                    item["by_method"][_method_family(methods.get("any_of"), chunk.get("tag_bucket"))] += 1
+                    item["by_campus"][campus] += 1
         for phrase in condition.get("requirements") or []:
             normalized = " ".join(str(phrase).split())
             if normalized:
                 requirements[normalized] += 1
 
-    attribute_order = {attribute: index for index, attribute in enumerate(ATTRIBUTES)}
+    attribute_order = {attribute: index for index, attribute in enumerate(frequency_attributes)}
     rows = sorted(counts.values(), key=lambda row: (attribute_order[row["attribute"]], row["value"]))
     never_seen = [f"{row['attribute']}={row['value']}" for row in rows if row["attribute"] in VOCABULARY and row["count"] == 0]
     top_requirements = [
         {"phrase": phrase, "count": count}
         for phrase, count in sorted(requirements.items(), key=lambda item: (-item[1], item[0]))[:15]
     ]
-    return {"index_id": db.index_id, "chunks": chunk_count, "frequencies": rows,
+    return {"index_id": db.index_id, "chunks": chunk_count, "any_of_sets": any_of_sets, "frequencies": rows,
             "never_seen": never_seen, "top_requirements": top_requirements}
 
 
@@ -760,6 +771,7 @@ def frequency_markdown(report: dict) -> str:
         f"# Applicability frequency: {report['index_id']}",
         "",
         f"Chunks: {report['chunks']}",
+        f"Alternative condition sets (`any_of`): {report['any_of_sets']}",
         "",
         "| Attribute | Value | Total | Rule | LLM | Seoul | ERICA |",
         "|---|---|---:|---:|---:|---:|---:|",

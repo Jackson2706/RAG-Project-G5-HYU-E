@@ -4,7 +4,7 @@ This document covers the offline step only. The tagger records who a chunk appli
 chunk is stored. Online profile matching, evidence selection, evidence sufficiency and answer policy
 are outside this specification.
 
-## Vocabulary v0
+## Vocabulary v1
 
 An absent attribute means that the chunk does not state a constraint for that attribute.
 
@@ -13,11 +13,12 @@ An absent attribute means that the chunk does not state a constraint for that at
 | `campus` | `seoul`, `erica` |
 | `degree_level` | `undergraduate`, `master`, `doctoral`, `language_program`, `non_degree` |
 | `year` | `1`, `2`, `3`, `4` |
-| `student_type` | `degree_seeking`, `exchange`, `visiting`, `language_program`, `short_term` |
+| `student_type` | `degree_seeking`, `exchange`, `visiting`, `language_program` |
 | `visa` | `D-2`, `D-2-5`, `D-2-8`, `D-4`, `D-10`, `other` |
 | `topik_level` | `none`, `1`, `2`, `3`, `4`, `5`, `6` |
 | `english_track` | `yes`, `no` |
-| `academic_status` | `enrolled`, `leave_of_absence`, `completed_coursework`, `graduating`, `admitted_not_enrolled` |
+| `academic_status` | `applicant`, `admitted_not_enrolled`, `enrolled`, `leave_of_absence`, `completed_coursework`, `graduating` |
+| `korean_standard` | `pass`, `exempt`, `fail` |
 | effective term | `YYYY-1` or `YYYY-2`; this is an open-ended pattern, not an enumerated attribute |
 
 The vocabulary and its order live only in `backend/app/rag/applicability.py`.
@@ -30,6 +31,7 @@ is written to the Qdrant payload during ingestion.
 ```json
 {
   "constraints": {"degree_level": ["undergraduate"], "year": ["1", "2"]},
+  "any_of": [{"topik_level": ["3", "4", "5", "6"]}, {"english_track": ["yes"]}],
   "scope": "national",
   "campus": ["seoul", "erica"],
   "requirements": ["attendance rate of less than 70%"],
@@ -41,8 +43,11 @@ is written to the Qdrant payload during ingestion.
 ```
 
 `scope` is `campus` or `national`. A national condition always applies to both campuses.
+`any_of` contains alternative condition sets that the source explicitly joins with “or.” The
+ordinary `constraints` must fit and at least one alternative set must fit. Alternative attributes
+are not duplicated in `constraints`.
 `requirements` holds conditions outside the fixed vocabulary, such as GPA, attendance, money, or a
-language standard. `superseded_by` comes from the frozen snapshot. Extraction methods are recorded
+preference. `superseded_by` comes from the frozen snapshot. Extraction methods are recorded
 per field as `site_default`, `rule`, `llm`, or `snapshot`. Evidence values are exact substrings when
 a short supporting span is available; every LLM field must have one.
 
@@ -58,34 +63,72 @@ rows, whose text repeats cells as `Header: value`.
   their respective levels. Explicit language-program and non-degree audiences use those values.
 - `Year 1-2` expands to `1`, `2`, and `Year 3-4` expands to `3`, `4`. `Year: N/A` adds nothing.
 - In a required-level table row, `X` means `none` through the level below the stated level; `O`
-  means the stated level through `6`. “TOPIK level N or higher” also expands through `6`. A Korean
-  language standard expressed only as pass or fail is a requirement, not a TOPIK level.
+  means the stated level through `6`. “TOPIK level N or higher” also expands through `6`.
+- The Korean Language Standards wording maps separately from TOPIK: satisfied or exempted maps to
+  `pass, exempt`, exempted alone maps to `exempt`, and did not satisfy or Korean Standard Fail maps
+  to `fail`.
 - Visa codes are read literally. `D-10-1` normalizes to `D-10`. For “transferring from X to Y,” the
   tag is the visa held now, `X`.
-- Degree, exchange, visiting, language-program and short-term student wording maps to
-  `student_type`. English-track or English-taught wording maps to `english_track` when explicit.
+- Degree, exchange, visiting and language-program wording maps to `student_type`. English-track or
+  English-taught wording maps to `english_track` when explicit.
 - Academic-status words map to the vocabulary. An exclusions list removes its listed statuses; if
   it excludes graduates, leave, extra semesters and completed students from current students, the
   remaining status is `enrolled`.
-- GPA, attendance, monetary thresholds, Korean or English standards, and a required higher TOPIK
-  score are short free-text requirements.
+- `applicant` is added only when the document title identifies an admission guide and that chunk
+  mentions applicants, application or admission. Acceptance guides remain
+  `admitted_not_enrolled`; scholarship references to applicants do not gain this tag.
+- Within one sentence or list line, a TOPIK condition joined by “or” to IELTS, TOEFL, TEPS or an
+  English-track condition becomes `any_of`. A TOPIK threshold expands through level 6; a valid
+  certificate without a level means levels 1–6. The two attributes are removed from ordinary
+  `constraints`.
+- GPA, attendance, monetary thresholds, English standards, and a required higher TOPIK score are
+  short free-text requirements.
+- Preferred, additional-points, bonus, advantage and optional wording never creates a constraint.
+  A matched preference from the chunk is retained as a `preference:` requirement.
 - An explicit `YYYY Spring/Fall Semester`, `YYYY-1/2`, or “applied from” date sets the effective
   term. Otherwise the post date supplies January–June as term 1 and July–December as term 2.
   Undated chunks have no effective term.
 - `superseded_by` is copied from the snapshot without trying to infer newer versions.
 
+## Profile fit and scope defaults (Step 2 helper; P7 must use these)
+
+`condition_fit(condition, stated_profile)` in `app/rag/applicability.py` gives A_e(u) for one chunk.
+The result is `compatible`, `conflicting` or `open`.
+
+- **One condition set:**
+  - conflicting if a known profile value lies outside an allowed list;
+  - open if a constrained attribute is unknown;
+  - else compatible.
+  - Campus is always part of the check, and `scope: national` means both campuses.
+- **`any_of`:** the chunk applies when `constraints` fit AND at least one alternative set fits.
+  - It is conflicting only if every set conflicts.
+  - Example: an English-track student with no TOPIK fits "valid TOPIK certificate **or** IELTS/TOEFL
+    (English track)".
+- **Scope defaults** (`SCOPE_DEFAULTS`, A17):
+  - Unless the user states it, `academic_status` is assumed to exclude `applicant`. Step 1 records
+    this attribute with status `scope_default` next to `stated` / `remembered` / `missing` /
+    `stale`, and the trace shows it.
+  - A scope default only rules values **out**. An applicant-only chunk conflicts. An enrolled-only
+    chunk stays `open`, never `compatible`, so a real branch (e.g. enrolled vs completed
+    coursework) is never hidden.
+- **The Qdrant payload** carries `app_any_of: true` for chunks with alternatives. A hard prefilter
+  must not drop those chunks on the alternative attributes.
+
 ## LLM fallback contract
 
-The fallback runs only when enabled and the rules found no vocabulary constraint. The prompt asks
-for JSON only, includes the complete v0 vocabulary, and requires an exact evidence quote for every
-field. The auxiliary Ollama call uses `qwen3.5:4b` by default, temperature 0, thinking off, a fixed
-seed and a bounded output.
+The fallback runs only when enabled and the rules found no vocabulary constraint or `any_of` set.
+Prompt v3 asks for JSON only, includes the complete v1 constraint vocabulary, tells the model not
+to tag preferences, and requires an evidence quote for every field. It does not ask the model for
+`any_of`; alternatives are rule-only. The auxiliary Ollama call uses `qwen3.5:4b` by default,
+temperature 0, thinking off, a fixed seed and a bounded output.
 
-The parser takes the first decodable JSON object even when the model wraps it in other text. It
-keeps a field only when the attribute exists, all values belong to that attribute's vocabulary, and
-the evidence quote is an exact substring of the chunk text. Unknown fields, invalid values, missing
-quotes and invented quotes are dropped and explained in the block's `trace_details`. Missing JSON,
-invalid JSON and LLM-call errors produce no fallback tags and never stop offline tagging.
+Postcheck p1 first maps unknown F and D- visa codes to `other`, drops `student_type` values
+`international` and `volunteer`, and drops the unknown `semester` attribute. It then matches the
+evidence quote after collapsing whitespace and ignoring case, while storing the exact substring
+from the chunk. A field that allows every vocabulary value is not a constraint. Unknown fields,
+invalid values, missing or invented quotes, every-value fields, and preferences are dropped with a
+fixed reason label. Missing or invalid JSON uses `bad_json`; LLM-call errors produce no fallback
+tags and never stop offline tagging.
 
 ## Index
 
@@ -102,7 +145,7 @@ Each chunk of the HYU snapshot index carries one validated `ChunkCondition`.
   - chunks tagged by rules or by the LLM, unconditioned chunks, LLM calls, cache hits, rejected
     outputs by reason, and LLM errors;
   - the auxiliary LLM model and digest, prompt version, temperature, `num_ctx`, seed, thinking
-    setting, and cache file path.
+    setting, cache file path, postcheck version, and vocabulary version.
 
 The cache key is the SHA-256 of the resolved model digest, `TAG_PROMPT_VERSION`, and the SHA-256 of
 the chunk text, separated by newlines. The model and its digest are resolved before a cache lookup.
@@ -137,7 +180,7 @@ each bucket. An index bucket with no reviewed chunk is reported as not sampled a
 weighted estimate. Gate G2 passes an attribute with at least five occurrences when precision is at
 least 0.8 and weighted recall is at least 0.7. The score report also counts the recorded
 out-of-vocabulary conditions and audience values. Site defaults and snapshot-derived fields belong
-to the deterministic rule family. `frequency` counts all indexed values and requirement phrases;
+to the deterministic rule family. `frequency` counts all indexed values, `any_of` sets, and requirement phrases;
 its zero-count vocabulary entries are candidates for the Gate G2 vocabulary review, not automatic
 removals.
 

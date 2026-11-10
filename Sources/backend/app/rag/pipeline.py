@@ -60,12 +60,13 @@ def _tag_chunks(extractor: Any, chunks: list[dict], inputs: list[dict], timings:
                                      "unconditioned" if bucket.endswith("_unconditioned") else "unknown")  # fmt: skip
     timings["tag_ms"] = (time.perf_counter() - start) * 1000
     methods = [m for c in conditions for a, m in c.extraction_method.items() if a in c.constraints]
-    tagged_by_rule = sum(any(c.extraction_method.get(a) == "rule" for a in c.constraints) for c in conditions)
+    methods.extend("rule" for condition in conditions if condition.any_of)
+    tagged_by_rule = sum(any(c.extraction_method.get(a) == "rule" for a in c.constraints) or bool(c.any_of) for c in conditions)
     tagged_by_llm = sum(any(c.extraction_method.get(a) == "llm" for a in c.constraints) for c in conditions)
     return {"vocabulary_version": VOCABULARY_VERSION, "chunks": len(chunks),
             "tagged_by_rule": tagged_by_rule, "tagged_by_llm": tagged_by_llm,
             "rule_tagged": tagged_by_rule, "llm_tagged": tagged_by_llm,
-            "unconditioned": sum(not c.constraints for c in conditions),
+            "unconditioned": sum(not c.constraints and not c.any_of for c in conditions),
             "partition": {b: buckets.count(b) for b in TAG_BUCKETS},
             "constraint_fields_by_method": {m: methods.count(m) for m in set(methods)},
             **getattr(extractor, "summary", {})}  # fmt: skip

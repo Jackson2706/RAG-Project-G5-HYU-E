@@ -11,7 +11,7 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
-from app.rag.applicability import CONSTRAINT_ATTRIBUTES, VOCABULARY, ChunkCondition, term_of
+from app.rag.applicability import CONSTRAINT_ATTRIBUTES, VOCABULARY, VOCABULARY_VERSION, ChunkCondition, term_of
 from app.rag.blocks.ingestion.metadata_extraction.base import BaseMetadataExtractor
 from app.rag.blocks.ingestion.metadata_extraction.basic_extractor import BasicMetadataExtractor
 from app.rag.schemas import DocumentMetadata, ParsedDocument
@@ -57,6 +57,13 @@ MONTHS = {
 GRADUATE = r"\bgraduate(?: school| students?| courses?| programs?|\s*:)"
 # "Except students who took a leave of absence, …" names statuses that are NOT eligible
 NEGATED = re.compile(r"\b(?:except|excluding|excluded|not eligible|cannot apply|are not allowed)\b[^.\n)]*", re.IGNORECASE)
+PREFERENCE = re.compile(r"\b(?:prefer\w*|additional points?|bonus|advantage|optional)\b", re.IGNORECASE)
+ADMISSION_GUIDE = re.compile(
+    r"\b(?:admission (?:guidelines?|guides?)|application forms?\s*&\s*guidelines?)\b|"
+    r"\b(?:GKS|scholarship program|degree program)[^\n]{0,60}\bapplication guidelines?\b|"  # not "Visa Application Guideline"
+    r"\brecruitment of\b.{0,120}\bstudents?\b",
+    re.IGNORECASE,
+)
 
 
 def _first_match(patterns: tuple[str, ...], text: str) -> re.Match[str] | None:
@@ -142,7 +149,6 @@ def _student_type(context: str) -> tuple[list[str], str | None]:
         "exchange": (r"\bexchange students?\b",),
         "visiting": (r"\bvisiting students?\b", r"\bvisiting program participants?\b"),
         "language_program": (r"\b(?:korean )?language program(?: students?)?\b",),
-        "short_term": (r"\bshort[- ]term (?:students?|participants?|program)\b",),
     }
     values = [value for value, value_patterns in patterns.items() if _first_match(value_patterns, context)]
     matched_patterns = tuple(pattern for value in values for pattern in patterns[value])
@@ -176,11 +182,75 @@ def _academic_status(context: str) -> tuple[list[str], str | None]:
     return values, _evidence(matched_patterns, positive) if matched_patterns else None
 
 
+def _applicant(title: str, text: str) -> tuple[list[str], str | None]:
+    if not ADMISSION_GUIDE.search(title):
+        return [], None
+    mention = re.search(r"\b(?:applicants?|applications?|admission)\b", text, re.IGNORECASE)
+    return (["applicant"], mention.group(0)) if mention else ([], None)
+
+
+def _korean_standard(context: str) -> tuple[list[str], str | None]:
+    failed = re.search(
+        r"\bdid not satisfy the Korean Language Standards?\b|\bKorean Standard Fail\b",
+        context,
+        re.IGNORECASE,
+    )
+    if failed:
+        return ["fail"], failed.group(0)
+    pass_or_exempt = re.search(
+        r"\bSatisfied\s*\(\s*or being exempted\s*\)\s*the Korean Language Standards?\b",
+        context,
+        re.IGNORECASE,
+    )
+    if pass_or_exempt:
+        return ["pass", "exempt"], pass_or_exempt.group(0)
+    # "exempt" only next to the Korean standard itself; a bare "exempted" (fees, vaccination, …) is not it
+    exempt = re.search(r"\bexempt(?:ed|ion)?\b[^.\n;]{0,40}\bKorean (?:Language )?Standards?\b|"
+                       r"\bKorean (?:Language )?Standards?\b[^.\n;]{0,40}\bexempt(?:ed|ion)?\b", context, re.IGNORECASE)
+    return (["exempt"], exempt.group(0)) if exempt else ([], None)
+
+
+def _any_of(text: str) -> tuple[list[dict[str, list[str]]], str | None]:
+    """Recognise one line/sentence that explicitly joins TOPIK and English alternatives with ``or``."""
+    english_pattern = re.compile(r"\b(?:IELTS|TOEFL|TEPS|English[- ]track)\b", re.IGNORECASE)
+    certificate_pattern = re.compile(r"\b(?:valid\s+)?TOPIK(?:\s+score)?\s+certificate\b", re.IGNORECASE)
+    for line in text.splitlines():
+        for sentence in re.finditer(r"[^.!?]+(?:[.!?]|$)", line):
+            phrase = sentence.group(0).strip()
+            threshold = TOPIK_THRESHOLD.search(phrase)
+            topik = threshold or certificate_pattern.search(phrase)
+            english = english_pattern.search(phrase, topik.end() if topik else 0)
+            if not topik or not english or not re.search(r"\bor\b", phrase[topik.end() : english.start()], re.IGNORECASE):
+                continue
+            levels = topik_at_least(int(threshold.group(1))) if threshold else [str(level) for level in range(1, 7)]
+            return [{"topik_level": levels}, {"english_track": ["yes"]}], phrase
+    return [], None
+
+
+def _preference_context(text: str, quote: str | None) -> str | None:
+    """Return the exact local text around a rule/evidence quote when it marks a preference."""
+    if not quote:
+        return None
+    start = text.find(quote)
+    if start < 0:
+        return quote if PREFERENCE.search(quote) else None
+    nearby = text[max(0, start - 80) : min(len(text), start + len(quote) + 80)]
+    return nearby.strip() if PREFERENCE.search(nearby) else None
+
+
+def _add_preference_requirement(condition: ChunkCondition, phrase: str, text: str) -> None:
+    requirement = f"preference: {phrase}"
+    if requirement not in condition.requirements:
+        condition.requirements.append(requirement)
+    condition.extraction_method["requirements"] = "rule"
+    if phrase in text:
+        condition.evidence.setdefault("requirements", phrase)
+
+
 def _requirements(text: str) -> list[str]:
     patterns = (
         r"\b(?:language school )?attendance rate of less than \d{1,3}%",
         r"\bTOPIK scores? (?:are|is) now higher than [^.\n;]{1,100}",
-        r"\bApplicants who [^\n]{0,100}Korean Language Standards\b",
         r"\bApplicants who [^\n]{0,100}English Language Standards\b",
         r"[^.;\n]{0,60}\bGPA\b[^.;\n]{0,60}",
         r"\bmust (?:pay|show)[^.\n]{0,100}\b(?:KRW\s*)?\d[\d,]*(?:\s*million)?(?:\s*(?:won|KRW|USD))?\b",
@@ -235,7 +305,16 @@ def _first_json_object(text: str) -> dict[str, Any] | None:
 
 # Every chunk lands in exactly one bucket; VERIFY checks the buckets add up to the chunk count.
 TAG_BUCKETS = ("rule_tagged", "rule_unconditioned", "llm_tagged", "llm_unconditioned", "llm_rejected", "llm_errors")
-TAG_PROMPT_VERSION = "v2"  # v2: evidence-object example, campus left out (site default/rules)  # bump whenever the fallback prompt below changes
+TAG_PROMPT_VERSION = "v3"  # bump whenever the fallback prompt below changes
+POSTCHECK_VERSION = "p1"
+
+
+def _normalized_substring(text: str, quote: str) -> str | None:
+    words = quote.split()
+    if not words:
+        return None
+    match = re.search(r"\s+".join(map(re.escape, words)), text, re.IGNORECASE)
+    return match.group(0) if match else None
 
 
 def _apply_llm_fallback(
@@ -246,6 +325,7 @@ def _apply_llm_fallback(
 ) -> None:
     prompt = (
         "Which students does this chunk apply to? Tag only constraints the chunk states explicitly.\n"
+        "Do not tag preferences ('preferred', 'additional points', 'optional').\n"
         "Reply with JSON only. `evidence` is an OBJECT with one exact quote from the chunk PER attribute in `constraints`.\n"
         'Example: {"constraints":{"degree_level":["master","doctoral"],"visa":["D-2"]},'
         '"evidence":{"degree_level":"graduate students","visa":"D-2 visa holders"}}\n'
@@ -264,33 +344,69 @@ def _apply_llm_fallback(
     details["raw_output"] = str(raw)[:800]
     parsed = _first_json_object(str(raw))
     if parsed is None:
-        details.update(status="rejected", reason="no JSON object")
+        details.update(status="rejected", reason="bad_json", rejected_fields={"_output": "bad_json"}, mapped_fields={})
         return
     constraints = parsed.get("constraints")
     evidence = parsed.get("evidence")
     if not isinstance(constraints, dict) or not isinstance(evidence, dict):
-        details.update(status="rejected", reason="constraints and evidence must be objects")
+        details.update(status="rejected", reason="bad_json", rejected_fields={"_output": "bad_json"}, mapped_fields={})
         return
+
+    constraints = dict(constraints)
+    mapped: dict[str, str] = {}
+    if "semester" in constraints:
+        constraints.pop("semester")
+        mapped["semester"] = "dropped"
+    student_types = constraints.get("student_type")
+    if isinstance(student_types, list):
+        kept = [value for value in student_types if value not in ("international", "volunteer")]
+        if len(kept) != len(student_types):
+            mapped["student_type"] = "dropped"
+            if kept:
+                constraints["student_type"] = kept
+            else:
+                constraints.pop("student_type")
+    visas = constraints.get("visa")
+    if isinstance(visas, list):
+        normalized_visas = []
+        changed = []
+        for value in visas:
+            if isinstance(value, str) and value not in VOCABULARY["visa"] and (value.startswith("F") or value.startswith("D-")):
+                normalized_visas.append("other")
+                changed.append(value)
+            else:
+                normalized_visas.append(value)
+        if changed:
+            constraints["visa"] = list(dict.fromkeys(normalized_visas))
+            mapped["visa"] = f"{', '.join(changed)} → other"
 
     rejected: dict[str, str] = {}
     for attribute, values in constraints.items():
         quote = evidence.get(attribute)
         if attribute not in CONSTRAINT_ATTRIBUTES:
-            rejected[str(attribute)] = "unknown attribute"
+            rejected[str(attribute)] = "unknown_attribute"
         elif not isinstance(values, list) or not values or any(value not in VOCABULARY[attribute] for value in values):
-            rejected[attribute] = "value outside vocabulary"
+            rejected[attribute] = "value_outside_vocabulary"
         elif not isinstance(quote, str) or not quote:
-            rejected[attribute] = "missing evidence quote"
-        elif quote not in text:
-            rejected[attribute] = "evidence is not an exact substring"
-        elif set(values) == set(VOCABULARY[attribute]):
-            rejected[attribute] = "every value allowed = no constraint"
+            rejected[attribute] = "missing_quote"
         else:
-            if attribute == "topik_level" and (threshold := TOPIK_THRESHOLD.search(quote)):
+            exact_quote = _normalized_substring(text, quote)
+            if exact_quote is None:
+                rejected[attribute] = "quote_not_in_text"
+                continue
+            if set(values) == set(VOCABULARY[attribute]):
+                rejected[attribute] = "every_value"
+                continue
+            if preference := _preference_context(text, exact_quote):
+                rejected[attribute] = "preference"
+                _add_preference_requirement(condition, preference, text)
+                continue
+            if attribute == "topik_level" and (threshold := TOPIK_THRESHOLD.search(exact_quote)):
                 values = topik_at_least(int(threshold.group(1)))  # the LLM often keeps only "3" from "3 or above"
             condition.constraints[attribute] = list(dict.fromkeys(values))
             condition.extraction_method[attribute] = "llm"
-            condition.evidence[attribute] = quote
+            condition.evidence[attribute] = exact_quote
+    details["mapped_fields"] = mapped
     details["rejected_fields"] = rejected
     # a valid answer with no constraints = "unconditioned"; any refused field with nothing accepted = "rejected" (tags unknown)
     details["status"] = "accepted" if condition.constraints else ("rejected" if rejected else "unconditioned")
@@ -329,20 +445,44 @@ def tag_chunk(
         "student_type": _student_type,
         "english_track": _english_track,
         "academic_status": _academic_status,
+        "korean_standard": _korean_standard,
     }
     for attribute, extractor in extractors.items():
         values, quote = extractor(context)
         if not values:
+            continue
+        if preference := _preference_context(text, quote):
+            _add_preference_requirement(condition, preference, text)
             continue
         condition.constraints[attribute] = values
         condition.extraction_method[attribute] = "rule"
         if quote and quote in text:
             condition.evidence[attribute] = quote
 
-    condition.requirements = _requirements(text)
+    applicant, applicant_quote = _applicant(chunk.get("title", ""), text)
+    if applicant:
+        condition.constraints["academic_status"] = applicant
+        condition.extraction_method["academic_status"] = "rule"
+        condition.evidence["academic_status"] = applicant_quote
+
+    alternatives, alternatives_quote = _any_of(text)
+    if alternatives:
+        if preference := _preference_context(text, alternatives_quote):
+            _add_preference_requirement(condition, preference, text)
+        else:
+            condition.any_of = alternatives
+            condition.evidence["any_of"] = alternatives_quote
+            condition.extraction_method["any_of"] = "rule"
+            for attribute in ("topik_level", "english_track"):
+                condition.constraints.pop(attribute, None)
+                condition.extraction_method.pop(attribute, None)
+                condition.evidence.pop(attribute, None)
+
+    rule_requirements = _requirements(text)
+    condition.requirements.extend(requirement for requirement in rule_requirements if requirement not in condition.requirements)
     if condition.requirements:
         condition.extraction_method["requirements"] = "rule"
-        condition.evidence["requirements"] = condition.requirements[0]
+        condition.evidence.setdefault("requirements", rule_requirements[0] if rule_requirements else condition.evidence["requirements"])
 
     condition.effective_term, term_quote = _effective_term(context, chunk.get("post_date"))
     if condition.effective_term:
@@ -350,7 +490,7 @@ def tag_chunk(
         if term_quote and term_quote in text:
             condition.evidence["effective_term"] = term_quote
 
-    if llm is not None and not condition.constraints:
+    if llm is not None and not condition.constraints and not condition.any_of:
         _apply_llm_fallback(condition, text, llm, trace_details)
     return condition.normalized()
 
@@ -376,7 +516,8 @@ class ApplicabilityExtractor(BaseMetadataExtractor):
         cache_path = cache_path or self.cache_path
         cache = _read_cache(cache_path)
         counts = {"llm_candidates": 0, "llm_called": 0, "llm_cache_hits": 0, "llm_accepted": 0,
-                  "llm_rejected": {}, "llm_rejected_total": 0, "llm_errors": 0}  # fmt: skip
+                  "llm_rejected": 0, "llm_rejected_fields_by_reason": {}, "llm_rejected_total": 0,
+                  "llm_errors": 0}  # fmt: skip
         loop = asyncio.new_event_loop() if use_llm else None
         selected: dict = {}
         resolution: dict[str, Any] = {"attempted": False, "error": None}
@@ -439,15 +580,16 @@ class ApplicabilityExtractor(BaseMetadataExtractor):
                         counts.setdefault("llm_first_error", fallback.get("reason"))
                     elif fallback.get("status") == "unconditioned":
                         counts["llm_unconditioned"] = counts.get("llm_unconditioned", 0) + 1
-                    else:
+                    elif fallback.get("status") == "rejected":
+                        counts["llm_rejected"] += 1
                         counts["llm_rejected_total"] += 1
-                        reasons = list(fallback.get("rejected_fields", {}).values()) or [fallback.get("reason", fallback.get("status"))]
-                        for reason in reasons:
-                            counts["llm_rejected"][reason] = counts["llm_rejected"].get(reason, 0) + 1
+                    for reason in fallback.get("rejected_fields", {}).values():
+                        by_reason = counts["llm_rejected_fields_by_reason"]
+                        by_reason[reason] = by_reason.get(reason, 0) + 1
                     fallback_details.append(details)
                 tagged.append(result)
                 status = details.get("llm_fallback", {}).get("status")
-                self.buckets.append({None: "rule_tagged" if result.constraints else "rule_unconditioned", "accepted": "llm_tagged",
+                self.buckets.append({None: "rule_tagged" if result.constraints or result.any_of else "rule_unconditioned", "accepted": "llm_tagged",
                                      "unconditioned": "llm_unconditioned", "error": "llm_errors"}.get(status, "llm_rejected"))  # fmt: skip
         finally:
             if loop is not None:
@@ -456,6 +598,7 @@ class ApplicabilityExtractor(BaseMetadataExtractor):
         self.trace_details = {"llm_fallbacks": fallback_details[:50]}
         self.summary = {**counts, "llm": {"enabled": use_llm, "role": "auxiliary", "model": model_name,
                                           "digest": selected.get("digest"), "prompt_version": TAG_PROMPT_VERSION,
+                                          "postcheck_version": POSTCHECK_VERSION, "vocabulary_version": VOCABULARY_VERSION,
                                           "temperature": 0, "num_ctx": LLM_NUM_CTX, "seed": LLM_SEED, "thinking": "off",
                                           "cache_path": str(cache_path) if cache_path is not None else None}}  # fmt: skip
         return tagged

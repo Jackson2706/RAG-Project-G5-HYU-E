@@ -260,7 +260,7 @@ def test_frequency_counts_methods_campuses_and_unseen_values(synthetic_index):
     assert rows[("student_type", "exchange")]["count"] == 16
     assert rows[("student_type", "exchange")]["by_method"] == {"rule": 0, "llm": 16}
     assert rows[("campus", "seoul")]["by_campus"] == {"seoul": 40, "erica": 0}
-    assert "student_type=short_term" in report["never_seen"]
+    assert "korean_standard=fail" in report["never_seen"]  # v1 value the synthetic index never uses
     assert report["top_requirements"][0] == {"phrase": "GPA 3.0", "count": 12}
 
 

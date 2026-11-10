@@ -114,7 +114,8 @@ def test_llm_is_asked_only_with_a_cue_and_answers_are_cached(services, fake_olla
     assert first[1].constraints == {"student_type": ["exchange"]} and first[1].extraction_method["student_type"] == "llm"
     assert block.summary["llm"] == {"enabled": True, "role": "auxiliary", "model": "qwen3.5:4b", "digest": "sha256:x",
                                     "prompt_version": extractor_module.TAG_PROMPT_VERSION, "temperature": 0, "num_ctx": 4096, "seed": 42,
-                                    "thinking": "off", "cache_path": str(cache)}  # fmt: skip
+                                    "thinking": "off", "cache_path": str(cache), "postcheck_version": extractor_module.POSTCHECK_VERSION,
+                                    "vocabulary_version": "v1"}  # fmt: skip
     assert fake_ollama.requests[0]["options"] | {"think": fake_ollama.requests[0]["think"]} == {
         "temperature": 0, "num_predict": 256, "num_ctx": 4096, "seed": 42, "think": False,
     }

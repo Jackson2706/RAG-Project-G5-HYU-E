@@ -103,7 +103,7 @@ synthetic fixture: 5 documents, 23 chunks) is separate and never touched.
 |---|---|---|---|---|
 | r1 | first build | vocabulary v0, prompt v2, qwen3.5:4b `7f3251fa6878…`, 772 LLM calls | 695 / 400 / 165 / 581 / 26 / 0 | published, kept for rollback |
 | r2 | TOPIK thresholds were stored as a single level ("3 or above" → `3`) on about 40 LLM chunks (A9) | same + ordinal TOPIK rule and LLM post-check; **0 new LLM calls** (all cache hits) | 900 / 400 / 26 / 522 / 19 / 0 | published, kept for rollback |
-| r3 | vocabulary v1 (A17) and the postcheck fixes (A13) | vocabulary v1, prompt v3 (re-called), postcheck p1 | see its verification report | becomes the HYU default once published |
+| r3 | vocabulary v1 (A17) and the postcheck fixes (A13) | vocabulary v1, prompt v3 (re-called), postcheck p1 | see its verification report | **HYU default** (`Settings.hyu_index_id`, env `HYU_INDEX_ID`) once published |
 
 All three revisions use 1,867 chunks from 362 documents: max 344 embedded tokens, 0 truncated, and
 `llm_errors` = 0.

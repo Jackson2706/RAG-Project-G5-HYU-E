@@ -48,7 +48,7 @@ TERM_RE = re.compile(r"^\d{4}-[12]$")
 CONSTRAINT_ATTRIBUTES = tuple(a for a in VOCABULARY if a != "campus")  # campus has its own field
 SCOPES = ("national", "campus")
 METHODS = ("site_default", "rule", "llm", "snapshot")
-FIELDS = ("constraints", "scope", "campus", "requirements", "effective_term", "superseded_by")
+FIELDS = ("constraints", "any_of", "scope", "campus", "requirements", "effective_term", "superseded_by")
 
 
 @dataclass

@@ -64,6 +64,7 @@ def frequency(conditions: list[dict]) -> Counter:
         for attr, values in c["constraints"].items():
             for v in values:
                 freq[f"{attr}={v}"] += 1
+        freq["has_any_of"] += bool(c.get("any_of"))
         freq["has_requirements"] += bool(c["requirements"])
         freq["has_effective_term"] += bool(c["effective_term"])
     return freq
@@ -80,12 +81,16 @@ def dry_run(args, services: Services, docs) -> int:
             inputs.append(lookup.chunk_input(document, c))
     conditions = [c.to_dict() for c in extractor.tag_chunks(inputs)]
     tokens = [services.embedder.count_tokens(embedded_text(c)) + 2 for c in chunks]  # +2: [CLS] and [SEP]
-    would_call = sum(1 for c, i in zip(conditions, inputs, strict=True) if not c["constraints"] and LLM_CUE.search(i["text"]))
+    would_call = sum(1 for c, i in zip(conditions, inputs, strict=True)
+                     if not c["constraints"] and not c.get("any_of") and LLM_CUE.search(i["text"]))  # fmt: skip
     print(f"Snapshot {args.snapshot}: {len(docs)} documents, {len(chunks)} chunks (section_tokens {CHUNK_SIZE}/{CHUNK_OVERLAP})")
     print(f"Embedded tokens: max {max(tokens)}, median {statistics.median(tokens)}; over {MAX_EMBED_TOKENS}: {sum(t > MAX_EMBED_TOKENS for t in tokens)}")
     print(f"Hangul in headers: {sum(bool(c['section'] and HANGUL.search(c['section'])) for c in chunks)}; "
           f"unmasked e-mails: {sum(unmasked_emails(c['text']) for c in chunks)}")
-    print(f"Rule-tagged chunks: {sum(bool(c['constraints']) for c in conditions)}; would call the LLM: {would_call}")
+    print(f"Rule-tagged chunks: {sum(bool(c['constraints'] or c.get('any_of')) for c in conditions)}; would call the LLM: {would_call}")
+    print(f"Chunks with any_of: {sum(bool(c.get('any_of')) for c in conditions)}; "
+          f"korean_standard: {sum('korean_standard' in c['constraints'] for c in conditions)}; "
+          f"applicant: {sum('applicant' in c['constraints'].get('academic_status', []) for c in conditions)}")
     print("\nAttribute frequency (rules only):")
     for key, n in sorted(frequency(conditions).items()):
         print(f"  {key:40s} {n}")
@@ -133,7 +138,8 @@ def verify(db: Database, embedder, default_before: dict, default_after: dict, ex
         "default_before": default_before, "default_after": default_after,
     }  # fmt: skip
     checks, status = evaluate_checks(facts)
-    count_fields = ("tagged_by_rule", "tagged_by_llm", "llm_rejected", "llm_rejected_total", "llm_errors",
+    count_fields = ("tagged_by_rule", "tagged_by_llm", "llm_rejected", "llm_rejected_fields_by_reason",
+                    "llm_rejected_total", "llm_errors",
                     "llm_called", "llm_cache_hits", "unconditioned", "partition", "llm_first_error")  # fmt: skip
     return {"facts": facts, "checks": checks, "status": status,
             "applicability_counts": {key: applicability.get(key) for key in count_fields},

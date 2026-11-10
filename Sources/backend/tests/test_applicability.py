@@ -14,10 +14,10 @@ from app.rag.applicability import VOCABULARY, ChunkCondition, term_of
 CASES = json.loads((Path(__file__).parent / "fixtures" / "applicability_chunks.json").read_text())
 
 
-def tag_chunk(chunk, llm=None):
+def tag_chunk(chunk, llm=None, **kwargs):
     from app.rag.blocks.ingestion.metadata_extraction.applicability_extractor import tag_chunk as impl
 
-    return impl(chunk, llm=llm)
+    return impl(chunk, llm=llm, **kwargs)
 
 
 # --- the condition format (runs without the tagger) ---------------------------------------------
@@ -175,7 +175,7 @@ def test_t08b_rule_fixes(text, expected):
     ("Applicants with TOPIK 3 or above may apply.", ["3", "4", "5", "6"]),
     ("TOPIK level 4 or higher is required.", ["4", "5", "6"]),
     ("Korean proficiency is required (TOPIK Lv4~6).", ["4", "5", "6"]),
-    ("TOPIK level 5+ students get a bonus.", ["5", "6"]),
+    ("TOPIK level 5+ students may apply.", ["5", "6"]),  # "bonus" would be a preference (A17)
 ], ids=["or_above", "or_higher", "range_to_6", "plus"])  # fmt: skip
 def test_topik_thresholds_expand_to_every_higher_level(text, expected):
     assert tag_chunk({**PLAIN, "title": "", "text": text}).constraints["topik_level"] == expected
@@ -193,7 +193,7 @@ def test_llm_topik_threshold_is_expanded_and_all_levels_is_no_constraint():
     every = fake_llm({"constraints": {"topik_level": list(VOCABULARY["topik_level"])}, "evidence": {"topik_level": "TOPIK three"}})
     condition = ChunkCondition(campus=["erica"])
     _apply_llm_fallback(condition, text, every, details := {})
-    assert condition.constraints == {} and details["llm_fallback"]["rejected_fields"] == {"topik_level": "every value allowed = no constraint"}
+    assert condition.constraints == {} and details["llm_fallback"]["rejected_fields"] == {"topik_level": "every_value"}  # postcheck p1 label
 
 
 
