@@ -1,0 +1,2435 @@
+{
+  "index_id": "hyu_20261110_97dc1269_r3",
+  "sample_n": 150,
+  "per_attribute": {
+    "degree_level": {
+      "tp": 55,
+      "fp": 13,
+      "fn": 18,
+      "precision": 0.8088235294117647,
+      "precision_ci": [
+        0.6998913522432758,
+        0.8847281439817526
+      ],
+      "recall": 0.7534246575342466,
+      "recall_ci": [
+        0.6435533785848676,
+        0.8379566368234529
+      ],
+      "weighted_recall": 0.7866382762537288,
+      "weighted_recall_ci": [
+        0.6795923024266585,
+        0.8650240034941502
+      ],
+      "occurrences": 41,
+      "gated": true
+    },
+    "year": {
+      "tp": 6,
+      "fp": 4,
+      "fn": 10,
+      "precision": 0.6,
+      "precision_ci": [
+        0.3126695474501864,
+        0.8318224187964902
+      ],
+      "recall": 0.375,
+      "recall_ci": [
+        0.18480982554752806,
+        0.613593529020652
+      ],
+      "weighted_recall": 0.22191623865205884,
+      "weighted_recall_ci": [
+        0.08515283345490171,
+        0.4663611390506363
+      ],
+      "occurrences": 9,
+      "gated": true
+    },
+    "student_type": {
+      "tp": 1,
+      "fp": 9,
+      "fn": 1,
+      "precision": 0.1,
+      "precision_ci": [
+        0.01787574951572113,
+        0.4041563854975721
+      ],
+      "recall": 0.5,
+      "recall_ci": [
+        0.09452865480086614,
+        0.9054713451991339
+      ],
+      "weighted_recall": 0.5,
+      "weighted_recall_ci": [
+        0.09452865480086614,
+        0.9054713451991339
+      ],
+      "occurrences": 7,
+      "gated": true
+    },
+    "visa": {
+      "tp": 10,
+      "fp": 8,
+      "fn": 3,
+      "precision": 0.5555555555555556,
+      "precision_ci": [
+        0.3371606942825164,
+        0.7544076889861088
+      ],
+      "recall": 0.7692307692307693,
+      "recall_ci": [
+        0.49743126004873084,
+        0.918206209075343
+      ],
+      "weighted_recall": 0.9744648220333568,
+      "weighted_recall_ci": [
+        0.7343718446322595,
+        0.998105198693035
+      ],
+      "occurrences": 13,
+      "gated": true
+    },
+    "topik_level": {
+      "tp": 74,
+      "fp": 14,
+      "fn": 4,
+      "precision": 0.8409090909090909,
+      "precision_ci": [
+        0.7504968606350919,
+        0.9028018623836709
+      ],
+      "recall": 0.9487179487179487,
+      "recall_ci": [
+        0.8754314334594728,
+        0.9798793131534966
+      ],
+      "weighted_recall": 0.9487179487179487,
+      "weighted_recall_ci": [
+        0.8754314334594728,
+        0.9798793131534966
+      ],
+      "occurrences": 24,
+      "gated": true
+    },
+    "english_track": {
+      "tp": 5,
+      "fp": 2,
+      "fn": 0,
+      "precision": 0.7142857142857143,
+      "precision_ci": [
+        0.35892909014821267,
+        0.9177828342909844
+      ],
+      "recall": 1.0,
+      "recall_ci": [
+        0.5655085052479191,
+        1.0000000000000002
+      ],
+      "weighted_recall": 1.0,
+      "weighted_recall_ci": [
+        0.5655085052479191,
+        1.0000000000000002
+      ],
+      "occurrences": 7,
+      "gated": true
+    },
+    "academic_status": {
+      "tp": 21,
+      "fp": 7,
+      "fn": 63,
+      "precision": 0.75,
+      "precision_ci": [
+        0.566439747592954,
+        0.8732366505779922
+      ],
+      "recall": 0.25,
+      "recall_ci": [
+        0.16972188801500593,
+        0.35214474465106566
+      ],
+      "weighted_recall": 0.359309281851668,
+      "weighted_recall_ci": [
+        0.264935915211439,
+        0.46598837750499844
+      ],
+      "occurrences": 84,
+      "gated": true
+    },
+    "korean_standard": {
+      "tp": 0,
+      "fp": 3,
+      "fn": 1,
+      "precision": 0.0,
+      "precision_ci": [
+        0.0,
+        0.5615060804490177
+      ],
+      "recall": 0.0,
+      "recall_ci": [
+        0.0,
+        0.7934567085261071
+      ],
+      "weighted_recall": 0.0,
+      "weighted_recall_ci": [
+        0.0,
+        0.7934567085261071
+      ],
+      "occurrences": 4,
+      "gated": false
+    },
+    "campus": {
+      "tp": 147,
+      "fp": 7,
+      "fn": 6,
+      "precision": 0.9545454545454546,
+      "precision_ci": [
+        0.9091549110786677,
+        0.9778102489298471
+      ],
+      "recall": 0.9607843137254902,
+      "recall_ci": [
+        0.917090678842982,
+        0.9819055058427137
+      ],
+      "weighted_recall": 0.9532351885490394,
+      "weighted_recall_ci": [
+        0.9072754835669382,
+        0.9769922597869046
+      ],
+      "occurrences": 145,
+      "gated": true
+    },
+    "scope": {
+      "tp": 140,
+      "fp": 10,
+      "fn": 10,
+      "precision": 0.9333333333333333,
+      "precision_ci": [
+        0.8816364734751868,
+        0.9633885392651903
+      ],
+      "recall": 0.9333333333333333,
+      "recall_ci": [
+        0.8816364734751868,
+        0.9633885392651903
+      ],
+      "weighted_recall": 0.9547068060190715,
+      "weighted_recall_ci": [
+        0.9085855975237396,
+        0.9781189206671883
+      ],
+      "occurrences": 150,
+      "gated": true
+    },
+    "effective_term": {
+      "tp": 86,
+      "fp": 10,
+      "fn": 11,
+      "precision": 0.8958333333333334,
+      "precision_ci": [
+        0.8187766618632338,
+        0.9424290880446203
+      ],
+      "recall": 0.8865979381443299,
+      "recall_ci": [
+        0.8082535953989312,
+        0.9354870830512321
+      ],
+      "weighted_recall": 0.8455941328602509,
+      "weighted_recall_ci": [
+        0.760684291081773,
+        0.9041728886425537
+      ],
+      "occurrences": 97,
+      "gated": true
+    }
+  },
+  "by_method": {
+    "rule": {
+      "degree_level": {
+        "tp": 50,
+        "fp": 6,
+        "fn": 12,
+        "precision": 0.8928571428571429,
+        "precision_ci": [
+          0.7853131324833861,
+          0.9499613254188092
+        ],
+        "recall": 0.8064516129032258,
+        "recall_ci": [
+          0.6914796824829172,
+          0.885663035798534
+        ],
+        "weighted_recall": 0.8064516129032259,
+        "weighted_recall_ci": [
+          0.6914796824829175,
+          0.885663035798534
+        ],
+        "occurrences": 29,
+        "gated": true
+      },
+      "year": {
+        "tp": 2,
+        "fp": 0,
+        "fn": 6,
+        "precision": 1.0,
+        "precision_ci": [
+          0.34237195288961925,
+          1.0
+        ],
+        "recall": 0.25,
+        "recall_ci": [
+          0.07147768885802763,
+          0.5907301208974108
+        ],
+        "weighted_recall": 0.25,
+        "weighted_recall_ci": [
+          0.07147768885802763,
+          0.5907301208974108
+        ],
+        "occurrences": 2,
+        "gated": false
+      },
+      "student_type": {
+        "tp": 1,
+        "fp": 1,
+        "fn": 1,
+        "precision": 0.5,
+        "precision_ci": [
+          0.09452865480086614,
+          0.9054713451991339
+        ],
+        "recall": 0.5,
+        "recall_ci": [
+          0.09452865480086614,
+          0.9054713451991339
+        ],
+        "weighted_recall": 0.5,
+        "weighted_recall_ci": [
+          0.09452865480086614,
+          0.9054713451991339
+        ],
+        "occurrences": 2,
+        "gated": false
+      },
+      "visa": {
+        "tp": 7,
+        "fp": 2,
+        "fn": 0,
+        "precision": 0.7777777777777778,
+        "precision_ci": [
+          0.4525833436728054,
+          0.9367762376877727
+        ],
+        "recall": 1.0,
+        "recall_ci": [
+          0.6456611570247934,
+          1.0
+        ],
+        "weighted_recall": 1.0,
+        "weighted_recall_ci": [
+          0.6456611570247934,
+          1.0
+        ],
+        "occurrences": 6,
+        "gated": true
+      },
+      "topik_level": {
+        "tp": 74,
+        "fp": 11,
+        "fn": 4,
+        "precision": 0.8705882352941177,
+        "precision_ci": [
+          0.7829500250687882,
+          0.9261772306312444
+        ],
+        "recall": 0.9487179487179487,
+        "recall_ci": [
+          0.8754314334594728,
+          0.9798793131534966
+        ],
+        "weighted_recall": 0.9487179487179487,
+        "weighted_recall_ci": [
+          0.8754314334594728,
+          0.9798793131534966
+        ],
+        "occurrences": 21,
+        "gated": true
+      },
+      "english_track": {
+        "tp": 5,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "precision_ci": [
+          0.5655085052479191,
+          1.0000000000000002
+        ],
+        "recall": 1.0,
+        "recall_ci": [
+          0.5655085052479191,
+          1.0000000000000002
+        ],
+        "weighted_recall": 1.0,
+        "weighted_recall_ci": [
+          0.5655085052479191,
+          1.0000000000000002
+        ],
+        "occurrences": 5,
+        "gated": true
+      },
+      "academic_status": {
+        "tp": 21,
+        "fp": 5,
+        "fn": 27,
+        "precision": 0.8076923076923077,
+        "precision_ci": [
+          0.6212336384535001,
+          0.9149306422821174
+        ],
+        "recall": 0.4375,
+        "recall_ci": [
+          0.3070105464041092,
+          0.5772522849899835
+        ],
+        "weighted_recall": 0.4375,
+        "weighted_recall_ci": [
+          0.3070105464041092,
+          0.5772522849899835
+        ],
+        "occurrences": 47,
+        "gated": true
+      },
+      "korean_standard": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "precision": null,
+        "precision_ci": null,
+        "recall": 0.0,
+        "recall_ci": [
+          0.0,
+          0.7934567085261071
+        ],
+        "weighted_recall": 0.0,
+        "weighted_recall_ci": [
+          0.0,
+          0.7934567085261071
+        ],
+        "occurrences": 1,
+        "gated": false
+      },
+      "campus": {
+        "tp": 147,
+        "fp": 7,
+        "fn": 4,
+        "precision": 0.9545454545454546,
+        "precision_ci": [
+          0.9091549110786677,
+          0.9778102489298471
+        ],
+        "recall": 0.9735099337748344,
+        "recall_ci": [
+          0.9338728903908144,
+          0.9896515371532046
+        ],
+        "weighted_recall": 0.9587724557139993,
+        "weighted_recall_ci": [
+          0.9140702222305666,
+          0.9807105190277761
+        ],
+        "occurrences": 145,
+        "gated": true
+      },
+      "scope": {
+        "tp": 140,
+        "fp": 10,
+        "fn": 3,
+        "precision": 0.9333333333333333,
+        "precision_ci": [
+          0.8816364734751868,
+          0.9633885392651903
+        ],
+        "recall": 0.9790209790209791,
+        "recall_ci": [
+          0.9401380081785267,
+          0.9928401124630355
+        ],
+        "weighted_recall": 0.9680766420545329,
+        "weighted_recall_ci": [
+          0.9248720850684788,
+          0.9867900027022647
+        ],
+        "occurrences": 150,
+        "gated": true
+      },
+      "effective_term": {
+        "tp": 86,
+        "fp": 10,
+        "fn": 9,
+        "precision": 0.8958333333333334,
+        "precision_ci": [
+          0.8187766618632338,
+          0.9424290880446203
+        ],
+        "recall": 0.9052631578947369,
+        "recall_ci": [
+          0.8296678767789459,
+          0.9493563397452708
+        ],
+        "weighted_recall": 0.8587265669857318,
+        "weighted_recall_ci": [
+          0.7747167155770082,
+          0.9148517224823621
+        ],
+        "occurrences": 96,
+        "gated": true
+      }
+    },
+    "llm": {
+      "degree_level": {
+        "tp": 5,
+        "fp": 7,
+        "fn": 6,
+        "precision": 0.4166666666666667,
+        "precision_ci": [
+          0.19325746190524656,
+          0.6804926643446272
+        ],
+        "recall": 0.45454545454545453,
+        "recall_ci": [
+          0.21270957543988045,
+          0.7199122443100118
+        ],
+        "weighted_recall": 0.17229530728450815,
+        "weighted_recall_ci": [
+          0.047099261871044074,
+          0.4671375293279627
+        ],
+        "occurrences": 12,
+        "gated": true
+      },
+      "year": {
+        "tp": 4,
+        "fp": 4,
+        "fn": 4,
+        "precision": 0.5,
+        "precision_ci": [
+          0.21521252682444186,
+          0.7847874731755582
+        ],
+        "recall": 0.5,
+        "recall_ci": [
+          0.21521252682444186,
+          0.7847874731755582
+        ],
+        "weighted_recall": 0.12225705329153606,
+        "weighted_recall_ci": [
+          0.02157512809561113,
+          0.468030402632042
+        ],
+        "occurrences": 7,
+        "gated": true
+      },
+      "student_type": {
+        "tp": 0,
+        "fp": 8,
+        "fn": 0,
+        "precision": 0.0,
+        "precision_ci": [
+          0.0,
+          0.3244156195108769
+        ],
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "occurrences": 5,
+        "gated": true
+      },
+      "visa": {
+        "tp": 3,
+        "fp": 6,
+        "fn": 3,
+        "precision": 0.3333333333333333,
+        "precision_ci": [
+          0.12058159868274293,
+          0.6458026525009102
+        ],
+        "recall": 0.5,
+        "recall_ci": [
+          0.18761280689940868,
+          0.8123871931005913
+        ],
+        "weighted_recall": 0.5225806451612904,
+        "weighted_recall_ci": [
+          0.20157352934662126,
+          0.8259593659077566
+        ],
+        "occurrences": 7,
+        "gated": true
+      },
+      "topik_level": {
+        "tp": 0,
+        "fp": 3,
+        "fn": 0,
+        "precision": 0.0,
+        "precision_ci": [
+          0.0,
+          0.5615060804490177
+        ],
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "occurrences": 3,
+        "gated": false
+      },
+      "english_track": {
+        "tp": 0,
+        "fp": 2,
+        "fn": 0,
+        "precision": 0.0,
+        "precision_ci": [
+          0.0,
+          0.6576280471103807
+        ],
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "occurrences": 2,
+        "gated": false
+      },
+      "academic_status": {
+        "tp": 0,
+        "fp": 2,
+        "fn": 36,
+        "precision": 0.0,
+        "precision_ci": [
+          0.0,
+          0.6576280471103807
+        ],
+        "recall": 0.0,
+        "recall_ci": [
+          0.0,
+          0.09642183044857634
+        ],
+        "weighted_recall": 0.0,
+        "weighted_recall_ci": [
+          0.0,
+          0.09642183044857634
+        ],
+        "occurrences": 37,
+        "gated": true
+      },
+      "korean_standard": {
+        "tp": 0,
+        "fp": 3,
+        "fn": 0,
+        "precision": 0.0,
+        "precision_ci": [
+          0.0,
+          0.5615060804490177
+        ],
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "occurrences": 3,
+        "gated": false
+      },
+      "campus": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 2,
+        "precision": null,
+        "precision_ci": null,
+        "recall": 0.0,
+        "recall_ci": [
+          0.0,
+          0.6576280471103807
+        ],
+        "weighted_recall": 0.0,
+        "weighted_recall_ci": [
+          0.0,
+          0.6576280471103807
+        ],
+        "occurrences": 2,
+        "gated": false
+      },
+      "scope": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 7,
+        "precision": null,
+        "precision_ci": null,
+        "recall": 0.0,
+        "recall_ci": [
+          0.0,
+          0.35433884297520657
+        ],
+        "weighted_recall": 0.0,
+        "weighted_recall_ci": [
+          0.0,
+          0.35433884297520657
+        ],
+        "occurrences": 7,
+        "gated": true
+      },
+      "effective_term": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 2,
+        "precision": null,
+        "precision_ci": null,
+        "recall": 0.0,
+        "recall_ci": [
+          0.0,
+          0.6576280471103807
+        ],
+        "weighted_recall": 0.0,
+        "weighted_recall_ci": [
+          0.0,
+          0.6576280471103807
+        ],
+        "occurrences": 2,
+        "gated": false
+      }
+    }
+  },
+  "by_bucket": {
+    "rule_tagged": {
+      "degree_level": {
+        "tp": 50,
+        "fp": 6,
+        "fn": 12,
+        "precision": 0.8928571428571429,
+        "precision_ci": [
+          0.7853131324833861,
+          0.9499613254188092
+        ],
+        "recall": 0.8064516129032258,
+        "recall_ci": [
+          0.6914796824829172,
+          0.885663035798534
+        ],
+        "weighted_recall": 0.8064516129032259,
+        "weighted_recall_ci": [
+          0.6914796824829175,
+          0.885663035798534
+        ],
+        "occurrences": 29,
+        "gated": true
+      },
+      "year": {
+        "tp": 2,
+        "fp": 0,
+        "fn": 6,
+        "precision": 1.0,
+        "precision_ci": [
+          0.34237195288961925,
+          1.0
+        ],
+        "recall": 0.25,
+        "recall_ci": [
+          0.07147768885802763,
+          0.5907301208974108
+        ],
+        "weighted_recall": 0.25,
+        "weighted_recall_ci": [
+          0.07147768885802763,
+          0.5907301208974108
+        ],
+        "occurrences": 2,
+        "gated": false
+      },
+      "student_type": {
+        "tp": 1,
+        "fp": 1,
+        "fn": 1,
+        "precision": 0.5,
+        "precision_ci": [
+          0.09452865480086614,
+          0.9054713451991339
+        ],
+        "recall": 0.5,
+        "recall_ci": [
+          0.09452865480086614,
+          0.9054713451991339
+        ],
+        "weighted_recall": 0.5,
+        "weighted_recall_ci": [
+          0.09452865480086614,
+          0.9054713451991339
+        ],
+        "occurrences": 2,
+        "gated": false
+      },
+      "visa": {
+        "tp": 7,
+        "fp": 2,
+        "fn": 0,
+        "precision": 0.7777777777777778,
+        "precision_ci": [
+          0.4525833436728054,
+          0.9367762376877727
+        ],
+        "recall": 1.0,
+        "recall_ci": [
+          0.6456611570247934,
+          1.0
+        ],
+        "weighted_recall": 1.0,
+        "weighted_recall_ci": [
+          0.6456611570247934,
+          1.0
+        ],
+        "occurrences": 6,
+        "gated": true
+      },
+      "topik_level": {
+        "tp": 74,
+        "fp": 11,
+        "fn": 4,
+        "precision": 0.8705882352941177,
+        "precision_ci": [
+          0.7829500250687882,
+          0.9261772306312444
+        ],
+        "recall": 0.9487179487179487,
+        "recall_ci": [
+          0.8754314334594728,
+          0.9798793131534966
+        ],
+        "weighted_recall": 0.9487179487179487,
+        "weighted_recall_ci": [
+          0.8754314334594728,
+          0.9798793131534966
+        ],
+        "occurrences": 21,
+        "gated": true
+      },
+      "english_track": {
+        "tp": 5,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "precision_ci": [
+          0.5655085052479191,
+          1.0000000000000002
+        ],
+        "recall": 1.0,
+        "recall_ci": [
+          0.5655085052479191,
+          1.0000000000000002
+        ],
+        "weighted_recall": 1.0,
+        "weighted_recall_ci": [
+          0.5655085052479191,
+          1.0000000000000002
+        ],
+        "occurrences": 5,
+        "gated": true
+      },
+      "academic_status": {
+        "tp": 21,
+        "fp": 5,
+        "fn": 27,
+        "precision": 0.8076923076923077,
+        "precision_ci": [
+          0.6212336384535001,
+          0.9149306422821174
+        ],
+        "recall": 0.4375,
+        "recall_ci": [
+          0.3070105464041092,
+          0.5772522849899835
+        ],
+        "weighted_recall": 0.4375,
+        "weighted_recall_ci": [
+          0.3070105464041092,
+          0.5772522849899835
+        ],
+        "occurrences": 47,
+        "gated": true
+      },
+      "korean_standard": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "precision": null,
+        "precision_ci": null,
+        "recall": 0.0,
+        "recall_ci": [
+          0.0,
+          0.7934567085261071
+        ],
+        "weighted_recall": 0.0,
+        "weighted_recall_ci": [
+          0.0,
+          0.7934567085261071
+        ],
+        "occurrences": 1,
+        "gated": false
+      },
+      "campus": {
+        "tp": 51,
+        "fp": 2,
+        "fn": 4,
+        "precision": 0.9622641509433962,
+        "precision_ci": [
+          0.8724547684904087,
+          0.9895899311661807
+        ],
+        "recall": 0.9272727272727272,
+        "recall_ci": [
+          0.827398219083632,
+          0.9713564034963114
+        ],
+        "weighted_recall": 0.9272727272727272,
+        "weighted_recall_ci": [
+          0.827398219083632,
+          0.9713564034963114
+        ],
+        "occurrences": 52,
+        "gated": true
+      },
+      "scope": {
+        "tp": 51,
+        "fp": 3,
+        "fn": 3,
+        "precision": 0.9444444444444444,
+        "precision_ci": [
+          0.8489254853651705,
+          0.980927077496161
+        ],
+        "recall": 0.9444444444444444,
+        "recall_ci": [
+          0.8489254853651705,
+          0.980927077496161
+        ],
+        "weighted_recall": 0.9444444444444444,
+        "weighted_recall_ci": [
+          0.8489254853651705,
+          0.980927077496161
+        ],
+        "occurrences": 54,
+        "gated": true
+      },
+      "effective_term": {
+        "tp": 36,
+        "fp": 9,
+        "fn": 9,
+        "precision": 0.8,
+        "precision_ci": [
+          0.6617674868607056,
+          0.8910399559749099
+        ],
+        "recall": 0.8,
+        "recall_ci": [
+          0.6617674868607056,
+          0.8910399559749099
+        ],
+        "weighted_recall": 0.7999999999999999,
+        "weighted_recall_ci": [
+          0.6617674868607056,
+          0.8910399559749099
+        ],
+        "occurrences": 45,
+        "gated": true
+      }
+    },
+    "rule_unconditioned": {
+      "degree_level": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "occurrences": 0,
+        "gated": false
+      },
+      "year": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "occurrences": 0,
+        "gated": false
+      },
+      "student_type": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "occurrences": 0,
+        "gated": false
+      },
+      "visa": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "occurrences": 0,
+        "gated": false
+      },
+      "topik_level": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "occurrences": 0,
+        "gated": false
+      },
+      "english_track": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "occurrences": 0,
+        "gated": false
+      },
+      "academic_status": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "occurrences": 0,
+        "gated": false
+      },
+      "korean_standard": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "occurrences": 0,
+        "gated": false
+      },
+      "campus": {
+        "tp": 26,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "precision_ci": [
+          0.8712669561953784,
+          1.0000000000000002
+        ],
+        "recall": 1.0,
+        "recall_ci": [
+          0.8712669561953784,
+          1.0000000000000002
+        ],
+        "weighted_recall": 1.0,
+        "weighted_recall_ci": [
+          0.8712669561953784,
+          1.0000000000000002
+        ],
+        "occurrences": 25,
+        "gated": true
+      },
+      "scope": {
+        "tp": 25,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "precision_ci": [
+          0.8668035060468213,
+          1.0
+        ],
+        "recall": 1.0,
+        "recall_ci": [
+          0.8668035060468213,
+          1.0
+        ],
+        "weighted_recall": 1.0,
+        "weighted_recall_ci": [
+          0.8668035060468213,
+          1.0
+        ],
+        "occurrences": 25,
+        "gated": true
+      },
+      "effective_term": {
+        "tp": 10,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "precision_ci": [
+          0.7224598312333834,
+          1.0
+        ],
+        "recall": 1.0,
+        "recall_ci": [
+          0.7224598312333834,
+          1.0
+        ],
+        "weighted_recall": 1.0,
+        "weighted_recall_ci": [
+          0.7224598312333834,
+          1.0
+        ],
+        "occurrences": 10,
+        "gated": true
+      }
+    },
+    "llm_tagged": {
+      "degree_level": {
+        "tp": 5,
+        "fp": 7,
+        "fn": 1,
+        "precision": 0.4166666666666667,
+        "precision_ci": [
+          0.19325746190524656,
+          0.6804926643446272
+        ],
+        "recall": 0.8333333333333334,
+        "recall_ci": [
+          0.43649056343635395,
+          0.9699474141282697
+        ],
+        "weighted_recall": 0.8333333333333331,
+        "weighted_recall_ci": [
+          0.4364905634363537,
+          0.9699474141282696
+        ],
+        "occurrences": 9,
+        "gated": true
+      },
+      "year": {
+        "tp": 4,
+        "fp": 4,
+        "fn": 0,
+        "precision": 0.5,
+        "precision_ci": [
+          0.21521252682444186,
+          0.7847874731755582
+        ],
+        "recall": 1.0,
+        "recall_ci": [
+          0.5100999795960008,
+          1.0
+        ],
+        "weighted_recall": 1.0,
+        "weighted_recall_ci": [
+          0.5100999795960008,
+          1.0
+        ],
+        "occurrences": 6,
+        "gated": true
+      },
+      "student_type": {
+        "tp": 0,
+        "fp": 8,
+        "fn": 0,
+        "precision": 0.0,
+        "precision_ci": [
+          0.0,
+          0.3244156195108769
+        ],
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "occurrences": 5,
+        "gated": true
+      },
+      "visa": {
+        "tp": 3,
+        "fp": 6,
+        "fn": 2,
+        "precision": 0.3333333333333333,
+        "precision_ci": [
+          0.12058159868274293,
+          0.6458026525009102
+        ],
+        "recall": 0.6,
+        "recall_ci": [
+          0.23071993220883708,
+          0.8823817688407467
+        ],
+        "weighted_recall": 0.6000000000000001,
+        "weighted_recall_ci": [
+          0.23071993220883708,
+          0.8823817688407467
+        ],
+        "occurrences": 6,
+        "gated": true
+      },
+      "topik_level": {
+        "tp": 0,
+        "fp": 3,
+        "fn": 0,
+        "precision": 0.0,
+        "precision_ci": [
+          0.0,
+          0.5615060804490177
+        ],
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "occurrences": 3,
+        "gated": false
+      },
+      "english_track": {
+        "tp": 0,
+        "fp": 2,
+        "fn": 0,
+        "precision": 0.0,
+        "precision_ci": [
+          0.0,
+          0.6576280471103807
+        ],
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "occurrences": 2,
+        "gated": false
+      },
+      "academic_status": {
+        "tp": 0,
+        "fp": 2,
+        "fn": 10,
+        "precision": 0.0,
+        "precision_ci": [
+          0.0,
+          0.6576280471103807
+        ],
+        "recall": 0.0,
+        "recall_ci": [
+          -2.7755575615628914e-17,
+          0.2775401687666166
+        ],
+        "weighted_recall": 0.0,
+        "weighted_recall_ci": [
+          -2.7755575615628914e-17,
+          0.2775401687666166
+        ],
+        "occurrences": 11,
+        "gated": true
+      },
+      "korean_standard": {
+        "tp": 0,
+        "fp": 3,
+        "fn": 0,
+        "precision": 0.0,
+        "precision_ci": [
+          0.0,
+          0.5615060804490177
+        ],
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "occurrences": 3,
+        "gated": false
+      },
+      "campus": {
+        "tp": 19,
+        "fp": 2,
+        "fn": 1,
+        "precision": 0.9047619047619048,
+        "precision_ci": [
+          0.7108541613925933,
+          0.9734817912030528
+        ],
+        "recall": 0.95,
+        "recall_ci": [
+          0.7638641064874331,
+          0.9911187805671268
+        ],
+        "weighted_recall": 0.9500000000000001,
+        "weighted_recall_ci": [
+          0.7638641064874331,
+          0.9911187805671268
+        ],
+        "occurrences": 18,
+        "gated": true
+      },
+      "scope": {
+        "tp": 16,
+        "fp": 4,
+        "fn": 4,
+        "precision": 0.8,
+        "precision_ci": [
+          0.5839782779742401,
+          0.9193436467288
+        ],
+        "recall": 0.8,
+        "recall_ci": [
+          0.5839782779742401,
+          0.9193436467288
+        ],
+        "weighted_recall": 0.8,
+        "weighted_recall_ci": [
+          0.5839782779742401,
+          0.9193436467288
+        ],
+        "occurrences": 20,
+        "gated": true
+      },
+      "effective_term": {
+        "tp": 13,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "precision_ci": [
+          0.7718981569447083,
+          1.0
+        ],
+        "recall": 1.0,
+        "recall_ci": [
+          0.7718981569447083,
+          1.0
+        ],
+        "weighted_recall": 1.0,
+        "weighted_recall_ci": [
+          0.7718981569447083,
+          1.0
+        ],
+        "occurrences": 13,
+        "gated": true
+      }
+    },
+    "llm_unconditioned": {
+      "degree_level": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 3,
+        "precision": null,
+        "precision_ci": null,
+        "recall": 0.0,
+        "recall_ci": [
+          0.0,
+          0.5615060804490177
+        ],
+        "weighted_recall": 0.0,
+        "weighted_recall_ci": [
+          0.0,
+          0.5615060804490177
+        ],
+        "occurrences": 2,
+        "gated": false
+      },
+      "year": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 4,
+        "precision": null,
+        "precision_ci": null,
+        "recall": 0.0,
+        "recall_ci": [
+          0.0,
+          0.48990002040399916
+        ],
+        "weighted_recall": 0.0,
+        "weighted_recall_ci": [
+          0.0,
+          0.48990002040399916
+        ],
+        "occurrences": 1,
+        "gated": false
+      },
+      "student_type": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "occurrences": 0,
+        "gated": false
+      },
+      "visa": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "occurrences": 0,
+        "gated": false
+      },
+      "topik_level": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "occurrences": 0,
+        "gated": false
+      },
+      "english_track": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "occurrences": 0,
+        "gated": false
+      },
+      "academic_status": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 19,
+        "precision": null,
+        "precision_ci": null,
+        "recall": 0.0,
+        "recall_ci": [
+          0.0,
+          0.16818436536845052
+        ],
+        "weighted_recall": 0.0,
+        "weighted_recall_ci": [
+          0.0,
+          0.16818436536845052
+        ],
+        "occurrences": 19,
+        "gated": true
+      },
+      "korean_standard": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "occurrences": 0,
+        "gated": false
+      },
+      "campus": {
+        "tp": 39,
+        "fp": 3,
+        "fn": 1,
+        "precision": 0.9285714285714286,
+        "precision_ci": [
+          0.8099028671147483,
+          0.9754100364488272
+        ],
+        "recall": 0.975,
+        "recall_ci": [
+          0.8711834051199223,
+          0.9955732825922052
+        ],
+        "weighted_recall": 0.975,
+        "weighted_recall_ci": [
+          0.8711834051199223,
+          0.9955732825922052
+        ],
+        "occurrences": 39,
+        "gated": true
+      },
+      "scope": {
+        "tp": 37,
+        "fp": 2,
+        "fn": 2,
+        "precision": 0.9487179487179487,
+        "precision_ci": [
+          0.8311406095436208,
+          0.9858223423536004
+        ],
+        "recall": 0.9487179487179487,
+        "recall_ci": [
+          0.8311406095436208,
+          0.9858223423536004
+        ],
+        "weighted_recall": 0.9487179487179487,
+        "weighted_recall_ci": [
+          0.8311406095436208,
+          0.9858223423536004
+        ],
+        "occurrences": 39,
+        "gated": true
+      },
+      "effective_term": {
+        "tp": 19,
+        "fp": 1,
+        "fn": 2,
+        "precision": 0.95,
+        "precision_ci": [
+          0.7638641064874331,
+          0.9911187805671268
+        ],
+        "recall": 0.9047619047619048,
+        "recall_ci": [
+          0.7108541613925933,
+          0.9734817912030528
+        ],
+        "weighted_recall": 0.9047619047619048,
+        "weighted_recall_ci": [
+          0.7108541613925933,
+          0.9734817912030528
+        ],
+        "occurrences": 21,
+        "gated": true
+      }
+    },
+    "llm_rejected": {
+      "degree_level": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 2,
+        "precision": null,
+        "precision_ci": null,
+        "recall": 0.0,
+        "recall_ci": [
+          0.0,
+          0.6576280471103807
+        ],
+        "weighted_recall": 0.0,
+        "weighted_recall_ci": [
+          0.0,
+          0.6576280471103807
+        ],
+        "occurrences": 1,
+        "gated": false
+      },
+      "year": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "occurrences": 0,
+        "gated": false
+      },
+      "student_type": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "occurrences": 0,
+        "gated": false
+      },
+      "visa": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "precision": null,
+        "precision_ci": null,
+        "recall": 0.0,
+        "recall_ci": [
+          0.0,
+          0.7934567085261071
+        ],
+        "weighted_recall": 0.0,
+        "weighted_recall_ci": [
+          0.0,
+          0.7934567085261071
+        ],
+        "occurrences": 1,
+        "gated": false
+      },
+      "topik_level": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "occurrences": 0,
+        "gated": false
+      },
+      "english_track": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "occurrences": 0,
+        "gated": false
+      },
+      "academic_status": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 7,
+        "precision": null,
+        "precision_ci": null,
+        "recall": 0.0,
+        "recall_ci": [
+          0.0,
+          0.35433884297520657
+        ],
+        "weighted_recall": 0.0,
+        "weighted_recall_ci": [
+          0.0,
+          0.35433884297520657
+        ],
+        "occurrences": 7,
+        "gated": true
+      },
+      "korean_standard": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "occurrences": 0,
+        "gated": false
+      },
+      "campus": {
+        "tp": 12,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "precision_ci": [
+          0.7574992425007574,
+          1.0
+        ],
+        "recall": 1.0,
+        "recall_ci": [
+          0.7574992425007574,
+          1.0
+        ],
+        "weighted_recall": 1.0,
+        "weighted_recall_ci": [
+          0.7574992425007574,
+          1.0
+        ],
+        "occurrences": 11,
+        "gated": true
+      },
+      "scope": {
+        "tp": 11,
+        "fp": 1,
+        "fn": 1,
+        "precision": 0.9166666666666666,
+        "precision_ci": [
+          0.6461140782014047,
+          0.9851352905492264
+        ],
+        "recall": 0.9166666666666666,
+        "recall_ci": [
+          0.6461140782014047,
+          0.9851352905492264
+        ],
+        "weighted_recall": 0.9166666666666666,
+        "weighted_recall_ci": [
+          0.6461140782014047,
+          0.9851352905492264
+        ],
+        "occurrences": 12,
+        "gated": true
+      },
+      "effective_term": {
+        "tp": 8,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "precision_ci": [
+          0.6755843804891231,
+          1.0
+        ],
+        "recall": 1.0,
+        "recall_ci": [
+          0.6755843804891231,
+          1.0
+        ],
+        "weighted_recall": 1.0,
+        "weighted_recall_ci": [
+          0.6755843804891231,
+          1.0
+        ],
+        "occurrences": 8,
+        "gated": true
+      }
+    },
+    "llm_errors": {
+      "degree_level": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "occurrences": 0,
+        "gated": false
+      },
+      "year": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "occurrences": 0,
+        "gated": false
+      },
+      "student_type": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "occurrences": 0,
+        "gated": false
+      },
+      "visa": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "occurrences": 0,
+        "gated": false
+      },
+      "topik_level": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "occurrences": 0,
+        "gated": false
+      },
+      "english_track": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "occurrences": 0,
+        "gated": false
+      },
+      "academic_status": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "occurrences": 0,
+        "gated": false
+      },
+      "korean_standard": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "occurrences": 0,
+        "gated": false
+      },
+      "campus": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "occurrences": 0,
+        "gated": false
+      },
+      "scope": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "occurrences": 0,
+        "gated": false
+      },
+      "effective_term": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "occurrences": 0,
+        "gated": false
+      }
+    }
+  },
+  "by_campus": {
+    "seoul": {
+      "degree_level": {
+        "tp": 37,
+        "fp": 11,
+        "fn": 13,
+        "precision": 0.7708333333333334,
+        "precision_ci": [
+          0.6346046409154885,
+          0.8669230897101096
+        ],
+        "recall": 0.74,
+        "recall_ci": [
+          0.6044657801100008,
+          0.8412862034863262
+        ],
+        "weighted_recall": 0.7888987959387715,
+        "weighted_recall_ci": [
+          0.6573473670405914,
+          0.87922434691065
+        ],
+        "occurrences": 30,
+        "gated": true
+      },
+      "year": {
+        "tp": 4,
+        "fp": 1,
+        "fn": 4,
+        "precision": 0.8,
+        "precision_ci": [
+          0.3755282641185388,
+          0.9637768390302125
+        ],
+        "recall": 0.5,
+        "recall_ci": [
+          0.21521252682444186,
+          0.7847874731755582
+        ],
+        "weighted_recall": 0.12225705329153606,
+        "weighted_recall_ci": [
+          0.02157512809561113,
+          0.468030402632042
+        ],
+        "occurrences": 5,
+        "gated": true
+      },
+      "student_type": {
+        "tp": 1,
+        "fp": 7,
+        "fn": 0,
+        "precision": 0.125,
+        "precision_ci": [
+          0.02241690886329617,
+          0.4708948057698615
+        ],
+        "recall": 1.0,
+        "recall_ci": [
+          0.20654329147389294,
+          1.0
+        ],
+        "weighted_recall": 1.0,
+        "weighted_recall_ci": [
+          0.20654329147389294,
+          1.0
+        ],
+        "occurrences": 5,
+        "gated": true
+      },
+      "visa": {
+        "tp": 4,
+        "fp": 6,
+        "fn": 3,
+        "precision": 0.4,
+        "precision_ci": [
+          0.16817758120350967,
+          0.6873304525498135
+        ],
+        "recall": 0.5714285714285714,
+        "recall_ci": [
+          0.2504542304090258,
+          0.8417830777373732
+        ],
+        "weighted_recall": 0.8646799864544531,
+        "weighted_recall_ci": [
+          0.4942988820591044,
+          0.9766205219368318
+        ],
+        "occurrences": 8,
+        "gated": true
+      },
+      "topik_level": {
+        "tp": 67,
+        "fp": 2,
+        "fn": 0,
+        "precision": 0.9710144927536232,
+        "precision_ci": [
+          0.9003322653873425,
+          0.992014964766855
+        ],
+        "recall": 1.0,
+        "recall_ci": [
+          0.9457719757882374,
+          0.9999999999999999
+        ],
+        "weighted_recall": 1.0,
+        "weighted_recall_ci": [
+          0.9457719757882374,
+          0.9999999999999999
+        ],
+        "occurrences": 17,
+        "gated": true
+      },
+      "english_track": {
+        "tp": 4,
+        "fp": 1,
+        "fn": 0,
+        "precision": 0.8,
+        "precision_ci": [
+          0.3755282641185388,
+          0.9637768390302125
+        ],
+        "recall": 1.0,
+        "recall_ci": [
+          0.5100999795960008,
+          1.0
+        ],
+        "weighted_recall": 1.0,
+        "weighted_recall_ci": [
+          0.5100999795960008,
+          1.0
+        ],
+        "occurrences": 5,
+        "gated": true
+      },
+      "academic_status": {
+        "tp": 12,
+        "fp": 4,
+        "fn": 44,
+        "precision": 0.75,
+        "precision_ci": [
+          0.5050123107060135,
+          0.8981809801576265
+        ],
+        "recall": 0.21428571428571427,
+        "recall_ci": [
+          0.127057803147445,
+          0.33819713656004946
+        ],
+        "weighted_recall": 0.30552602482037977,
+        "weighted_recall_ci": [
+          0.20063507234902778,
+          0.4353859361113499
+        ],
+        "occurrences": 56,
+        "gated": true
+      },
+      "korean_standard": {
+        "tp": 0,
+        "fp": 3,
+        "fn": 1,
+        "precision": 0.0,
+        "precision_ci": [
+          0.0,
+          0.5615060804490177
+        ],
+        "recall": 0.0,
+        "recall_ci": [
+          0.0,
+          0.7934567085261071
+        ],
+        "weighted_recall": 0.0,
+        "weighted_recall_ci": [
+          0.0,
+          0.7934567085261071
+        ],
+        "occurrences": 4,
+        "gated": false
+      },
+      "campus": {
+        "tp": 90,
+        "fp": 6,
+        "fn": 4,
+        "precision": 0.9375,
+        "precision_ci": [
+          0.8702889506383905,
+          0.9710437203123955
+        ],
+        "recall": 0.9574468085106383,
+        "recall_ci": [
+          0.895642004129686,
+          0.9833297215984298
+        ],
+        "weighted_recall": 0.9554851745685321,
+        "weighted_recall_ci": [
+          0.8929936528843869,
+          0.9822088460412646
+        ],
+        "occurrences": 91,
+        "gated": true
+      },
+      "scope": {
+        "tp": 87,
+        "fp": 7,
+        "fn": 7,
+        "precision": 0.925531914893617,
+        "precision_ci": [
+          0.8541862329739056,
+          0.9634618839824809
+        ],
+        "recall": 0.925531914893617,
+        "recall_ci": [
+          0.8541862329739056,
+          0.9634618839824809
+        ],
+        "weighted_recall": 0.9686391930066705,
+        "weighted_recall_ci": [
+          0.911107058177699,
+          0.9893705330028832
+        ],
+        "occurrences": 94,
+        "gated": true
+      },
+      "effective_term": {
+        "tp": 77,
+        "fp": 2,
+        "fn": 2,
+        "precision": 0.9746835443037974,
+        "precision_ci": [
+          0.9123124646752687,
+          0.993029778835238
+        ],
+        "recall": 0.9746835443037974,
+        "recall_ci": [
+          0.9123124646752687,
+          0.993029778835238
+        ],
+        "weighted_recall": 0.9599416535650865,
+        "weighted_recall_ci": [
+          0.8913040423532843,
+          0.9859216662675498
+        ],
+        "occurrences": 79,
+        "gated": true
+      }
+    },
+    "erica": {
+      "degree_level": {
+        "tp": 18,
+        "fp": 2,
+        "fn": 5,
+        "precision": 0.9,
+        "precision_ci": [
+          0.6989617935882066,
+          0.9721341060158468
+        ],
+        "recall": 0.782608695652174,
+        "recall_ci": [
+          0.5809611981726508,
+          0.9033616439828094
+        ],
+        "weighted_recall": 0.7826086956521738,
+        "weighted_recall_ci": [
+          0.5809611981726508,
+          0.9033616439828094
+        ],
+        "occurrences": 11,
+        "gated": true
+      },
+      "year": {
+        "tp": 2,
+        "fp": 3,
+        "fn": 6,
+        "precision": 0.4,
+        "precision_ci": [
+          0.1176182311592533,
+          0.769280067791163
+        ],
+        "recall": 0.25,
+        "recall_ci": [
+          0.07147768885802763,
+          0.5907301208974108
+        ],
+        "weighted_recall": 0.25,
+        "weighted_recall_ci": [
+          0.07147768885802763,
+          0.5907301208974108
+        ],
+        "occurrences": 4,
+        "gated": false
+      },
+      "student_type": {
+        "tp": 0,
+        "fp": 2,
+        "fn": 1,
+        "precision": 0.0,
+        "precision_ci": [
+          0.0,
+          0.6576280471103807
+        ],
+        "recall": 0.0,
+        "recall_ci": [
+          0.0,
+          0.7934567085261071
+        ],
+        "weighted_recall": 0.0,
+        "weighted_recall_ci": [
+          0.0,
+          0.7934567085261071
+        ],
+        "occurrences": 2,
+        "gated": false
+      },
+      "visa": {
+        "tp": 6,
+        "fp": 2,
+        "fn": 0,
+        "precision": 0.75,
+        "precision_ci": [
+          0.40926987910258916,
+          0.9285223111419724
+        ],
+        "recall": 1.0,
+        "recall_ci": [
+          0.6096569663469354,
+          0.9999999999999999
+        ],
+        "weighted_recall": 1.0,
+        "weighted_recall_ci": [
+          0.6096569663469354,
+          0.9999999999999999
+        ],
+        "occurrences": 5,
+        "gated": true
+      },
+      "topik_level": {
+        "tp": 7,
+        "fp": 12,
+        "fn": 4,
+        "precision": 0.3684210526315789,
+        "precision_ci": [
+          0.19149272376273843,
+          0.5896084250184328
+        ],
+        "recall": 0.6363636363636364,
+        "recall_ci": [
+          0.35379677689163724,
+          0.8483377638586862
+        ],
+        "weighted_recall": 0.6363636363636365,
+        "weighted_recall_ci": [
+          0.35379677689163735,
+          0.8483377638586863
+        ],
+        "occurrences": 7,
+        "gated": true
+      },
+      "english_track": {
+        "tp": 1,
+        "fp": 1,
+        "fn": 0,
+        "precision": 0.5,
+        "precision_ci": [
+          0.09452865480086614,
+          0.9054713451991339
+        ],
+        "recall": 1.0,
+        "recall_ci": [
+          0.20654329147389294,
+          1.0
+        ],
+        "weighted_recall": 1.0,
+        "weighted_recall_ci": [
+          0.20654329147389294,
+          1.0
+        ],
+        "occurrences": 2,
+        "gated": false
+      },
+      "academic_status": {
+        "tp": 9,
+        "fp": 3,
+        "fn": 19,
+        "precision": 0.75,
+        "precision_ci": [
+          0.46768966087934005,
+          0.9110599603710386
+        ],
+        "recall": 0.32142857142857145,
+        "recall_ci": [
+          0.1793304754342074,
+          0.5066149544436882
+        ],
+        "weighted_recall": 0.4695093527510177,
+        "weighted_recall_ci": [
+          0.2998006235510987,
+          0.6465753046075676
+        ],
+        "occurrences": 28,
+        "gated": true
+      },
+      "korean_standard": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "occurrences": 0,
+        "gated": false
+      },
+      "campus": {
+        "tp": 57,
+        "fp": 1,
+        "fn": 2,
+        "precision": 0.9827586206896551,
+        "precision_ci": [
+          0.9085892732270167,
+          0.9969500401154581
+        ],
+        "recall": 0.9661016949152542,
+        "recall_ci": [
+          0.8845621301839242,
+          0.9906542869664985
+        ],
+        "weighted_recall": 0.9499954954499684,
+        "weighted_recall_ci": [
+          0.8619826200920457,
+          0.9829905897418267
+        ],
+        "occurrences": 54,
+        "gated": true
+      },
+      "scope": {
+        "tp": 53,
+        "fp": 3,
+        "fn": 3,
+        "precision": 0.9464285714285714,
+        "precision_ci": [
+          0.8539246046357077,
+          0.9816145520713321
+        ],
+        "recall": 0.9464285714285714,
+        "recall_ci": [
+          0.8539246046357077,
+          0.9816145520713321
+        ],
+        "weighted_recall": 0.9329635282284464,
+        "weighted_recall_ci": [
+          0.8359769459855176,
+          0.9743609320389001
+        ],
+        "occurrences": 56,
+        "gated": true
+      },
+      "effective_term": {
+        "tp": 9,
+        "fp": 8,
+        "fn": 9,
+        "precision": 0.5294117647058824,
+        "precision_ci": [
+          0.30962897311549487,
+          0.738351988039119
+        ],
+        "recall": 0.5,
+        "recall_ci": [
+          0.2903070395897999,
+          0.7096929604102
+        ],
+        "weighted_recall": 0.4590237280071774,
+        "weighted_recall_ci": [
+          0.25711898501930514,
+          0.6753426573630472
+        ],
+        "occurrences": 18,
+        "gated": true
+      }
+    }
+  },
+  "any_of_exact_match": {
+    "all_chunks": {
+      "matches": 148,
+      "n": 150,
+      "rate": 0.9866666666666667
+    },
+    "chunks_with_any_of": {
+      "matches": 4,
+      "n": 6,
+      "rate": 0.6666666666666666
+    }
+  },
+  "g2": {
+    "passed": false,
+    "failing_attributes": [
+      "year",
+      "student_type",
+      "visa",
+      "english_track",
+      "academic_status"
+    ]
+  },
+  "disagreement_review": {
+    "predicted": 18,
+    "reference": 147,
+    "both_wrong": 5,
+    "ambiguous": 7
+  },
+  "ambiguous_rows": [
+    {
+      "chunk_id": "6b545cd1-087b-52de-b617-0bf504fb6b59",
+      "attribute": "effective_term",
+      "reason": "The chunk contains only \"https://hylu-s.hanyang.ac.kr/ko/program/all/view/1532\" and provides no visible term or post date to distinguish the candidates."
+    },
+    {
+      "chunk_id": "79549099-04bb-5030-99a1-20334245215e",
+      "attribute": "effective_term",
+      "reason": "\"Students who plan to apply for visa while in Korea\" supplies no visible term or post date to distinguish 2022-1 from 2022-2."
+    },
+    {
+      "chunk_id": "adf5b764-7e3c-5403-bc89-fde68599cd94",
+      "attribute": "campus",
+      "reason": "The \"HY-in\" re-registration procedure makes this campus-scoped, but the visible text and heading do not identify which campus."
+    },
+    {
+      "chunk_id": "b36ab985-5dff-55f5-a2c9-b144719f863b",
+      "attribute": "campus",
+      "reason": "\"Up to 2 years, maximum 6 months per instance\" and the \"Expiration\" heading do not identify a campus."
+    },
+    {
+      "chunk_id": "d78cead4-f316-5f3a-b98e-77df4a2153dd",
+      "attribute": "campus",
+      "reason": "The \"Undergraduate Admission Guideline\" uses OIA group procedures, but the visible text and heading do not identify Seoul versus ERICA."
+    },
+    {
+      "chunk_id": "dfc7b114-37b3-5b82-aea1-cae884092272",
+      "attribute": "campus",
+      "reason": "The text only describes \"job search activities\" and internships and does not identify a campus or a national rule."
+    },
+    {
+      "chunk_id": "e233c221-8217-5c25-a8e4-741e1d77bfea",
+      "attribute": "campus",
+      "reason": "The job's \"headquarters in Seoul\" is not a Hanyang campus designation, and the visible row does not supply the source site."
+    }
+  ],
+  "out_of_vocabulary_conditions": {
+    "recommendation letter from a Hanyang advisory professor": 4,
+    "undergraduate GPA at least 3.0 or graduate GPA at least 4.2; outside scholarships that prohibit double benefits; valid certificate by deadline; IELTS/TOEFL score requirement": 3,
+    "TOPIK transcripts, test history, Korean bank-account copy, and application form": 2,
+    "foreign nationality and legal eligibility to work in Korea, including registered foreigners or overseas Koreans": 2,
+    "interview if necessary": 2,
+    "valid ID required for card pick-up": 2,
+    "English communication, basic Korean communication, and mechanical-engineering major": 1,
+    "English-test scores, thesis qualification, comprehensive examination, and off-campus residence prohibition": 1,
+    "English-track students must meet one of the listed TOEFL, IELTS, CEFR, or TEPS scores; alternatives to TOPIK include KIIP or King Sejong Institute thresholds": 1,
+    "GPA of 3.5 or higher and specified admission route for the four-year scholarship": 1,
+    "Indian or Middle Eastern nationality, ability to start work in July 2022, and bilingual English and Korean; preference: chemical engineering": 1,
+    "Indonesian nationality, age 19\u201334, residence in Korea, and interest in entrepreneurship and Indonesian environmental or energy issues": 1,
+    "Indonesian nationality, age 19\u201334, residence in Korea, and interest in entrepreneurship and Indonesian environmental, energy, or local issues": 1,
+    "TOPIK score must improve over the previously submitted score; expected graduates, leave students, extra-semester students, completed students, and prior Level 6 submitters excluded; criteria differ for arts and non-arts programs": 1,
+    "Vietnamese nationality, ability to work in Korea and Vietnam, passport and ARC, academic and graduation records; preference: software-related major and Korean or English ability": 1
+  },
+  "audience_counts": {
+    "applicant": 34,
+    "admitted": 5,
+    "enrolled": 60
+  },
+  "topik_scope_counts": {
+    "whole_chunk": 17,
+    "one_line": 5,
+    "null": 128
+  }
+}

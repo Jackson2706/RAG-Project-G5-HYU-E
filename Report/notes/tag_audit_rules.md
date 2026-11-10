@@ -34,6 +34,12 @@ applies to, using only the v1 vocabulary.
    English track)" gives `any_of: [{"topik_level": ["1","2","3","4","5","6"]}, {"english_track": ["yes"]}]`.
    - Put those attributes in `any_of`, not in `constraints`.
    - Use `any_of` only when the text itself says "or".
+   - **5b.** If only ONE of the alternatives is in the vocabulary, e.g. "TOPIK 4 or higher, or the
+     Social Integration Program, or IIE level 4", that attribute is **not a constraint**: a student
+     can qualify without it. Write no `constraints` and no `any_of` for it, and record the whole
+     alternative in `out_of_vocabulary_condition`. (Added 2026-11-11, after the reference pass:
+     4 rows had a one-set `any_of`. They were normalized this way in `reference_normalized.jsonl`,
+     and the original is kept.)
 6. **Conditions outside the vocabulary are not misses.** Examples: GPA, nationality, attendance,
    money amounts, documents.
    - Record them in `out_of_vocabulary_condition` as short text.

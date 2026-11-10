@@ -828,3 +828,16 @@ so recall is measured where the tagger said "no conditions".
 - **Demo cases** (8–10) are chosen from dev only, after the split is frozen.
 - **After every labeling session:** commit and push the label files.
 - **Stops:** at G3 (guideline approval) and at G4 (freeze), each with the numbers the human needs.
+
+**A18 addendum (2026-11-11): automated audit results, appended to the G2 record.**
+- **Where:** r3, 150 chunks, scored in `Report/results/tag_audit/hyu_20261110_97dc1269_r3/auto/scores_final.md`.
+- **Limitation:** automated audit; reference annotator Codex, which also wrote the tagging rules;
+  not human-validated. The disagreement reviewer was Codex too: it sided with the reference in 147
+  of 177 rows and with the system in 18, with 5 both-wrong and 7 ambiguous. Same-model bias is
+  likely.
+- **Gate (precision ≥ 0.8 and weighted recall ≥ 0.7, attributes with ≥ 5 occurrences):**
+  - pass: degree_level, topik_level, campus, scope, effective_term;
+  - fail: year, student_type, visa, english_track, academic_status.
+- **Rule 5b was added to the audit rules after the reference pass:** an alternative whose other
+  options are outside the vocabulary gives no constraint. 4 reference rows were normalized; the
+  original file is kept.
