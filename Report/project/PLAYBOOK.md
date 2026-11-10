@@ -789,3 +789,42 @@ so recall is measured where the tagger said "no conditions".
 - **Prompt v3 re-call approved.** The v2 cache is kept for r2 reproducibility.
 - **GUIDELINES.md moves to vocabulary v1.**
 - **r3 = postcheck fixes + v1.** Part C (the automated audit) starts after r3 is published.
+
+## 2026-11-11 (Gate G2 approved; P5 decisions)
+
+**A18 Gate G2 approved by the human.**
+- **Decisions:**
+  - vocabulary v1 as approved in A17;
+  - the rule fixes committed in the T08c review (`51f2873`): `exempt` only next to the Korean
+    standard, no `applicant` on visa guides, the `any_of` method key.
+- **What the approval was based on:**
+  - the crawl stats;
+  - the r1/r2/r3 verification reports (15/15 each);
+  - the r3 frequency table;
+  - T07 (300/300; A2 branch 1).
+- **What was not yet available:** the automated tag audit (A14) had not finished, so no precision
+  or recall numbers existed. The audit is completed anyway, and its scores are appended to the G2
+  record.
+
+**A19 P5 labeling, on top of the P5 start prompt and Appendix D.**
+- **Vocabulary v1 everywhere.**
+  - The label schema includes `korean_standard`, `academic_status=applicant` and
+    `condition_sets`.
+  - `gold_profile` contains `applicant` only when the persona is an applicant (the scope default).
+- **Personas: 10–12.**
+  - Together they cover campus, degree level, year, visa, TOPIK / English track, academic status
+    and `korean_standard`.
+  - At least 2 English-track students, and at least 2 ERICA students with visa questions.
+- **Stratification:** by campus, on purpose rather than proportionally. Slices are as in
+  Appendix D, and `answerability: unanswerable_unreadable` is used for answers that exist only in
+  the `.hwp` files or the scanned PDFs.
+- **multi_session** includes attribute updates (a stale profile), e.g. D-4 → D-2, or coursework
+  completed.
+- **Roles are unchanged:**
+  - Codex annotates everything;
+  - Claude Code annotates a blind ~30% subset;
+  - `labeling.agreement` reports κ;
+  - humans adjudicate the disagreements and verify every test item.
+- **Demo cases** (8–10) are chosen from dev only, after the split is frozen.
+- **After every labeling session:** commit and push the label files.
+- **Stops:** at G3 (guideline approval) and at G4 (freeze), each with the numbers the human needs.
