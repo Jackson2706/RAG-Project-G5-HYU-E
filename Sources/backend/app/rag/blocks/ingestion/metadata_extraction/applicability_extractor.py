@@ -18,9 +18,14 @@ from app.rag.schemas import DocumentMetadata, ParsedDocument
 
 
 # The LLM is asked only about chunks the rules left untagged AND that contain one of these cues (cost control).
-LLM_CUE = re.compile(r"eligib|\bapplicants?\b|\bonly\b|\bmust\b|\brequired\b|\bstudents? (?:who|with|in)\b|undergraduate|"
-                     r"\bgraduate\b|\bexchange\b|\bvisa\b|\bTOPIK\b|\benrolled\b|leave of absence|\bsemester\b|\byear\b",
-                     re.IGNORECASE)
+LLM_CUE = re.compile(
+    r"eligib|\bapplicants?\b|\bonly\b|\bmust\b|\brequired\b|\bstudents? (?:who|with|in)\b|"  # eligibility wording
+    r"graduat|\bmaster|\bdoctor|\bph\.?\s*d\b|\bfreshm|\bnew students?\b|"  # degree level / year of study
+    r"\bexchange\b|\bvisiting\b|\binternational students?\b|"  # student type
+    r"\bvisa\b|\bD-\d|\bTOPIK\b|\bkorean (?:language|proficiency)\b|"  # visa / language
+    r"\benrolled\b|leave of absence|\bcomplet|\bsemesters?\b|\byears?\b|"  # academic status / term
+    r"\bSeoul\b|\bERICA\b",  # the other campus may be named on a page
+    re.IGNORECASE)
 LLM_NUM_CTX, LLM_SEED = 4096, 42
 
 NATIONAL_RULES = (
@@ -216,6 +221,8 @@ def _first_json_object(text: str) -> dict[str, Any] | None:
     return None
 
 
+# Every chunk lands in exactly one bucket; VERIFY checks the buckets add up to the chunk count.
+TAG_BUCKETS = ("rule_tagged", "rule_unconditioned", "llm_tagged", "llm_unconditioned", "llm_rejected", "llm_errors")
 TAG_PROMPT_VERSION = "v1"  # bump whenever the fallback prompt below changes
 
 
@@ -266,9 +273,8 @@ def _apply_llm_fallback(
             condition.extraction_method[attribute] = "llm"
             condition.evidence[attribute] = quote
     details["rejected_fields"] = rejected
-    details["status"] = "accepted" if condition.constraints else "rejected"
-    if not condition.constraints and not rejected:
-        details["reason"] = "no supported constraints"
+    # a valid answer with no constraints = "unconditioned"; any refused field with nothing accepted = "rejected" (tags unknown)
+    details["status"] = "accepted" if condition.constraints else ("rejected" if rejected else "unconditioned")
 
 
 def tag_chunk(
@@ -399,6 +405,7 @@ class ApplicabilityExtractor(BaseMetadataExtractor):
 
         try:
             tagged = []
+            self.buckets: list[str] = []  # one TAG_BUCKETS entry per chunk, in order
             for index, chunk in enumerate(chunks):
                 details: dict[str, Any] = {"chunk_index": index, "doc_id": chunk.get("doc_id")}
                 ask = use_llm and LLM_CUE.search(chunk["text"]) is not None
@@ -417,6 +424,9 @@ class ApplicabilityExtractor(BaseMetadataExtractor):
                             counts["llm_rejected"][reason] = counts["llm_rejected"].get(reason, 0) + 1
                     fallback_details.append(details)
                 tagged.append(result)
+                status = details.get("llm_fallback", {}).get("status")
+                self.buckets.append({None: "rule_tagged" if result.constraints else "rule_unconditioned", "accepted": "llm_tagged",
+                                     "unconditioned": "llm_unconditioned", "error": "llm_errors"}.get(status, "llm_rejected"))  # fmt: skip
         finally:
             if loop is not None:
                 loop.run_until_complete(loop.shutdown_asyncgens())

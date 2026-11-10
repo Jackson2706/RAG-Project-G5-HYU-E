@@ -674,3 +674,22 @@ unconditioned, which is the error AAES must avoid.
   - tag precision and recall per attribute;
   - the frequency table and the proposed vocabulary v1;
   - the T07 result and which A2 branch applies.
+
+## 2026-11-10 (tag accounting, before the T09 ingest)
+
+**A6 Tag partition.** Every chunk is in exactly one bucket:
+`rule_tagged | rule_unconditioned | llm_tagged | llm_unconditioned | llm_rejected | llm_errors`.
+- `rule_unconditioned` means no rule tag and no LLM cue, so the chunk was never sent to the LLM.
+- VERIFY checks that the buckets sum to the chunk count, and that `llm_errors` = 0.
+
+**A7 Unknown is not unconditioned.**
+- A refused LLM answer (vocabulary or substring check failed) gives `condition_status = "unknown"`,
+  with empty tags.
+- In Step 2, an `unknown` chunk ranks like `unconditioned`, but it is flagged in the trace and
+  counted in the audit.
+
+**A8 T10 sampling.** The 50 audit chunks are stratified by bucket as well:
+- ≥ 8 from `rule_unconditioned`;
+- ≥ 5 from `llm_unconditioned`;
+
+so recall is measured where the tagger said "no conditions".

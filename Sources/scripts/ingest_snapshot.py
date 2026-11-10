@@ -125,6 +125,7 @@ def verify(db: Database, embedder, default_before: dict, default_after: dict, ex
         "unique_chunk_ids": len(ids), "points_without_chunk": sum(str(p.id) not in ids for p in points),
         "max_embedded_tokens": max(tokens, default=0), "truncated_by_embedder": sum(t > MAX_EMBED_TOKENS for t in tokens),
         "invalid_applicability": invalid, "llm_errors": applicability.get("llm_errors", 0),
+        "partition": dict(Counter(c.get("tag_bucket") for c in chunks)),
         "span_text_mismatches": len(span_mismatch_ids), "span_text_mismatch_chunk_ids": span_mismatch_ids[:5],
         "points_missing_app_fields": sum(not {"app_scope", "app_campus"} <= set(p.payload or {}) for p in points),
         "unmasked_emails": sum(unmasked_emails(c["text"]) for c in chunks),
@@ -133,7 +134,7 @@ def verify(db: Database, embedder, default_before: dict, default_after: dict, ex
     }  # fmt: skip
     checks, status = evaluate_checks(facts)
     count_fields = ("tagged_by_rule", "tagged_by_llm", "llm_rejected", "llm_rejected_total", "llm_errors",
-                    "llm_called", "llm_cache_hits", "unconditioned")  # fmt: skip
+                    "llm_called", "llm_cache_hits", "unconditioned", "partition")  # fmt: skip
     return {"facts": facts, "checks": checks, "status": status,
             "applicability_counts": {key: applicability.get(key) for key in count_fields},
             "frequency": dict(sorted(frequency([c["applicability"] for c in chunks]).items()))}  # fmt: skip

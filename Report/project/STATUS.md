@@ -16,3 +16,4 @@
 | 2026-11-10 | P4 | T08b | done | Claude Code (human-approved, ~20 lines): year ranges with commas, 'graduate' → master+doctoral, statuses in except/excluded clauses are not constraints; 6 tests. |
 | 2026-11-10 | P4 | T09 | review | Snapshot index script BUILD/VERIFY/PUBLISH written by Claude Code (Codex at usage limit, human approved); dry run 362 docs, 1,867 chunks, max 344 tokens, 652 LLM candidates; review fixes go to T09b. |
 | 2026-11-10 | P4 | T09b | done | Codex: llm_errors block VERIFY and are never cached; cache key = digest + prompt version + text sha; source_spans text check; manifest counts. Claude Code restored the fail-fast model check. Ready for the human ingest. |
+| 2026-11-10 | P4 | T09c | done | Claude Code: tag partition (6 buckets, VERIFY sums to chunks), condition_status unknown for refused LLM answers, LLM cue list extended (772 candidates, 400 rule_unconditioned in dry run). |

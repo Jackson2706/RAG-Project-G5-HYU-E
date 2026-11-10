@@ -167,7 +167,9 @@ def evaluate_checks(facts: dict) -> tuple[dict[str, bool], str]:
         "max_tokens_le_512": facts["max_embedded_tokens"] <= 512,
         "truncated_zero": facts["truncated_by_embedder"] == 0,
         "applicability_valid": facts["invalid_applicability"] == 0,
-        "llm_errors_zero": facts["llm_errors"] == 0,
+        "llm_errors_zero": facts["llm_errors"] == 0 and facts["partition"].get("llm_errors", 0) == 0,
+        # every chunk in exactly one known bucket (rule_tagged … llm_errors), summing to the chunk count
+        "partition_complete": sum(facts["partition"].values()) == facts["mongo_chunks"] and None not in facts["partition"],
         "span_text_matches": facts["span_text_mismatches"] == 0,
         "payload_has_scope_campus": facts["points_missing_app_fields"] == 0,
         "no_unmasked_emails": facts["unmasked_emails"] == 0,

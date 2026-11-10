@@ -162,6 +162,7 @@ def test_qdrant_payload_has_the_compact_applicability_fields(db):
 GOOD = {"expected_documents": 362, "mongo_documents": 362, "mongo_chunks": 10, "qdrant_points": 10, "dimension": 384,
         "unique_chunk_ids": 10, "points_without_chunk": 0, "max_embedded_tokens": 344, "truncated_by_embedder": 0,
         "invalid_applicability": 0, "llm_errors": 0, "span_text_mismatches": 0,
+        "partition": {"rule_tagged": 4, "rule_unconditioned": 3, "llm_tagged": 1, "llm_unconditioned": 1, "llm_rejected": 1},
         "points_missing_app_fields": 0, "unmasked_emails": 0, "hangul_headers": 0,
         "default_before": {"documents": 5}, "default_after": {"documents": 5}}  # fmt: skip
 
@@ -196,3 +197,24 @@ def test_verify_passes_only_when_every_check_passes():
     assert evaluate_checks({**GOOD, "unmasked_emails": 1})[1] == "built"
     checks, status = evaluate_checks({**GOOD, "span_text_mismatches": 1})
     assert status == "built" and not checks["span_text_matches"]
+
+
+def test_every_chunk_lands_in_one_bucket_and_refused_answers_are_unknown(services, fake_ollama, tmp_path):
+    from app.rag.pipeline import _tag_chunks
+
+    fake_ollama.models = [{"name": "qwen3.5:4b", "details": {}, "capabilities": ["completion"], "digest": "sha256:x"}]
+    step = validate_config({"metadata_extraction": {"method": "applicability_extractor", "params": {}}})["metadata_extraction"]
+    block = create_block("metadata_extraction", step["method"], step["params"], services)
+    inputs = [{**UNTAGGED, "text": t} for t in ("Year 1-2 Bachelor's students may apply.",  # rule_tagged
+                                               "The office opens at 9:00.",  # no cue -> rule_unconditioned
+                                               "Only partner-university applicants may join.")]  # cue -> LLM  # fmt: skip
+    answers = {"llm_unconditioned": {"constraints": {}, "evidence": {}},
+               "llm_rejected": {"constraints": {"student_type": ["full_time"]}, "evidence": {"student_type": "applicants"}}}
+    for expected, answer in answers.items():
+        fake_ollama.answer = json.dumps(answer)
+        chunks = [{"text": i["text"]} for i in inputs]
+        summary = _tag_chunks(block, chunks, inputs, {})
+        assert [c["tag_bucket"] for c in chunks] == ["rule_tagged", "rule_unconditioned", expected]
+        assert chunks[2]["condition_status"] == ("unconditioned" if expected == "llm_unconditioned" else "unknown")
+        assert sum(summary["partition"].values()) == 3
+    assert not evaluate_checks({**GOOD, "partition": {"rule_tagged": 9}})[0]["partition_complete"]

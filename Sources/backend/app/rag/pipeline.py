@@ -50,6 +50,14 @@ def _tag_chunks(extractor: Any, chunks: list[dict], inputs: list[dict], timings:
         chunk["vocabulary_version"] = VOCABULARY_VERSION
         if "source_spans" in tag_input:
             chunk["source_spans"] = tag_input["source_spans"]
+    from app.rag.blocks.ingestion.metadata_extraction.applicability_extractor import TAG_BUCKETS
+
+    buckets = getattr(extractor, "buckets", [])
+    for chunk, bucket in zip(chunks, buckets, strict=True):
+        chunk["tag_bucket"] = bucket
+        # "unknown": the LLM's answer was refused or failed, so we do not know; never the same as "unconditioned"
+        chunk["condition_status"] = ("conditioned" if bucket.endswith("_tagged") else
+                                     "unconditioned" if bucket.endswith("_unconditioned") else "unknown")  # fmt: skip
     timings["tag_ms"] = (time.perf_counter() - start) * 1000
     methods = [m for c in conditions for a, m in c.extraction_method.items() if a in c.constraints]
     tagged_by_rule = sum(any(c.extraction_method.get(a) == "rule" for a in c.constraints) for c in conditions)
@@ -58,6 +66,7 @@ def _tag_chunks(extractor: Any, chunks: list[dict], inputs: list[dict], timings:
             "tagged_by_rule": tagged_by_rule, "tagged_by_llm": tagged_by_llm,
             "rule_tagged": tagged_by_rule, "llm_tagged": tagged_by_llm,
             "unconditioned": sum(not c.constraints for c in conditions),
+            "partition": {b: buckets.count(b) for b in TAG_BUCKETS},
             "constraint_fields_by_method": {m: methods.count(m) for m in set(methods)},
             **getattr(extractor, "summary", {})}  # fmt: skip
 
