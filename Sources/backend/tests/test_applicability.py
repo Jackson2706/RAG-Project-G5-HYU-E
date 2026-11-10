@@ -147,3 +147,19 @@ def test_registered_block_tags_chunks_without_the_llm():
     tags = block.tag_chunks([CASES[0]["chunk"], CASES[9]["chunk"]])
     assert [t.scope for t in tags] == ["national", "campus"]
     assert tags[0].constraints["year"] == ["1", "2"] and tags[1].constraints == {}
+
+
+# --- T08b rule fixes (found on non-fixture snapshot spans) ----------------------------------------
+
+
+@pytest.mark.parametrize("text, expected", [
+    ("Column 1: Year 3, 4 / 3, 4 term; Undergraduate: KRW 300,000", {"year": ["3", "4"], "degree_level": ["undergraduate"]}),
+    ("Graduate: KRW 300,000", {"degree_level": ["master", "doctoral"]}),
+    ("Open to graduate students only.", {"degree_level": ["master", "doctoral"]}),
+    ("Undergraduate students may apply.", {"degree_level": ["undergraduate"]}),
+    ("All students for 1 semester. (Except students who took a leave of absence, completed coursework)", {}),
+    ("Enrolled students must apply (except students on leave of absence).", {"academic_status": ["enrolled"]}),
+], ids=["year_comma", "graduate_cell", "graduate_students", "undergraduate_only", "except_clause", "enrolled_except"])  # fmt: skip
+def test_t08b_rule_fixes(text, expected):
+    got = tag_chunk({**PLAIN, "title": "", "text": text})
+    assert got.constraints == expected

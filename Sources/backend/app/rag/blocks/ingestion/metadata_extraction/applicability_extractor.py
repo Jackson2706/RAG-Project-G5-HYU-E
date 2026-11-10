@@ -40,6 +40,12 @@ MONTHS = {
 }
 
 
+# "graduate school/students/courses" or a "Graduate:" table cell = master + doctoral ("undergraduate" never matches \b)
+GRADUATE = r"\bgraduate(?: school| students?| courses?| programs?|\s*:)"
+# "Except students who took a leave of absence, …" names statuses that are NOT eligible
+NEGATED = re.compile(r"\b(?:except|excluding|excluded|not eligible|cannot apply|are not allowed)\b[^.\n)]*", re.IGNORECASE)
+
+
 def _first_match(patterns: tuple[str, ...], text: str) -> re.Match[str] | None:
     return next((match for pattern in patterns if (match := re.search(pattern, text, re.IGNORECASE))), None)
 
@@ -57,8 +63,8 @@ def _scope(context: str) -> str:
 def _degree_level(context: str) -> tuple[list[str], str | None]:
     patterns = {
         "undergraduate": (r"\bbachelor(?:'s|’s)?\b", r"\bundergraduate(?: school| students?)?\b"),
-        "master": (r"\bmaster(?:'s|’s)?\b",),
-        "doctoral": (r"\bdoctoral\b", r"\bph\.?\s*d\.?\b"),
+        "master": (r"\bmaster(?:'s|’s)?\b", GRADUATE),
+        "doctoral": (r"\bdoctoral\b", r"\bph\.?\s*d\.?\b", GRADUATE),
         "language_program": (r"\b(?:korean )?language program(?: students?)?\b",),
         "non_degree": (r"\bnon[- ]degree(?: students?| program)?\b",),
     }
@@ -68,7 +74,8 @@ def _degree_level(context: str) -> tuple[list[str], str | None]:
 
 
 def _year(context: str) -> tuple[list[str], str | None]:
-    match = re.search(r"\bYear\s*:\s*(?:Year\s*)?([1-4])(?:\s*[-–]\s*([1-4]))?\b", context, re.IGNORECASE)
+    # "Year: Year 1-2", "Year 3, 4", "Year 3~4"
+    match = re.search(r"\bYear\s*:?\s*(?:Year\s*)?([1-4])(?:\s*(?:[-–~,]|and)\s*([1-4]))?\b", context, re.IGNORECASE)
     if not match:
         return [], None
     first, last = int(match.group(1)), int(match.group(2) or match.group(1))
@@ -138,9 +145,10 @@ def _academic_status(context: str) -> tuple[list[str], str | None]:
         "graduating": (r"\bexpected graduates?\b", r"\bgraduating students?\b"),
         "admitted_not_enrolled": (r"\bacceptance\b", r"\badmitted students?\b", r"\badmission result page\b"),
     }
-    values = [value for value, value_patterns in patterns.items() if _first_match(value_patterns, context)]
+    positive = NEGATED.sub(" ", context)  # statuses in an exclusion clause are not constraints
+    values = [value for value, value_patterns in patterns.items() if _first_match(value_patterns, positive)]
     matched_patterns = tuple(pattern for value in values for pattern in patterns[value])
-    return values, _evidence(matched_patterns, context) if matched_patterns else None
+    return values, _evidence(matched_patterns, positive) if matched_patterns else None
 
 
 def _requirements(text: str) -> list[str]:
