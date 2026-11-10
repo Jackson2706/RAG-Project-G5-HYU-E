@@ -23,6 +23,8 @@ from .sites import ERICA_BOARD_NAMES, SITES, SiteConfig, get_site
 EMAIL_RE = re.compile(r"(?<![\w.+-])[\w.+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}(?![\w.-])")
 DATE_RE = re.compile(r"(?<!\d)(20\d{2})[./-](\d{1,2})[./-](\d{1,2})(?!\d)")
 BLOCK_TAGS = {"p", "li", "h1", "h2", "h3", "h4", "h5", "h6", "dd", "dt"}
+# A page that keeps only its title (e.g. "VISA") is not a useful English document.
+MIN_ENGLISH_LETTERS = 30
 
 
 @dataclass(frozen=True)
@@ -199,6 +201,12 @@ def rows_to_lines(rows: list[list[str]], header_rows: int = 1) -> list[str]:
     return lines
 
 
+def _is_key_value_table(table: Tag) -> bool:
+    """Rows like <th>Cost</th><td>Free</td> with no header row: write them as "Cost: Free"."""
+    rows = [row.find_all(["th", "td"], recursive=False) for row in table.find_all("tr")]
+    return bool(rows) and all(cells and cells[0].name == "th" and any(cell.name == "td" for cell in cells) for cells in rows)
+
+
 def html_blocks(content: Tag) -> list[TextBlock]:
     blocks: list[TextBlock] = []
     handled: set[int] = set()
@@ -209,7 +217,11 @@ def html_blocks(content: Tag) -> list[TextBlock]:
             continue
         if element.name == "table":
             grid, header_rows = expand_html_table(element)
-            blocks.extend(TextBlock(line, "table_row") for line in rows_to_lines(grid, header_rows))
+            if _is_key_value_table(element):
+                lines = [f"{row[0].rstrip(': ')}: {'; '.join(value for value in row[1:] if value)}" for row in grid if row and row[0]]
+            else:
+                lines = rows_to_lines(grid, header_rows)
+            blocks.extend(TextBlock(line, "table_row") for line in lines)
             handled.add(id(element))
             continue
         if element.name in BLOCK_TAGS:
@@ -246,9 +258,9 @@ def _select_content(soup: BeautifulSoup, config: SiteConfig, url: str) -> Tag | 
         selector = (
             ".content_body .rhymix_content.xe_content"
             if re.match(r"^/(?:notice|sub4_01|Forms)/\d+/?$", parsed.path)
-            else "#content .rhymix_content.xe_content"
+            else "#content .content_inner"  # static pages stack several xe_content widgets (title, body)
         )
-        return soup.select_one(selector)
+        return soup.select_one(selector) or soup.select_one("#content .rhymix_content.xe_content")
     if config.name == "erica":
         return soup.select_one("#bo_v_con") or soup.select_one(".sub-cnt > section")
     return soup.select_one(config.content_selector)
@@ -487,6 +499,8 @@ def extract_document(
     for selector in config.drop_selectors:
         for node in working.select(selector):
             node.decompose()
+    for node in working(["script", "style", "noscript"]):
+        node.decompose()  # e.g. the Seoul partner table is built by JavaScript; its source is not text
     content = _select_content(working, config, url)
     if content is None:
         return None
@@ -522,9 +536,8 @@ def extract_document(
             kept_attachments.append((attachment, kept))
 
     coverage = language_counts(all_raw_text)
-    if not any(is_latin(char) for block in kept_page for char in block.text) and not any(
-        is_latin(char) for _, blocks in kept_attachments for block in blocks for char in block.text
-    ):
+    kept_blocks = [*kept_page, *(block for _, blocks in kept_attachments for block in blocks)]
+    if sum(is_latin(char) for block in kept_blocks for char in block.text) < MIN_ENGLISH_LETTERS:
         return None
 
     text = ""

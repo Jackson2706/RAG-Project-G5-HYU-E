@@ -40,7 +40,7 @@ def test_max_pages_caps_transport_requests(tmp_path):
             ), headers={"Content-Type": "application/xml"})
         return httpx.Response(200, text=(
             '<html><head><title>한양대 국제처 - Summer</title></head>'
-            '<body><div id="content"><div class="rhymix_content xe_content"><p>English body.</p></div></div></body></html>'
+            '<body><div id="content"><div class="rhymix_content xe_content"><p>English body text about the summer school programme.</p></div></div></body></html>'
         ), headers={"Content-Type": "text/html"})
 
     with httpx.Client(transport=httpx.MockTransport(handler)) as client:
@@ -117,7 +117,7 @@ def test_one_failing_page_does_not_stop_the_crawl(tmp_path):
             raise httpx.ConnectError("down", request=request)
         return httpx.Response(200, text=(
             '<html><head><title>한양대 국제처 - Summer</title></head>'
-            '<body><div id="content"><div class="rhymix_content xe_content"><p>English body.</p></div></div></body></html>'
+            '<body><div id="content"><div class="rhymix_content xe_content"><p>English body text about the summer school programme.</p></div></div></body></html>'
         ), headers={"Content-Type": "text/html"})
 
     with httpx.Client(transport=httpx.MockTransport(handler)) as client:

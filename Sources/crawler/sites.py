@@ -92,7 +92,7 @@ ERICA = SiteConfig(
         r"^/bbs/board\.php\?",
         r"^/bbs/download\.php\?",
     ),
-    deny_patterns=COMMON_DENY_PATTERNS,
+    deny_patterns=(*COMMON_DENY_PATTERNS, r"^/eng/s1/s1_3\.php$"),  # "About the OIA" is the staff directory
     content_selector=".sub-cnt > section, #bo_v_con",
     drop_selectors=(
         "header#header",

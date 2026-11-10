@@ -178,7 +178,7 @@ def test_language_filter_keeps_contextual_neutral_and_marks_borderline():
 def test_unsupported_attachment_is_listed_and_attachment_filename_email_is_masked():
     html = b"""
         <html><head><title>English title</title></head><body><div id="content">
-        <div class="rhymix_content xe_content"><p>English page body.</p></div>
+        <div class="rhymix_content xe_content"><p>English page body text about the guidebook download.</p></div>
         </div></body></html>
     """
     attachment = AttachmentInput(
@@ -210,3 +210,51 @@ def test_erica_attachments_are_found_in_the_file_section_outside_the_body():
     assert [item["canonical_uri"] for item in found] == [
         "https://global.hanyang.ac.kr/bbs/download.php?bo_table=s375_eng&wr_id=7&no=0"
     ]
+
+
+def test_seoul_static_page_keeps_every_content_widget_not_only_the_title():
+    from crawler.extract import extract_document
+
+    html = (
+        '<html><head><title>한양대 국제처 - Exchange</title></head><body><div id="content">'
+        '<div class="content_inner">'
+        '<div class="rhymix_content xe_content"><article><h1>Program</h1></article></div>'
+        '<div class="rhymix_content xe_content"><p>1. Student Exchange Program promotes interaction.</p></div>'
+        '<div class="bh_widget_content"><p>팝업 공지</p></div>'
+        '</div></div></body></html>'
+    ).encode()
+    document = extract_document(html, "https://oia.hanyang.ac.kr/exchange", "seoul")
+    assert "Program" in document["text"]
+    assert "Student Exchange Program" in document["text"]
+
+
+def test_script_source_and_title_only_pages_are_not_documents():
+    from crawler.extract import extract_document
+
+    script_page = (
+        '<html><head><title>한양대 국제처 - Partners</title></head><body><div id="content"><div class="content_inner">'
+        "<div><script>var columns = [{ title: '순번', dataIndex: 'key' }]; var Table = antd.Table;</script></div>"
+        '<p>Hanyang has partner universities in many countries around the world.</p>'
+        '</div></div></body></html>'
+    ).encode()
+    document = extract_document(script_page, "https://oia.hanyang.ac.kr/partner", "seoul")
+    assert "antd" not in document["text"] and "dataIndex" not in document["text"]
+
+    title_only = (
+        '<html><head><title>한양대 국제처 - VISA</title></head><body><div id="content"><div class="content_inner">'
+        '<h1>VISA</h1><p>외국인등록 개요 신청 대상 대한민국에 입국한 날부터 90일을 초과하여 체류하려는 외국인</p>'
+        '</div></div></body></html>'
+    ).encode()
+    assert extract_document(title_only, "https://oia.hanyang.ac.kr/visa", "seoul") is None
+
+
+def test_key_value_table_rows_read_as_label_and_value():
+    from bs4 import BeautifulSoup
+    from crawler.extract import html_blocks
+
+    soup = BeautifulSoup(
+        "<section><table><tr><th>Available Hours</th><td>09:00 ~ 24:00</td></tr>"
+        "<tr><th>Cost:</th><td>Free</td></tr></table></section>",
+        "html.parser",
+    )
+    assert [block.text for block in html_blocks(soup.section)] == ["Available Hours: 09:00 ~ 24:00", "Cost: Free"]

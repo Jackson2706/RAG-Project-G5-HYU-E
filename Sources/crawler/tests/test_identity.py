@@ -42,3 +42,10 @@ def test_doc_id_is_stable_across_non_identity_parameters():
     second = "https://oia.hanyang.ac.kr/notice/123?page=9#x"
     assert doc_id_for_url(first) == doc_id_for_url(second)
 
+
+
+def test_erica_staff_directory_page_is_denied():
+    from crawler.sites import get_site
+
+    assert not get_site("erica").is_allowed("https://global.hanyang.ac.kr/eng/s1/s1_3.php")
+    assert get_site("erica").is_allowed("https://global.hanyang.ac.kr/eng/s1/s1_2.php")
