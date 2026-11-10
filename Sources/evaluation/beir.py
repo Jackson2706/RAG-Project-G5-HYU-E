@@ -28,6 +28,48 @@ DATASETS = {
 }
 
 
+def write_source_md(folder: Path, source: dict) -> None:
+    """Write the human-readable provenance file committed for a benchmark dataset."""
+    urls = source.get("urls") or source.get("url") or []
+    if isinstance(urls, dict):
+        url_lines = [f"  - `{name}`: {url}" for name, url in urls.items()]
+    else:
+        url_lines = [f"  - {url}" for url in ([urls] if isinstance(urls, str) else urls)]
+
+    checksums = []
+    for kind in ("md5", "sha256"):
+        if value := source.get(kind):
+            checksums.append((kind.upper().replace("SHA256", "SHA-256"), value, source.get(f"{kind}_verified", False), None))
+    for name, details in source.get("files", {}).items():
+        if value := details.get("sha256"):
+            checksums.append((f"SHA-256 (`{name}`)", value, details.get("verified", False), details.get("note")))
+
+    lines = [
+        f"# {source['dataset']} source",
+        "",
+        f"- Dataset: `{source['dataset']}`",
+        "- URL(s):",
+        *url_lines,
+        f"- Licence: {source['license']}",
+    ]
+    if source.get("license_note"):
+        lines.append(f"- Licence note: {source['license_note']}")
+    lines.append("- Checksum(s):")
+    for kind, value, verified, note in checksums:
+        suffix = "yes" if verified else "no"
+        detail = f"; {note}" if note else ""
+        lines.append(f"  - {kind}: `{value}`; verified against a published value: {suffix}{detail}")
+    lines.extend([
+        f"- Downloaded: {source['downloaded_at']}",
+        f"- Splits: {', '.join(source['splits'])}",
+        "",
+        source.get("contents", "This folder holds the published corpus, queries, and relevance judgments."),
+        "",
+    ])
+    folder.mkdir(parents=True, exist_ok=True)
+    (folder / "SOURCE.md").write_text("\n".join(lines), encoding="utf-8")
+
+
 def dataset_dir(name: str) -> Path:
     return DATASETS_DIR / name
 
@@ -43,7 +85,9 @@ def download(name: str) -> dict:
         raise ValueError(f"Unknown BEIR dataset '{name}'. Known: {', '.join(DATASETS)}")
     folder = dataset_dir(name)
     if is_downloaded(name):
-        return json.loads((folder / "SOURCE.json").read_text())
+        source = json.loads((folder / "SOURCE.json").read_text())
+        write_source_md(folder, source)
+        return source
     DATASETS_DIR.mkdir(parents=True, exist_ok=True)
     url, archive = f"{BASE_URL}/{name}.zip", DATASETS_DIR / f"{name}.zip"
     print(f"Downloading {url} …", flush=True)
@@ -59,6 +103,7 @@ def download(name: str) -> dict:
     source = {"dataset": name, "url": url, "md5": md5, "md5_verified": True, "downloaded_at": datetime.now(UTC).isoformat(),
               "license": DATASETS[name]["license"], "splits": DATASETS[name]["splits"]}  # fmt: skip
     (folder / "SOURCE.json").write_text(json.dumps(source, indent=2))
+    write_source_md(folder, source)
     return source
 
 

@@ -549,11 +549,21 @@ def main() -> int:
     parser.add_argument("--force", action="store_true", help="recompute tasks and rebuild their indexes")
     parser.add_argument("--run-id", help="folder name under Report/results/ (default: main, or smoke)")
     parser.add_argument("--max-queries", type=int, help="limit queries per task (recorded in the run manifest)")
-    parser.add_argument("--download", help="download BEIR datasets into Report/data/benchmarks/ and exit")
+    parser.add_argument("--download", help="download scifact,nfcorpus,arguana,scifact_original,conditionalqa into Report/data/benchmarks/ and exit")
     args = parser.parse_args()
     if args.download:
-        for name in args.download.split(","):
-            print(name, beir.download(name))
+        from evaluation import conditionalqa, scifact_original
+
+        downloaders = {"scifact_original": scifact_original.download, "conditionalqa": conditionalqa.download}
+        for name in (item.strip() for item in args.download.split(",")):
+            if name in beir.DATASETS:
+                source = beir.download(name)
+            elif name in downloaders:
+                source = downloaders[name]()
+            else:
+                known = ",".join([*beir.DATASETS, *downloaders])
+                raise ValueError(f"Unknown download '{name}'. Known: {known}")
+            print(name, source)
         return 0
     return asyncio.run(main_async(args))
 

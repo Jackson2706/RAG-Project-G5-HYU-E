@@ -1,0 +1,29 @@
+[
+  {
+    "id": "train-0",
+    "url": "https://example.test/benefit",
+    "scenario": "I am a full-time student.",
+    "question": "Can I apply?",
+    "not_answerable": false,
+    "answers": [["Yes", ["you are a full-time student"]]],
+    "evidences": ["<p>Full-time students can apply.</p>"]
+  },
+  {
+    "id": "train-1",
+    "url": "https://example.test/other",
+    "scenario": "I am checking the general rule.",
+    "question": "Is the service open?",
+    "not_answerable": false,
+    "answers": [["The service is open.", []]],
+    "evidences": ["<p>The service is open.</p>"]
+  },
+  {
+    "id": "train-2",
+    "url": "https://example.test/benefit",
+    "scenario": "My status is not listed.",
+    "question": "Can I apply?",
+    "not_answerable": true,
+    "answers": [],
+    "evidences": []
+  }
+]

@@ -1,0 +1,11 @@
+[
+  {
+    "id": "dev-0",
+    "url": "https://example.test/other",
+    "scenario": "I am checking the general rule.",
+    "question": "Is the service open?",
+    "not_answerable": false,
+    "answers": [["The service is open.", []]],
+    "evidences": ["<p>The service is open.</p>"]
+  }
+]

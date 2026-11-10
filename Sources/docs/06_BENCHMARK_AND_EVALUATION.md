@@ -76,7 +76,48 @@ cd Sources
 python -m evaluation.runner --download scifact,nfcorpus,arguana
 ```
 
-Licenses: SciFact CC BY-NC 2.0, NFCorpus and ArguAna CC BY-SA 4.0 (recorded in each `SOURCE.json`).
+Licenses: SciFact CC BY-NC 2.0, NFCorpus and ArguAna CC BY-SA 4.0. Each dataset folder has a
+machine-readable `SOURCE.json` and a short `SOURCE.md` with its URL, licence, checksums, download
+date, splits, and contents. Running the command again backfills `SOURCE.md` for an existing cache
+without downloading the archive again.
+
+### Adapter-only datasets
+
+Two additional loaders preserve labels that the BEIR conversion does not expose. No runner suite
+uses them yet.
+
+| Dataset | Folder | Loader output | Integrity check |
+|---|---|---|---|
+| Original SciFact | `scifact_original/` | train/dev claims with SUPPORT, CONTRADICT, NEI, or MIXED labels and merged rationale sentences; abstract corpus | published S3 ETag/MD5, plus a recorded SHA-256 |
+| ConditionalQA | `conditionalqa/` | train/dev eligibility questions with answer conditions and evidence; public test questions without answers; raw HTML source documents | files pinned to commit `77bd295…`, with SHA-256 recorded on first download and enforced later |
+
+Download them separately:
+
+```bash
+conda activate RAG
+cd Sources
+python -m evaluation.runner --download scifact_original,conditionalqa
+```
+
+Original SciFact annotations are CC BY 4.0 and its S2ORC abstracts are ODC-By 1.0. ConditionalQA
+uses the BSD 2-Clause licence and carries the publisher's research-only disclaimer. The
+ConditionalQA document adapter turns each `<h1>`–`<h4>` element into a section heading and strips
+tags from the section text. Conditions attached to answers remain exactly as published.
+
+### SciFact claim mapping
+
+After both SciFact datasets are downloaded, check whether the BEIR test queries match the original
+development claims:
+
+```bash
+cd Sources
+python -m evaluation.scifact_mapping
+```
+
+The command compares IDs and normalized claim text, counts the original SUPPORT, CONTRADICT, NEI,
+and MIXED labels, and compares each BEIR qrels set with the claim's evidence and cited documents.
+It writes `mapping.json` and `mapping.md` to `Report/results/scifact_mapping/` by default. A missing
+dataset exits with code 2 and prints the required `--download` command.
 
 ### Splits and tuning
 

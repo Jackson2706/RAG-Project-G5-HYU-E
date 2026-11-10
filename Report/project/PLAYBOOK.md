@@ -25,7 +25,7 @@ and pass the gates. Each phase below has a **start prompt** to paste into Claude
 | Gate | Condition to pass |
 |---|---|
 | G1 | Reorg done; all Definition-of-done checks green; same Docker volumes; app starts; `docker volume ls` unchanged |
-| G2 | Crawl report reviewed (counts, English coverage, warnings); attribute vocabulary frozen (v1); 50-chunk tag audit precision ≥ 0.8 per attribute |
+| G2 | Crawl report reviewed (counts, English coverage, warnings); attribute vocabulary frozen (v1); 50-chunk tag audit: precision ≥ 0.8 and recall ≥ 0.7 per attribute with ≥ 5 occurrences (A5) |
 | G3 | Labeling guideline approved by the team |
 | G4 | Labels adjudicated; every test item human-verified; dev/test split frozen with SHA |
 | G5 | Dev results reviewed; AAES and baseline configs frozen and tagged (`git tag config-freeze`) |
@@ -586,3 +586,91 @@ these are the intended stories:
 - Every claim on the slides about which method is better uses `Report/results/test-final`, not the live
   demo.
 
+
+# Amendments
+
+## 2026-11-10 (decisions from the planning chat, after P3 downloads)
+
+**A1 Real-schema fixtures.**
+- Before writing any loader for external data, inspect the real file: top-level type, keys, field
+  types, and optional fields per split. Write that schema into the task file.
+- Fixtures use synthetic content in the real structure.
+- Every loader gets a real-data smoke test that loads the actual downloaded file and is skipped
+  when the file is absent.
+- Missing labels stay `None`. Never default them to False or "answerable".
+
+**A2 SciFact roles** (choose the branch from the T07 result).
+- If the BEIR SciFact test IDs equal the original dev claim IDs:
+  - Keep BEIR SciFact for retrieval metrics.
+  - Add a public sufficiency benchmark on the same 300 claims:
+    - gold "sufficient" = the selected context contains ≥ 1 gold evidence abstract;
+    - NEI claims are always "insufficient";
+    - predicted positive = the system proceeds.
+  - Report the course 2×2 gate matrix and 3-way verdict accuracy (NEI ↔ abstain).
+  - Tune on original train (809 claims). Report the 300 once, after G5.
+- Never use BEIR qrels as sufficiency labels: cited docs are not evidence docs. Use only the
+  original evidence annotations.
+- If the IDs do not map, build the sufficiency benchmark on original SciFact dev with its own
+  corpus and index revision. Keep BEIR SciFact for retrieval only.
+- Report caveat: NEI means "no evidence in the cited abstracts", not in the whole corpus.
+- SciFact tests the single-branch case of AAES (ordinary sufficiency) and ablation A5.
+
+**A3 ConditionalQA roles.**
+- The official test set is unlabeled, so dev (285) is our held-out set: run it once, after G5.
+- Tune only on a fixed, seeded 150-question sample of train (2,338).
+- Mode: oracle document. The gold document is given, and sections inside it are retrieved to fit
+  `num_ctx`.
+- It tests vocabulary-free conditional answering: AAES steps 3–4, with conditions extracted from
+  the text by the LLM. It does not test the HYU vocabulary.
+- Metrics:
+  - the dataset's official answer and condition metrics. Wrap the official evaluation script at
+    the pinned commit if it exists; otherwise implement them with tests;
+  - action accuracy (answer / conditional / not answerable).
+- Priority: Should. Cite Sun, Cohen & Salakhutdinov, ACL 2022.
+- Research use only. Never commit its data.
+
+**A4 HYU lessons from P2.**
+- Every chunk header that is embedded or indexed must be English-only. Fall back to the first
+  English heading.
+- Labels are stratified by campus, not proportionally: ERICA is only 56/362 docs but holds most
+  conditional pages.
+- The 4 `.hwp` files and 2 scanned PDFs are listed as known gaps. Questions answerable only from
+  them are labeled `unanswerable_unreadable`.
+
+**A5 Gate G2 criterion, updated.** For every attribute with ≥ 5 occurrences in the audit:
+precision ≥ 0.8 AND recall ≥ 0.7. A missed condition makes conditional evidence look
+unconditioned, which is the error AAES must avoid.
+
+**P4 additions.**
+- **T08 test set:** 12 real chunks with hand-written expected tags:
+  - 4 ERICA (visa-table rows, scholarship);
+  - 4 Seoul notices (insurance by academic status, acceptance guide by Korean-test result);
+  - 2 unconditioned;
+  - 2 superseded/temporal.
+- **Site defaults:** ERICA chunks default to `campus=[erica]`, Seoul chunks to `campus=[seoul]`.
+  `scope=national` only when the chunk states a national rule (visa or immigration law, NHI
+  enrollment) without a campus-specific procedure.
+- **Tagging:** `extraction_method` is recorded per field. Table rows are tagged from header and
+  row together.
+- **LLM fallback:**
+  - qwen3.5:4b via Ollama, in the auxiliary role, recorded in the index manifest;
+  - its output must validate against the vocabulary and quote a supporting substring of the chunk.
+- **T09 index:**
+  - a new index revision for hyu-20261110-97dc1269, built in three steps: BUILD → VERIFY →
+    PUBLISH;
+  - section-aware chunking 320/48, measured with the bge tokenizer;
+  - English-only headers; a test that no chunk exceeds 512 tokens;
+  - full tags in the MongoDB chunk metadata, and a compact copy of the filterable fields in the
+    Qdrant payload;
+  - the synthetic index stays untouched.
+- **T10 audit:**
+  - a stratified sample of 50 chunks: 25 Seoul, 25 ERICA, ≥ 20 with conditions, ≥ 5 table rows;
+  - written to `Report/notes/tag_audit.csv`, with correct / wrong / missed columns per attribute;
+  - precision and recall per attribute;
+  - an attribute-frequency table over all chunks, to propose vocabulary v1.
+- **G2 package:**
+  - crawl stats;
+  - the index verification report (counts, dimensions, unique IDs, max tokens, truncated = 0);
+  - tag precision and recall per attribute;
+  - the frequency table and the proposed vocabulary v1;
+  - the T07 result and which A2 branch applies.

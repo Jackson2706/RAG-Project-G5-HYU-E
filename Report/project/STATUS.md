@@ -10,3 +10,6 @@
 | 2026-11-10 | P2 | T05 | full crawl checked | Full crawl reviewed (1,423 requests, 59 min); 5 more extractor fixes (e-mail masking, ERICA attachment types, bare-extension files, e-mail-only docs, gallery board); snapshot rebuild pending. |
 | 2026-11-10 | P2 | T05 | done | Snapshot hyu-20261110-97dc1269 built and checked: 362 docs (306 Seoul, 56 ERICA), 0 unmasked e-mails; manifest and snapshot committed. |
 | 2026-11-10 | P2 | T05R | done | Two-folder layout: data, results, project docs moved under Report/; config paths, .gitignore, docs and README updated; root leftovers cleaned; manifest and snapshot hashes unchanged. |
+| 2026-11-10 | P3 | T06/T06b | done | SOURCE.md for 5 benchmark folders; loaders for original SciFact (CC BY 4.0 / ODC-By) and ConditionalQA (BSD-2, research only; 652 docs, 13,072 sections); real-schema fixtures + real-data smoke tests (Amendment A1). |
+| 2026-11-10 | P3 | T07 | done | BEIR SciFact test = original dev: 300/300 IDs and texts match; SUPPORT 124, CONTRADICT 64, NEI 112; BEIR qrels = cited docs (300/300), not evidence. A2 branch 1 applies. |
+| 2026-11-10 | P4 | T08 | done | Vocabulary v0 + ChunkCondition (Claude Code, tests first, 12 real chunks approved by human); rule-first applicability extractor with validated LLM fallback (Codex). |
