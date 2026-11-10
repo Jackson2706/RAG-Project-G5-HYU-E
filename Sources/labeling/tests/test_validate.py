@@ -167,3 +167,14 @@ def test_behavior_rules(valid_case, rows, updates, expected):
 def test_case_ids_are_unique(valid_case, rows):
     duplicate = deepcopy(valid_case)
     assert any("case_id: must be unique" in error for error in validate_cases([valid_case, duplicate], rows, SNAPSHOT))
+
+
+@pytest.mark.parametrize("condition_sets, expected", [
+    ([{"topik_level": ["3", "4", "5", "6"]}, {"english_track": ["yes"]}], None),
+    ([{"english_track": ["yes"]}], "at least two"),
+    ([{"topik_level": ["7"]}, {"english_track": ["yes"]}], "outside the vocabulary"),
+    ([{"korean_standard": ["pass"]}, {}], "non-empty"),
+], ids=["valid", "single_set", "bad_value", "empty_set"])  # fmt: skip
+def test_condition_sets_use_vocabulary_v1(valid_case, rows, condition_sets, expected):
+    errors = validate_cases([{**valid_case, "condition_sets": condition_sets}], rows, SNAPSHOT)
+    assert (not errors) if expected is None else any("condition_sets" in e and expected in e for e in errors)

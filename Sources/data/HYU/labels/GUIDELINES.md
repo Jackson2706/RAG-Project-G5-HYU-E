@@ -1,8 +1,17 @@
-# HYU Compass labeling guideline (draft v0.1)
+# HYU Compass labeling guideline (draft v0.2)
 
-Status: **draft for Gate G3.** Written with applicability vocabulary **v0**
-(`Sources/backend/app/rag/applicability.py`). It is updated after Gate G2 approves vocabulary v1.
-Per PLAYBOOK A11, no labels are produced before v1 is approved.
+Status: **draft for Gate G3.** Written with applicability vocabulary **v1**
+(`Sources/backend/app/rag/applicability.py`; PLAYBOOK A17). Per A11, no labels are produced before
+G2 is approved.
+
+**Vocabulary v1 in short** (values are in `applicability.py`; never copy them):
+- `campus`, `degree_level`, `year`, `student_type` (no `short_term`), `visa`, `topik_level`,
+  `english_track`, `korean_standard` (`pass` / `exempt` / `fail`: the admission Korean-language
+  standard, a pass/fail result, not a TOPIK level);
+- `academic_status` with `applicant` first. `applicant` means a prospective student before
+  admission.
+- **Scope default:** unless the student says they are applying, assume they are **not** an
+  applicant. Write `academic_status: applicant` in `stated_profile` only when the student says so.
 
 Snapshot: `hyu-20261110-97dc1269`. Evidence spans point into this snapshot's `documents.jsonl`.
 Find spans with `python -m labeling.search` (T12).
@@ -31,6 +40,7 @@ need judgement.
 | `stated_profile` | Only the attributes the student actually said, in this question or the history. Use vocabulary values. Never infer. |
 | `gold_profile` | The full persona, from T13 `personas.json`. The system never sees it. |
 | `branch_attributes` | Vocabulary attributes whose value changes the correct answer for this question, given the evidence. Empty if nothing changes it. |
+| `condition_sets` | Optional. Use it when the evidence says one requirement can be met in alternative ways joined by "or", e.g. `[{"topik_level": ["1","2","3","4","5","6"]}, {"english_track": ["yes"]}]` (a valid TOPIK certificate **or**, for English-track students, IELTS/TOEFL). The student qualifies if **any** set fits. Only use it when the text itself says "or". |
 | `answerability` | `answerable`, `partial`, `unanswerable`, `external_only` (the answer is only on another site, such as HiKorea), `korean_only` (the answer exists only in Korean), or `unanswerable_unreadable` (only in a `.hwp` file or a scanned PDF; PLAYBOOK A4). |
 | `expected_behavior` | The single best behaviour; see section 3. |
 | `acceptable_behaviors` | Every behaviour that would also be fine. It always includes `expected_behavior`. |
@@ -41,8 +51,8 @@ need judgement.
 | `condition_scope` | `national` if the rule is national law or policy (immigration, NHI), else `campus`. |
 | `reference_answer` | 1–4 sentences, written for the gold profile, citing the facts in `required_facts`. |
 
-Attributes **outside the vocabulary** are not branch attributes: GPA, attendance, nationality, a
-pass/fail Korean standard. A good answer states them as caveats ("you also need a GPA of at least
+Attributes **outside the vocabulary** are not branch attributes: GPA, attendance, nationality. A
+good answer states them as caveats ("you also need a GPA of at least
 2.0"). The assistant never asks the student about them. If you think one matters a lot, note it in
 `notes` (it feeds vocabulary v1).
 
@@ -112,6 +122,16 @@ not cases: do not copy them into the label files.
 - `branch_attributes: [academic_status]`, two branches.
 - Label: `conditional_answer`, acceptable `[conditional_answer, clarify]`.
 
+**C3.** *"Which acceptance guideline should I follow, and when do I pay tuition?"*
+- Profile: stated `{campus: seoul, degree_level: undergraduate, academic_status: admitted_not_enrolled}`;
+  gold adds `korean_standard: fail`.
+- Evidence: Seoul notice `2751c7a0…` has two guides: "[Korean Standard Pass or Exemption] Acceptance
+  Guideline" and "[Korean Standard Fail] Acceptance Guideline". It says to "check the appropriate
+  Acceptance Guideline according to the 'Korean Language' result shown on your admission result
+  page".
+- `branch_attributes: [korean_standard]`, two branches.
+- Label: `conditional_answer`, acceptable `[conditional_answer, clarify]`.
+
 ### clarify
 
 **Q1.** *"What documents do I need to change my visa?"*
@@ -139,6 +159,17 @@ not cases: do not copy them into the label files.
 - Example: a Seoul re-enrollment notice with a Korean title and body.
 - Label: `answerability: korean_only`, `abstain`. Say that the official notice is in Korean and
   refer the student to the Seoul OIA. Do not translate it into an answer.
+
+### alternative condition sets
+
+**S1.** *"Can I apply for the HIEA scholarship? I'm in the English track and I don't have TOPIK."*
+- Profile: stated `{campus: seoul, english_track: yes, topik_level: none}`.
+- Evidence: Seoul HIEA notice `…1814932` says "Students who have valid TOPIK certificate or
+  IELTS/TOEFL iBT(for English track)".
+- `condition_sets: [{topik_level: 1–6}, {english_track: yes}]`. The second set fits, so the
+  language condition is met. The GPA rule (3.0 undergraduate / 4.2 graduate) is a caveat.
+- Label: `answer`, with required facts "IELTS/TOEFL instead of TOPIK" and "GPA ≥ 3.0 last
+  semester (undergraduate)".
 
 ## 5. National vs campus-scoped conditions
 
@@ -182,8 +213,8 @@ not cases: do not copy them into the label files.
 
 1. **The clarify threshold:** "more than 3 branches, or very different procedures". Is that the
    rule we want?
-2. **Out-of-vocabulary conditions:** should a pass/fail Korean standard become a vocabulary
-   attribute in v1? The tag audit's `out_of_vocabulary_condition` column will show how often it
-   appears.
+2. **Applicant scope default:** is "assume not an applicant unless stated" right for every slice?
+   Prospective students may ask without saying so. (The Korean standard became `korean_standard`
+   in v1.)
 3. **A missing campus:** should it be a branch attribute when the two campuses' rules differ, or is
    the default "ask the campus" when it is unstated?

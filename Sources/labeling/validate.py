@@ -176,6 +176,18 @@ def validate_cases(cases: list[dict], rows: list[dict], snapshot_id: str) -> lis
             for attribute in branch_attributes:
                 if not isinstance(attribute, str) or attribute not in VOCABULARY:
                     errors.append(_message(case_id, "branch_attributes", f"unknown vocabulary attribute {attribute!r}"))
+        condition_sets = case.get("condition_sets")  # optional, vocabulary v1 (A17): alternatives joined by "or"
+        if condition_sets is not None:
+            if not isinstance(condition_sets, list) or len(condition_sets) < 2:
+                errors.append(_message(case_id, "condition_sets", "must be a list of at least two alternative sets"))
+            else:
+                for group in condition_sets:
+                    if not isinstance(group, dict) or not group:
+                        errors.append(_message(case_id, "condition_sets", "each set must be a non-empty object"))
+                        continue
+                    for attribute, values in group.items():
+                        if attribute not in VOCABULARY or not isinstance(values, list) or any(v not in VOCABULARY[attribute] for v in values):
+                            errors.append(_message(case_id, "condition_sets", f"{attribute}={values!r} is outside the vocabulary"))
         if case.get("answerability") not in ANSWERABILITY:
             errors.append(_message(case_id, "answerability", f"must be one of {sorted(ANSWERABILITY)}"))
         behavior = case.get("expected_behavior")
