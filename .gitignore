@@ -42,3 +42,6 @@ Report/data/benchmarks/*/*
 Report/results/*/raw/
 Report/results/smoke*/
 Report/course/
+
+# LLM tag cache (T09)
+Report/data/HYU/cache/
