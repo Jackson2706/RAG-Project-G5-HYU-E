@@ -36,6 +36,7 @@ dist/
 
 # Crawled and benchmark data, report inputs, and bulky per-query results
 data/HYU/raw/
+data/HYU/extracted/
 data/benchmarks/*/*
 !data/benchmarks/*/SOURCE.md
 results/*/raw/
