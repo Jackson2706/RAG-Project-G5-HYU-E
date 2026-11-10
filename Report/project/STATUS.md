@@ -31,3 +31,4 @@
 | 2026-11-11 | P4 | T09 r3 | done | r3 built, verified 15/15 and published by the human: rule_tagged 1058, rule_uncond 392, llm_tagged 27, llm_uncond 378, llm_rejected 12, llm_errors 0; 417 new LLM calls (prompt v3, postcheck p1, vocabulary v1). HYU default. |
 | 2026-11-11 | P4 | T10c | done | Codex: labeling.auto_audit sample/compare/finalize. Claude Code ran sample on r3: 150 chunks, floors met (TOPIK text 27, rule_unconditioned 25, any_of 4); blind_inputs has no tag fields. |
 | 2026-11-11 | P4 | G2 | approved | Human approved G2: vocabulary v1 (A17) + T08c review rule fixes. Approved before the automated audit (A14) finished; audit scores will be appended. P4 done. |
+| 2026-11-11 | P5 | T11 | draft v0.3 for G3 | Guideline adds A19: persona minimums, 180-case targets by slice x campus (108 Seoul / 72 ERICA), unanswerable_unreadable >= 4, multi_session updates >= 6, roles, demo from dev after freeze. Stop at G3. |

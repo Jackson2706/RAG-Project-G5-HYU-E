@@ -1,8 +1,8 @@
-# HYU Compass labeling guideline (draft v0.2)
+# HYU Compass labeling guideline (draft v0.3)
 
 Status: **draft for Gate G3.** Written with applicability vocabulary **v1**
-(`Sources/backend/app/rag/applicability.py`; PLAYBOOK A17). Per A11, no labels are produced before
-G2 is approved.
+(`Sources/backend/app/rag/applicability.py`; PLAYBOOK A17). G2 is approved (A18). Labels are produced
+only after G3 approves this guideline.
 
 **Vocabulary v1 in short** (values are in `applicability.py`; never copy them):
 - `campus`, `degree_level`, `year`, `student_type` (no `short_term`), `visa`, `topik_level`,
@@ -38,7 +38,7 @@ need judgement.
 | `question` | One realistic question, as a new international student would type it. English. |
 | `session_history` | Only for `multi_session`. These are earlier turns that state profile facts. |
 | `stated_profile` | Only the attributes the student actually said, in this question or the history. Use vocabulary values. Never infer. |
-| `gold_profile` | The full persona, from T13 `personas.json`. The system never sees it. |
+| `gold_profile` | The full persona, from T13 `personas.json`. The system never sees it. It contains `academic_status: applicant` **only** when the persona is a prospective student (the scope default). |
 | `branch_attributes` | Vocabulary attributes whose value changes the correct answer for this question, given the evidence. Empty if nothing changes it. |
 | `condition_sets` | Optional. Use it when the evidence says one requirement can be met in alternative ways joined by "or", e.g. `[{"topik_level": ["1","2","3","4","5","6"]}, {"english_track": ["yes"]}]` (a valid TOPIK certificate **or**, for English-track students, IELTS/TOEFL). The student qualifies if **any** set fits. Only use it when the text itself says "or". |
 | `answerability` | `answerable`, `partial`, `unanswerable`, `external_only` (the answer is only on another site, such as HiKorea), `korean_only` (the answer exists only in Korean), or `unanswerable_unreadable` (only in a `.hwp` file or a scanned PDF; PLAYBOOK A4). |
@@ -193,21 +193,48 @@ not cases: do not copy them into the label files.
 - **Superseded.** The 2021 entry-report notice (`d8ebecb7…`) is superseded in the snapshot. Use the
   newer version, and put the old one in `outdated_evidence`.
 
-## 7. Process rules (from Appendix D and AGENTS.md)
+## 7. Process rules (Appendix D, AGENTS.md, PLAYBOOK A19)
 
-- Every row records `annotator` (`codex:<model>`, `claude-code:<model>`, `human:<initials>`) and
-  `origin` (`human`, `agent_draft_human_edited`, `agent_draft`).
-- **Annotate independently:** never open another annotator's file before submitting your own.
-  Labeling agents never see system outputs or results.
-- **Demo cases** come from the dev split only.
-- **Split and slices:** about 180 cases, dev about 50 and test about 130.
-  - The slice targets are in Appendix D.
-  - Stratify by slice **and by campus, not proportionally** (A4). ERICA has 56 of the 362
-    documents but most of the conditional pages. Aim for at least 40% ERICA cases in the
-    `conditional` slice.
-- At least 30% of the questions are written or edited by humans.
-- Cohen's κ (answerability, expected_behavior) is reported before adjudication. Humans adjudicate
-  every disagreement and verify every test item.
+**Personas (T13, 10–12).** Each persona has a full `gold_profile` in v1 values.
+
+- Together the personas cover every attribute: `campus`, `degree_level`, `year`, `student_type`,
+  `visa`, `topik_level` / `english_track`, `academic_status` and `korean_standard`.
+- Minimums:
+  - at least 2 English-track students (`english_track: yes`, low or no TOPIK);
+  - at least 2 ERICA students who ask visa questions (D-2, D-4, D-10);
+  - at least 1 applicant (`academic_status: applicant`);
+  - at least 1 admitted student with `korean_standard: fail`;
+  - at least 1 student with completed coursework;
+  - at least 1 graduate student.
+
+**Targets: 180 cases, stratified by campus on purpose, not by campus share.** ERICA has 56/362
+documents but most of the conditional pages, so it gets about 40% of the cases.
+
+| Slice | Seoul | ERICA | Total | Notes |
+|---|---:|---:|---:|---|
+| unconditional | 38 | 25 | 63 | single facts and table look-ups |
+| conditional | 25 | 20 | 45 | ≥ 1 branch attribute; a mix of stated, unstated and partly stated; ≥ 6 with `condition_sets` (TOPIK or English track) |
+| temporal | 13 | 5 | 18 | newest vs older version; NHI 2025/2026; superseded notices |
+| negative | 22 | 14 | 36 | unanswerable, external_only (HiKorea etc.), korean_only, and ≥ 4 `unanswerable_unreadable` (answer only in a `.hwp` file or scanned PDF) |
+| multi_session | 10 | 8 | 18 | session 1 states attributes; session 2 asks. ≥ 6 include an **update** (stale profile): D-4 → D-2, coursework completed, Korean standard re-taken |
+| **total** | **108** | **72** | **180** | dev ≈ 50, test ≈ 130 (frozen by `labeling.freeze`, seed 13, stratified by slice × campus) |
+
+**Roles:**
+- Codex annotates all 180 cases (T15, `labels/annot_codex/`).
+- Claude Code annotates a blind, stratified ~30% subset of 54 cases (T16, `labels/annot_claude/`)
+  without opening Codex's files.
+- `python -m labeling.agreement` reports Cohen's κ (answerability, expected_behavior), branch
+  Jaccard and span F1, and writes `adjudication.csv`.
+- Humans adjudicate every disagreement and verify every test item (`adjudicated_by: human:<initials>`).
+  `labeling.freeze` refuses to run otherwise.
+- At least 30% of the questions are written or edited by humans. Report the share.
+
+**Other rules:**
+- Every row records `annotator` and `origin`.
+- Annotate independently, and never look at system outputs or results.
+- Demo cases (8–10) are chosen from **dev only, after the freeze**.
+- After every labeling session: run `python -m labeling.validate`, then commit and push the label
+  files.
 
 ## 8. Open points for G3 (team decision)
 
