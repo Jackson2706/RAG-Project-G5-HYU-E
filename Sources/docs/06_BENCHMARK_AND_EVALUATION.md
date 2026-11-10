@@ -26,7 +26,7 @@ flowchart LR
     A["answer_from_evidence()"]
   end
   subgraph eval["Sources/evaluation/"]
-    RUN["runner.py"] --> RAW["results/&lt;run&gt;/raw/*.jsonl<br/>(per query)"]
+    RUN["runner.py"] --> RAW["Report/results/&lt;run&gt;/raw/*.jsonl<br/>(per query)"]
     RAW --> REP["reports.py + metrics/ + failure_analysis.py"]
     REP --> OUT["summary.md · *.csv · results.json"]
   end
@@ -67,7 +67,7 @@ simply never judged — it is not necessarily irrelevant.
 the right documents were *retrieved*, but not whether a generated *answer* is correct. Answer
 quality therefore needs separate, human annotations (section 9) — we never compute it from qrels.
 
-**Download** (once; files stay in `data/benchmarks/`, which is not committed to Git). Each
+**Download** (once; files stay in `Report/data/benchmarks/`, which is not committed to Git). Each
 archive's MD5 checksum is checked against the value published in the BEIR README:
 
 ```bash
@@ -337,8 +337,8 @@ is LLM-based.
 
 Answer correctness, relevance, completeness, reference coverage, exact match, token F1, grounding
 support, citation precision and citation coverage all need **human labels per case**.
-`data/HYU/labels/legacy/qa_annotations.jsonl` lists every generation case as `pending`; follow
-`data/HYU/labels/legacy/README.md` to annotate. Annotated cases are scored automatically on the next
+`Report/data/HYU/labels/legacy/qa_annotations.jsonl` lists every generation case as `pending`; follow
+`Report/data/HYU/labels/legacy/README.md` to annotate. Annotated cases are scored automatically on the next
 `python -m evaluation.reports`. The metric code (`Sources/evaluation/metrics/answer.py`, `attribution.py`)
 is already tested on the Lesson 6 examples (grounding 3/4, citation precision 1/3, coverage 1/4).
 
@@ -350,12 +350,12 @@ Two different things, never mixed: **marker validity** (does `[E2]` point to a r
 ## 10. Prefiltering vs Postfiltering and the gate (HYU fixture)
 
 BEIR has no eligibility metadata, so R9/R10 are `NOT_APPLICABLE` there. They run on a **controlled
-fixture**: the five synthetic HYU sample documents (`data/HYU/synthetic_fixture/`) and
+fixture**: the five synthetic HYU sample documents (`Report/data/HYU/synthetic_fixture/`) and
 `Sources/evaluation/fixtures/hyu_metadata_queries.jsonl` (10 questions with stated criteria). Eligibility is
 computed from each document's declared metadata by the pipeline's own predicate. R0, R9 and R10 use
 the same candidate cutoff (Top 2), so postfiltering's **starvation** becomes visible.
 
-The **gate** (R12) is scored on the 14 questions of `data/HYU/labels/legacy/sample_questions.jsonl` with a derived
+The **gate** (R12) is scored on the 14 questions of `Report/data/HYU/labels/legacy/sample_questions.jsonl` with a derived
 label: sufficient = the question is answerable **and** a relevant document is among the selected
 evidence. Convention (Lesson 6): actual positive = sufficient, predicted positive = proceed.
 These labels were written by the project authors — the numbers show behaviour, not real-world accuracy.
@@ -364,7 +364,7 @@ These labels were written by the project authors — the numbers show behaviour,
 
 ## 11. Reading the reports
 
-`results/<run-id>/`:
+`Report/results/<run-id>/`:
 
 | File | Content |
 |---|---|

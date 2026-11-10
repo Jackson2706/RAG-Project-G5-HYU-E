@@ -21,7 +21,7 @@ class BaseDocumentParser(PipelineBlock):
     def parse(self, path: Path) -> ParsedDocument: ...
 
     def source_uri(self, path: Path) -> str:
-        """The file's path relative to the data/ folder, e.g. "raw/handbook.pdf"."""
+        """The file's path relative to DATA_DIR, e.g. "HYU/raw/handbook.pdf"."""
         data_dir = self.services.settings.data_dir.resolve()
         path = path.resolve()
         return path.relative_to(data_dir).as_posix() if path.is_relative_to(data_dir) else path.name

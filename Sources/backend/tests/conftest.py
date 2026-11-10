@@ -128,7 +128,7 @@ def services(db, ollama, settings) -> Services:
 
 @pytest.fixture
 def corpus(settings):
-    """A copy of the five synthetic sample documents in a temporary data/raw folder."""
+    """A copy of the five synthetic sample documents in a temporary data directory."""
     folder = settings.data_dir / "raw"
     for f in SAMPLES.iterdir():
         shutil.copy(f, folder / f.name)

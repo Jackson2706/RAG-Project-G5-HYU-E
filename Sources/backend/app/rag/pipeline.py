@@ -68,7 +68,7 @@ def index_documents(documents: list[ParsedDocument], config: dict, services: Ser
                     corpus: dict | None = None, parse_ms: float = 0.0) -> dict:
     """Chunking → Metadata Extraction → Embedding → Vector Indexing for already parsed documents.
 
-    Used by run_ingestion() (files from data/) and by the benchmark runner (BEIR records), so both
+    Used by run_ingestion() (files from the data directory) and by the benchmark runner (BEIR records), so both
     build indexes with exactly the same code. Writes a manifest describing how the index was built
     and returns a report with counts, timings and verification results.
     """

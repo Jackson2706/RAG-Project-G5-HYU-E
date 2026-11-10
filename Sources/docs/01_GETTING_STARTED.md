@@ -153,7 +153,7 @@ Done: 5 documents, 23 chunks, 384-dimensional vectors.
 
 The first run downloads the embedding model (~130 MB) and takes longer.
 
-**Your real documents:** copy PDF, TXT, Markdown or HTML files into `data/HYU/raw/` (sub-folders are
+**Your real documents:** copy PDF, TXT, Markdown or HTML files into `Report/data/HYU/raw/` (sub-folders are
 fine), then run:
 
 ```bash
@@ -263,5 +263,5 @@ python -m evaluation.runner --suite all --smoke            # a few minutes: 5 qu
 ```
 
 ✅ The dry run lists every task as `READY`, `NOT_APPLICABLE` or `SHARED`; the smoke run ends with
-`Reports: results/smoke/summary.md`. The full run (`--suite all`) takes hours on a laptop.
+`Reports: Report/results/smoke/summary.md`. The full run (`--suite all`) takes hours on a laptop.
 

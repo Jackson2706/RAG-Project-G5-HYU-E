@@ -202,7 +202,7 @@ Run it from `Sources/` (the SciFact O0 index is reused if it exists, otherwise b
 python -m evaluation.runner --suite retrieval --dataset scifact --experiment B0_BASIC_DENSE_RAG,R15_DIVERSE_SELECTION --run-id tutorial
 ```
 
-Open `results/tutorial/retrieval_comparison.csv` and compare the two rows: the ranking
+Open `Report/results/tutorial/retrieval_comparison.csv` and compare the two rows: the ranking
 metrics (nDCG@10, Recall@100) are **identical** — evidence selection does not change the ranking —
 while `duplicate_doc_rate_in_selection` and `selected_doc_recall` show what your method changes.
 That separation (ranking vs selection) is exactly why the report keeps them in different columns.

@@ -6,7 +6,7 @@ generation: {temperature: 0.0, top_p: 0.9, top_k: 40, context_window: 4096, max_
 retrieval_preset: B0_BASIC_DENSE_RAG
 # Answer quality (correctness, completeness, grounding, citation support) is ONLY computed for cases
 # whose annotation_status is "annotated". Other cases still give latency, abstention and marker validity.
-annotations: data/HYU/labels/legacy/qa_annotations.jsonl
+annotations: Report/data/HYU/labels/legacy/qa_annotations.jsonl
 cases:
   beir: {datasets: [scifact, nfcorpus, arguana], per_dataset: 10}   # first 10 test queries (sorted IDs)
-  hyu_fixture: data/HYU/labels/legacy/sample_questions.jsonl        # 14 questions with author-written answerable labels
+  hyu_fixture: Report/data/HYU/labels/legacy/sample_questions.jsonl # 14 questions with author-written answerable labels

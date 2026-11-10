@@ -130,11 +130,6 @@ def get_site(name: str) -> SiteConfig:
     return SITES[name]
 
 
-def site_for_url(url: str) -> SiteConfig | None:
-    host = (urlsplit(url).hostname or "").lower()
-    return next((site for site in SITES.values() if host in site.allowed_hosts), None)
-
-
 def is_board_listing(url: str) -> bool:
     parsed = urlsplit(url)
     query = parse_qs(parsed.query)

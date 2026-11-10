@@ -8,9 +8,9 @@ and pass the gates. Each phase below has a **start prompt** to paste into Claude
 | Phase | What | Main owner | Ends at |
 |---|---|---|---|
 | P0 | Install skills, add agent files, voice sample, branch | Human | — |
-| P1 | Reorganize repository into `Sources/ data/ results/ Report/` | Codex (T01–T02), Claude reviews | **G1** |
+| P1 | Reorganize repository into `Sources/ Report/` | Codex (T01–T02), Claude reviews | **G1** |
 | P2 | Crawl HYU English data (Seoul OIA + ERICA OIA) | Codex code, human runs | G2 (with P4) |
-| P3 | Benchmark datasets into `data/benchmarks/<name>/` | Codex code, human runs | — |
+| P3 | Benchmark datasets into `Report/data/benchmarks/<name>/` | Codex code, human runs | — |
 | P4 | HYU snapshot ingest + applicability tags (AAES offline step) | Claude tests, Codex code, human runs | **G2** |
 | P5 | Labeling (Codex primary, Claude second, human adjudication) | All | **G3**, **G4** |
 | P6 | New baselines (brackets, self-query, prompted-conditional, memory M1/M2) | Codex, Claude reviews | — |
@@ -29,8 +29,8 @@ and pass the gates. Each phase below has a **start prompt** to paste into Claude
 | G3 | Labeling guideline approved by the team |
 | G4 | Labels adjudicated; every test item human-verified; dev/test split frozen with SHA |
 | G5 | Dev results reviewed; AAES and baseline configs frozen and tagged (`git tag config-freeze`) |
-| G6 | Exactly one test run (clean tree, `--confirm-frozen`), logged in `results/TEST_RUNS.md` |
-| G7 | Report and slides reviewed; every number traced to `results/`. Demo rehearsed: the scripted questions run in compare mode on the presentation laptop within the time slot; a backup screen recording exists |
+| G6 | Exactly one test run (clean tree, `--confirm-frozen`), logged in `Report/results/TEST_RUNS.md` |
+| G7 | Report and slides reviewed; every number traced to `Report/results/`. Demo rehearsed: the scripted questions run in compare mode on the presentation laptop within the time slot; a backup screen recording exists |
 
 ## Schedule (target: end of this week)
 
@@ -57,7 +57,7 @@ Priority if time runs short:
    ```bash
    git switch -c hyu-aaes && git tag before-reorg
    ```
-2. Copy `AGENTS.md`, `CLAUDE.md`, and `PLAYBOOK.md` to the repo root. Create `STATUS.md`:
+2. Copy `AGENTS.md` and `CLAUDE.md` to the repo root. Keep `PLAYBOOK.md` and `STATUS.md` under `Report/project/`:
    ```markdown
    # STATUS
    | Date | Phase | Task | State | Note |
@@ -87,7 +87,7 @@ Priority if time runs short:
 ## P1 — Reorganize (T01, T02) → Gate G1
 
 **Start prompt (Claude Code):**
-> Phase P1. Read PLAYBOOK.md §P1 and Appendix A.
+> Phase P1. Read Report/project/PLAYBOOK.md §P1 and Appendix A.
 > 1. Record the BEFORE state into `Sources/docs/agent_tasks/T01.before.md`:
 >    - the Definition-of-done checks with the current paths;
 >    - frontend `npm run typecheck && npm test`;
@@ -101,14 +101,14 @@ Priority if time runs short:
 >    `docker compose -f Sources/docker-compose.yml config | head -3` and a start/health check.
 >    The same number of presets must appear in the UI, and one chat question must work in the
 >    browser.
-> 5. Update STATUS.md and stop at Gate G1 with a before/after table.
+> 5. Update Report/project/STATUS.md and stop at Gate G1 with a before/after table.
 
 ---
 
 ## P2 — Crawl HYU English data (T03–T05)
 
 **Start prompt (Claude Code):**
-> Phase P2. Read PLAYBOOK.md §P2 and Appendix B.
+> Phase P2. Read Report/project/PLAYBOOK.md §P2 and Appendix B.
 > - T03 (you): fetch robots.txt for each allowed site and save 8 fixture pages to
 >   `Sources/crawler/tests/fixtures/`. Use the minimum calls. Pick pages covering: Seoul OIA static
 >   page, Seoul notice post (trilingual), Seoul post with PDF attachment, ERICA /eng visa page,
@@ -123,7 +123,7 @@ The human runs, inside `Sources/` with `conda activate RAG`:
 ```bash
 caffeinate -i python -m crawler.run --site all --dry-run      # prints the URL plan only
 caffeinate -i python -m crawler.run --site all --resume       # real crawl, polite, resumable
-python -m crawler.run --build-snapshot                        # writes data/HYU/snapshots/<id>/
+python -m crawler.run --build-snapshot                        # writes Report/data/HYU/snapshots/<id>/
 ```
 
 ---
@@ -132,7 +132,7 @@ python -m crawler.run --build-snapshot                        # writes data/HYU/
 
 **Start prompt (Claude Code):**
 > Phase P3. Write T06 for Codex: move BEIR download/loading from `evaluation/datasets/` to
-> `data/benchmarks/<name>/`, keeping the existing checksums and loaders. Add adapters for:
+> `Report/data/benchmarks/<name>/`, keeping the existing checksums and loaders. Add adapters for:
 > - the original SciFact release (claims with labels and rationales), and
 > - ONE external conditional-QA set (ConditionalQA or MDCR — check licences first and tell me which).
 >
@@ -170,7 +170,7 @@ Roles:
 
 **Start prompt (Claude Code):**
 > Phase P5. Read Appendix D.
-> - T11 (you): write `data/HYU/labels/GUIDELINES.md` from Appendix D with 2 worked examples per
+> - T11 (you): write `Report/data/HYU/labels/GUIDELINES.md` from Appendix D with 2 worked examples per
 >   expected behaviour, national vs campus-scoped conditions, conditional vs clarify, and temporal
 >   cases. Stop at G3 for team approval.
 > - T12 (Codex): `Sources/labeling/` tools — `search.py` (BM25 over snapshot chunks: id, span,
@@ -246,7 +246,7 @@ Roles:
 > - T30 (Codex): `--suite hyu` and `--suite memory` in the runner (dev/test, per-query outputs,
 >   slices, paired bootstrap + Holm on the pre-registered comparisons), plus tables in `summary.md`.
 > - T31 (Codex): `Sources/scripts/run_all.sh` (Appendix G). The test-run guard refuses a dirty tree
->   or a missing `--confirm-frozen`, and appends to `results/TEST_RUNS.md`.
+>   or a missing `--confirm-frozen`, and appends to `Report/results/TEST_RUNS.md`.
 > - T32 (Codex, Should): external conditional benchmark adapter in oracle-context mode.
 >
 > Finish with a full `--dry-run` and a dev `--smoke`.
@@ -261,7 +261,7 @@ Roles:
 >   **sequentially** via the existing `/api/chat/stream`, and show columns with answer, action
 >   badge, citations, latency, and LLM calls. Clicking a column opens its Execution trace. The
 >   existing single-chat view stays the default. Add vitest tests.
-> - T37 (Codex): `GET /api/demo/cases` serves `data/HYU/labels/demo_cases.jsonl`
+> - T37 (Codex): `GET /api/demo/cases` serves `Report/data/HYU/labels/demo_cases.jsonl`
 >   (8–10 dev cases, never test). A demo-case picker in the chat fills the question and session
 >   history. Oracle presets (G1, A2) are enabled only when a demo case is selected; otherwise
 >   `check_runnable` returns the reason. Presets needing applicability tags are disabled on
@@ -279,13 +279,13 @@ Roles:
 ```bash
 cd Sources && conda activate RAG
 caffeinate -i ./scripts/run_all.sh --split dev --run-id dev-01            # overnight
-# Claude analyses results/dev-01, proposes tuning (dev only), we iterate dev-02, dev-03 ...
+# Claude analyses Report/results/dev-01, proposes tuning (dev only), we iterate dev-02, dev-03 ...
 git tag config-freeze                                                      # Gate G5
 caffeinate -i ./scripts/run_all.sh --split test --run-id test-final --confirm-frozen   # Gate G6
 ```
 
 **Analysis prompt (Claude Code):**
-> Analyse `results/dev-XX/`.
+> Analyse `Report/results/dev-XX/`.
 > - Primary metrics with 95% CIs.
 > - Slice table.
 > - Wins/losses vs the strongest baseline.
@@ -301,12 +301,12 @@ caffeinate -i ./scripts/run_all.sh --split test --run-id test-final --confirm-fr
 **Start prompt (Claude Code):**
 > Phase P10.
 > - T33 (Codex): `Sources/scripts/make_report_assets.py` exports figures (PNG + SVG) and tables
->   (CSV + Markdown) from `results/test-final` and `results/dev-*` into `Report/figures` and
+>   (CSV + Markdown) from `Report/results/test-final` and `Report/results/dev-*` into `Report/figures` and
 >   `Report/tables`, each with a source path.
 > - T34 (Codex): draft `Report/report/draft.md` sections: data, setup, methods, baselines.
 > - You: draft the results, discussion, limitations, and course-lesson mapping.
 > - Then run `/humanizer:humanizer` on the draft with `Report/voice_sample.md` as the voice sample.
-> - Then re-check every number against `results/`.
+> - Then re-check every number against `Report/results/`.
 > - T35 (Codex): slide outline in `Report/slides/outline.md`.
 >
 > Stop at G7.
@@ -322,12 +322,12 @@ caffeinate -i ./scripts/run_all.sh --split test --run-id test-final --confirm-fr
 | `backend/` | `Sources/backend/` |
 | `frontend/` | `Sources/frontend/` |
 | `evaluation/` (code, configs, tests, fixtures) | `Sources/evaluation/` |
-| `evaluation/results/main/` | `results/2026-11-01_main/` (legacy, keep files as-is) |
-| `evaluation/annotations/` | `data/HYU/labels/legacy/` |
+| `evaluation/results/main/` | `Report/results/2026-11-01_main/` (legacy, keep files as-is) |
+| `evaluation/annotations/` | `Report/data/HYU/labels/legacy/` |
 | `scripts/` | `Sources/scripts/` |
 | `docs/` | `Sources/docs/` |
-| `data/samples/` | `data/HYU/synthetic_fixture/` |
-| `data/eval/`, `data/raw/README.md` | `data/HYU/labels/legacy/`, `data/HYU/README.md` |
+| `data/samples/` | `Report/data/HYU/synthetic_fixture/` |
+| `data/eval/`, `data/raw/README.md` | `Report/data/HYU/labels/legacy/`, `Report/data/HYU/README.md` |
 | `docker-compose.yml`, `setup.sh`, `start.sh`, `stop.sh`, `uninstall.sh`, `.env.example` | `Sources/` |
 | `.claude/` | stays at root (Claude Code loads project skills from the repo root) |
 | `README.md` | stays at root; update its layout and run instructions |
@@ -343,10 +343,10 @@ caffeinate -i ./scripts/run_all.sh --split test --run-id test-final --confirm-fr
 - `.gitignore` paths:
   - `Sources/backend/.env`, `Sources/.env`
   - `Sources/frontend/node_modules/`, `Sources/frontend/dist/`
-  - `data/HYU/raw/`, `data/benchmarks/*/` with `!data/benchmarks/*/SOURCE.md`
-  - `results/*/raw/`, `results/smoke*/`
+  - `Report/data/HYU/raw/`, `Report/data/benchmarks/*/` with `!Report/data/benchmarks/*/SOURCE.md`
+  - `Report/results/*/raw/`, `Report/results/smoke*/`
   - `Report/course/`, `.run/`
-- Create empty folders with `.gitkeep`: `data/HYU/{snapshots,labels}`, `Report/{report,slides,figures,tables,notes}`.
+- Create empty folders with `.gitkeep`: `Report/data/HYU/{snapshots,labels}`, `Report/{report,slides,figures,tables,notes}`.
 
 ### A.3 Untracked local state (human runs; agents print these)
 
@@ -354,7 +354,7 @@ caffeinate -i ./scripts/run_all.sh --split test --run-id test-final --confirm-fr
 mv .env Sources/.env
 mv backend/.env Sources/backend/.env
 mv frontend/node_modules Sources/frontend/node_modules
-[ -d evaluation/datasets ] && mkdir -p data/benchmarks && mv evaluation/datasets/* data/benchmarks/
+[ -d evaluation/datasets ] && mkdir -p Report/data/benchmarks && mv evaluation/datasets/* Report/data/benchmarks/
 [ -d .run ] && mv .run Sources/.run
 ```
 
@@ -400,9 +400,9 @@ Record `lang_coverage` per document.
   They are never merged.
 
 **Outputs:**
-- `data/HYU/raw/`
-- `data/HYU/manifest.jsonl`
-- `data/HYU/snapshots/<id>/{documents.jsonl, crawl_report.json, SNAPSHOT.sha256}`
+- `Report/data/HYU/raw/`
+- `Report/data/HYU/manifest.jsonl`
+- `Report/data/HYU/snapshots/<id>/{documents.jsonl, crawl_report.json, SNAPSHOT.sha256}`
 
 `<id>` = `hyu-YYYYMMDD` + the first 8 characters of the manifest SHA.
 
@@ -535,10 +535,10 @@ Steps:
 1. Preflight: Docker and Ollama health; models present; index revision exists; label SHA check.
 2. For `test`: refuse if `git status --porcelain` is not empty or `--confirm-frozen` is missing.
 3. Run suites in order: `hyu` → `memory` → `generation` (backbone comparison) → `external` (if present).
-4. Write reports and append to `results/TEST_RUNS.md` for test runs.
+4. Write reports and append to `Report/results/TEST_RUNS.md` for test runs.
 
 ```
-results/<run_id>/
+Report/results/<run_id>/
   run_manifest.json   status.json   summary.md
   per_query.csv       answers.jsonl          actions_confusion.csv   gate_matrix.csv
   retrieval_comparison.csv   comparisons_paired.csv   slices.csv   failure_analysis.csv
@@ -583,6 +583,6 @@ these are the intended stories:
 
 **Rules:**
 - Demo questions come from dev or are newly written. Never show test cases.
-- Every claim on the slides about which method is better uses `results/test-final`, not the live
+- Every claim on the slides about which method is better uses `Report/results/test-final`, not the live
   demo.
 

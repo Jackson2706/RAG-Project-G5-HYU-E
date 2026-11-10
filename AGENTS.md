@@ -15,20 +15,21 @@ level, year, student type/visa, language status, academic status, term). Otherwi
 gives a conditional answer, asks one clarifying question, or abstains and refers the student to
 the right office. Spec: `Sources/docs/aaes_spec.md`.
 
-- Plan, phases, gates: `PLAYBOOK.md`
-- Progress log: `STATUS.md`
+- Plan, phases, gates: `Report/project/PLAYBOOK.md`
+- Progress log: `Report/project/STATUS.md`
 - Task specs and results: `Sources/docs/agent_tasks/`
 
 ## Repository layout (all paths repo-relative)
 
 ```
-AGENTS.md  CLAUDE.md  PLAYBOOK.md  STATUS.md  README.md
+AGENTS.md  CLAUDE.md  README.md
 Sources/   ALL code: backend/ frontend/ evaluation/ crawler/ labeling/ scripts/ docs/
            docker-compose.yml  setup.sh  start.sh  stop.sh  uninstall.sh  .env.example
-data/      HYU/        raw/ (gitignored) manifest.jsonl snapshots/<id>/ labels/
-           benchmarks/<dataset>/   (gitignored except SOURCE.md)
-results/   <run_id>/ per evaluation run, plus TEST_RUNS.md
-Report/    report/ slides/ figures/ tables/ notes/ course/ (gitignored)
+Report/    data/HYU/    raw/ (gitignored) manifest.jsonl snapshots/<id>/ labels/
+           data/benchmarks/<dataset>/   (gitignored except SOURCE.md)
+           results/<run_id>/ per evaluation run, plus TEST_RUNS.md
+           project/PLAYBOOK.md project/STATUS.md
+           report/ slides/ figures/ tables/ notes/ course/ (gitignored)
            voice_sample.md  ai_use_statement.md
 ```
 
@@ -106,18 +107,18 @@ Use the Ponytail skill for all code. These project overrides win over Ponytail:
 - Polite crawling: obey robots.txt, at least 2.5 s between requests, one request at a time,
   identifying User-Agent, raw bytes stored once, never re-crawl a frozen snapshot.
 - Mask every e-mail address in extracted text. Never crawl or index staff directories or personal data.
-- Do NOT commit: `data/HYU/raw/`, benchmark files, `Report/course/` (course slides), `.env` files,
+- Do NOT commit: `Report/data/HYU/raw/`, benchmark files, `Report/course/` (course slides), `.env` files,
   large per-query raw results. Commit code, manifests, labels, small result summaries.
   The GitHub repository is public.
 
 ## Evaluation rules (Lesson 6)
 
 - Dev/test separation. Thresholds, prompts, λ/μ, and model choices are tuned on dev only.
-- After Gate G4, `data/HYU/labels/test.jsonl` is frozen; its SHA-256 is in
-  `data/HYU/labels/FROZEN.sha256`. Agents never open it directly afterwards; only the runner reads it.
+- After Gate G4, `Report/data/HYU/labels/test.jsonl` is frozen; its SHA-256 is in
+  `Report/data/HYU/labels/FROZEN.sha256`. Agents never open it directly afterwards; only the runner reads it.
 - A test run requires a clean git tree and `--confirm-frozen`. Each test run is appended to
-  `results/TEST_RUNS.md` (date, git SHA, configs, reason).
-- Never invent numbers. Every number in `Report/` traces to a file in `results/`.
+  `Report/results/TEST_RUNS.md` (date, git SHA, configs, reason).
+- Never invent numbers. Every number in `Report/` traces to a file in `Report/results/`.
 - Each run manifest versions three things:
   - case version (label file SHA);
   - system version (git SHA + registry config hash);
@@ -151,11 +152,11 @@ Agents may run unit tests and `--dry-run` / `--smoke` commands.
 4. Docs touched by the change are updated (`Sources/docs/*`).
 5. A result note exists: `Sources/docs/agent_tasks/T<NN>.result.md`. It covers what changed,
    what was skipped or not checked, risks, and the exact commands the human must run.
-6. `STATUS.md` has one new line.
+6. `Report/project/STATUS.md` has one new line.
 
 ## Writing rules (Report/)
 
-- Plain technical prose in the team's voice. Numbers only from `results/`.
+- Plain technical prose in the team's voice. Numbers only from `Report/results/`.
 - Use the professor's terms: eligibility vs relevance, candidate retrieval vs evidence selection,
   prefiltering vs postfiltering, evidence sufficiency, abstention.
 - Run the Humanizer skill on every prose file before review, matching `Report/voice_sample.md`.

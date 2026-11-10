@@ -155,7 +155,7 @@ async def ingest(body: IngestRequest, request: Request):
     data_dir = get_settings().data_dir.resolve()
     folder = (data_dir / body.folder).resolve()
     if not folder.is_relative_to(data_dir) or not folder.is_dir():
-        raise HTTPException(400, f"'{body.folder}' is not a folder inside data/")
+        raise HTTPException(400, f"'{body.folder}' is not a folder under the configured data directory")
     try:
         return await asyncio.to_thread(run_ingestion, folder, config, services(request))
     except (ValueError, FileNotFoundError) as exc:

@@ -9,3 +9,4 @@
 | 2026-11-10 | P2 | T05 | trial checked | Trial crawl reviewed by Claude Code; 5 extractor fixes (Seoul widgets, script text, title-only docs, key/value tables, ERICA staff page denied); full crawl pending. |
 | 2026-11-10 | P2 | T05 | full crawl checked | Full crawl reviewed (1,423 requests, 59 min); 5 more extractor fixes (e-mail masking, ERICA attachment types, bare-extension files, e-mail-only docs, gallery board); snapshot rebuild pending. |
 | 2026-11-10 | P2 | T05 | done | Snapshot hyu-20261110-97dc1269 built and checked: 362 docs (306 Seoul, 56 ERICA), 0 unmasked e-mails; manifest and snapshot committed. |
+| 2026-11-10 | P2 | T05R | done | Two-folder layout: data, results, project docs moved under Report/; config paths, .gitignore, docs and README updated; root leftovers cleaned; manifest and snapshot hashes unchanged. |

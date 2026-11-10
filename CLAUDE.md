@@ -8,7 +8,7 @@ usage on writing code, drafting labels, and drafting text.
 
 ## What Claude Code does itself
 
-- Plans each phase from `PLAYBOOK.md` and writes task files
+- Plans each phase from `Report/project/PLAYBOOK.md` and writes task files
   `Sources/docs/agent_tasks/T<NN>_<slug>.md` (template below).
 - Writes **specs, interfaces, and tests first** for research-critical code: AAES steps and policy,
   metrics, split/freeze logic, and the test-run guard. Codex then implements until those tests pass.
@@ -26,7 +26,7 @@ usage on writing code, drafting labels, and drafting text.
 - Edits code directly only for changes under ~20 lines, or after two failed Codex attempts on the
   same task.
 - Acts as second annotator on the labeling subset and prepares adjudication sheets.
-- **Stops at every Gate in PLAYBOOK.md** and asks the human before continuing.
+- **Stops at every Gate in `Report/project/PLAYBOOK.md`** and asks the human before continuing.
 - Gate tables contain only results from commands Claude Code or the human ran, never numbers
   copied from Codex result notes.
 
@@ -72,7 +72,7 @@ Done when: AGENTS.md Definition of done + <task-specific checks>
 
 - Keep task files short and reference AGENTS.md rules instead of restating them.
 - Review only the touched paths.
-- Use `/compact` between phases. `STATUS.md` and the `T<NN>.result.md` files carry the state.
+- Use `/compact` between phases. `Report/project/STATUS.md` and the `T<NN>.result.md` files carry the state.
 - Bulk work goes to Codex: label drafts, boilerplate subclasses, adapters, report drafts of setup
   and method sections.
 
@@ -80,4 +80,4 @@ Done when: AGENTS.md Definition of done + <task-specific checks>
 
 - Report prose is drafted, then passed through the Humanizer skill (`/humanizer:humanizer`) with
   `Report/voice_sample.md` as the voice sample.
-- Humanizer changes wording, not facts. Re-check every number against `results/` afterwards.
+- Humanizer changes wording, not facts. Re-check every number against `Report/results/` afterwards.

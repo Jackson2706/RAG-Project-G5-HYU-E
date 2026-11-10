@@ -9,7 +9,7 @@
 
 Each task (experiment × dataset × protocol) ends as COMPLETED, NOT_APPLICABLE, BLOCKED (a model or
 service is missing) or FAILED (an error) — with the reason. Per-query results are appended to
-results/<run-id>/raw/ as they are produced, so an interrupted run can be resumed.
+Report/results/<run-id>/raw/ as they are produced, so an interrupted run can be resumed.
 Metrics and reports are computed from those files by evaluation/reports.py.
 """
 
@@ -547,9 +547,9 @@ def main() -> int:
     parser.add_argument("--smoke", action="store_true", help=f"{SMOKE_QUERIES} queries on a small corpus slice, separate indexes and run")
     parser.add_argument("--resume", action="store_true", help="continue tasks of an existing run (skip finished queries)")
     parser.add_argument("--force", action="store_true", help="recompute tasks and rebuild their indexes")
-    parser.add_argument("--run-id", help="results folder name under results/ (default: main, or smoke)")
+    parser.add_argument("--run-id", help="folder name under Report/results/ (default: main, or smoke)")
     parser.add_argument("--max-queries", type=int, help="limit queries per task (recorded in the run manifest)")
-    parser.add_argument("--download", help="download BEIR datasets (comma-separated) and exit")
+    parser.add_argument("--download", help="download BEIR datasets into Report/data/benchmarks/ and exit")
     args = parser.parse_args()
     if args.download:
         for name in args.download.split(","):

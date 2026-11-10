@@ -44,7 +44,7 @@ class ParsedDocument(BaseModel):
     """Output of parsing: the readable content of one file."""
 
     path: Path
-    source_uri: str  # path relative to data/, e.g. "raw/handbook.pdf"
+    source_uri: str  # path relative to DATA_DIR, e.g. "HYU/raw/handbook.pdf"
     file_type: str  # "pdf" | "txt" | "md" | "html"
     title: str
     sections: list[Section]

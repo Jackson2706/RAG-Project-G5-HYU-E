@@ -15,9 +15,21 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 BACKEND_DIR = Path(__file__).resolve().parent.parent
 PROJECT_ROOT = BACKEND_DIR.parent
 REPO_ROOT = PROJECT_ROOT.parent
-DATA_DIR = Path(os.environ.get("HYU_DATA_DIR", REPO_ROOT / "data"))
-RESULTS_DIR = Path(os.environ.get("HYU_RESULTS_DIR", REPO_ROOT / "results"))
 REPORT_DIR = Path(os.environ.get("HYU_REPORT_DIR", REPO_ROOT / "Report"))
+DATA_DIR = Path(os.environ.get("HYU_DATA_DIR", REPORT_DIR / "data"))
+RESULTS_DIR = Path(os.environ.get("HYU_RESULTS_DIR", REPORT_DIR / "results"))
+
+
+def resolve_stored_path(path: str | Path) -> Path:
+    """Resolve paths stored before data and results moved under Report."""
+    path = Path(path)
+    if path.is_absolute():
+        return path
+    if path.parts[:1] == ("data",):
+        return DATA_DIR.joinpath(*path.parts[1:])
+    if path.parts[:1] == ("results",):
+        return RESULTS_DIR.joinpath(*path.parts[1:])
+    return REPO_ROOT / path
 
 
 class Settings(BaseSettings):

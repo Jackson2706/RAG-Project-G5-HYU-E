@@ -2,7 +2,7 @@
 
     python -m evaluation.reports --run-id main
 
-Reads results/<run-id>/ (status.json, run_manifest.json, raw/**.jsonl) and writes:
+Reads Report/results/<run-id>/ (status.json, run_manifest.json, raw/**.jsonl) and writes:
 results.json, per_query.csv, retrieval_comparison.csv, offline_comparison.csv, generation_comparison.csv,
 failure_analysis.csv, summary.md. Missing values are written as "N/A", never as 0.
 """
@@ -17,7 +17,7 @@ import statistics
 from collections import Counter
 from pathlib import Path
 
-from app.config import REPO_ROOT, RESULTS_DIR
+from app.config import REPO_ROOT, RESULTS_DIR, resolve_stored_path
 from evaluation import ROOT, beir
 from evaluation.failure_analysis import CATEGORIES, classify_fixture, classify_generation, classify_retrieval
 from evaluation.metrics.attribution import marker_validity
@@ -400,7 +400,7 @@ def summary_markdown(manifest: dict, status: dict, comparison: list, offline_row
                          "answers_citing_a_source_rate", "invalid_markers_total", "generation_ms_p50", "generation_ms_p95", "output_tokens_mean",
                          "annotated_cases", "correctness", "grounding_support", "citation_precision"]),
                   "Correctness, relevance, completeness, grounding and citation support need annotated cases "
-                  "(data/HYU/labels/legacy/). With 0 annotated cases they are N/A — BEIR qrels are not reference answers.", ""]  # fmt: skip
+                  "(Report/data/HYU/labels/legacy/). With 0 annotated cases they are N/A — BEIR qrels are not reference answers.", ""]  # fmt: skip
     if failures:
         by = Counter((f.get("dataset", ""), f.get("protocol", "-"), f["experiment"], f["category"]) for f in failures)
         lines += ["## Report D — Failure categories (earliest observable stage)", "",
@@ -425,7 +425,10 @@ def write_reports(run_dir: Path) -> None:
     comparison, offline_rows, per_query, failures, records = retrieval_tables(run_dir, status, split)
     ann = ann_rows(records)
     filters, gates, fixture_failures = fixture_tables(run_dir, status)
-    annotations = REPO_ROOT / ((manifest.get("configs") or {}).get("generation", {}).get("annotations") or "data/HYU/labels/legacy/qa_annotations.jsonl")
+    annotations = resolve_stored_path(
+        (manifest.get("configs") or {}).get("generation", {}).get("annotations")
+        or "Report/data/HYU/labels/legacy/qa_annotations.jsonl"
+    )
     generation, generation_failures, _ = generation_tables(run_dir, status, annotations)
     failures += fixture_failures + generation_failures
     write_csv(run_dir / "retrieval_comparison.csv", comparison)

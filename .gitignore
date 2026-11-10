@@ -35,10 +35,10 @@ dist/
 .claude
 
 # Crawled and benchmark data, report inputs, and bulky per-query results
-data/HYU/raw/
-data/HYU/extracted/
-data/benchmarks/*/*
-!data/benchmarks/*/SOURCE.md
-results/*/raw/
-results/smoke*/
+Report/data/HYU/raw/
+Report/data/HYU/extracted/
+Report/data/benchmarks/*/*
+!Report/data/benchmarks/*/SOURCE.md
+Report/results/*/raw/
+Report/results/smoke*/
 Report/course/

@@ -3,11 +3,11 @@
 Put the real, approved English documents here: **PDF, TXT, Markdown (`.md`) or HTML**.
 Sub-folders are fine. Ingestion only reads these files and never changes them.
 
-Then run, from the `hyu-compass/` folder:
+Then run, from the `hyu-compass/Sources/` folder:
 
 ```bash
 conda activate RAG
-python scripts/ingest.py --path data/raw
+python scripts/ingest.py --path HYU/raw
 ```
 
 Tips:
