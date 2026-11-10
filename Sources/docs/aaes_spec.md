@@ -159,28 +159,27 @@ leaves the index in `built` state.
 
 ## Tag audit
 
-`python -m labeling.audit_tags sample` writes the fixed, seeded 50-chunk review sheet without
-changing the index. The sample keeps the campus, condition, table-row, and A6 bucket floors and
-adds at least six chunks whose `topik_level` was extracted by the LLM. Sampling also writes a
-`<csv stem>.meta.json` sidecar with the index ID, seed, sample size, achieved strata, and the full
-six-bucket partition from the index manifest. The last two fields are `stratum_counts` and
-`bucket_partition`. `score` requires this sidecar.
+The A14 automated audit uses `python -m labeling.auto_audit`. `sample` reads the published MongoDB
+index and writes a seeded 150-chunk sample under
+`Report/results/tag_audit/<index_id>/auto/`. Sampling uses the six A6 buckets and campus within each
+bucket. It includes every `llm_rejected` and `llm_errors` chunk, at least 15 chunks whose text names
+TOPIK, at least 20 `rule_unconditioned` chunks, and at least four predicted `any_of` chunks. The
+blind JSONL contains only the chunk ID, site, title, heading path, post date, and text. Predicted
+conditions, buckets, methods, and status remain in `sample_meta.json`.
 
-A reviewer assigns every predicted value to `correct` or `wrong`, records true values absent from
-the prediction in `missed`, and signs the row in `reviewer`. Values in these cells are separated
-with `|`. The reviewer uses `out_of_vocabulary_condition` for an eligibility condition that the
-attribute vocabulary cannot express, such as `GPA >= 3.0` or `nationality`. The `audience` cell is
-blank when the text gives no audience; otherwise it contains `applicant`, `admitted`, `enrolled`,
-or several of these values separated with `|`. These two columns do not affect tag scores.
+The reference annotator follows `Report/notes/tag_audit_rules.md` without seeing the system tags.
+`compare` validates every v1 value and checks whitespace-normalized evidence quotes against the
+chunk text before it reads the current predicted tags from MongoDB. It expands `any_of` sets into
+their attribute values for TP, FP, and FN counts, and also reports chunk-level exact match for the
+sets. Scores are split by rule/LLM family, bucket, and campus. Recall is reported both raw and
+weighted by the full bucket partition, and every precision and recall estimate has a Wilson 95%
+interval.
 
-`score` rejects an incomplete or invalid reviewed row before writing metrics by attribute,
-rule/LLM extraction family, tag bucket, and campus. Every precision and recall point estimate has
-a Wilson 95% interval. Recall is reported both raw and weighted by the index-to-sample ratio of
-each bucket. An index bucket with no reviewed chunk is reported as not sampled and left out of the
-weighted estimate. Gate G2 passes an attribute with at least five occurrences when precision is at
-least 0.8 and weighted recall is at least 0.7. The score report also counts the recorded
-out-of-vocabulary conditions and audience values. Site defaults and snapshot-derived fields belong
-to the deterministic rule family. `frequency` counts all indexed values, `any_of` sets, and requirement phrases;
-its zero-count vocabulary entries are candidates for the Gate G2 vocabulary review, not automatic
-removals.
+Disagreements are written with the two sides assigned to `a` and `b` by a seeded shuffle. The side
+key is stored separately and is not provided to the reviewer. `finalize` maps the review decisions
+back through this key, excludes ambiguous rows, and re-scores the adjudicated reference. For an
+attribute with at least five occurrences, Gate G2 passes when precision is at least 0.8 and weighted
+recall is at least 0.7. The final report also records disagreement outcomes, frequent
+out-of-vocabulary conditions, audience counts, and TOPIK-scope counts. The report states that the
+automated reference is not human-validated and that Codex also wrote the tagging rules.
 
