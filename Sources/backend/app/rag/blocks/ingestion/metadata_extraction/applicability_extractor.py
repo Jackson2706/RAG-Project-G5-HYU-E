@@ -108,10 +108,22 @@ def _topik_level(context: str) -> tuple[list[str], str | None]:
         level = int(met.group(1))
         values = range(level, 7) if met.group(2).upper() == "O" else range(0, level)
         return ["none" if value == 0 else str(value) for value in values], met.group(0)
-    minimum = re.search(r"\bTOPIK\s+level\s*([1-6])\s+or higher\b", context, re.IGNORECASE)
+    minimum = TOPIK_THRESHOLD.search(context)
     if minimum:
-        return [str(value) for value in range(int(minimum.group(1)), 7)], minimum.group(0)
+        return topik_at_least(int(minimum.group(1))), minimum.group(0)
     return [], None
+
+
+# "TOPIK level 3 or higher", "TOPIK 4 or above", "TOPIK Lv4~6", "TOPIK level 5+" — a threshold, so levels N…6
+TOPIK_THRESHOLD = re.compile(
+    r"\bTOPIK\s*(?:level|lv\.?|grade)?\s*([1-6])\s*(?:or (?:above|higher|more)\b|\+|[~–-]\s*6\b)", re.IGNORECASE)
+
+
+def topik_at_least(level: int) -> list[str]:
+    """>>> topik_at_least(3)
+    ['3', '4', '5', '6']
+    """
+    return [str(value) for value in range(level, 7)]
 
 
 def _visa(context: str) -> tuple[list[str], str | None]:
@@ -271,7 +283,11 @@ def _apply_llm_fallback(
             rejected[attribute] = "missing evidence quote"
         elif quote not in text:
             rejected[attribute] = "evidence is not an exact substring"
+        elif set(values) == set(VOCABULARY[attribute]):
+            rejected[attribute] = "every value allowed = no constraint"
         else:
+            if attribute == "topik_level" and (threshold := TOPIK_THRESHOLD.search(quote)):
+                values = topik_at_least(int(threshold.group(1)))  # the LLM often keeps only "3" from "3 or above"
             condition.constraints[attribute] = list(dict.fromkeys(values))
             condition.extraction_method[attribute] = "llm"
             condition.evidence[attribute] = quote

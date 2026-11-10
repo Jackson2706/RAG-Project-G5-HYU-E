@@ -163,3 +163,31 @@ def test_registered_block_tags_chunks_without_the_llm():
 def test_t08b_rule_fixes(text, expected):
     got = tag_chunk({**PLAIN, "title": "", "text": text})
     assert got.constraints == expected
+
+
+# --- topik_level thresholds are ordinal ------------------------------------------------------------
+
+
+@pytest.mark.parametrize("text, expected", [
+    ("Applicants with TOPIK 3 or above may apply.", ["3", "4", "5", "6"]),
+    ("TOPIK level 4 or higher is required.", ["4", "5", "6"]),
+    ("Korean proficiency is required (TOPIK Lv4~6).", ["4", "5", "6"]),
+    ("TOPIK level 5+ students get a bonus.", ["5", "6"]),
+], ids=["or_above", "or_higher", "range_to_6", "plus"])  # fmt: skip
+def test_topik_thresholds_expand_to_every_higher_level(text, expected):
+    assert tag_chunk({**PLAIN, "title": "", "text": text}).constraints["topik_level"] == expected
+
+
+def test_llm_topik_threshold_is_expanded_and_all_levels_is_no_constraint():
+    text = "Scholarship for students. Korean: TOPIK three or above, see TOPIK 3 or above in the table."
+    narrow = fake_llm({"constraints": {"topik_level": ["3"]}, "evidence": {"topik_level": "TOPIK 3 or above"}})
+    # rules see the same threshold here, so call the fallback directly on an untagged condition
+    from app.rag.blocks.ingestion.metadata_extraction.applicability_extractor import _apply_llm_fallback
+
+    condition = ChunkCondition(campus=["erica"])
+    _apply_llm_fallback(condition, text, narrow, None)
+    assert condition.constraints == {"topik_level": ["3", "4", "5", "6"]}
+    every = fake_llm({"constraints": {"topik_level": list(VOCABULARY["topik_level"])}, "evidence": {"topik_level": "TOPIK three"}})
+    condition = ChunkCondition(campus=["erica"])
+    _apply_llm_fallback(condition, text, every, details := {})
+    assert condition.constraints == {} and details["llm_fallback"]["rejected_fields"] == {"topik_level": "every value allowed = no constraint"}
