@@ -223,7 +223,7 @@ def _first_json_object(text: str) -> dict[str, Any] | None:
 
 # Every chunk lands in exactly one bucket; VERIFY checks the buckets add up to the chunk count.
 TAG_BUCKETS = ("rule_tagged", "rule_unconditioned", "llm_tagged", "llm_unconditioned", "llm_rejected", "llm_errors")
-TAG_PROMPT_VERSION = "v1"  # bump whenever the fallback prompt below changes
+TAG_PROMPT_VERSION = "v2"  # v2: evidence-object example, campus left out (site default/rules)  # bump whenever the fallback prompt below changes
 
 
 def _apply_llm_fallback(
@@ -233,9 +233,12 @@ def _apply_llm_fallback(
     trace_details: dict[str, Any] | None,
 ) -> None:
     prompt = (
-        "Tag only applicability constraints explicitly supported by this chunk. Reply with JSON only in the form "
-        '{"constraints":{"attribute":["value"]},"evidence":{"attribute":"exact quote"}}. '
-        f"Allowed vocabulary: {json.dumps(VOCABULARY)}. Every evidence value must be an exact substring of the chunk.\n\n"
+        "Which students does this chunk apply to? Tag only constraints the chunk states explicitly.\n"
+        "Reply with JSON only. `evidence` is an OBJECT with one exact quote from the chunk PER attribute in `constraints`.\n"
+        'Example: {"constraints":{"degree_level":["master","doctoral"],"visa":["D-2"]},'
+        '"evidence":{"degree_level":"graduate students","visa":"D-2 visa holders"}}\n'
+        'If the chunk applies to every student, reply {"constraints":{},"evidence":{}}.\n'
+        f"Allowed attributes and values: {json.dumps({a: VOCABULARY[a] for a in CONSTRAINT_ATTRIBUTES})}\n\n"
         f"Chunk:\n{text}"
     )
     details: dict[str, Any] = {"status": "called"}
@@ -417,6 +420,9 @@ class ApplicabilityExtractor(BaseMetadataExtractor):
                         counts["llm_accepted"] += 1
                     elif fallback.get("status") == "error":
                         counts["llm_errors"] += 1
+                        counts.setdefault("llm_first_error", fallback.get("reason"))
+                    elif fallback.get("status") == "unconditioned":
+                        counts["llm_unconditioned"] = counts.get("llm_unconditioned", 0) + 1
                     else:
                         counts["llm_rejected_total"] += 1
                         reasons = list(fallback.get("rejected_fields", {}).values()) or [fallback.get("reason", fallback.get("status"))]

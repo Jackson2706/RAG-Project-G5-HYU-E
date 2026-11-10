@@ -113,7 +113,7 @@ def test_llm_is_asked_only_with_a_cue_and_answers_are_cached(services, fake_olla
     assert block.summary["llm_called"] == 1 and block.summary["llm_accepted"] == 1
     assert first[1].constraints == {"student_type": ["exchange"]} and first[1].extraction_method["student_type"] == "llm"
     assert block.summary["llm"] == {"enabled": True, "role": "auxiliary", "model": "qwen3.5:4b", "digest": "sha256:x",
-                                    "prompt_version": "v1", "temperature": 0, "num_ctx": 4096, "seed": 42,
+                                    "prompt_version": extractor_module.TAG_PROMPT_VERSION, "temperature": 0, "num_ctx": 4096, "seed": 42,
                                     "thinking": "off", "cache_path": str(cache)}  # fmt: skip
     assert fake_ollama.requests[0]["options"] | {"think": fake_ollama.requests[0]["think"]} == {
         "temperature": 0, "num_predict": 256, "num_ctx": 4096, "seed": 42, "think": False,
@@ -141,7 +141,7 @@ def test_llm_cache_key_uses_digest_prompt_version_and_chunk_text(services, fake_
     block.tag_chunks([chunk], cache_path=cache)
     assert len(fake_ollama.requests) == 2 and block.summary["llm_cache_hits"] == 0
 
-    monkeypatch.setattr(extractor_module, "TAG_PROMPT_VERSION", "v2")
+    monkeypatch.setattr(extractor_module, "TAG_PROMPT_VERSION", extractor_module.TAG_PROMPT_VERSION + "-next")
     block.tag_chunks([chunk], cache_path=cache)
     assert len(fake_ollama.requests) == 3 and block.summary["llm_cache_hits"] == 0
     assert len(cache.read_text().splitlines()) == 3

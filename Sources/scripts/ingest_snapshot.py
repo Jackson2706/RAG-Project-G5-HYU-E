@@ -134,7 +134,7 @@ def verify(db: Database, embedder, default_before: dict, default_after: dict, ex
     }  # fmt: skip
     checks, status = evaluate_checks(facts)
     count_fields = ("tagged_by_rule", "tagged_by_llm", "llm_rejected", "llm_rejected_total", "llm_errors",
-                    "llm_called", "llm_cache_hits", "unconditioned", "partition")  # fmt: skip
+                    "llm_called", "llm_cache_hits", "unconditioned", "partition", "llm_first_error")  # fmt: skip
     return {"facts": facts, "checks": checks, "status": status,
             "applicability_counts": {key: applicability.get(key) for key in count_fields},
             "frequency": dict(sorted(frequency([c["applicability"] for c in chunks]).items()))}  # fmt: skip
@@ -191,7 +191,8 @@ def main() -> None:
     ollama = OllamaClient(settings.ollama_base_url)
     if not args.no_llm:  # fail fast: without this, a missing model only shows up as llm_errors after the whole build
         model = config["metadata_extraction"]["params"]["model"]
-        installed = {m["name"]: m for m in asyncio.run(ollama.list_models())}
+        # a separate client: asyncio.run() closes its loop, and the tagger's client must not be bound to it
+        installed = {m["name"]: m for m in asyncio.run(OllamaClient(settings.ollama_base_url).list_models())}
         if not installed.get(model, {}).get("digest"):
             sys.exit(f"Ollama model {model} is not installed (installed: {', '.join(installed)}). Run: ollama pull {model}, or use --no-llm.")
     default_before = default_counts(app_db)
