@@ -46,6 +46,8 @@ class SpanInfo:
     end: int
     kind: str
     heading_path: list[str]
+    snapshot_start: int  # offsets into the snapshot row's text
+    snapshot_end: int
 
 
 class SpanLookup:
@@ -63,7 +65,8 @@ class SpanLookup:
         meta = document.declared_metadata
         return {"doc_id": meta.get("doc_id"), "site": meta["site"], "title": document.title, "source_uri": document.source_uri,
                 "post_date": meta.get("post_date") or None, "superseded_by": meta.get("superseded_by") or None, "kind": kind,
-                "heading_path": spans[0].heading_path if spans else [], "text": chunk.text}  # fmt: skip
+                "heading_path": spans[0].heading_path if spans else [], "text": chunk.text,
+                "source_spans": [[s.snapshot_start, s.snapshot_end] for s in spans]}  # fmt: skip
 
 
 def to_parsed_document(row: dict, snapshot_id: str, count_tokens: Callable[[str], int] | None = None,
@@ -75,12 +78,12 @@ def to_parsed_document(row: dict, snapshot_id: str, count_tokens: Callable[[str]
     if not is_english(title):
         title = english_headings[0] if english_headings else (title or row["source_uri"])
 
-    sections: list[tuple[str | None, list[tuple[str, str, list[str]]]]] = []  # (heading, [(span text, kind, path)])
+    sections: list[tuple[str | None, list[tuple[str, str, list[str], int, int]]]] = []
     path: list[str] = []
     heading: str | None = title if is_english(title) else None
 
     def section_text(items):
-        return LINE.join(t for t, _, _ in items)
+        return LINE.join(item[0] for item in items)
 
     for span in row["spans"]:
         piece = text[span["char_start"]:span["char_end"]].strip()
@@ -98,14 +101,15 @@ def to_parsed_document(row: dict, snapshot_id: str, count_tokens: Callable[[str]
         if items and count_tokens and count_tokens(section_text(items) + LINE + piece) > max_tokens:
             sections.append((heading, []))
             items = sections[-1][1]
-        items.append((piece, span["kind"], list(path)))
+        items.append((piece, span["kind"], list(path), span["char_start"], span["char_end"]))
 
     sections = [(h, items) for h, items in sections if items]
     parsed_sections, lookup, position = [], [], 0
     for h, items in sections:
         offset = position
-        for piece, kind, span_path in items:
-            lookup.append(SpanInfo(offset, offset + len(piece), kind, span_path))
+        for piece, kind, span_path, snapshot_start, snapshot_end in items:
+            lookup.append(SpanInfo(start=offset, end=offset + len(piece), kind=kind, heading_path=span_path,
+                                   snapshot_start=snapshot_start, snapshot_end=snapshot_end))  # fmt: skip
             offset += len(piece) + len(LINE)
         body = section_text(items)
         parsed_sections.append(Section(heading=h, text=body))
@@ -136,6 +140,22 @@ def load_snapshot(snapshot_id: str, count_tokens: Callable[[str], int] | None = 
     return [to_parsed_document(r, snapshot_id, count_tokens, max_tokens) for r in rows]
 
 
+def source_spans_match(chunk_text: str, snapshot_text: str, source_spans: list[list[int]]) -> bool:
+    """Match a whole-span chunk exactly, or a one-span token window as a substring."""
+    pieces = []
+    for span in source_spans:
+        if not isinstance(span, (list, tuple)) or len(span) != 2:
+            return False
+        start, end = span
+        if not isinstance(start, int) or not isinstance(end, int) or not 0 <= start <= end <= len(snapshot_text):
+            return False
+        pieces.append(snapshot_text[start:end].strip())
+    if not pieces:
+        return False
+    joined = LINE.join(pieces)
+    return chunk_text == joined or (len(pieces) == 1 and bool(chunk_text) and chunk_text in joined)
+
+
 def evaluate_checks(facts: dict) -> tuple[dict[str, bool], str]:
     """VERIFY: every check is pass/fail; the index is "verified" only if all pass, else it stays "built"."""
     checks = {
@@ -147,6 +167,8 @@ def evaluate_checks(facts: dict) -> tuple[dict[str, bool], str]:
         "max_tokens_le_512": facts["max_embedded_tokens"] <= 512,
         "truncated_zero": facts["truncated_by_embedder"] == 0,
         "applicability_valid": facts["invalid_applicability"] == 0,
+        "llm_errors_zero": facts["llm_errors"] == 0,
+        "span_text_matches": facts["span_text_mismatches"] == 0,
         "payload_has_scope_campus": facts["points_missing_app_fields"] == 0,
         "no_unmasked_emails": facts["unmasked_emails"] == 0,
         "no_hangul_headers": facts["hangul_headers"] == 0,

@@ -93,9 +93,24 @@ Each chunk of the HYU snapshot index carries one validated `ChunkCondition`.
 
 - MongoDB stores the full form (`chunk["applicability"]`). Qdrant stores the compact filterable
   copy from `ChunkCondition.to_payload()`.
+- MongoDB also stores `source_spans`, the snapshot character offsets for the source spans covered
+  by the chunk. VERIFY reconstructs whole-span chunks from `documents.jsonl`. A token window inside
+  one long span must be a substring of that span.
 - `superseded_by` is converted from the snapshot doc_id to the index doc_id of the newer version.
 - The index manifest's `applicability` block records:
   - the vocabulary version;
-  - the counts by extraction method, LLM calls, cache hits, and accepts and rejects with reasons;
-  - the auxiliary LLM settings: model, digest, temperature, `num_ctx`, seed, thinking off.
+  - chunks tagged by rules or by the LLM, unconditioned chunks, LLM calls, cache hits, rejected
+    outputs by reason, and LLM errors;
+  - the auxiliary LLM model and digest, prompt version, temperature, `num_ctx`, seed, thinking
+    setting, and cache file path.
+
+The cache key is the SHA-256 of the resolved model digest, `TAG_PROMPT_VERSION`, and the SHA-256 of
+the chunk text, separated by newlines. The model and its digest are resolved before a cache lookup.
+A missing digest or failed Ollama call counts as an LLM error and is not cached. With LLM fallback
+disabled, the tagger does not resolve a model and records `llm.enabled` as false.
+
+VERIFY checks the reconstructed span text and recounts tokens from the exact embedded string,
+`section + "\n" + text` when a section exists. It also requires zero LLM errors. Rejected LLM
+outputs remain in the report but do not block publication; an LLM error or any failed VERIFY check
+leaves the index in `built` state.
 

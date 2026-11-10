@@ -216,6 +216,9 @@ def _first_json_object(text: str) -> dict[str, Any] | None:
     return None
 
 
+TAG_PROMPT_VERSION = "v1"  # bump whenever the fallback prompt below changes
+
+
 def _apply_llm_fallback(
     condition: ChunkCondition,
     text: str,
@@ -330,7 +333,8 @@ def tag_chunk(
 class ApplicabilityExtractor(BaseMetadataExtractor):
     """Basic document metadata plus a separate chunk-tagging entry point for T09 ingestion."""
 
-    cache_path: Path | None = None  # LLM answer cache; set by scripts/ingest_snapshot.py
+    # shortcut: class-level cache path; one ingest per process, pass it per call if two ever share a process
+    cache_path: Path | None = None
     summary: dict[str, Any] = {}
 
     def extract(self, document: ParsedDocument) -> DocumentMetadata:
@@ -339,37 +343,56 @@ class ApplicabilityExtractor(BaseMetadataExtractor):
     def tag_chunks(self, chunks: list[dict], cache_path: Path | None = None) -> list[ChunkCondition]:
         """Tag every chunk with rules; ask the auxiliary LLM only for untagged chunks with an LLM_CUE.
 
-        cache_path: JSONL of earlier LLM answers keyed by sha256(model + prompt), so a re-run makes no new calls.
+        cache_path: JSONL of earlier LLM answers keyed by model digest, prompt version, and chunk text hash.
         After the call, self.summary has the counts and LLM settings for the index manifest.
         """
         use_llm = self.params.get("llm_fallback", True)
         model_name = self.params.get("model", "qwen3.5:4b")
         cache_path = cache_path or self.cache_path
         cache = _read_cache(cache_path)
-        counts = {"llm_candidates": 0, "llm_called": 0, "llm_cache_hits": 0, "llm_accepted": 0, "llm_rejected": {}}
+        counts = {"llm_candidates": 0, "llm_called": 0, "llm_cache_hits": 0, "llm_accepted": 0,
+                  "llm_rejected": {}, "llm_rejected_total": 0, "llm_errors": 0}  # fmt: skip
         loop = asyncio.new_event_loop() if use_llm else None
         selected: dict = {}
+        resolution: dict[str, Any] = {"attempted": False, "error": None}
         fallback_details: list[dict[str, Any]] = []
 
         async def complete(prompt: str, details: dict[str, Any]) -> str:
-            if not selected:
-                selected.update(await self.services.ollama.pick_model(model_name, ""))
-            options = {"temperature": self.params.get("temperature", 0.0), "num_predict": self.params.get("max_tokens", 256),
+            options = {"temperature": 0, "num_predict": self.params.get("max_tokens", 256),
                        "num_ctx": LLM_NUM_CTX, "seed": LLM_SEED}  # fmt: skip
             output, usage = await self.services.ollama.complete(selected, [{"role": "user", "content": prompt}], options, think="off")
-            details.update(model=selected["name"], prompt_tokens=usage.get("prompt_eval_count"), output_tokens=usage.get("eval_count"))
+            details.update(model=selected["name"], digest=selected["digest"], prompt_tokens=usage.get("prompt_eval_count"),
+                           output_tokens=usage.get("eval_count"))  # fmt: skip
             return output
 
-        def make_llm(details: dict[str, Any]) -> Callable[[str], str]:
+        def resolve_model() -> None:
+            if not resolution["attempted"]:
+                resolution["attempted"] = True
+                try:
+                    selected.update(loop.run_until_complete(self.services.ollama.pick_model(model_name, "")))  # type: ignore[union-attr]
+                    if not selected.get("digest"):
+                        raise ValueError(f"Ollama model {selected.get('name', model_name)} has no digest")
+                except Exception as exc:
+                    resolution["error"] = exc
+            if resolution["error"] is not None:
+                raise resolution["error"]
+
+        def make_llm(details: dict[str, Any], text: str) -> Callable[[str], str]:
             def llm(prompt: str) -> str:
-                key = hashlib.sha256((model_name + prompt).encode()).hexdigest()
+                try:
+                    resolve_model()
+                except Exception:
+                    counts["llm_called"] += 1
+                    raise
+                key = _cache_key(selected["digest"], text)
                 if key in cache:
                     counts["llm_cache_hits"] += 1
+                    details.update(model=selected["name"], digest=selected["digest"], cache_hit=True)
                     return cache[key]
                 counts["llm_called"] += 1
                 output = loop.run_until_complete(complete(prompt, details))  # type: ignore[union-attr]
-                cache[key] = output
                 _append_cache(cache_path, key, output)
+                cache[key] = output
                 return output
 
             return llm
@@ -379,13 +402,16 @@ class ApplicabilityExtractor(BaseMetadataExtractor):
             for index, chunk in enumerate(chunks):
                 details: dict[str, Any] = {"chunk_index": index, "doc_id": chunk.get("doc_id")}
                 ask = use_llm and LLM_CUE.search(chunk["text"]) is not None
-                result = tag_chunk(chunk, llm=make_llm(details) if ask else None, trace_details=details)
+                result = tag_chunk(chunk, llm=make_llm(details, chunk["text"]) if ask else None, trace_details=details)
                 if "llm_fallback" in details:
                     counts["llm_candidates"] += 1
                     fallback = details["llm_fallback"]
                     if fallback.get("status") == "accepted":
                         counts["llm_accepted"] += 1
+                    elif fallback.get("status") == "error":
+                        counts["llm_errors"] += 1
                     else:
+                        counts["llm_rejected_total"] += 1
                         reasons = list(fallback.get("rejected_fields", {}).values()) or [fallback.get("reason", fallback.get("status"))]
                         for reason in reasons:
                             counts["llm_rejected"][reason] = counts["llm_rejected"].get(reason, 0) + 1
@@ -393,12 +419,19 @@ class ApplicabilityExtractor(BaseMetadataExtractor):
                 tagged.append(result)
         finally:
             if loop is not None:
+                loop.run_until_complete(loop.shutdown_asyncgens())
                 loop.close()
         self.trace_details = {"llm_fallbacks": fallback_details[:50]}
         self.summary = {**counts, "llm": {"enabled": use_llm, "role": "auxiliary", "model": model_name,
-                                          "digest": selected.get("digest"), "temperature": self.params.get("temperature", 0.0),
-                                          "num_ctx": LLM_NUM_CTX, "seed": LLM_SEED, "thinking": "off"}}  # fmt: skip
+                                          "digest": selected.get("digest"), "prompt_version": TAG_PROMPT_VERSION,
+                                          "temperature": 0, "num_ctx": LLM_NUM_CTX, "seed": LLM_SEED, "thinking": "off",
+                                          "cache_path": str(cache_path) if cache_path is not None else None}}  # fmt: skip
         return tagged
+
+
+def _cache_key(model_digest: str, text: str) -> str:
+    text_hash = hashlib.sha256(text.encode()).hexdigest()
+    return hashlib.sha256(f"{model_digest}\n{TAG_PROMPT_VERSION}\n{text_hash}".encode()).hexdigest()
 
 
 def _read_cache(path: Path | None) -> dict[str, str]:

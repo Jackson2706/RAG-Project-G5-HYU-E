@@ -6,9 +6,10 @@ import pytest
 
 from app.config import DATA_DIR
 from app.rag.applicability import ChunkCondition
+from app.rag.blocks.ingestion.metadata_extraction import applicability_extractor as extractor_module
 from app.rag.registry import create_block, validate_config
 from app.rag.schemas import Chunk
-from app.rag.snapshot import HANGUL, evaluate_checks, load_snapshot, to_parsed_document
+from app.rag.snapshot import HANGUL, evaluate_checks, load_snapshot, source_spans_match, to_parsed_document
 
 SNAPSHOT = "hyu-20261110-97dc1269"
 
@@ -43,8 +44,9 @@ def test_snapshot_row_becomes_english_sections_with_exact_offsets():
     assert [s.heading for s in doc.sections] == ["Undergraduate Admission Guideline", "Tuition"]
     assert "등록금 납부 안내" in doc.sections[1].text
     full = doc.full_text()
-    for span in lookup.spans:  # every span maps back to its own text
-        assert full[span.start:span.end] in ROW["text"]
+    expected = ["Welcome to the guide.", "Pay by March 1.", "등록금 납부 안내",
+                "Degree: Bachelor's; Fee: KRW 100", "Degree: Master's; Fee: KRW 200"]  # fmt: skip
+    assert [full[span.start:span.end] for span in lookup.spans] == expected
     assert [s.kind for s in lookup.spans][-2:] == ["table_row", "table_row"]
 
 
@@ -63,6 +65,7 @@ def test_chunk_kind_and_heading_path_come_from_the_covered_spans():
                   start=rows[0].start, end=rows[-1].end)  # fmt: skip
     got = lookup.chunk_input(doc, table)
     assert got["kind"] == "table_row" and got["heading_path"] == ["Tuition"] and got["site"] == "seoul"
+    assert got["source_spans"] == [[row.snapshot_start, row.snapshot_end] for row in rows]
     first = doc.sections[1]
     start = doc.section_starts()[1]
     mixed = Chunk(text=first.text, section="Tuition", page_number=None, token_count=1, start=start, end=start + len(first.text))
@@ -97,7 +100,7 @@ UNTAGGED = {"doc_id": "x", "site": "erica", "title": "", "source_uri": "u", "pos
 
 
 def test_llm_is_asked_only_with_a_cue_and_answers_are_cached(services, fake_ollama, tmp_path):
-    fake_ollama.models = [{"name": "qwen3.5:4b", "details": {}, "capabilities": ["completion"], "digest": "sha256:x"}]
+    fake_ollama.models = [{"name": "qwen3.5:4b", "details": {}, "capabilities": ["completion", "thinking"], "digest": "sha256:x"}]
     fake_ollama.answer = json.dumps({"constraints": {"student_type": ["exchange"]}, "evidence": {"student_type": "partner-university applicants"}})
     step = validate_config({"metadata_extraction": {"method": "applicability_extractor", "params": {}}})["metadata_extraction"]
     block = create_block("metadata_extraction", step["method"], step["params"], services)
@@ -109,11 +112,39 @@ def test_llm_is_asked_only_with_a_cue_and_answers_are_cached(services, fake_olla
     assert len(fake_ollama.requests) == 1  # the chunk without a cue never reaches the LLM
     assert block.summary["llm_called"] == 1 and block.summary["llm_accepted"] == 1
     assert first[1].constraints == {"student_type": ["exchange"]} and first[1].extraction_method["student_type"] == "llm"
-    assert block.summary["llm"]["digest"] == "sha256:x"
+    assert block.summary["llm"] == {"enabled": True, "role": "auxiliary", "model": "qwen3.5:4b", "digest": "sha256:x",
+                                    "prompt_version": "v1", "temperature": 0, "num_ctx": 4096, "seed": 42,
+                                    "thinking": "off", "cache_path": str(cache)}  # fmt: skip
+    assert fake_ollama.requests[0]["options"] | {"think": fake_ollama.requests[0]["think"]} == {
+        "temperature": 0, "num_predict": 256, "num_ctx": 4096, "seed": 42, "think": False,
+    }
 
     again = block.tag_chunks([no_cue, cue], cache_path=cache)
     assert len(fake_ollama.requests) == 1 and block.summary["llm_cache_hits"] == 1
     assert again[1].to_dict() == first[1].to_dict()
+
+
+def test_llm_cache_key_uses_digest_prompt_version_and_chunk_text(services, fake_ollama, tmp_path, monkeypatch):
+    fake_ollama.models = [{"name": "qwen3.5:4b", "details": {}, "capabilities": ["completion"], "digest": "digest-a"}]
+    fake_ollama.answer = json.dumps({"constraints": {"student_type": ["exchange"]},
+                                     "evidence": {"student_type": "partner-university applicants"}})  # fmt: skip
+    step = validate_config({"metadata_extraction": {"method": "applicability_extractor", "params": {}}})["metadata_extraction"]
+    block = create_block("metadata_extraction", step["method"], step["params"], services)
+    chunk = {**UNTAGGED, "text": "Only partner-university applicants may join."}
+    cache = tmp_path / "llm_tags.jsonl"
+
+    block.tag_chunks([chunk], cache_path=cache)
+    block.tag_chunks([chunk], cache_path=cache)
+    assert len(fake_ollama.requests) == 1 and block.summary["llm_cache_hits"] == 1
+
+    fake_ollama.models[0]["digest"] = "digest-b"
+    block.tag_chunks([chunk], cache_path=cache)
+    assert len(fake_ollama.requests) == 2 and block.summary["llm_cache_hits"] == 0
+
+    monkeypatch.setattr(extractor_module, "TAG_PROMPT_VERSION", "v2")
+    block.tag_chunks([chunk], cache_path=cache)
+    assert len(fake_ollama.requests) == 3 and block.summary["llm_cache_hits"] == 0
+    assert len(cache.read_text().splitlines()) == 3
 
 
 # --- Qdrant payload and VERIFY ---------------------------------------------------------------------
@@ -130,8 +161,31 @@ def test_qdrant_payload_has_the_compact_applicability_fields(db):
 
 GOOD = {"expected_documents": 362, "mongo_documents": 362, "mongo_chunks": 10, "qdrant_points": 10, "dimension": 384,
         "unique_chunk_ids": 10, "points_without_chunk": 0, "max_embedded_tokens": 344, "truncated_by_embedder": 0,
-        "invalid_applicability": 0, "points_missing_app_fields": 0, "unmasked_emails": 0, "hangul_headers": 0,
+        "invalid_applicability": 0, "llm_errors": 0, "span_text_mismatches": 0,
+        "points_missing_app_fields": 0, "unmasked_emails": 0, "hangul_headers": 0,
         "default_before": {"documents": 5}, "default_after": {"documents": 5}}  # fmt: skip
+
+
+def test_llm_error_is_not_cached_and_blocks_verify(services, fake_ollama, tmp_path):
+    fake_ollama.models = [{"name": "qwen3.5:4b", "details": {}, "capabilities": ["completion"], "digest": "sha256:x"}]
+    fake_ollama.fail = "500"
+    step = validate_config({"metadata_extraction": {"method": "applicability_extractor", "params": {}}})["metadata_extraction"]
+    block = create_block("metadata_extraction", step["method"], step["params"], services)
+    cache = tmp_path / "llm_tags.jsonl"
+
+    block.tag_chunks([{**UNTAGGED, "text": "Only partner-university applicants may join."}], cache_path=cache)
+
+    assert block.summary["llm_errors"] == 1 and block.summary["llm_rejected_total"] == 0
+    assert not cache.exists()
+    checks, status = evaluate_checks({**GOOD, "llm_errors": 1})
+    assert status == "built" and not checks["llm_errors_zero"]
+
+
+def test_source_span_text_accepts_whole_spans_and_one_span_window():
+    snapshot_text = "Alpha\nBeta\nA long source span"
+    assert source_spans_match("Alpha\nBeta", snapshot_text, [[0, 5], [6, 10]])
+    assert source_spans_match("long source", snapshot_text, [[11, 29]])
+    assert not source_spans_match("Alpha", snapshot_text, [[0, 5], [6, 10]])
 
 
 def test_verify_passes_only_when_every_check_passes():
@@ -140,3 +194,5 @@ def test_verify_passes_only_when_every_check_passes():
     checks, status = evaluate_checks({**GOOD, "default_after": {"documents": 4}})
     assert status == "built" and not checks["default_index_unchanged"]
     assert evaluate_checks({**GOOD, "unmasked_emails": 1})[1] == "built"
+    checks, status = evaluate_checks({**GOOD, "span_text_mismatches": 1})
+    assert status == "built" and not checks["span_text_matches"]

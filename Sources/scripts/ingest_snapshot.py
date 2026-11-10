@@ -34,8 +34,8 @@ from app.rag.applicability import ChunkCondition  # noqa: E402
 from app.rag.blocks.ingestion.metadata_extraction.applicability_extractor import LLM_CUE, ApplicabilityExtractor  # noqa: E402
 from app.rag.pipeline import _with_embedder, index_documents  # noqa: E402
 from app.rag.registry import create_block, validate_config  # noqa: E402
-from app.rag.schemas import Services  # noqa: E402
-from app.rag.snapshot import HANGUL, evaluate_checks, load_snapshot, snapshot_dir  # noqa: E402
+from app.rag.schemas import Services, make_doc_id  # noqa: E402
+from app.rag.snapshot import HANGUL, evaluate_checks, load_snapshot, snapshot_dir, source_spans_match  # noqa: E402
 from crawler.extract import EMAIL_RE  # noqa: E402
 
 CHUNK_SIZE, CHUNK_OVERLAP, MAX_EMBED_TOKENS = 320, 48, 512
@@ -97,7 +97,8 @@ def default_counts(db: Database) -> dict:
     return {k: info[k] for k in ("documents", "chunks", "vectors")}
 
 
-def verify(db: Database, embedder, default_before: dict, default_after: dict, expected_documents: int) -> dict:
+def verify(db: Database, embedder, default_before: dict, default_after: dict, expected_documents: int,
+           snapshot_id: str, applicability: dict) -> dict:  # fmt: skip
     chunks = list(db.chunks.find({}, {"_id": 0}))
     ids = {c["chunk_id"] for c in chunks}
     points, offset = [], None
@@ -112,20 +113,29 @@ def verify(db: Database, embedder, default_before: dict, default_after: dict, ex
             ChunkCondition.from_dict(c["applicability"]).validate(c["text"])
         except (KeyError, TypeError, ValueError):
             invalid += 1
+    with open(snapshot_dir(snapshot_id) / "documents.jsonl", encoding="utf-8") as f:
+        rows = (json.loads(line) for line in f if line.strip())
+        snapshot_texts = {make_doc_id(row["source_uri"]): row["text"] for row in rows}
+    span_mismatch_ids = [c["chunk_id"] for c in chunks
+                         if not source_spans_match(c["text"], snapshot_texts.get(c["doc_id"], ""), c.get("source_spans", []))]  # fmt: skip
     tokens = [embedder.count_tokens(embedded_text(c)) + 2 for c in chunks]
     facts = {
         "expected_documents": expected_documents, "mongo_documents": db.documents.count_documents({}),
         "mongo_chunks": len(chunks), "qdrant_points": len(points), "dimension": db.vector_size(),
         "unique_chunk_ids": len(ids), "points_without_chunk": sum(str(p.id) not in ids for p in points),
         "max_embedded_tokens": max(tokens, default=0), "truncated_by_embedder": sum(t > MAX_EMBED_TOKENS for t in tokens),
-        "invalid_applicability": invalid,
+        "invalid_applicability": invalid, "llm_errors": applicability.get("llm_errors", 0),
+        "span_text_mismatches": len(span_mismatch_ids), "span_text_mismatch_chunk_ids": span_mismatch_ids[:5],
         "points_missing_app_fields": sum(not {"app_scope", "app_campus"} <= set(p.payload or {}) for p in points),
         "unmasked_emails": sum(unmasked_emails(c["text"]) for c in chunks),
         "hangul_headers": sum(bool(c["section"] and HANGUL.search(c["section"])) for c in chunks),
         "default_before": default_before, "default_after": default_after,
     }  # fmt: skip
     checks, status = evaluate_checks(facts)
+    count_fields = ("tagged_by_rule", "tagged_by_llm", "llm_rejected", "llm_rejected_total", "llm_errors",
+                    "llm_called", "llm_cache_hits", "unconditioned")  # fmt: skip
     return {"facts": facts, "checks": checks, "status": status,
+            "applicability_counts": {key: applicability.get(key) for key in count_fields},
             "frequency": dict(sorted(frequency([c["applicability"] for c in chunks]).items()))}  # fmt: skip
 
 
@@ -135,7 +145,8 @@ def write_report(index_id: str, report: dict) -> Path:
     (out / f"{index_id}.json").write_text(json.dumps(report, indent=2, default=str) + "\n", encoding="utf-8")
     lines = [f"# Index verification: {index_id}", "", f"Status: **{report['status']}**", "", "| Check | Pass |", "|---|---|",
              *(f"| {k} | {'yes' if v else 'NO'} |" for k, v in report["checks"].items()), "", "| Fact | Value |", "|---|---|",
-             *(f"| {k} | {v} |" for k, v in report["facts"].items()), "", "| Tag | Chunks |", "|---|---:|",
+             *(f"| {k} | {v} |" for k, v in report["facts"].items()), "", "| Applicability count | Value |", "|---|---|",
+             *(f"| {k} | {v} |" for k, v in report["applicability_counts"].items()), "", "| Tag | Chunks |", "|---|---:|",
              *(f"| {k} | {v} |" for k, v in report["frequency"].items())]  # fmt: skip
     (out / f"{index_id}.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     return out / f"{index_id}.md"
@@ -177,12 +188,11 @@ def main() -> None:
         sys.exit(f"Index {args.index_id} already exists (status {manifest.get('status')}). Use --force to rebuild it.")
 
     ollama = OllamaClient(settings.ollama_base_url)
-    if not args.no_llm:
+    if not args.no_llm:  # fail fast: without this, a missing model only shows up as llm_errors after the whole build
         model = config["metadata_extraction"]["params"]["model"]
-        installed = [m["name"] for m in asyncio.run(ollama.list_models())]
-        if model not in installed:
+        installed = {m["name"]: m for m in asyncio.run(ollama.list_models())}
+        if not installed.get(model, {}).get("digest"):
             sys.exit(f"Ollama model {model} is not installed (installed: {', '.join(installed)}). Run: ollama pull {model}, or use --no-llm.")
-
     default_before = default_counts(app_db)
     db.create_indexes()
     services = _with_embedder(config, Services(db=db, ollama=ollama, settings=settings))
@@ -205,7 +215,8 @@ def main() -> None:
     db.save_manifest(built)
     print(f"Built: {report['documents']} documents, {report['chunks']} chunks. VERIFY …")
 
-    result = verify(db, services.embedder, default_before, default_counts(app_db), len(docs))
+    result = verify(db, services.embedder, default_before, default_counts(app_db), len(docs), args.snapshot,
+                    built.get("applicability") or {})  # fmt: skip
     db.save_manifest({**built, "status": result["status"], "verification": {"checks": result["checks"], "facts": result["facts"]}})
     path = write_report(args.index_id, {"index_id": args.index_id, "snapshot_id": args.snapshot,
                                         "applicability": built.get("applicability"), **result})  # fmt: skip

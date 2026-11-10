@@ -44,15 +44,20 @@ def _tag_chunks(extractor: Any, chunks: list[dict], inputs: list[dict], timings:
         raise ValueError(f"Metadata extraction method '{extractor.method_id}' cannot tag chunks; use applicability_extractor")
     start = time.perf_counter()
     conditions = extractor.tag_chunks(inputs)
-    for chunk, condition in zip(chunks, conditions, strict=True):
+    for chunk, condition, tag_input in zip(chunks, conditions, inputs, strict=True):
         condition.validate(chunk["text"])
         chunk["applicability"] = condition.to_dict()
         chunk["vocabulary_version"] = VOCABULARY_VERSION
+        if "source_spans" in tag_input:
+            chunk["source_spans"] = tag_input["source_spans"]
     timings["tag_ms"] = (time.perf_counter() - start) * 1000
     methods = [m for c in conditions for a, m in c.extraction_method.items() if a in c.constraints]
+    tagged_by_rule = sum(any(c.extraction_method.get(a) == "rule" for a in c.constraints) for c in conditions)
+    tagged_by_llm = sum(any(c.extraction_method.get(a) == "llm" for a in c.constraints) for c in conditions)
     return {"vocabulary_version": VOCABULARY_VERSION, "chunks": len(chunks),
-            "rule_tagged": sum(any(c.extraction_method.get(a) == "rule" for a in c.constraints) for c in conditions),
-            "llm_tagged": sum(any(c.extraction_method.get(a) == "llm" for a in c.constraints) for c in conditions),
+            "tagged_by_rule": tagged_by_rule, "tagged_by_llm": tagged_by_llm,
+            "rule_tagged": tagged_by_rule, "llm_tagged": tagged_by_llm,
+            "unconditioned": sum(not c.constraints for c in conditions),
             "constraint_fields_by_method": {m: methods.count(m) for m in set(methods)},
             **getattr(extractor, "summary", {})}  # fmt: skip
 
