@@ -35,9 +35,11 @@ usage on writing code, drafting labels, and drafting text.
 Run from the repository root:
 
 ```bash
-codex exec --full-auto "Read AGENTS.md, then complete the task in Sources/docs/agent_tasks/T04_crawler_core.md. Write only inside its allowed paths. Finish by writing T04.result.md."
+codex exec -s workspace-write "Read AGENTS.md, then complete the task in Sources/docs/agent_tasks/T04_crawler_core.md. Write only inside its allowed paths. Finish by writing T04.result.md." < /dev/null > .run/codex_T04.log 2>&1
 ```
 
+- Codex CLI 0.167 rejects `--full-auto`; use `-s workspace-write`. In that sandbox `.git` is
+  read-only, so Codex never commits; Claude Code stages and commits after review.
 - Codex runs in a sandbox without network access. Never ask it to run anything that needs the
   internet, Ollama, MongoDB, or Qdrant. Delegate the code, and give the run command to the human.
 - Codex tasks can take many minutes. Run the command in the background with output to
@@ -45,7 +47,8 @@ codex exec --full-auto "Read AGENTS.md, then complete the task in Sources/docs/a
 - If `codex exec` fails inside Claude Code (for example a nested-sandbox error), print the exact
   command, ask the human to run it in a second terminal, then continue with review.
 - One task = one focused change (roughly 300 lines of diff or less).
-- After each accepted task: `git add -A && git commit -m "T<NN>: <summary>"`.
+- After each accepted task: `git add <the task's paths> && git commit -m "T<NN>: <summary>"`.
+  Never `git add -A`: untracked local leftovers must stay out of the public repo.
 - Point Codex to files; do not paste file contents into task files.
 
 ## Task file template
