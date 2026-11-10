@@ -750,3 +750,42 @@ so recall is measured where the tagger said "no conditions".
 - Limitation, stated in the report: "automated audit; reference annotator Codex, which also wrote
   the tagging rules; not human-validated".
 - P4 is done when the human approves G2.
+
+## 2026-11-10 (vocabulary v1 approved; cleanup)
+
+**A15 Cleanup.**
+- Approved deletions:
+  - `HYU/README.md` and `labels/.gitkeep`;
+  - `.DS_Store` files, finished Codex logs, caches;
+  - `labels/legacy/qa_annotations.jsonl`, with `annotations: null` in `generation.yaml`.
+- `synthetic_fixture/` moves to `Sources/backend/sample_data/`. The default index stays 5/23/23.
+
+**A16 Missing raw files.**
+- The crawler dry run reports a missing raw file as a warning; it does not crash.
+- The guidebook PDF is re-fetched with one human-run request:
+  - same sha256 (`a800a6ab…`): restore it into `raw/`;
+  - different: do not keep it, and record "raw missing, upstream changed" in DATA.md.
+- Three files disappeared at about 21:05 (the raw PDF, the fixture, `libtorch_cpu.dylib`). The
+  cause is being investigated.
+
+**A17 Vocabulary v1 (approved).**
+- **`academic_status`** gains `applicant`, tagged only on admission guides.
+  - **Scope default:** unless the user states they are an applicant, the profile excludes
+    `applicant`.
+  - The trace shows this with status `scope_default`, and P7 must use it.
+- **`korean_standard ∈ {pass, exempt, fail}`** is a new attribute.
+- **`student_type`** drops `short_term`.
+- **Alternative condition sets (`any_of`)**, only where the text joins the groups with "or":
+  - e.g. `[{topik_level: 3–6}, {english_track: yes}]`;
+  - A_e(u) holds when any set fits;
+  - an English-track student with no TOPIK is compatible.
+  - The cross-chunk exception (stated in another chunk) is a known limitation.
+- **Fixed postcheck mappings, shown in the trace:**
+  - `visa=F*` or any `D-*` not in the list → `other`;
+  - `student_type=international|volunteer` → dropped;
+  - attribute `semester` → dropped.
+- **Requirements, not attributes:** GPA and nationality.
+- **Preference wording** ("preferred", "additional points", "optional") never becomes a constraint.
+- **Prompt v3 re-call approved.** The v2 cache is kept for r2 reproducibility.
+- **GUIDELINES.md moves to vocabulary v1.**
+- **r3 = postcheck fixes + v1.** Part C (the automated audit) starts after r3 is published.

@@ -217,7 +217,7 @@
  {
   "case_id": "C07",
   "group": "seoul_acceptance",
-  "note": "Korean standard PASS/exempt guide. The Korean-test result is a pass/fail standard, not a TOPIK level -> requirement, no topik_level tag. '2026 Fall Semester' -> 2026-2 (text wins over the 2023 post date). Text = the first ~700 characters (the first chunk of the attachment).",
+  "note": "Korean standard PASS/exempt guide. The Korean-test result is a pass/fail standard, not a TOPIK level -> requirement, no topik_level tag. '2026 Fall Semester' -> 2026-2 (text wins over the 2023 post date). Text = the first ~700 characters (the first chunk of the attachment). v1 (A17): the Korean standard is now the attribute korean_standard = pass|exempt (\"Satisfied(or being exempted)\").",
   "chunk": {
    "doc_id": "2751c7a0-4f3b-5a27-bab9-e54479e1770f",
    "site": "seoul",
@@ -236,15 +236,17 @@
     ],
     "academic_status": [
      "admitted_not_enrolled"
+    ],
+    "korean_standard": [
+     "pass",
+     "exempt"
     ]
    },
    "scope": "campus",
    "campus": [
     "seoul"
    ],
-   "requirements_contain": [
-    "Korean Language Standards"
-   ],
+   "requirements_contain": [],
    "effective_term": "2026-2",
    "superseded_by": null
   }
@@ -252,7 +254,7 @@
  {
   "case_id": "C08",
   "group": "seoul_acceptance",
-  "note": "Korean standard FAIL guide; same tags as C07, different requirement. Text = the first ~700 characters (the first chunk of the attachment).",
+  "note": "Korean standard FAIL guide; same tags as C07, different requirement. Text = the first ~700 characters (the first chunk of the attachment). v1 (A17): korean_standard = fail (\"did not satisfy\").",
   "chunk": {
    "doc_id": "2751c7a0-4f3b-5a27-bab9-e54479e1770f",
    "site": "seoul",
@@ -271,15 +273,16 @@
     ],
     "academic_status": [
      "admitted_not_enrolled"
+    ],
+    "korean_standard": [
+     "fail"
     ]
    },
    "scope": "campus",
    "campus": [
     "seoul"
    ],
-   "requirements_contain": [
-    "did not satisfy"
-   ],
+   "requirements_contain": [],
    "effective_term": "2026-2",
    "superseded_by": null
   }
@@ -397,6 +400,59 @@
    ],
    "requirements_contain": [],
    "effective_term": "2025-1",
+   "superseded_by": null
+  }
+ },
+ {
+  "case_id": "C13",
+  "group": "any_of",
+  "note": "HIEA (Seoul, 2026-03-09): 'Students who have valid TOPIK certificate or IELTS/TOEFL iBT(for English track)'. The text joins the two groups with 'or', so they are alternative sets (A17): any_of = [{topik_level: 1-6 (a valid certificate, any level)}, {english_track: yes}]; english_track is NOT a plain constraint. 'Undergraduate'/'Graduate students' give degree_level. GPA is a requirement.",
+  "chunk": {
+   "doc_id": "1be80ed5-bcf8-5ea3-913b-7d6645f1f8b0",
+   "site": "seoul",
+   "title": "HIEA",
+   "source_uri": "https://oia.hanyang.ac.kr/notice/1814932",
+   "post_date": "2026-03-09",
+   "superseded_by": null,
+   "kind": "mixed",
+   "heading_path": [
+    "HIEA"
+   ],
+   "text": "③ Students who is taking another scholarship in the university such as academic scholarships\nfrom your departments or natural sciences engineering scholarships.\n※ But Hanyang International Excellence Award (HIEA) scholarship will be awarded only if\nthe recipient is eligible for an amount greater than the existing scholarship.\n√Case #1 When you are selected for 30%/50% of HIEA while receiving 50% of natural\nsciences engineering scholarship.\n→ You can only take 50% of natural sciences engineering scholarship.\n√Case #2 When you are selected for 50% of HIEA while receiving 30% of academic\nscholarship.\n→ The academic scholarship of 30% will be replaced by the Hanyang\nInternational Excellence Award (HIEA) scholarship of 30%. An additional\nscholarship of 20% corresponding to the difference will also be provided.\n④ Undergraduate & Graduate school students cannot apply for HIEA when taking other\nscholarships outside of university (including KGSP, Pakistan, Vietnam, Samsung global, Chung\nMong-Koo foundation scholarship etc) that does not allow you to benefit from both of\nscholarships.\n3. Qualifications\n① GPA\n1) Undergraduate students who achieved at least GPA of 3.0 last semester\n2) Graduate students who achieved at least GPA of 4.2 last semester\n② Language certificate\nStudents who have valid TOPIK certificate or IELTS/TOEFL iBT(for English track)\n1) TOPIK certificate must be valid until applying HIEA deadline(26.03.24)\n2) Students who have entered the English track can submit IELTS or TOEFL iBT(above a\ncertain score) in substitution for TOPIK certificate."
+  },
+  "expected": {
+   "constraints": {
+    "degree_level": [
+     "undergraduate",
+     "master",
+     "doctoral"
+    ]
+   },
+   "any_of": [
+    {
+     "topik_level": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6"
+     ]
+    },
+    {
+     "english_track": [
+      "yes"
+     ]
+    }
+   ],
+   "scope": "campus",
+   "campus": [
+    "seoul"
+   ],
+   "requirements_contain": [
+    "GPA"
+   ],
+   "effective_term": "2026-1",
    "superseded_by": null
   }
  }

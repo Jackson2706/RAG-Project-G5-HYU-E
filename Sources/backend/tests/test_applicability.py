@@ -23,9 +23,11 @@ def tag_chunk(chunk, llm=None):
 # --- the condition format (runs without the tagger) ---------------------------------------------
 
 
-def test_vocabulary_has_the_v0_attributes():
+def test_vocabulary_has_the_v1_attributes():
     assert set(VOCABULARY) == {"campus", "degree_level", "year", "student_type", "visa", "topik_level",
-                               "english_track", "academic_status"}  # fmt: skip
+                               "english_track", "academic_status", "korean_standard"}  # fmt: skip
+    assert VOCABULARY["korean_standard"] == ("pass", "exempt", "fail")
+    assert "applicant" in VOCABULARY["academic_status"] and "short_term" not in VOCABULARY["student_type"]
 
 
 def test_validate_rejects_values_outside_the_vocabulary():
@@ -72,6 +74,7 @@ def test_rule_tagger_on_real_chunks(case):
     got = tag_chunk(chunk).normalized()
     got.validate(chunk["text"])
     assert got.constraints == exp["constraints"], case["note"]
+    assert got.any_of == exp.get("any_of", []), case["note"]
     assert (got.scope, got.campus) == (exp["scope"], exp["campus"]), case["note"]
     assert got.effective_term == exp["effective_term"], case["note"]
     assert got.superseded_by == exp["superseded_by"]
@@ -191,3 +194,103 @@ def test_llm_topik_threshold_is_expanded_and_all_levels_is_no_constraint():
     condition = ChunkCondition(campus=["erica"])
     _apply_llm_fallback(condition, text, every, details := {})
     assert condition.constraints == {} and details["llm_fallback"]["rejected_fields"] == {"topik_level": "every value allowed = no constraint"}
+
+
+
+# --- vocabulary v1: alternative sets, profile fit, scope default (A17; Claude Code, tests first) ---------
+
+from app.rag.applicability import FIT_COMPATIBLE, FIT_CONFLICTING, FIT_OPEN, condition_fit, profile_with_scope_defaults  # noqa: E402
+
+C13 = next(c for c in CASES if c["case_id"] == "C13")
+HIEA = ChunkCondition(constraints=C13["expected"]["constraints"], any_of=C13["expected"]["any_of"], campus=["seoul"])
+
+
+def test_english_track_student_without_topik_fits_a_topik_or_english_chunk():
+    student = {"campus": ["seoul"], "degree_level": ["undergraduate"], "english_track": ["yes"], "topik_level": ["none"]}
+    assert condition_fit(HIEA, student) == FIT_COMPATIBLE
+
+
+def test_alternative_sets_conflict_only_when_every_set_conflicts():
+    korean_track_no_topik = {"campus": ["seoul"], "degree_level": ["master"], "english_track": ["no"], "topik_level": ["none"]}
+    assert condition_fit(HIEA, korean_track_no_topik) == FIT_CONFLICTING
+    assert condition_fit(HIEA, {"campus": ["seoul"], "degree_level": ["master"], "topik_level": ["4"]}) == FIT_COMPATIBLE
+    assert condition_fit(HIEA, {"campus": ["seoul"]}) == FIT_OPEN  # degree and language unknown
+    assert condition_fit(HIEA, {"campus": ["erica"], "english_track": ["yes"]}) == FIT_CONFLICTING  # wrong campus
+
+
+def test_any_of_needs_two_non_empty_sets_and_is_flagged_in_the_payload():
+    with pytest.raises(ValueError, match="at least two"):
+        ChunkCondition(any_of=[{"english_track": ["yes"]}], campus=["seoul"]).validate()
+    with pytest.raises(ValueError, match="korean_standard"):
+        ChunkCondition(any_of=[{"korean_standard": ["passed"]}, {"english_track": ["yes"]}], campus=["seoul"]).validate()
+    assert HIEA.to_payload()["app_any_of"] is True and "app_any_of" not in ChunkCondition(campus=["seoul"]).to_payload()
+    assert ChunkCondition.from_dict(HIEA.to_dict()).to_dict() == HIEA.to_dict()
+
+
+def test_scope_default_excludes_applicant_unless_stated():
+    applicant_only = ChunkCondition(constraints={"academic_status": ["applicant"]}, campus=["seoul"])
+    enrolled_only = ChunkCondition(constraints={"academic_status": ["enrolled"]}, campus=["seoul"])
+    unstated = {"campus": ["seoul"]}
+    assert profile_with_scope_defaults(unstated)["academic_status"]["status"] == "scope_default"
+    assert "applicant" not in profile_with_scope_defaults(unstated)["academic_status"]["values"]
+    assert condition_fit(applicant_only, unstated) == FIT_CONFLICTING
+    assert condition_fit(applicant_only, {**unstated, "academic_status": ["applicant"]}) == FIT_COMPATIBLE
+    # a scope default never confirms a branch: an enrolled-only chunk stays open for an unstated status
+    assert condition_fit(enrolled_only, unstated) == FIT_OPEN
+    assert condition_fit(enrolled_only, {**unstated, "academic_status": ["completed_coursework"]}) == FIT_CONFLICTING
+
+
+# --- vocabulary v1: tagger rules and LLM postcheck (Codex implements; Claude Code, tests first) ----------
+
+ADMISSION = {**PLAIN, "site": "seoul", "title": "2026 Spring Semester Undergraduate Admission Guideline"}
+
+
+@pytest.mark.parametrize("chunk, expected", [
+    ({**ADMISSION, "text": "Applicants must submit the application form by October 1."}, {"academic_status": ["applicant"]}),
+    ({**PLAIN, "title": "HIEA", "text": "Applicants must have a GPA of at least 3.0 last semester."}, {}),  # scholarship: not an admission guide
+], ids=["admission_guide", "scholarship_applicants"])  # fmt: skip
+def test_applicant_is_tagged_only_on_admission_guides(chunk, expected):
+    got = tag_chunk(chunk)
+    assert {k: v for k, v in got.constraints.items() if k == "academic_status"} == expected
+
+
+@pytest.mark.parametrize("text", [
+    "Applicants who hold a TOPIK level 3 or above will be given additional points (10% of the total).",
+    "Submission Status: Certificate of Valid TOPIK score * optional",
+    "TOPIK 4 or above preferred.",
+], ids=["additional_points", "optional", "preferred"])  # fmt: skip
+def test_preference_wording_never_becomes_a_constraint(text):
+    got = tag_chunk({**PLAIN, "title": "", "text": text})
+    assert "topik_level" not in got.constraints and not got.any_of
+
+
+@pytest.mark.parametrize("answer, expected, mapped", [
+    ({"constraints": {"visa": ["F-2"]}, "evidence": {"visa": "residence permit"}}, {"visa": ["other"]}, "visa"),
+    ({"constraints": {"student_type": ["international"], "visa": ["D-2"]}, "evidence": {"student_type": "residence permit", "visa": "residence permit"}},
+     {"visa": ["D-2"]}, "student_type"),
+    ({"constraints": {"semester": ["2"]}, "evidence": {"semester": "residence permit"}}, {}, "semester"),
+], ids=["visa_F_to_other", "international_dropped", "semester_dropped"])  # fmt: skip
+def test_fixed_postcheck_mappings_are_applied_and_traced(answer, expected, mapped):
+    details: dict = {}
+    got = tag_chunk(PLAIN, llm=fake_llm(answer), trace_details=details)
+    assert got.constraints == expected
+    assert mapped in details["llm_fallback"]["mapped_fields"]  # shown in the trace, not counted as a rejection
+    assert mapped not in details["llm_fallback"].get("rejected_fields", {})
+
+
+def test_evidence_is_matched_after_whitespace_and_case_normalization():
+    answer = {"constraints": {"student_type": ["degree_seeking"]}, "evidence": {"student_type": "REGULAR  degree\ncourses"}}
+    got = tag_chunk(PLAIN, llm=fake_llm(answer))
+    assert got.constraints == {"student_type": ["degree_seeking"]}
+    assert got.evidence["student_type"] == "regular degree courses"  # the exact text of the chunk, so validate() holds
+    got.validate(PLAIN["text"])
+
+
+def test_prompt_v3_lists_vocabulary_v1_and_the_preference_rule():
+    from app.rag.blocks.ingestion.metadata_extraction import applicability_extractor as ae
+
+    llm = fake_llm({"constraints": {}, "evidence": {}})
+    tag_chunk(PLAIN, llm=llm)
+    assert ae.TAG_PROMPT_VERSION == "v3" and ae.POSTCHECK_VERSION
+    assert "korean_standard" in llm.calls[0] and "applicant" in llm.calls[0] and "short_term" not in llm.calls[0]
+    assert "prefer" in llm.calls[0].lower()
