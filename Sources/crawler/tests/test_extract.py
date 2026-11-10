@@ -258,3 +258,33 @@ def test_key_value_table_rows_read_as_label_and_value():
         "html.parser",
     )
     assert [block.text for block in html_blocks(soup.section)] == ["Available Hours: 09:00 ~ 24:00", "Cost: Free"]
+
+
+def test_broken_and_run_on_emails_are_masked():
+    from crawler.extract import mask_email
+
+    text = "Mail coreaembajada@mofa.go.k\nr or gsisapply@sogang.ac.kr51, hykoica@hanyang.ac.kr. Follow @gksmentors"
+    assert mask_email(text) == "Mail [email]\nr or [email], [email]. Follow @gksmentors"
+
+
+def test_attachment_type_ignores_gnuboard_size_suffix_and_falls_back_to_content_type():
+    from crawler.extract import attachment_extension
+
+    assert attachment_extension("Leave of Absence Guidelines-English.pdf (4.2M)", "file/unknown") == ".pdf"
+    assert attachment_extension(".docx") == ".docx"
+    assert attachment_extension("Major Guidebook Download", "application/pdf") == ".pdf"
+    assert attachment_extension("2. ERICA Leave of Absence English") == ""
+
+
+def test_email_only_page_is_not_a_document():
+    html = b"""<html><head><title>Contact</title></head><body><div id="content">
+        <div class="content_inner"><p>international.office.contact@hanyang.ac.kr</p></div></div></body></html>"""
+    assert extract_document(html, "https://oia.hanyang.ac.kr/contact", "seoul") is None
+
+
+def test_gallery_board_listing_finds_posts():
+    html = b"""<form id="fboardlist"><ul id="gall_ul"><li class="gall_li">
+        <a href="https://global.hanyang.ac.kr/bbs/board.php?bo_table=s374_eng&wr_id=6&page=1">2026-2</a>
+        </li></ul></form><a href="/bbs/board.php?bo_table=s4_1_eng&wr_id=9">sidebar</a>"""
+    posts = discover_board_posts(html, "https://global.hanyang.ac.kr/bbs/board.php?bo_table=s374_eng&page=1")
+    assert posts == ["https://global.hanyang.ac.kr/bbs/board.php?bo_table=s374_eng&wr_id=6"]

@@ -22,6 +22,7 @@ from .dedup import deduplicate
 from .extract import (
     AttachmentInput,
     canonical_uri,
+    attachment_extension,
     discover_attachments,
     discover_board_posts,
     discover_erica_menu,
@@ -247,7 +248,7 @@ class Crawler:
                 break
             if record:
                 attachment_records.append(record)
-                extension = Path(item["filename"]).suffix.lower() or "unknown"
+                extension = attachment_extension(item["filename"]) or "unknown"
                 counts = site_report["attachments_by_type"]
                 counts[extension] = counts.get(extension, 0) + 1
         document = self._extract_preview(page_record, attachment_records)

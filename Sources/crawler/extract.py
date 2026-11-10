@@ -20,7 +20,16 @@ from pypdf import PdfReader
 from .sites import ERICA_BOARD_NAMES, SITES, SiteConfig, get_site
 
 
-EMAIL_RE = re.compile(r"(?<![\w.+-])[\w.+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}(?![\w.-])")
+# Greedy on purpose: PDF text breaks addresses ("x@mofa.go.k" + newline) and runs them into
+# the next word ("x@a.ac.kr51"); masking a little too much is safer than leaking one.
+EMAIL_RE = re.compile(r"[\w.+-]+@[\w-]*(?:\.[\w-]+)*")
+# gnuboard link text ends with the file size, e.g. "Guide.pdf (344.3K)"
+FILE_SIZE_RE = re.compile(r"\s*\(\d[\d.,]*\s*[KMG]B?\)$", re.IGNORECASE)
+ATTACHMENT_TYPES = {
+    "application/pdf": ".pdf",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": ".docx",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": ".xlsx",
+}
 DATE_RE = re.compile(r"(?<!\d)(20\d{2})[./-](\d{1,2})[./-](\d{1,2})(?!\d)")
 BLOCK_TAGS = {"p", "li", "h1", "h2", "h3", "h4", "h5", "h6", "dd", "dt"}
 # A page that keeps only its title (e.g. "VISA") is not a useful English document.
@@ -357,7 +366,7 @@ def discover_attachments(raw: bytes, page_url: str, site: str | SiteConfig) -> l
     found: list[dict[str, str]] = []
     seen: set[str] = set()
     for link in content.select(f'a[href*="{needle}"]'):
-        filename = normalize_text(link.get_text(" ", strip=True)) or Path(urlsplit(link.get("href", "")).path).name
+        filename = FILE_SIZE_RE.sub("", normalize_text(link.get_text(" ", strip=True))) or Path(urlsplit(link.get("href", "")).path).name
         if not attachment_filename_allowed(filename):
             continue
         url = urljoin(config.base_url, link.get("href", ""))
@@ -447,10 +456,16 @@ def _xlsx_blocks(data: bytes) -> list[TextBlock]:
         return blocks
 
 
+def attachment_extension(filename: str, content_type: str = "") -> str:
+    """Extension from the filename, else from the Content-Type ("Major Guidebook Download" is a PDF)."""
+    match = re.search(r"\.[a-z0-9]{2,5}$", FILE_SIZE_RE.sub("", filename).lower())  # also a bare ".pdf"
+    return match.group() if match else ATTACHMENT_TYPES.get(content_type.split(";", 1)[0].strip().lower(), "")
+
+
 def extract_attachment(data: bytes, filename: str, content_type: str = "") -> tuple[list[TextBlock], list[str]]:
-    extension = Path(filename).suffix.lower()
+    extension = attachment_extension(filename, content_type)
     try:
-        if extension == ".pdf" or content_type.split(";", 1)[0] == "application/pdf":
+        if extension == ".pdf":
             reader = PdfReader(BytesIO(data))
             blocks = [
                 TextBlock(normalize_text(line), "attachment")
@@ -521,7 +536,7 @@ def extract_document(
         all_raw_text.extend(block.text for block in blocks)
         kept, language_warnings = filter_english_blocks(blocks)
         combined_warnings = [*attachment_warnings, *language_warnings]
-        filename = mask_email(attachment.filename)
+        filename = mask_email(FILE_SIZE_RE.sub("", attachment.filename))
         uri = attachment.canonical_uri
         attachment_records.append({
             "canonical_uri": uri,
@@ -537,7 +552,7 @@ def extract_document(
 
     coverage = language_counts(all_raw_text)
     kept_blocks = [*kept_page, *(block for _, blocks in kept_attachments for block in blocks)]
-    if sum(is_latin(char) for block in kept_blocks for char in block.text) < MIN_ENGLISH_LETTERS:
+    if sum(is_latin(char) for block in kept_blocks for char in mask_email(block.text)) < MIN_ENGLISH_LETTERS:
         return None
 
     text = ""
@@ -549,7 +564,7 @@ def extract_document(
         text += mask_email(block.text)
         spans.append({"char_start": start, "char_end": len(text), "kind": block.kind, "source": "page"})
     for attachment, blocks in kept_attachments:
-        filename = mask_email(attachment.filename)
+        filename = mask_email(FILE_SIZE_RE.sub("", attachment.filename))
         prefix = f"\n\nAttachment: {filename}\n" if text else f"Attachment: {filename}\n"
         start = len(text)
         text += prefix + "\n".join(mask_email(block.text) for block in blocks)
@@ -631,7 +646,8 @@ def discover_board_posts(raw: bytes, listing_url: str) -> list[str]:
     soup = BeautifulSoup(raw, "html.parser")
     urls: list[str] = []
     seen = set()
-    for link in soup.select('#fboardlist tbody tr a[href*="wr_id"]'):
+    # list skin rows, or the gallery skin (#gall_ul) used by the Guidebook board s374_eng
+    for link in soup.select('#fboardlist tbody tr a[href*="wr_id"], #fboardlist #gall_ul a[href*="wr_id"]'):
         url = urljoin(listing_url, link.get("href", ""))
         uri = canonical_uri(url)
         if uri not in seen and SITES["erica"].is_allowed(url):
