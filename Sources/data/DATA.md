@@ -142,10 +142,11 @@ All three revisions use 1,867 chunks from 362 documents: max 344 embedded tokens
   - `libtorch_cpu.dylib` in the RAG env (torch reinstalled).
 
   The cause is being investigated: the Trash, cleaner apps, iCloud Desktop sync.
-  - The snapshot text extracted from the PDF is intact.
-  - `crawler.run --dry-run` reports the missing raw file as a warning (A16).
-  - The PDF is restored only if a one-URL re-fetch gives the same sha256. Otherwise this entry
-    reads "raw missing, upstream changed".
+  - The snapshot text extracted from the PDF was intact throughout.
+  - `crawler.run --dry-run` reports any missing raw file as a warning (A16).
+  - **The PDF is restored.** On 2026-11-11, one human-run re-fetch of the same URL (crawler
+    User-Agent) returned the identical sha256 `a800a6ab…61ace` (70,192,404 bytes). It was moved
+    back into `raw/a8/`, and the crawler dry run now shows no missing raw files.
 
 ## 7. Benchmarks (`benchmarks/<dataset>/`, downloaded, only `SOURCE.md` committed)
 
