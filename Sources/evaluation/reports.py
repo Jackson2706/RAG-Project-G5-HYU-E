@@ -400,7 +400,7 @@ def summary_markdown(manifest: dict, status: dict, comparison: list, offline_row
                          "answers_citing_a_source_rate", "invalid_markers_total", "generation_ms_p50", "generation_ms_p95", "output_tokens_mean",
                          "annotated_cases", "correctness", "grounding_support", "citation_precision"]),
                   "Correctness, relevance, completeness, grounding and citation support need annotated cases "
-                  "(Report/data/HYU/labels/legacy/). With 0 annotated cases they are N/A — BEIR qrels are not reference answers.", ""]  # fmt: skip
+                  "(Sources/data/HYU/labels/legacy/). With 0 annotated cases they are N/A — BEIR qrels are not reference answers.", ""]  # fmt: skip
     if failures:
         by = Counter((f.get("dataset", ""), f.get("protocol", "-"), f["experiment"], f["category"]) for f in failures)
         lines += ["## Report D — Failure categories (earliest observable stage)", "",
@@ -427,7 +427,7 @@ def write_reports(run_dir: Path) -> None:
     filters, gates, fixture_failures = fixture_tables(run_dir, status)
     annotations = resolve_stored_path(
         (manifest.get("configs") or {}).get("generation", {}).get("annotations")
-        or "Report/data/HYU/labels/legacy/qa_annotations.jsonl"
+        or "Sources/data/HYU/labels/legacy/qa_annotations.jsonl"
     )
     generation, generation_failures, _ = generation_tables(run_dir, status, annotations)
     failures += fixture_failures + generation_failures

@@ -37,5 +37,5 @@ experiments:
 fixture:
   index: hyu_samples
   metadata_queries: Sources/evaluation/fixtures/hyu_metadata_queries.jsonl
-  gate_questions: Report/data/HYU/labels/legacy/sample_questions.jsonl
+  gate_questions: Sources/data/HYU/labels/legacy/sample_questions.jsonl
   candidate_cutoff: 2          # the same Top K for R0, R9 and R10, small enough to show starvation

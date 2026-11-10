@@ -158,7 +158,7 @@ files gives the same IDs.
    - The chunker is `section_tokens` at 320/48 bge tokens.
    - `index_documents(..., tag_input=...)` tags every chunk with `applicability_extractor`.
      - Rules come first. The LLM is asked only for untagged chunks that contain a cue word, and its
-       answers are cached in `Report/data/HYU/cache/llm_tags.jsonl`.
+       answers are cached in `Sources/data/HYU/cache/llm_tags.jsonl`.
      - Tags are stored in two places:
        - MongoDB chunk: `applicability` (the full `ChunkCondition`) and `vocabulary_version`;
        - Qdrant payload: `app_<attribute>`, `app_scope`, `app_campus`, `app_term`, `app_superseded`.

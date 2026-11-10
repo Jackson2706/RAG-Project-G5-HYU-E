@@ -25,9 +25,10 @@ the right office. Spec: `Sources/docs/aaes_spec.md`.
 AGENTS.md  CLAUDE.md  README.md
 Sources/   ALL code: backend/ frontend/ evaluation/ crawler/ labeling/ scripts/ docs/
            docker-compose.yml  setup.sh  start.sh  stop.sh  uninstall.sh  .env.example
-Report/    data/HYU/    raw/ (gitignored) manifest.jsonl snapshots/<id>/ labels/
+           data/HYU/    raw/ (gitignored) manifest.jsonl snapshots/<id>/ labels/
            data/benchmarks/<dataset>/   (gitignored except SOURCE.md)
-           results/<run_id>/ per evaluation run, plus TEST_RUNS.md
+           data/DATA.md  provenance and reproduction of all data
+Report/    results/<run_id>/ per evaluation run, plus TEST_RUNS.md, index_reports/, tag_audit/
            project/PLAYBOOK.md project/STATUS.md
            report/ slides/ figures/ tables/ notes/ course/ (gitignored)
            voice_sample.md  ai_use_statement.md
@@ -107,15 +108,15 @@ Use the Ponytail skill for all code. These project overrides win over Ponytail:
 - Polite crawling: obey robots.txt, at least 2.5 s between requests, one request at a time,
   identifying User-Agent, raw bytes stored once, never re-crawl a frozen snapshot.
 - Mask every e-mail address in extracted text. Never crawl or index staff directories or personal data.
-- Do NOT commit: `Report/data/HYU/raw/`, benchmark files, `Report/course/` (course slides), `.env` files,
+- Do NOT commit: `Sources/data/HYU/raw/`, benchmark files, `Report/course/` (course slides), `.env` files,
   large per-query raw results. Commit code, manifests, labels, small result summaries.
   The GitHub repository is public.
 
 ## Evaluation rules (Lesson 6)
 
 - Dev/test separation. Thresholds, prompts, λ/μ, and model choices are tuned on dev only.
-- After Gate G4, `Report/data/HYU/labels/test.jsonl` is frozen; its SHA-256 is in
-  `Report/data/HYU/labels/FROZEN.sha256`. Agents never open it directly afterwards; only the runner reads it.
+- After Gate G4, `Sources/data/HYU/labels/test.jsonl` is frozen; its SHA-256 is in
+  `Sources/data/HYU/labels/FROZEN.sha256`. Agents never open it directly afterwards; only the runner reads it.
 - A test run requires a clean git tree and `--confirm-frozen`. Each test run is appended to
   `Report/results/TEST_RUNS.md` (date, git SHA, configs, reason).
 - Never invent numbers. Every number in `Report/` traces to a file in `Report/results/`.

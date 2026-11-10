@@ -1,7 +1,7 @@
 """BEIR datasets: download (only when asked), checksum verification, loading, and conversion.
 
 Files stay exactly as published (corpus.jsonl, queries.jsonl, qrels/<split>.tsv) in
-Report/data/benchmarks/<name>/, which is not committed to Git. Original document and query IDs are kept.
+Sources/data/benchmarks/<name>/, which is not committed to Git. Original document and query IDs are kept.
 """
 
 from __future__ import annotations

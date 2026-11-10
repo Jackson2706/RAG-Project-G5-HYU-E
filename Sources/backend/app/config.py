@@ -16,7 +16,7 @@ BACKEND_DIR = Path(__file__).resolve().parent.parent
 PROJECT_ROOT = BACKEND_DIR.parent
 REPO_ROOT = PROJECT_ROOT.parent
 REPORT_DIR = Path(os.environ.get("HYU_REPORT_DIR", REPO_ROOT / "Report"))
-DATA_DIR = Path(os.environ.get("HYU_DATA_DIR", REPORT_DIR / "data"))
+DATA_DIR = Path(os.environ.get("HYU_DATA_DIR", PROJECT_ROOT / "data"))  # Sources/data (PLAYBOOK A12)
 RESULTS_DIR = Path(os.environ.get("HYU_RESULTS_DIR", REPORT_DIR / "results"))
 
 

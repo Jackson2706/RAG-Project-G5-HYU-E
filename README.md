@@ -18,12 +18,13 @@ hyu-compass/
 │   ├── frontend/           React + TypeScript UI (chat, Configuration, Execution)
 │   ├── evaluation/         headless benchmark runner, metrics, reports
 │   ├── crawler/            polite crawler for the approved HYU sites
-│   ├── scripts/ docs/      ingest script; tutorials and task notes (docs/agent_tasks/)
+│   ├── labeling/           label search, validation, agreement, freeze; tag audit
+│   ├── scripts/ docs/      ingest scripts; tutorials and task notes (docs/agent_tasks/)
+│   ├── data/HYU/           crawl manifest, frozen snapshots, labels, synthetic sample documents (see data/DATA.md)
+│   ├── data/benchmarks/    benchmark datasets (downloaded, not committed; SOURCE.md is)
 │   └── setup.sh start.sh stop.sh uninstall.sh docker-compose.yml
-├── Report/                 everything the code reads or writes, and the report itself
-│   ├── data/HYU/           crawl manifest, frozen snapshots, labels, synthetic sample documents
-│   ├── data/benchmarks/    BEIR datasets (downloaded, not committed)
-│   ├── results/<run_id>/   one folder per evaluation run
+├── Report/                 everything the experiments produce, and the report itself
+│   ├── results/<run_id>/   one folder per evaluation run; index_reports/, tag_audit/
 │   ├── project/            PLAYBOOK.md (plan and gates) and STATUS.md (progress log)
 │   └── report/ slides/ figures/ tables/ notes/
 ├── AGENTS.md  CLAUDE.md    rules for the coding agents
@@ -46,7 +47,7 @@ cd Sources
 ```
 
 The step-by-step version is in [Sources/docs/01_GETTING_STARTED.md](Sources/docs/01_GETTING_STARTED.md).
-The five documents in `Report/data/HYU/synthetic_fixture/` are invented practice documents, not
+The five documents in `Sources/data/HYU/synthetic_fixture/` are invented practice documents, not
 HYU policy.
 
 ## Evaluation
@@ -68,10 +69,10 @@ Details: [Sources/docs/06_BENCHMARK_AND_EVALUATION.md](Sources/docs/06_BENCHMARK
 
 | What | Where |
 |---|---|
-| Crawl manifest and frozen HYU snapshots | `Report/data/HYU/manifest.jsonl`, `Report/data/HYU/snapshots/<id>/` |
-| Raw crawled bytes (not committed) | `Report/data/HYU/raw/` |
-| Labels | `Report/data/HYU/labels/` |
-| Benchmark datasets (not committed) | `Report/data/benchmarks/<dataset>/` |
+| Crawl manifest and frozen HYU snapshots | `Sources/data/HYU/manifest.jsonl`, `Sources/data/HYU/snapshots/<id>/` |
+| Raw crawled bytes (not committed) | `Sources/data/HYU/raw/` |
+| Labels | `Sources/data/HYU/labels/` |
+| Benchmark datasets (not committed) | `Sources/data/benchmarks/<dataset>/` |
 | Evaluation results | `Report/results/<run_id>/` (per-query `raw/` not committed) |
 | Plan, gates, progress | `Report/project/PLAYBOOK.md`, `Report/project/STATUS.md` |
 | Report, slides, figures, tables | `Report/report/`, `Report/slides/`, `Report/figures/`, `Report/tables/` |

@@ -35,13 +35,13 @@ dist/
 .claude
 
 # Crawled and benchmark data, report inputs, and bulky per-query results
-Report/data/HYU/raw/
-Report/data/HYU/extracted/
-Report/data/benchmarks/*/*
-!Report/data/benchmarks/*/SOURCE.md
+Sources/data/HYU/raw/
+Sources/data/HYU/extracted/
+Sources/data/benchmarks/*/*
+!Sources/data/benchmarks/*/SOURCE.md
 Report/results/*/raw/
 Report/results/smoke*/
 Report/course/
 
 # LLM tag cache (T09)
-Report/data/HYU/cache/
+Sources/data/HYU/cache/

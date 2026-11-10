@@ -42,7 +42,7 @@ function Reindex({ config, system }: { config: PipelineConfigState; system: Syst
       <div className="flex flex-wrap gap-1.5">
         {["HYU/raw", "HYU/synthetic_fixture"].map((folder) => (
           <Button key={folder} size="sm" disabled={!!running || !config.valid} onClick={() => void run(folder)}>
-            {running === folder ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />} Re-index Report/data/{folder}
+            {running === folder ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />} Re-index Sources/data/{folder}
           </Button>
         ))}
       </div>

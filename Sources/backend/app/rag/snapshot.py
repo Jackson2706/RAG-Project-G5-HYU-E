@@ -1,6 +1,6 @@
 """Frozen HYU snapshot → ParsedDocument, plus what the applicability tagger needs per chunk.
 
-A snapshot row (Report/data/HYU/snapshots/<id>/documents.jsonl) has `text` and `spans`
+A snapshot row (Sources/data/HYU/snapshots/<id>/documents.jsonl) has `text` and `spans`
 (kind heading / paragraph / table_row / list_item / attachment, with char offsets into `text`).
 
 - Every `heading` span with English text starts a new Section. Headers are English-only

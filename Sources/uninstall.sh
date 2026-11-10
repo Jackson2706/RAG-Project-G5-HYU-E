@@ -4,7 +4,7 @@
 #   ./uninstall.sh                 # stop everything; remove containers, node_modules, build output, caches, logs
 #   ./uninstall.sh --delete-data   # ALSO delete the MongoDB + Qdrant volumes (index and traces). Asks first.
 #
-# Never removed: source code, documents in ../Report/data/, your .env files, the Conda environment
+# Never removed: source code, documents in ../Sources/data/, your .env files, the Conda environment
 # (shared with other course work), Ollama models and the Hugging Face model cache.
 # The end of the script prints the commands to remove those yourself.
 set -euo pipefail
@@ -22,7 +22,7 @@ command -v docker >/dev/null || PATH="$PATH:/Applications/Docker.app/Contents/Re
 
 if $DELETE_DATA; then
   printf '\033[1;31mThis permanently deletes the MongoDB and Qdrant data (indexed documents, chunks, traces).\033[0m\n'
-  printf 'Your files in ../Report/data/ are NOT deleted. Type "delete" to continue: '
+  printf 'Your files in ../Sources/data/ are NOT deleted. Type "delete" to continue: '
   read -r answer
   [ "$answer" = "delete" ] || { echo "Cancelled. Nothing was changed."; exit 1; }
 fi
@@ -56,7 +56,7 @@ Kept on purpose — remove them yourself only if you are sure:
   Ollama models                         ollama rm qwen3:4b   (and llama2:7b, qwen3.5:4b if you pulled them)
   Embedding/reranker model cache        rm -rf ~/.cache/huggingface/hub/models--BAAI--bge-small-en-v1.5
                                         (also models--sentence-transformers--all-MiniLM-L6-v2, models--cross-encoder--ms-marco-MiniLM-L6-v2)
-  BEIR datasets and benchmark results   ../Report/data/benchmarks/, ../Report/results/
+  BEIR datasets and benchmark results   ../Sources/data/benchmarks/, ../Report/results/
                                         (benchmark indexes live in the database volumes: removed only by --delete-data)
   Conda environment (shared!)           conda env remove -n RAG
 

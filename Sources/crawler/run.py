@@ -463,7 +463,7 @@ def build_snapshot(data_dir: Path = DATA_DIR, today: datetime | None = None) -> 
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Crawl approved HYU English pages into Report/data/")
+    parser = argparse.ArgumentParser(description="Crawl approved HYU English pages into Sources/data/")
     parser.add_argument("--site", choices=(*SITES, "all"), default="all")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--from-fixtures", action="store_true", help=argparse.SUPPRESS)
@@ -472,7 +472,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--build-snapshot",
         action="store_true",
-        help="write an immutable snapshot under Report/data/HYU/snapshots/",
+        help="write an immutable snapshot under Sources/data/HYU/snapshots/",
     )
     return parser
 

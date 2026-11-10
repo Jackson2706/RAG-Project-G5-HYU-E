@@ -216,7 +216,7 @@ PIPELINE: list[Stage] = [
     # ======================= OFFLINE: ingestion and indexing =======================
     Stage("document_loading", "Document Loading", "offline", BaseDocumentLoader,
           "Find the files to ingest.", default_method="local_folder", methods=[
-              Method("local_folder", "Local folder", LocalFolderLoader, True, "PDF, TXT, Markdown and HTML files in a folder under Report/data/."),
+              Method("local_folder", "Local folder", LocalFolderLoader, True, "PDF, TXT, Markdown and HTML files in a folder under Sources/data/."),
               Method("website_loader", "HYU website loader", WebsiteLoader, False, "Download approved pages from the HYU website."),
           ]),
     Stage("parsing", "Parsing", "offline", BaseDocumentParser,

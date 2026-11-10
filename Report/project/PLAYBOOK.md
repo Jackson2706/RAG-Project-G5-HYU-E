@@ -10,7 +10,7 @@ and pass the gates. Each phase below has a **start prompt** to paste into Claude
 | P0 | Install skills, add agent files, voice sample, branch | Human | — |
 | P1 | Reorganize repository into `Sources/ Report/` | Codex (T01–T02), Claude reviews | **G1** |
 | P2 | Crawl HYU English data (Seoul OIA + ERICA OIA) | Codex code, human runs | G2 (with P4) |
-| P3 | Benchmark datasets into `Report/data/benchmarks/<name>/` | Codex code, human runs | — |
+| P3 | Benchmark datasets into `Sources/data/benchmarks/<name>/` | Codex code, human runs | — |
 | P4 | HYU snapshot ingest + applicability tags (AAES offline step) | Claude tests, Codex code, human runs | **G2** |
 | P5 | Labeling (Codex primary, Claude second, human adjudication) | All | **G3**, **G4** |
 | P6 | New baselines (brackets, self-query, prompted-conditional, memory M1/M2) | Codex, Claude reviews | — |
@@ -123,7 +123,7 @@ The human runs, inside `Sources/` with `conda activate RAG`:
 ```bash
 caffeinate -i python -m crawler.run --site all --dry-run      # prints the URL plan only
 caffeinate -i python -m crawler.run --site all --resume       # real crawl, polite, resumable
-python -m crawler.run --build-snapshot                        # writes Report/data/HYU/snapshots/<id>/
+python -m crawler.run --build-snapshot                        # writes Sources/data/HYU/snapshots/<id>/
 ```
 
 ---
@@ -132,7 +132,7 @@ python -m crawler.run --build-snapshot                        # writes Report/da
 
 **Start prompt (Claude Code):**
 > Phase P3. Write T06 for Codex: move BEIR download/loading from `evaluation/datasets/` to
-> `Report/data/benchmarks/<name>/`, keeping the existing checksums and loaders. Add adapters for:
+> `Sources/data/benchmarks/<name>/`, keeping the existing checksums and loaders. Add adapters for:
 > - the original SciFact release (claims with labels and rationales), and
 > - ONE external conditional-QA set (ConditionalQA or MDCR — check licences first and tell me which).
 >
@@ -170,7 +170,7 @@ Roles:
 
 **Start prompt (Claude Code):**
 > Phase P5. Read Appendix D.
-> - T11 (you): write `Report/data/HYU/labels/GUIDELINES.md` from Appendix D with 2 worked examples per
+> - T11 (you): write `Sources/data/HYU/labels/GUIDELINES.md` from Appendix D with 2 worked examples per
 >   expected behaviour, national vs campus-scoped conditions, conditional vs clarify, and temporal
 >   cases. Stop at G3 for team approval.
 > - T12 (Codex): `Sources/labeling/` tools — `search.py` (BM25 over snapshot chunks: id, span,
@@ -261,7 +261,7 @@ Roles:
 >   **sequentially** via the existing `/api/chat/stream`, and show columns with answer, action
 >   badge, citations, latency, and LLM calls. Clicking a column opens its Execution trace. The
 >   existing single-chat view stays the default. Add vitest tests.
-> - T37 (Codex): `GET /api/demo/cases` serves `Report/data/HYU/labels/demo_cases.jsonl`
+> - T37 (Codex): `GET /api/demo/cases` serves `Sources/data/HYU/labels/demo_cases.jsonl`
 >   (8–10 dev cases, never test). A demo-case picker in the chat fills the question and session
 >   history. Oracle presets (G1, A2) are enabled only when a demo case is selected; otherwise
 >   `check_runnable` returns the reason. Presets needing applicability tags are disabled on
@@ -323,11 +323,11 @@ caffeinate -i ./scripts/run_all.sh --split test --run-id test-final --confirm-fr
 | `frontend/` | `Sources/frontend/` |
 | `evaluation/` (code, configs, tests, fixtures) | `Sources/evaluation/` |
 | `evaluation/results/main/` | `Report/results/2026-11-01_main/` (legacy, keep files as-is) |
-| `evaluation/annotations/` | `Report/data/HYU/labels/legacy/` |
+| `evaluation/annotations/` | `Sources/data/HYU/labels/legacy/` |
 | `scripts/` | `Sources/scripts/` |
 | `docs/` | `Sources/docs/` |
-| `data/samples/` | `Report/data/HYU/synthetic_fixture/` |
-| `data/eval/`, `data/raw/README.md` | `Report/data/HYU/labels/legacy/`, `Report/data/HYU/README.md` |
+| `data/samples/` | `Sources/data/HYU/synthetic_fixture/` |
+| `data/eval/`, `data/raw/README.md` | `Sources/data/HYU/labels/legacy/`, `Sources/data/HYU/README.md` |
 | `docker-compose.yml`, `setup.sh`, `start.sh`, `stop.sh`, `uninstall.sh`, `.env.example` | `Sources/` |
 | `.claude/` | stays at root (Claude Code loads project skills from the repo root) |
 | `README.md` | stays at root; update its layout and run instructions |
@@ -343,10 +343,10 @@ caffeinate -i ./scripts/run_all.sh --split test --run-id test-final --confirm-fr
 - `.gitignore` paths:
   - `Sources/backend/.env`, `Sources/.env`
   - `Sources/frontend/node_modules/`, `Sources/frontend/dist/`
-  - `Report/data/HYU/raw/`, `Report/data/benchmarks/*/` with `!Report/data/benchmarks/*/SOURCE.md`
+  - `Sources/data/HYU/raw/`, `Sources/data/benchmarks/*/` with `!Sources/data/benchmarks/*/SOURCE.md`
   - `Report/results/*/raw/`, `Report/results/smoke*/`
   - `Report/course/`, `.run/`
-- Create empty folders with `.gitkeep`: `Report/data/HYU/{snapshots,labels}`, `Report/{report,slides,figures,tables,notes}`.
+- Create empty folders with `.gitkeep`: `Sources/data/HYU/{snapshots,labels}`, `Report/{report,slides,figures,tables,notes}`.
 
 ### A.3 Untracked local state (human runs; agents print these)
 
@@ -354,7 +354,7 @@ caffeinate -i ./scripts/run_all.sh --split test --run-id test-final --confirm-fr
 mv .env Sources/.env
 mv backend/.env Sources/backend/.env
 mv frontend/node_modules Sources/frontend/node_modules
-[ -d evaluation/datasets ] && mkdir -p Report/data/benchmarks && mv evaluation/datasets/* Report/data/benchmarks/
+[ -d evaluation/datasets ] && mkdir -p Sources/data/benchmarks && mv evaluation/datasets/* Sources/data/benchmarks/
 [ -d .run ] && mv .run Sources/.run
 ```
 
@@ -400,9 +400,9 @@ Record `lang_coverage` per document.
   They are never merged.
 
 **Outputs:**
-- `Report/data/HYU/raw/`
-- `Report/data/HYU/manifest.jsonl`
-- `Report/data/HYU/snapshots/<id>/{documents.jsonl, crawl_report.json, SNAPSHOT.sha256}`
+- `Sources/data/HYU/raw/`
+- `Sources/data/HYU/manifest.jsonl`
+- `Sources/data/HYU/snapshots/<id>/{documents.jsonl, crawl_report.json, SNAPSHOT.sha256}`
 
 `<id>` = `hyu-YYYYMMDD` + the first 8 characters of the manifest SHA.
 
@@ -715,3 +715,38 @@ so recall is measured where the tagger said "no conditions".
 - T11 (labeling guideline, drafted by Claude Code with vocabulary v0) and T12 (labeling tools,
   Codex, after T10) may start before G2.
 - No labels are produced until vocabulary v1 is approved. T11 is updated after G2.
+
+## 2026-11-10 (data layout, vocabulary v1 before the audit, automated audit)
+
+**A12 Data lives in `Sources/data/`.**
+- `Report/data/` moves to `Sources/data/`:
+  - `benchmarks/<dataset>/` (with `SOURCE.json` and `SOURCE.md`);
+  - `HYU/`: `raw/` (gitignored, kept), `manifest.jsonl`, `crawl_report.json`, `snapshots/`,
+    `labels/`;
+  - `DATA.md`.
+- Results, index reports and audit notes stay in `Report/`.
+- `DATA_DIR` defaults to `REPO_ROOT/Sources/data` (the env override is unchanged).
+- The manifest and snapshot are moved, never rewritten; their sha256 is identical before and after.
+- Deletions happen only after human OK. Never delete `raw/`, `manifest.jsonl`, the snapshot,
+  `SOURCE.*` or `labels/GUIDELINES.md`.
+
+**A13 Vocabulary v1 comes before the audit.**
+- v1 is proposed from the r2 frequency table, and the human approves it.
+- r3 = the postcheck fixes plus vocabulary v1:
+  - postcheck fixes: drop a field that allows every value, normalized substring match, labeled
+    rejection units, and a `postcheck_version`;
+  - r3 becomes the HYU default index; r1 and r2 are kept for rollback.
+
+**A14 Automated tag audit (team decision; replaces the human-filled sheet for G2).**
+- 150 chunks are sampled from r3, stratified by bucket and campus, with ≥ 15 TOPIK chunks and
+  ≥ 20 `rule_unconditioned`.
+- Codex annotates them blind: chunk text, heading path, vocabulary v1 and the audit rules, but no
+  predicted tags.
+- A script scores predicted vs Codex tags: precision and recall per attribute, split by method,
+  bucket and campus, with Wilson 95% intervals and bucket-weighted recall.
+- A second Codex pass reviews only the disagreements: it sees both versions, decides, and gives a
+  one-line reason.
+- The rules are in `Report/notes/tag_audit_rules.md`.
+- Limitation, stated in the report: "automated audit; reference annotator Codex, which also wrote
+  the tagging rules; not human-validated".
+- P4 is done when the human approves G2.

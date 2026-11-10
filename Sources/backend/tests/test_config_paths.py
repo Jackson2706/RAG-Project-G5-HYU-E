@@ -1,11 +1,11 @@
 """Focused checks for the two-folder repository layout."""
 
-from app.config import DATA_DIR, REPORT_DIR, REPO_ROOT, RESULTS_DIR, resolve_stored_path
+from app.config import DATA_DIR, PROJECT_ROOT, REPORT_DIR, REPO_ROOT, RESULTS_DIR, resolve_stored_path
 
 
-def test_default_directories_are_under_report():
+def test_default_directories():
     assert REPORT_DIR == REPO_ROOT / "Report"
-    assert DATA_DIR == REPORT_DIR / "data"
+    assert DATA_DIR == PROJECT_ROOT / "data" == REPO_ROOT / "Sources" / "data"
     assert RESULTS_DIR == REPORT_DIR / "results"
 
 

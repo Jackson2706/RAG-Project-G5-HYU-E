@@ -15,7 +15,7 @@ def test_repository_paths_have_defaults_and_environment_overrides(monkeypatch, t
             assert config.PROJECT_ROOT == config.BACKEND_DIR.parent
             assert config.REPO_ROOT == config.PROJECT_ROOT.parent
             assert config.REPORT_DIR == config.REPO_ROOT / "Report"
-            assert config.DATA_DIR == config.REPORT_DIR / "data"
+            assert config.DATA_DIR == config.PROJECT_ROOT / "data"
             assert config.RESULTS_DIR == config.REPORT_DIR / "results"
             assert config.Settings().data_dir == config.DATA_DIR
 
@@ -23,7 +23,7 @@ def test_repository_paths_have_defaults_and_environment_overrides(monkeypatch, t
             env.setenv("HYU_REPORT_DIR", str(report_dir))
             importlib.reload(config)
             assert config.REPORT_DIR == report_dir
-            assert config.DATA_DIR == report_dir / "data"
+            assert config.DATA_DIR == config.PROJECT_ROOT / "data"  # data stays in Sources/
             assert config.RESULTS_DIR == report_dir / "results"
 
             overrides = {name: tmp_path / name.lower() for name in names}

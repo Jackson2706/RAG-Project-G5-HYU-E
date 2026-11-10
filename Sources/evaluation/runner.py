@@ -549,7 +549,7 @@ def main() -> int:
     parser.add_argument("--force", action="store_true", help="recompute tasks and rebuild their indexes")
     parser.add_argument("--run-id", help="folder name under Report/results/ (default: main, or smoke)")
     parser.add_argument("--max-queries", type=int, help="limit queries per task (recorded in the run manifest)")
-    parser.add_argument("--download", help="download scifact,nfcorpus,arguana,scifact_original,conditionalqa into Report/data/benchmarks/ and exit")
+    parser.add_argument("--download", help="download scifact,nfcorpus,arguana,scifact_original,conditionalqa into Sources/data/benchmarks/ and exit")
     args = parser.parse_args()
     if args.download:
         from evaluation import conditionalqa, scifact_original
