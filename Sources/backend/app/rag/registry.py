@@ -27,6 +27,7 @@ from app.rag.blocks.ingestion.chunking.recursive_chunker import RecursiveChunker
 from app.rag.blocks.ingestion.chunking.section_chunker import SectionTokenChunker
 from app.rag.blocks.ingestion.chunking.semantic_chunker import SemanticChunker
 from app.rag.blocks.ingestion.chunking.whole_document import WholeDocumentChunker
+from app.rag.blocks.ingestion.metadata_extraction.applicability_extractor import ApplicabilityExtractor
 from app.rag.blocks.ingestion.metadata_extraction.base import BaseMetadataExtractor
 from app.rag.blocks.ingestion.metadata_extraction.basic_extractor import BasicMetadataExtractor
 from app.rag.blocks.ingestion.metadata_extraction.llm_extractor import LLMMetadataExtractor
@@ -237,6 +238,17 @@ PIPELINE: list[Stage] = [
     Stage("metadata_extraction", "Metadata Extraction", "offline", BaseMetadataExtractor,
           "Describe each document (title, language, declared fields).", default_method="basic_metadata", methods=[
               Method("basic_metadata", "Basic metadata", BasicMetadataExtractor, True, "Title, language and fields the file declares itself."),
+              Method("applicability_extractor", "Applicability tags (AAES)", ApplicabilityExtractor, True,
+                     "Rule-first student applicability tags, with a validated local-LLM fallback.", parameters={
+                         "llm_fallback": Param("boolean", True, "LLM fallback", "Ask the auxiliary LLM only when rules find no constraints.",
+                                               ui="toggle", scope="ingestion"),
+                         "model": Param("string", "qwen3.5:4b", "Auxiliary LLM", "Installed Ollama model used for unmatched chunks.",
+                                        ui="ollama_model", scope="ingestion"),
+                         "temperature": Param("float", 0.0, "Temperature", "0 = most repeatable output.", min=0, max=1, step=0.05,
+                                              scope="ingestion", advanced=True),
+                         "max_tokens": Param("integer", 256, "Max generated tokens", "Upper limit on the fallback JSON output.",
+                                             min=16, max=1024, step=16, scope="ingestion", advanced=True),
+                     }),
               Method("llm_metadata", "LLM metadata extraction", LLMMetadataExtractor, False, "Ask the LLM for campus, audience, deadlines."),
           ]),
     Stage("embedding", "Embedding", "offline", BaseEmbedder,

@@ -1,0 +1,369 @@
+"""AAES chunk applicability tags: readable rules first, guarded LLM fallback second."""
+
+from __future__ import annotations
+
+import asyncio
+import json
+import re
+from collections.abc import Callable
+from datetime import date
+from typing import Any
+
+from app.rag.applicability import CONSTRAINT_ATTRIBUTES, VOCABULARY, ChunkCondition, term_of
+from app.rag.blocks.ingestion.metadata_extraction.base import BaseMetadataExtractor
+from app.rag.blocks.ingestion.metadata_extraction.basic_extractor import BasicMetadataExtractor
+from app.rag.schemas import DocumentMetadata, ParsedDocument
+
+
+NATIONAL_RULES = (
+    r"\bpart[- ]time (?:employment|work permits?)\b",
+    r"\bextension of (?:residence|stay)\b",
+    r"\b(?:visa|residence) status change\b",
+    r"\bchange of (?:visa|residence|status of (?:stay|sojourn))\b",
+    r"\balien[- ]registration\b",
+    r"\bnational health insur(?:ance|ane)\b",
+    r"\bNHI (?:enrollment|premiums?)\b",
+)
+CAMPUS_PROCEDURE = re.compile(
+    r"\b(?:submit|apply|visit|contact)\b.{0,60}\b(?:OIA|HY-IN|international office)\b",
+    re.IGNORECASE | re.DOTALL,
+)
+MONTHS = {
+    name.lower(): number
+    for number, name in enumerate(
+        (
+            "", "January", "February", "March", "April", "May", "June", "July",
+            "August", "September", "October", "November", "December",
+        )
+    )
+    if name
+}
+
+
+def _first_match(patterns: tuple[str, ...], text: str) -> re.Match[str] | None:
+    return next((match for pattern in patterns if (match := re.search(pattern, text, re.IGNORECASE))), None)
+
+
+def _evidence(patterns: tuple[str, ...], text: str) -> str | None:
+    match = _first_match(patterns, text)
+    return match.group(0) if match else None
+
+
+def _scope(context: str) -> str:
+    national = _first_match(NATIONAL_RULES, context)
+    return "national" if national and not CAMPUS_PROCEDURE.search(context) else "campus"
+
+
+def _degree_level(context: str) -> tuple[list[str], str | None]:
+    patterns = {
+        "undergraduate": (r"\bbachelor(?:'s|’s)?\b", r"\bundergraduate(?: school| students?)?\b"),
+        "master": (r"\bmaster(?:'s|’s)?\b",),
+        "doctoral": (r"\bdoctoral\b", r"\bph\.?\s*d\.?\b"),
+        "language_program": (r"\b(?:korean )?language program(?: students?)?\b",),
+        "non_degree": (r"\bnon[- ]degree(?: students?| program)?\b",),
+    }
+    values = [value for value, value_patterns in patterns.items() if _first_match(value_patterns, context)]
+    matched_patterns = tuple(pattern for value in values for pattern in patterns[value])
+    return values, _evidence(matched_patterns, context) if matched_patterns else None
+
+
+def _year(context: str) -> tuple[list[str], str | None]:
+    match = re.search(r"\bYear\s*:\s*(?:Year\s*)?([1-4])(?:\s*[-–]\s*([1-4]))?\b", context, re.IGNORECASE)
+    if not match:
+        return [], None
+    first, last = int(match.group(1)), int(match.group(2) or match.group(1))
+    if first > last:
+        first, last = last, first
+    return [str(value) for value in range(first, last + 1)], match.group(0)
+
+
+def _topik_level(context: str) -> tuple[list[str], str | None]:
+    met = re.search(
+        r"(?:TOPIK|Korean Language Proficiency)[^;\n]{0,50}?Level\s*([1-6])"
+        r"(?:\s*;[^;\n]{0,80}?(?:TOPIK|Korean Language Proficiency)[^;\n]{0,30}?:\s*)?([OX])\b",
+        context,
+        re.IGNORECASE,
+    )
+    if met:
+        level = int(met.group(1))
+        values = range(level, 7) if met.group(2).upper() == "O" else range(0, level)
+        return ["none" if value == 0 else str(value) for value in values], met.group(0)
+    minimum = re.search(r"\bTOPIK\s+level\s*([1-6])\s+or higher\b", context, re.IGNORECASE)
+    if minimum:
+        return [str(value) for value in range(int(minimum.group(1)), 7)], minimum.group(0)
+    return [], None
+
+
+def _visa(context: str) -> tuple[list[str], str | None]:
+    transfer = re.search(r"\btransferring from\b.{0,180}?\b(D-(?:10(?:-1)?|2(?:-5|-8)?|4))\b.{0,180}?\bto\b", context, re.IGNORECASE)
+    if transfer:
+        value = transfer.group(1).upper()
+        return ["D-10" if value == "D-10-1" else value], transfer.group(1)
+    matches = list(re.finditer(r"\bD-(?:10(?:-1)?|2(?:-5|-8)?|4)\b", context, re.IGNORECASE))
+    values = [("D-10" if match.group(0).upper() == "D-10-1" else match.group(0).upper()) for match in matches]
+    return list(dict.fromkeys(values)), matches[0].group(0) if matches else None
+
+
+def _student_type(context: str) -> tuple[list[str], str | None]:
+    patterns = {
+        "degree_seeking": (r"\b(?:international\s+)?degree students?\b",),
+        "exchange": (r"\bexchange students?\b",),
+        "visiting": (r"\bvisiting students?\b", r"\bvisiting program participants?\b"),
+        "language_program": (r"\b(?:korean )?language program(?: students?)?\b",),
+        "short_term": (r"\bshort[- ]term (?:students?|participants?|program)\b",),
+    }
+    values = [value for value, value_patterns in patterns.items() if _first_match(value_patterns, context)]
+    matched_patterns = tuple(pattern for value in values for pattern in patterns[value])
+    return values, _evidence(matched_patterns, context) if matched_patterns else None
+
+
+def _english_track(context: str) -> tuple[list[str], str | None]:
+    no = re.search(r"\b(?:non[- ]English|Korean)[- ](?:track|taught)\b", context, re.IGNORECASE)
+    if no:
+        return ["no"], no.group(0)
+    yes = re.search(r"\bEnglish[- ](?:track|taught)(?: program| course)?\b", context, re.IGNORECASE)
+    return (["yes"], yes.group(0)) if yes else ([], None)
+
+
+def _academic_status(context: str) -> tuple[list[str], str | None]:
+    exclusions = re.search(r"\bExclusions\s*:(.*)", context, re.IGNORECASE | re.DOTALL)
+    if exclusions and re.search(r"expected graduates|leave of absence|completed students|extra semesters", exclusions.group(1), re.IGNORECASE):
+        evidence = _evidence((r"\bInternational students studying\b", r"\bEligibility\b"), context)
+        return ["enrolled"], evidence
+
+    patterns = {
+        "enrolled": (r"\benrolled students?\b", r"\bstudents? (?:who are )?enrolled\b", r"\bcurrently enrolled\b"),
+        "leave_of_absence": (r"\bleave of absence\b", r"\bstudents? on leave\b"),
+        "completed_coursework": (r"\bcompleted coursework\b", r"\bcompleted students?\b"),
+        "graduating": (r"\bexpected graduates?\b", r"\bgraduating students?\b"),
+        "admitted_not_enrolled": (r"\bacceptance\b", r"\badmitted students?\b", r"\badmission result page\b"),
+    }
+    values = [value for value, value_patterns in patterns.items() if _first_match(value_patterns, context)]
+    matched_patterns = tuple(pattern for value in values for pattern in patterns[value])
+    return values, _evidence(matched_patterns, context) if matched_patterns else None
+
+
+def _requirements(text: str) -> list[str]:
+    patterns = (
+        r"\b(?:language school )?attendance rate of less than \d{1,3}%",
+        r"\bTOPIK scores? (?:are|is) now higher than [^.\n;]{1,100}",
+        r"\bApplicants who [^\n]{0,100}Korean Language Standards\b",
+        r"\bApplicants who [^\n]{0,100}English Language Standards\b",
+        r"[^.;\n]{0,60}\bGPA\b[^.;\n]{0,60}",
+        r"\bmust (?:pay|show)[^.\n]{0,100}\b(?:KRW\s*)?\d[\d,]*(?:\s*million)?(?:\s*(?:won|KRW|USD))?\b",
+        r"\bbank account balance[^.\n]{0,160}\bKRW\s*\d[\d,]*(?:\s*million)?\b",
+    )
+    found = []
+    for pattern in patterns:
+        found.extend(match.group(0).strip() for match in re.finditer(pattern, text, re.IGNORECASE))
+    return list(dict.fromkeys(found))
+
+
+def _effective_term(context: str, post_date: str | None) -> tuple[str | None, str | None]:
+    semester = re.search(r"\b(20\d{2})\s+(Spring|Fall)\s+Semester\b", context, re.IGNORECASE)
+    if semester:
+        return f"{semester.group(1)}-{1 if semester.group(2).lower() == 'spring' else 2}", semester.group(0)
+    numbered = re.search(r"\b(20\d{2})\s*[-–]\s*([12])\b", context)
+    if numbered:
+        return f"{numbered.group(1)}-{numbered.group(2)}", numbered.group(0)
+    applied = re.search(
+        r"\bapplied from\s+"
+        r"(?:(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},\s*(20\d{2})"
+        r"|(20\d{2})[-./](\d{1,2})[-./]\d{1,2})",
+        context,
+        re.IGNORECASE,
+    )
+    if applied:
+        year = int(applied.group(2) or applied.group(3))
+        month = MONTHS[applied.group(1).lower()] if applied.group(1) else int(applied.group(4))
+        return term_of(year, month), applied.group(0)
+    if post_date:
+        try:
+            posted = date.fromisoformat(post_date)
+            return term_of(posted.year, posted.month), None
+        except ValueError:
+            pass
+    return None, None
+
+
+def _first_json_object(text: str) -> dict[str, Any] | None:
+    decoder = json.JSONDecoder()
+    for start, char in enumerate(text):
+        if char != "{":
+            continue
+        try:
+            value, _ = decoder.raw_decode(text[start:])
+        except (json.JSONDecodeError, TypeError):
+            continue
+        if isinstance(value, dict):
+            return value
+    return None
+
+
+def _apply_llm_fallback(
+    condition: ChunkCondition,
+    text: str,
+    llm: Callable[[str], str],
+    trace_details: dict[str, Any] | None,
+) -> None:
+    prompt = (
+        "Tag only applicability constraints explicitly supported by this chunk. Reply with JSON only in the form "
+        '{"constraints":{"attribute":["value"]},"evidence":{"attribute":"exact quote"}}. '
+        f"Allowed vocabulary: {json.dumps(VOCABULARY)}. Every evidence value must be an exact substring of the chunk.\n\n"
+        f"Chunk:\n{text}"
+    )
+    details: dict[str, Any] = {"status": "called"}
+    if trace_details is not None:
+        trace_details["llm_fallback"] = details
+    try:
+        raw = llm(prompt)
+    except Exception as exc:  # a fallback must never make offline tagging fail
+        details.update(status="error", reason=f"{type(exc).__name__}: {exc}")
+        return
+    details["raw_output"] = str(raw)[:800]
+    parsed = _first_json_object(str(raw))
+    if parsed is None:
+        details.update(status="rejected", reason="no JSON object")
+        return
+    constraints = parsed.get("constraints")
+    evidence = parsed.get("evidence")
+    if not isinstance(constraints, dict) or not isinstance(evidence, dict):
+        details.update(status="rejected", reason="constraints and evidence must be objects")
+        return
+
+    rejected: dict[str, str] = {}
+    for attribute, values in constraints.items():
+        quote = evidence.get(attribute)
+        if attribute not in CONSTRAINT_ATTRIBUTES:
+            rejected[str(attribute)] = "unknown attribute"
+        elif not isinstance(values, list) or not values or any(value not in VOCABULARY[attribute] for value in values):
+            rejected[attribute] = "value outside vocabulary"
+        elif not isinstance(quote, str) or not quote:
+            rejected[attribute] = "missing evidence quote"
+        elif quote not in text:
+            rejected[attribute] = "evidence is not an exact substring"
+        else:
+            condition.constraints[attribute] = list(dict.fromkeys(values))
+            condition.extraction_method[attribute] = "llm"
+            condition.evidence[attribute] = quote
+    details["rejected_fields"] = rejected
+    details["status"] = "accepted" if condition.constraints else "rejected"
+    if not condition.constraints and not rejected:
+        details["reason"] = "no supported constraints"
+
+
+def tag_chunk(
+    chunk: dict,
+    llm: Callable[[str], str] | None = None,
+    *,
+    trace_details: dict[str, Any] | None = None,
+) -> ChunkCondition:
+    """Tag one crawler chunk. Rules are authoritative; the optional LLM only fills an empty result."""
+    text = chunk["text"]
+    context = "\n".join([chunk.get("title", ""), *chunk.get("heading_path", []), text])
+    scope = _scope(context)
+    campus = list(VOCABULARY["campus"]) if scope == "national" else [chunk["site"]]
+    condition = ChunkCondition(
+        scope=scope,
+        campus=campus,
+        superseded_by=chunk.get("superseded_by"),
+        extraction_method={
+            "scope": "rule" if scope == "national" else "site_default",
+            "campus": "rule" if scope == "national" else "site_default",
+            "superseded_by": "snapshot",
+        },
+    )
+    national_quote = _evidence(NATIONAL_RULES, text)
+    if scope == "national" and national_quote:
+        condition.evidence.update(scope=national_quote, campus=national_quote)
+
+    extractors = {
+        "degree_level": _degree_level,
+        "year": _year,
+        "topik_level": _topik_level,
+        "visa": _visa,
+        "student_type": _student_type,
+        "english_track": _english_track,
+        "academic_status": _academic_status,
+    }
+    for attribute, extractor in extractors.items():
+        values, quote = extractor(context)
+        if not values:
+            continue
+        condition.constraints[attribute] = values
+        condition.extraction_method[attribute] = "rule"
+        if quote and quote in text:
+            condition.evidence[attribute] = quote
+
+    condition.requirements = _requirements(text)
+    if condition.requirements:
+        condition.extraction_method["requirements"] = "rule"
+        condition.evidence["requirements"] = condition.requirements[0]
+
+    condition.effective_term, term_quote = _effective_term(context, chunk.get("post_date"))
+    if condition.effective_term:
+        condition.extraction_method["effective_term"] = "rule"
+        if term_quote and term_quote in text:
+            condition.evidence["effective_term"] = term_quote
+
+    if llm is not None and not condition.constraints:
+        _apply_llm_fallback(condition, text, llm, trace_details)
+    return condition.normalized()
+
+
+class ApplicabilityExtractor(BaseMetadataExtractor):
+    """Basic document metadata plus a separate chunk-tagging entry point for T09 ingestion."""
+
+    def extract(self, document: ParsedDocument) -> DocumentMetadata:
+        return BasicMetadataExtractor(self.params, self.services).extract(document)
+
+    def tag_chunks(self, chunks: list[dict]) -> list[ChunkCondition]:
+        if not self.params.get("llm_fallback", True):
+            self.trace_details = {"llm_fallback": "disabled"}
+            return [tag_chunk(chunk) for chunk in chunks]
+
+        loop = asyncio.new_event_loop()
+        selected_model: dict | None = None
+        fallback_details: list[dict[str, Any]] = []
+
+        async def complete(prompt: str, details: dict[str, Any]) -> str:
+            nonlocal selected_model
+            ollama = self.services.ollama
+            if selected_model is None:
+                default_model = getattr(self.services.settings, "ollama_chat_model", "qwen3.5:4b")
+                selected_model = await ollama.pick_model(self.params.get("model", "qwen3.5:4b"), default_model)
+            messages = [{"role": "user", "content": prompt}]
+            options = {
+                "temperature": self.params.get("temperature", 0.0),
+                "num_predict": self.params.get("max_tokens", 256),
+                "num_ctx": 4096,
+                "seed": 42,
+            }
+            output, usage = await ollama.complete(selected_model, messages, options)
+            details.update(
+                model=selected_model["name"],
+                prompt_tokens=usage.get("prompt_eval_count"),
+                output_tokens=usage.get("eval_count"),
+            )
+            return output
+
+        try:
+            tagged = []
+            for index, chunk in enumerate(chunks):
+                details: dict[str, Any] = {"chunk_index": index, "doc_id": chunk.get("doc_id")}
+
+                def llm(prompt: str, details: dict[str, Any] = details) -> str:
+                    try:
+                        asyncio.get_running_loop()
+                    except RuntimeError:
+                        return loop.run_until_complete(complete(prompt, details))
+                    raise RuntimeError("tag_chunks cannot make an Ollama fallback call inside a running event loop")
+
+                result = tag_chunk(chunk, llm=llm, trace_details=details)
+                if "llm_fallback" in details:
+                    fallback_details.append(details)
+                tagged.append(result)
+            self.trace_details = {"llm_fallbacks": fallback_details}
+            return tagged
+        finally:
+            loop.close()

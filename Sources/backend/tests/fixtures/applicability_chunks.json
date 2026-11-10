@@ -1,0 +1,403 @@
+[
+ {
+  "case_id": "C01",
+  "group": "erica_visa_table",
+  "note": "Row: Bachelor's, Year 1-2, required Level 3 NOT met (X) -> 10 h. X means below the level. Visa is not stated in the row, so it is not tagged.",
+  "chunk": {
+   "doc_id": "d66aa2f5-1197-5846-980e-f366c0cd27a5",
+   "site": "erica",
+   "title": "Visa",
+   "source_uri": "https://global.hanyang.ac.kr/eng/s3/s3_1.php",
+   "post_date": null,
+   "superseded_by": null,
+   "kind": "table_row",
+   "heading_path": [
+    "Part-time Employment",
+    "Permitted Hours"
+   ],
+   "text": "University Type: Bachelor's; Year: Year 1-2; Korean Language Proficiency Level: Level 3; Korean Language Proficiency Level: X; Start: No Restrictions; Permitted Hours / Weekdays: 10 hours; Permitted Hours / Weekends, School holidays: 10 hours"
+  },
+  "expected": {
+   "constraints": {
+    "degree_level": [
+     "undergraduate"
+    ],
+    "year": [
+     "1",
+     "2"
+    ],
+    "topik_level": [
+     "none",
+     "1",
+     "2"
+    ]
+   },
+   "scope": "national",
+   "campus": [
+    "seoul",
+    "erica"
+   ],
+   "requirements_contain": [],
+   "effective_term": null,
+   "superseded_by": null
+  }
+ },
+ {
+  "case_id": "C02",
+  "group": "erica_visa_table",
+  "note": "Row: Master's/Doctoral, Level 4 met (O) -> 35 h. 'Year: N/A' adds no year constraint.",
+  "chunk": {
+   "doc_id": "d66aa2f5-1197-5846-980e-f366c0cd27a5",
+   "site": "erica",
+   "title": "Visa",
+   "source_uri": "https://global.hanyang.ac.kr/eng/s3/s3_1.php",
+   "post_date": null,
+   "superseded_by": null,
+   "kind": "table_row",
+   "heading_path": [
+    "Part-time Employment",
+    "Permitted Hours"
+   ],
+   "text": "University Type: Master's/Doctoral; Year: N/A; Korean Language Proficiency Level: Level 4; Korean Language Proficiency Level: O; Start: No Restrictions; Permitted Hours / Weekdays: 35 hours; Permitted Hours / Weekends, School holidays: No Restrictions"
+  },
+  "expected": {
+   "constraints": {
+    "degree_level": [
+     "master",
+     "doctoral"
+    ],
+    "topik_level": [
+     "4",
+     "5",
+     "6"
+    ]
+   },
+   "scope": "national",
+   "campus": [
+    "seoul",
+    "erica"
+   ],
+   "requirements_contain": [],
+   "effective_term": null,
+   "superseded_by": null
+  }
+ },
+ {
+  "case_id": "C03",
+  "group": "erica_visa_table",
+  "note": "Heading + row: D-4 -> D-2 change; the bank-balance rule applies to attendance < 70%, which is outside the vocabulary -> requirement.",
+  "chunk": {
+   "doc_id": "d66aa2f5-1197-5846-980e-f366c0cd27a5",
+   "site": "erica",
+   "title": "Visa",
+   "source_uri": "https://global.hanyang.ac.kr/eng/s3/s3_1.php",
+   "post_date": null,
+   "superseded_by": null,
+   "kind": "mixed",
+   "heading_path": [
+    "Extension of Residence",
+    "When transferring from a general training/studying Korean language (D-4) visa to a full-time degree/exchange program (D-2) visa"
+   ],
+   "text": "When transferring from a general training/studying Korean language (D-4) visa to a full-time degree/exchange program (D-2) visa\nFor Applicable Students Only: 1. Bank account balance statement Applicants with a language school attendance rate of less than 70%: KRW 20 million (if the student’s language school belongs to the university, statement must show KRW 10 million) 2. Statement Applicants with a language school attendance rate of less than 70%"
+  },
+  "expected": {
+   "constraints": {
+    "visa": [
+     "D-4"
+    ]
+   },
+   "scope": "national",
+   "campus": [
+    "seoul",
+    "erica"
+   ],
+   "requirements_contain": [
+    "attendance rate",
+    "70%"
+   ],
+   "effective_term": null,
+   "superseded_by": null
+  }
+ },
+ {
+  "case_id": "C04",
+  "group": "erica_scholarship",
+  "note": "Exclusions (expected graduates, leave of absence, extra semesters, completed students) leave only 'enrolled'. 'Higher TOPIK score than before' is a requirement, not a topik_level value.",
+  "chunk": {
+   "doc_id": "1486dc97-517c-5cfd-a16b-98e38762c46e",
+   "site": "erica",
+   "title": "Scholarship Information",
+   "source_uri": "https://global.hanyang.ac.kr/eng/s3/s3_3_1.php",
+   "post_date": null,
+   "superseded_by": null,
+   "kind": "table_row",
+   "heading_path": [
+    "ERICA Scholarship",
+    "TOPIK Scholarship"
+   ],
+   "text": "Eligibility: Application instructions; 1) International students studying at Hanyang University's ERICA Campus 2) Applicants whose TOPIK scores are now higher than the score they previously submitted to the university at the time of their admission or previous TOPIK scholarship reception 3) Exclusions: Expected graduates, students on leave of absence, students enrolled in extra semesters, completed students, students who previous submitted their TOPIK level 6 report: 1) Students can apply for 1 week after TOPIK scores are announced 2) Students can apply only with the TOPIK score from the most recently administered test 3) Follow e-mail instructions to access the application link and submit the application; Column 3:"
+  },
+  "expected": {
+   "constraints": {
+    "academic_status": [
+     "enrolled"
+    ]
+   },
+   "scope": "campus",
+   "campus": [
+    "erica"
+   ],
+   "requirements_contain": [
+    "TOPIK"
+   ],
+   "effective_term": null,
+   "superseded_by": null
+  }
+ },
+ {
+  "case_id": "C05",
+  "group": "seoul_insurance",
+  "note": "Two branches by academic status in one chunk (enrolled: paid by HYU; completed coursework: pays 25,000 won). Term from post date 2026-03-06.",
+  "chunk": {
+   "doc_id": "47317421-6190-50c9-95c1-b2b3f911501a",
+   "site": "seoul",
+   "title": "Information on the private Insurance System for International Students",
+   "source_uri": "https://oia.hanyang.ac.kr/notice/1814901",
+   "post_date": "2026-03-06",
+   "superseded_by": null,
+   "kind": "mixed",
+   "heading_path": [],
+   "text": "Hanynag University operates a private insurance service for international students to prepare for unexpected accidents that may occur during their time in Korea.\nPlease note that the insurance subscription process varies depending on academic status at the beginning of each semester.\n- Enrolled students : Premiums are paid in full through Hanyang University’s budget\n(Students do not need to pay premiums themselves)\n- Students who completed coursework : Students who wish to enroll in insurance, they must pay directly the premiun of 25,000 won themselves.\nWe recommend that students who completed coursework individually sign up for insurance by referring to the attached file."
+  },
+  "expected": {
+   "constraints": {
+    "academic_status": [
+     "enrolled",
+     "completed_coursework"
+    ]
+   },
+   "scope": "campus",
+   "campus": [
+    "seoul"
+   ],
+   "requirements_contain": [
+    "25,000"
+   ],
+   "effective_term": "2026-1",
+   "superseded_by": null
+  }
+ },
+ {
+  "case_id": "C06",
+  "group": "seoul_insurance",
+  "note": "National Health Insurance premium from March 1, 2026: a national rule, no campus procedure, no student constraint.",
+  "chunk": {
+   "doc_id": "19fd4a70-a101-51eb-a08f-265456147a6b",
+   "site": "seoul",
+   "title": "Guide on National Health Insurance Service for International Students (UPDATED: 2026.03.01",
+   "source_uri": "https://oia.hanyang.ac.kr/notice/1814881",
+   "post_date": "2026-03-05",
+   "superseded_by": null,
+   "kind": "mixed",
+   "heading_path": [],
+   "text": "OIA would like to inform students of the contents of the National Health Insurance System for International Students that was applied from March 1, 2026.\n- Monthly Insurance premium: 76,390 won → 79,320 won\nFailure to pay National Health Insurane will result in disadvantages in the immigration office's review of extension of stay period, so please pay by the deadline."
+  },
+  "expected": {
+   "constraints": {},
+   "scope": "national",
+   "campus": [
+    "seoul",
+    "erica"
+   ],
+   "requirements_contain": [],
+   "effective_term": "2026-1",
+   "superseded_by": null
+  }
+ },
+ {
+  "case_id": "C07",
+  "group": "seoul_acceptance",
+  "note": "Korean standard PASS/exempt guide. The Korean-test result is a pass/fail standard, not a TOPIK level -> requirement, no topik_level tag. '2026 Fall Semester' -> 2026-2 (text wins over the 2023 post date). Text = the first ~700 characters (the first chunk of the attachment).",
+  "chunk": {
+   "doc_id": "2751c7a0-4f3b-5a27-bab9-e54479e1770f",
+   "site": "seoul",
+   "title": "/ [2026 Fall Semester] Undergraduate Acceptance Guideline / [2026",
+   "source_uri": "https://oia.hanyang.ac.kr/sub4_01/1803551",
+   "post_date": "2023-12-13",
+   "superseded_by": null,
+   "kind": "mixed",
+   "heading_path": [],
+   "text": "[Undergraduate] Please refer to the Acceptance Guideline below and proceed with the subsequent steps, including tuition payment, within the designated period.\n※ Please check the appropriate Acceptance Guideline according to the “Korean Language” result shown on your admission result page.\nAttachment: [Korean Standard Pass or Exemption] Acceptance Guideline.pdf\n2026 Fall Semester Acceptance Guideline\n[Undergraduate School]\n- Applicants who Satisfied(or being exempted) the Korean Language Standards\nAcceptance Guideline [Undergraduate School]\nCONTENTS\nMain Schedule\nResults\nAnnouncement\nTuition Payment\nMissing Document\nSubmission\nSchedule &\nRegistration\n01\nBank Balance\nCertificate"
+  },
+  "expected": {
+   "constraints": {
+    "degree_level": [
+     "undergraduate"
+    ],
+    "academic_status": [
+     "admitted_not_enrolled"
+    ]
+   },
+   "scope": "campus",
+   "campus": [
+    "seoul"
+   ],
+   "requirements_contain": [
+    "Korean Language Standards"
+   ],
+   "effective_term": "2026-2",
+   "superseded_by": null
+  }
+ },
+ {
+  "case_id": "C08",
+  "group": "seoul_acceptance",
+  "note": "Korean standard FAIL guide; same tags as C07, different requirement. Text = the first ~700 characters (the first chunk of the attachment).",
+  "chunk": {
+   "doc_id": "2751c7a0-4f3b-5a27-bab9-e54479e1770f",
+   "site": "seoul",
+   "title": "/ [2026 Fall Semester] Undergraduate Acceptance Guideline / [2026",
+   "source_uri": "https://oia.hanyang.ac.kr/sub4_01/1803551",
+   "post_date": "2023-12-13",
+   "superseded_by": null,
+   "kind": "mixed",
+   "heading_path": [],
+   "text": "[Undergraduate] Please refer to the Acceptance Guideline below and proceed with the subsequent steps, including tuition payment, within the designated period.\n※ Please check the appropriate Acceptance Guideline according to the “Korean Language” result shown on your admission result page.\nAttachment: [Korean Standard Fail] Acceptance Guideline.pdf\n2026 Fall Semester Acceptance Guideline\n[Undergraduate School]\n- Applicants who did not satisfy the Korean Language Standards\nAcceptance Guideline [Undergraduate School]\nCONTENTS\nMain Schedule\nResults\nAnnouncement\nTuition Payment\nMissing Document\nSubmission\nSchedule &\nRegistration\n01\nAdditional Language\nDocument submission\nApplication for"
+  },
+  "expected": {
+   "constraints": {
+    "degree_level": [
+     "undergraduate"
+    ],
+    "academic_status": [
+     "admitted_not_enrolled"
+    ]
+   },
+   "scope": "campus",
+   "campus": [
+    "seoul"
+   ],
+   "requirements_contain": [
+    "did not satisfy"
+   ],
+   "effective_term": "2026-2",
+   "superseded_by": null
+  }
+ },
+ {
+  "case_id": "C09",
+  "group": "unconditioned",
+  "note": "Report alien-registration changes within 14 days: immigration law for every foreign student.",
+  "chunk": {
+   "doc_id": "d66aa2f5-1197-5846-980e-f366c0cd27a5",
+   "site": "erica",
+   "title": "Visa",
+   "source_uri": "https://global.hanyang.ac.kr/eng/s3/s3_1.php",
+   "post_date": null,
+   "superseded_by": null,
+   "kind": "mixed",
+   "heading_path": [
+    "Reporting Changes in Alien Registration",
+    "Application Period"
+   ],
+   "text": "Application Period\nStudents must apply within 14 days from the date of any changes to the registration information below.\nChange of name, gender, date of birth, or nationality\nChange of passport number, issuance date, or expiration date\nChange of school (including school name change)\nNew place of residence (new address may be registered at the local Gu District Office)\n※ Failure to report the above changes within 14 days from the date of change may result in a fine."
+  },
+  "expected": {
+   "constraints": {},
+   "scope": "national",
+   "campus": [
+    "seoul",
+    "erica"
+   ],
+   "requirements_contain": [],
+   "effective_term": null,
+   "superseded_by": null
+  }
+ },
+ {
+  "case_id": "C10",
+  "group": "unconditioned",
+  "note": "Office hours of the Ansan immigration office: no condition; ERICA site default.",
+  "chunk": {
+   "doc_id": "d66aa2f5-1197-5846-980e-f366c0cd27a5",
+   "site": "erica",
+   "title": "Visa",
+   "source_uri": "https://global.hanyang.ac.kr/eng/s3/s3_1.php",
+   "post_date": null,
+   "superseded_by": null,
+   "kind": "mixed",
+   "heading_path": [
+    "Ansan Immigration Office",
+    "Business Hours"
+   ],
+   "text": "Ansan Immigration Office\nBusiness Hours\n09:00-18:00 (Lunch Break: 12:00-13:00)"
+  },
+  "expected": {
+   "constraints": {},
+   "scope": "campus",
+   "campus": [
+    "erica"
+   ],
+   "requirements_contain": [],
+   "effective_term": null,
+   "superseded_by": null
+  }
+ },
+ {
+  "case_id": "C11",
+  "group": "temporal",
+  "note": "2021 entry-report notice for degree students; the snapshot links a newer version (superseded_by, method 'snapshot').",
+  "chunk": {
+   "doc_id": "d8ebecb7-0974-5466-bc23-7cc97bf69569",
+   "site": "seoul",
+   "title": "International Degree Students Entry Report Notice",
+   "source_uri": "https://oia.hanyang.ac.kr/notice/1543905",
+   "post_date": "2021-09-18",
+   "superseded_by": "2407161f-61aa-5754-a73a-ba9b1956526d",
+   "kind": "mixed",
+   "heading_path": [],
+   "text": "International degree students in Hanyang University must respond to the entry and exit report on the HY-IN portal every semester. Responses are mandatory for all foreign students. We ask for your active participation.\n<Entry and Exit Report Guide>\n-Report Deadline: ~2021.09.22(Wed)\n*Deadline for Initial report. you may change your response upon changes to your status at all times thereafter"
+  },
+  "expected": {
+   "constraints": {
+    "student_type": [
+     "degree_seeking"
+    ]
+   },
+   "scope": "campus",
+   "campus": [
+    "seoul"
+   ],
+   "requirements_contain": [],
+   "effective_term": "2021-2",
+   "superseded_by": "2407161f-61aa-5754-a73a-ba9b1956526d"
+  }
+ },
+ {
+  "case_id": "C12",
+  "group": "temporal",
+  "note": "2025 NHI premium notice. A newer 2026 version exists (C06), but the snapshot did not link them, so superseded_by stays None.",
+  "chunk": {
+   "doc_id": "2bdc754f-0be3-5dfe-83d8-180b7147ef98",
+   "site": "seoul",
+   "title": "Guide on National Health Insurance Service for International Students (UPDATED : 2025.03.01",
+   "source_uri": "https://oia.hanyang.ac.kr/notice/1812000",
+   "post_date": "2025-06-27",
+   "superseded_by": null,
+   "kind": "mixed",
+   "heading_path": [],
+   "text": "OIA would like to inform students of the contents of the National Health Insurance System for International Students that was applied from March 1, 2025.\n- Monthly Insurance premium: 75,490 won → 76,390 won\nFailure to pay National Health Insurane will result in disadvantages in the immigration office's review of extension of stay period, so please pay by the deadline."
+  },
+  "expected": {
+   "constraints": {},
+   "scope": "national",
+   "campus": [
+    "seoul",
+    "erica"
+   ],
+   "requirements_contain": [],
+   "effective_term": "2025-1",
+   "superseded_by": null
+  }
+ }
+]

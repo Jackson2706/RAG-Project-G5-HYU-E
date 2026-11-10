@@ -105,6 +105,11 @@ Small helper functions (`_chunk_params()`, `_llm_params()`, `_filter_params()`, 
 return the parameter definitions several methods share, so e.g. prefiltering and postfiltering have
 exactly the same policy settings.
 
+Metadata Extraction also offers `applicability_extractor`. It keeps the basic title, language and
+declared metadata, then exposes the rule-first AAES chunk tagger used by ingestion. Its optional
+Ollama fallback accepts only vocabulary values backed by an exact quote. `basic_metadata` remains
+the stage default.
+
 The order of `PIPELINE` is the order the UI shows: offline blocks first, then online. The order of
 execution is written out in `run_rag()`.
 
@@ -141,6 +146,10 @@ Every implemented hyperparameter (generated from `registry.py`):
 | Chunking | `fixed_tokens` | `chunk_overlap` | 32 | 0–128 | ingestion | basic |
 | Chunking | `recursive` | `chunk_size` | 256 | 64–512 | ingestion | basic |
 | Chunking | `recursive` | `chunk_overlap` | 32 | 0–128 | ingestion | basic |
+| Metadata Extraction | `applicability_extractor` | `llm_fallback` | true | text | ingestion | basic |
+| Metadata Extraction | `applicability_extractor` | `model` | qwen3.5:4b | installed Ollama models | ingestion | basic |
+| Metadata Extraction | `applicability_extractor` | `temperature` | 0.0 | 0–1 | ingestion | advanced |
+| Metadata Extraction | `applicability_extractor` | `max_tokens` | 256 | 16–1024 | ingestion | advanced |
 | Vector Indexing | `qdrant_mongodb` | `hnsw_m` | 16 | 4–64 | index | advanced |
 | Vector Indexing | `qdrant_mongodb` | `hnsw_ef_construct` | 100 | 16–512 | index | advanced |
 | Vector Indexing | `qdrant_mongodb` | `indexing_threshold_kb` | 20000 | 1–1e+06 | index | advanced |
