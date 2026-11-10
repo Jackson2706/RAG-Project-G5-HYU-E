@@ -16,6 +16,7 @@ and pass the gates. Each phase below has a **start prompt** to paste into Claude
 | P6 | New baselines (brackets, self-query, prompted-conditional, memory M1/M2) | Codex, Claude reviews | — |
 | P7 | AAES online steps 1–4 + ablation presets | Claude tests first, Codex code | — |
 | P8 | Metrics, HYU and memory suites, headless `run_all.sh` | Claude tests first, Codex code | — |
+| P8D | Demo: all presets in the UI, compare mode, demo cases, demo script | Codex code, Claude reviews, human rehearses | G7 (demo part) |
 | P9 | Dev runs → tuning → config freeze → one test run | Human runs, Claude analyses | **G5**, **G6** |
 | P10 | Figures, tables, report, slides (Humanizer) | Codex drafts, Claude edits, human owns | **G7** |
 
@@ -29,7 +30,7 @@ and pass the gates. Each phase below has a **start prompt** to paste into Claude
 | G4 | Labels adjudicated; every test item human-verified; dev/test split frozen with SHA |
 | G5 | Dev results reviewed; AAES and baseline configs frozen and tagged (`git tag config-freeze`) |
 | G6 | Exactly one test run (clean tree, `--confirm-frozen`), logged in `results/TEST_RUNS.md` |
-| G7 | Report and slides reviewed by the team; every number traced to `results/` |
+| G7 | Report and slides reviewed; every number traced to `results/`. Demo rehearsed: the scripted questions run in compare mode on the presentation laptop within the time slot; a backup screen recording exists |
 
 ## Schedule (target: end of this week)
 
@@ -38,13 +39,14 @@ and pass the gates. Each phase below has a **start prompt** to paste into Claude
 | Mon | P0, P1 → G1. Start P2 code |
 | Tue | Run crawl; P3 downloads; P4 tags + audit → G2; write guideline → G3 |
 | Wed | P5 drafting + annotation + adjudication → G4 (evening). P6 in parallel |
-| Thu | P7, P8; dev runs overnight (`caffeinate`) |
+| Thu | P7, P8, P8D (compare mode can be built in parallel); dev runs overnight (`caffeinate`) |
 | Fri | G5 → single test run (G6) → P10 assets and drafts |
-| Sat | Report and slides (G7), buffer |
+| Sat | Report, slides, demo rehearsal and backup recording (G7), buffer |
 
 Priority if time runs short:
 - **Must:** P1–P5, G0/G1 brackets, R16, R15, AAES A0 + 3 ablations, HYU suite.
-- **Should:** M1/M2 memory slice, external conditional benchmark.
+  Also: every preset visible in the UI, compare mode, and the demo script.
+- **Should:** M1/M2 memory slice, external conditional benchmark, demo-case picker with oracle presets.
 - **Could:** MTRAG-UN subset, BEIR re-run.
 
 ---
@@ -86,14 +88,19 @@ Priority if time runs short:
 
 **Start prompt (Claude Code):**
 > Phase P1. Read PLAYBOOK.md §P1 and Appendix A.
-> 1. Record the BEFORE state into `Sources/docs/agent_tasks/T01.before.md`: run the
->    Definition-of-done checks with the current paths, `docker volume ls | grep hyu-compass`, and
->    `git status --short | head`.
+> 1. Record the BEFORE state into `Sources/docs/agent_tasks/T01.before.md`:
+>    - the Definition-of-done checks with the current paths;
+>    - frontend `npm run typecheck && npm test`;
+>    - the preset count from `GET /api/pipeline/presets`;
+>    - `docker volume ls | grep hyu-compass`;
+>    - `git status --short | head`.
 > 2. Write T01 (moves) and T02 (path config) for Codex from Appendix A, delegate T01, review it,
 >    then delegate T02 and review it.
 > 3. Print the human-only commands for untracked local files (Appendix A.3).
 > 4. Verify the AFTER state with the same checks, plus
 >    `docker compose -f Sources/docker-compose.yml config | head -3` and a start/health check.
+>    The same number of presets must appear in the UI, and one chat question must work in the
+>    browser.
 > 5. Update STATUS.md and stop at Gate G1 with a before/after table.
 
 ---
@@ -185,8 +192,10 @@ Roles:
 ## P6 — New baselines (T19–T23)
 
 **Start prompt (Claude Code):**
-> Phase P6. Read Appendix E. For each new baseline write a short task for Codex. Each one is a
-> subclass + registry entry + preset + test, and every existing preset stays unchanged:
+> Phase P6. Read Appendix E and AGENTS.md "UI and demo rules". For each new baseline write a short
+> task for Codex. Each one is a subclass + registry entry + preset (with `group` and
+> `description`) + test, and every existing preset stays unchanged. Each preset must show up in the
+> UI picker and either run from the chat or be disabled with a clear reason:
 > - T19: G0 closed-book, G1 oracle-context.
 > - T20: R15 self-query (LLM → metadata filter on applicability payload; no filter when the
 >   attribute is missing).
@@ -196,7 +205,8 @@ Roles:
 > - T23: M2 profile memory as a new `conversation_memory` block (none / buffer / profile), stored
 >   in MongoDB, with staleness flags.
 >
-> Review each; smoke-test on the dev split with `--smoke`.
+> Review each. Smoke-test on the dev split with `--smoke`. Then ask me to try each preset once in
+> the browser.
 
 ---
 
@@ -216,8 +226,14 @@ Roles:
 >   - per-action generation templates;
 >   - presets A0–A7 from Appendix E.
 >
-> All tests must pass. Each step logs its typed input/output into the execution trace, so the
-> Execution tab shows it.
+> All tests must pass. Every preset A0–A7 is in the UI under group `Ours (AAES)` or `Ablations`.
+> Each step logs its typed input/output into the execution trace, so the Execution tab shows:
+> - the profile with its stated/remembered/missing/stale status;
+> - the applicability label of each candidate;
+> - the branch table with values and information gain;
+> - the chosen action.
+>
+> The chat message shows an action badge: ANSWER, CONDITIONAL, CLARIFY, ABSTAIN, or CONFIRM.
 
 ---
 
@@ -234,6 +250,27 @@ Roles:
 > - T32 (Codex, Should): external conditional benchmark adapter in oracle-context mode.
 >
 > Finish with a full `--dry-run` and a dev `--smoke`.
+
+---
+
+## P8D — Demo in the UI (T36–T38)
+
+**Start prompt (Claude Code):**
+> Phase P8D. Read AGENTS.md "UI and demo rules" and Appendix H.
+> - T36 (Codex): compare mode in the frontend. Pick 2–4 presets, run one question through each
+>   **sequentially** via the existing `/api/chat/stream`, and show columns with answer, action
+>   badge, citations, latency, and LLM calls. Clicking a column opens its Execution trace. The
+>   existing single-chat view stays the default. Add vitest tests.
+> - T37 (Codex): `GET /api/demo/cases` serves `data/HYU/labels/demo_cases.jsonl`
+>   (8–10 dev cases, never test). A demo-case picker in the chat fills the question and session
+>   history. Oracle presets (G1, A2) are enabled only when a demo case is selected; otherwise
+>   `check_runnable` returns the reason. Presets needing applicability tags are disabled on
+>   untagged indexes with a reason.
+> - T38 (you): write `Report/slides/demo_script.md` using Appendix H. Pick the cases from dev
+>   results where the presets differ most, and include a warm-up checklist and a timing for each
+>   step.
+>
+> I will rehearse on the presentation laptop and record a backup video.
 
 ---
 
@@ -444,23 +481,27 @@ answers, never asked about. Online steps 1–4 and the policy are defined in
 
 # Appendix E — Methods to run
 
-| ID | Method | Data |
-|---|---|---|
-| B0, R1–R14 | Existing baselines (R9/R10 use stated attributes) | HYU dev/test (+ BEIR re-run optional) |
-| G0 | Closed-book (no retrieval) | HYU |
-| G1 | Oracle context (gold evidence only) | HYU |
-| R15 | Self-query retriever (LLM → metadata filter) | HYU |
-| R16 | Prompted conditional answering ("if it depends on the student, state conditions or ask") | HYU |
-| M1 | History-aware rewrite (short-term memory) | HYU multi_session |
-| M2 | Profile memory (long-term, with staleness flags) | HYU multi_session |
-| A0 | AAES full | HYU (+ multi_session with M2) |
-| A1 | AAES with hard filter instead of soft penalty | HYU |
-| A2 | AAES with oracle profile | HYU |
-| A3 | Always clarify when any attribute is missing | HYU |
-| A4 | Question-only ambiguity detector (no evidence branching) | HYU |
-| A5 | AAES with LLM sufficiency judge instead of lexical | HYU |
-| A6 | AAES without temporal rule | HYU temporal |
-| A7 | AAES + M2 memory | HYU multi_session |
+| ID | Method | Data | UI group | In live demo |
+|---|---|---|---|---|
+| B0 | Basic dense RAG | HYU dev/test (+ BEIR) | Naive | yes |
+| R1–R8, R11–R14 | Existing advanced baselines | HYU dev/test (+ BEIR) | Advanced | yes |
+| R9, R10 | Prefilter / postfilter on stated attributes | HYU | Advanced | yes (needs tagged index) |
+| G0 | Closed-book (no retrieval) | HYU | Brackets | yes |
+| G1 | Oracle context (gold evidence only) | HYU | Brackets | only with a demo case |
+| R15 | Self-query retriever (LLM → metadata filter) | HYU | Advanced | yes (tagged index) |
+| R16 | Prompted conditional answering ("if it depends on the student, state conditions or ask") | HYU | Advanced | yes |
+| M1 | History-aware rewrite (short-term memory) | HYU multi_session | Memory | yes |
+| M2 | Profile memory (long-term, with staleness flags) | HYU multi_session | Memory | yes (shows profile + reset) |
+| A0 | AAES full | HYU (+ multi_session with M2) | Ours (AAES) | yes |
+| A1 | AAES with hard filter instead of soft penalty | HYU | Ablations | yes |
+| A2 | AAES with oracle profile | HYU | Ablations | only with a demo case |
+| A3 | Always clarify when any attribute is missing | HYU | Ablations | yes |
+| A4 | Question-only ambiguity detector (no evidence branching) | HYU | Ablations | yes |
+| A5 | AAES with LLM sufficiency judge instead of lexical | HYU | Ablations | yes |
+| A6 | AAES without temporal rule | HYU temporal | Ablations | yes |
+| A7 | AAES + M2 memory | HYU multi_session | Ours (AAES) | yes |
+
+Offline presets O0–O8 stay in the picker under their existing `offline` kind.
 
 - Generation backbone: `qwen3.5:4b` for all methods. `llama2:7b` only for B0, R5, R16, A0.
 - Retrieval stays fixed (hybrid + cross-encoder, the best dev configuration) for all AAES variants.
@@ -512,3 +553,36 @@ Report/
   notes/ (decisions.md, tag_audit.csv, meeting notes)   course/ (gitignored)
   voice_sample.md   ai_use_statement.md
 ```
+
+# Appendix H — Demo spec (P8D)
+
+**Setup:** the presentation laptop runs everything locally: Docker (MongoDB + Qdrant), Ollama,
+backend, frontend. No internet is needed. Use the frozen HYU index revision.
+
+**Warm-up checklist (10 minutes before):**
+1. Run `./start.sh`.
+2. Load each Ollama model with one throwaway question.
+3. Confirm the preset list shows every group, with no unexpected disabled presets.
+4. Reset M2 memory.
+5. Close other heavy apps.
+
+**Compare-mode limits:** at most 3 columns live (≈ 3 × 5–15 s per question on a 16 GB Mac),
+run sequentially. Precomputed dev results back up every scripted question.
+
+**Script (about 8 minutes).** Pick the final questions from dev results where presets differ most;
+these are the intended stories:
+
+| # | Story | Question type | Columns |
+|---|---|---|---|
+| 1 | Unconditional question: no friction | fee or office-hours question | B0 · R16 · A0 → all ANSWER, same facts |
+| 2 | Conditional question: wrong branch vs conditional answer | part-time work hours (ERICA visa page) | B0 · R15 · A0 → B0 picks one row; A0 CONDITIONAL |
+| 3 | Clarify only when the evidence branches | question with many branches | A4 · A0 → A4 asks an irrelevant question; A0 asks the splitting attribute |
+| 4 | Campus applicability: abstain and refer | Seoul student asks about an ERICA-only procedure | B0 · A0 → B0 gives the ERICA office; A0 refers to Seoul OIA |
+| 5 | Memory: no repeated questions, but stale-profile check | two-turn script with an attribute update | M2 · A7 → A7 asks CONFIRM after the update |
+| 6 | Look inside: Execution tab | any of the above | profile → labels → branches → decision |
+
+**Rules:**
+- Demo questions come from dev or are newly written. Never show test cases.
+- Every claim on the slides about which method is better uses `results/test-final`, not the live
+  demo.
+

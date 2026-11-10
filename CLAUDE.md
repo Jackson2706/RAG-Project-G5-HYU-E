@@ -17,10 +17,18 @@ usage on writing code, drafting labels, and drafting text.
   2. Run the Definition-of-done commands from AGENTS.md.
   3. Run `/ponytail-review` (or `/ponytail:ponytail-review` if your version namespaces plugin
      commands). Must-fix findings go back to Codex.
+  4. If the change adds a method, check AGENTS.md "UI and demo rules":
+     - the preset has a `group` and a professor-readable `description`;
+     - it appears in `GET /api/pipeline/presets`;
+     - it is either runnable from the chat or disabled with a clear reason;
+     - its steps render in the Execution tab.
+     Then ask the human to click through it once in the browser.
 - Edits code directly only for changes under ~20 lines, or after two failed Codex attempts on the
   same task.
 - Acts as second annotator on the labeling subset and prepares adjudication sheets.
 - **Stops at every Gate in PLAYBOOK.md** and asks the human before continuing.
+- Gate tables contain only results from commands Claude Code or the human ran, never numbers
+  copied from Codex result notes.
 
 ## Delegating to Codex
 

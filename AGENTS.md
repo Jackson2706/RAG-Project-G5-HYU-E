@@ -57,6 +57,33 @@ Every path is resolved in ONE place: `Sources/backend/app/config.py`
 - No plugin frameworks, metaclasses, or speculative abstractions.
 - The AAES attribute vocabulary lives only in `Sources/backend/app/rag/applicability.py`.
 
+## UI and demo rules (the UI stays — it is our demo for the professor)
+
+- Keep the React UI working after every task: the chat, the Configuration tab, and the Execution
+  tab. Never remove or break an existing UI feature or API endpoint.
+- **Every method we evaluate is also runnable from the UI.** Each existing baseline, each new
+  baseline, each memory method, and each AAES variant and ablation is a preset in `presets.py`,
+  validated by the registry. It therefore appears in the preset picker through
+  `GET /api/pipeline/presets`. There are no evaluation-only code paths: the UI and the runner call
+  the same pipeline.
+- Each preset has three fields for the picker:
+  - `kind`;
+  - `group`: one of `Naive`, `Advanced`, `Brackets`, `Memory`, `Ours (AAES)`, `Ablations`;
+  - `description`: one line a professor understands in five seconds.
+- If a preset cannot run in the current context, the API returns the reason (HTTP 422 from
+  `check_runnable`) and the UI shows the preset as disabled with that reason. Never fail silently.
+  Examples of such contexts:
+  - the index has no applicability tags;
+  - an oracle method needs a labeled demo case;
+  - an Ollama model is missing.
+- **Compare mode:** the UI can run one question through 2–4 selected presets and show the results
+  side by side, one column per preset: answer, AAES action badge, citations, latency. Clicking a
+  column opens that run's Execution trace. Runs are sequential, because the Mac has 16 GB.
+- Every AAES step writes its typed input and output into the execution trace, so the Execution tab
+  shows the profile, applicability labels, branches, information gain, and the decision.
+- Memory methods show the remembered profile in the UI, with a "reset memory" button.
+- Demo cases come from the **dev** split only, never from test.
+
 ## Coding style: Ponytail, with project overrides
 
 Use the Ponytail skill for all code. These project overrides win over Ponytail:
@@ -117,10 +144,14 @@ Agents may run unit tests and `--dry-run` / `--smoke` commands.
    (plus the tests of any new package, e.g. `pytest -q crawler/tests labeling/tests`).
 2. `cd Sources && python -m evaluation.runner --suite all --dry-run` passes, and the registry
    check passes.
-3. Docs touched by the change are updated (`Sources/docs/*`).
-4. A result note exists: `Sources/docs/agent_tasks/T<NN>.result.md`. It covers what changed,
+3. If the task adds or changes a method, preset, API field, or UI component:
+   - `cd Sources/frontend && npm run typecheck && npm test` pass;
+   - the preset appears in `GET /api/pipeline/presets`, either enabled or disabled with a reason;
+   - a backend test calls `/api/chat` with that preset on the synthetic fixture index (mock Ollama).
+4. Docs touched by the change are updated (`Sources/docs/*`).
+5. A result note exists: `Sources/docs/agent_tasks/T<NN>.result.md`. It covers what changed,
    what was skipped or not checked, risks, and the exact commands the human must run.
-5. `STATUS.md` has one new line.
+6. `STATUS.md` has one new line.
 
 ## Writing rules (Report/)
 
