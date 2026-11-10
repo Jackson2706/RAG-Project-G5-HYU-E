@@ -114,3 +114,14 @@ VERIFY checks the reconstructed span text and recounts tokens from the exact emb
 outputs remain in the report but do not block publication; an LLM error or any failed VERIFY check
 leaves the index in `built` state.
 
+## Tag audit
+
+`python -m labeling.audit_tags sample` writes the fixed, seeded 50-chunk review sheet without
+changing the index. A reviewer assigns every predicted value to `correct` or `wrong`, records true
+values absent from the prediction in `missed`, and signs the row in `reviewer`. Values in each cell
+are separated with `|`. `score` rejects an incomplete or out-of-vocabulary reviewed row before it
+writes precision and recall by attribute, rule/LLM extraction family, tag bucket, and campus. Site
+defaults and snapshot-derived fields belong to the deterministic rule family. `frequency` counts
+all indexed values and requirement phrases; its zero-count vocabulary entries are candidates for
+the Gate G2 vocabulary review, not automatic removals.
+
