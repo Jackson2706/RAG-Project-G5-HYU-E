@@ -38,10 +38,10 @@ and pass the gates. Each phase below has a **start prompt** to paste into Claude
 |---|---|
 | Mon | P0, P1 → G1. Start P2 code |
 | Tue | Run crawl; P3 downloads; P4 tags + audit → G2; write guideline → G3 |
-| Wed | P5 drafting + annotation + adjudication → G4 (evening). P6 in parallel |
-| Thu | P7, P8, P8D (compare mode can be built in parallel); dev runs overnight (`caffeinate`) |
-| Fri | G5 → single test run (G6) → P10 assets and drafts |
-| Sat | Report, slides, demo rehearsal and backup recording (G7), buffer |
+| Wed | P5 drafting + annotation (T15 Codex, T16 blind subset); P7 spec + T24 tests (A29) |
+| Thu | Adjudication → **G4 (evening)**; P6 + P7 implemented by Claude Code; P8; **dev runs Thursday night** (`caffeinate`) |
+| Fri | **G5** → single test run (G6) → P10 assets and drafts |
+| Sat | **Report and demo**: slides, demo rehearsal and backup recording (G7) |
 
 Priority if time runs short:
 - **Must:** P1–P5, G0/G1 brackets, R16, R15, AAES A0 + 3 ablations, HYU suite.
@@ -955,3 +955,14 @@ GUIDELINES.md v1.0 stands. T14 (question drafts from topics × personas, no page
 target of A27 (and A26's 30%). The question set is 100% agent-written: origin `agent_draft` or `agent_edited`.
 Every report states this (`Report/notes/limitations.md`). Claude Code selected 180 of 230 drafts: 161 kept,
 19 `agent_edited`, 50 deleted; all slice × campus targets met exactly.
+
+**A29 Schedule and roles for the rest of the week (decision from the planning chat, 2026-11-11 evening).**
+- T16 (Claude Code blind subset, 54 cases = 30% of each slice × campus, `labels/subset_ids.txt`) runs in a
+  subagent now; part 1 = the 29 subset cases in batches 01-03.
+- Early agreement on part 1 (κ answerability and expected_behavior, span overlap, branch attributes). If κ ≥ 0.6
+  with no systematic disagreement, Codex resumes T15 batches 04-06 unchanged (one batch per exec, validated);
+  otherwise guideline clarifications go to the human first, with the 01-03 items to re-annotate.
+- Codex quota is reserved for T15. Claude Code writes the P7 spec (`aaes_spec.md`: condition sets, applicant
+  scope default, unknown-caveat rule, CONFIRM) and the T24 tests, then implements P6 (G0, G1, R16, R9-scope,
+  R15 with the scope default) and P7 itself (Ponytail). M1, M2, A7 and ConditionalQA move to "if time".
+- Schedule: G4 Thursday evening; dev runs Thursday night; G5 + test run Friday; report and demo Saturday.
