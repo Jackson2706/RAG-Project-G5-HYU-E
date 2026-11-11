@@ -1,6 +1,6 @@
-# HYU Compass labeling guideline (v1.0)
+# HYU Compass labeling guideline (v1.1)
 
-Status: **approved at Gate G3 (2026-11-11, PLAYBOOK A22).** Written with applicability vocabulary **v1**
+Status: **v1.0 approved at Gate G3 (2026-11-11, PLAYBOOK A22); v1.1 amendment (section 9, 2026-11-12, A30) wins where they differ.** Written with applicability vocabulary **v1**
 (`Sources/backend/app/rag/applicability.py`; PLAYBOOK A17). G2a is passed (A20); G3 approved this guideline.
 
 **Vocabulary v1 in short** (values are in `applicability.py`; never copy them):
@@ -109,8 +109,9 @@ not cases: do not copy them into the label files.
   requirement (Level 3) is met, and 10 hours if not. Year 3–4 needs Level 4.
 - `branch_attributes: [year, topik_level]`. Four short branches, but the student's year narrows it
   quickly.
-- Label: `conditional_answer`, acceptable `[conditional_answer, clarify]`. The master's/doctoral
-  rows go to `inapplicable_evidence` ("graduate rows").
+- Label (v1.1, section 9.3): four branches is more than 2, so `clarify` ("Which year are you in?"),
+  acceptable `[clarify, conditional_answer]`. The master's/doctoral rows go to `inapplicable_evidence`
+  ("graduate rows").
 - The GPA ≥ 2.0 rule on the same page is a caveat, not a branch.
 
 **C2.** *"Do I have to pay for the university's private insurance?"*
@@ -248,3 +249,97 @@ documents but most of the conditional pages, so it gets about 40% of the cases.
    the campus is unstated, `campus` is a branch attribute like any other: `conditional_answer` with
    one branch per campus, or `clarify` ("Which campus are you at?") under rule 1. When the rules are
    the same, campus is not a branch.
+
+## 9. Amendment v1.1 (2026-11-12, PLAYBOOK A30)
+
+Decided after the early agreement check (Codex batches 01-03 vs Claude T16 part 1, κ answerability
+0.53). Where this section differs from sections 1-8, **this section wins**. Examples use real snapshot
+passages; they are illustrations, not cases.
+
+### 9.1 Answerability counts required facts
+
+- `answerable`: **every** required fact has a gold span in the English snapshot.
+- `partial`: **at least one, but not all** required facts have a gold span.
+- `unanswerable`: **no** required fact has a gold span (and no other negative value fits).
+- `partial` → `expected_behavior: abstain`: refer the student and say what is missing.
+  `acceptable_behaviors` also includes `answer`, for an answer that gives the supported facts **and**
+  names the missing part.
+
+**E1 (partial).** *"When do I have to report a change of address, and how much is the fine if I'm late?"*
+(stated `{campus: erica}`)
+- `d66aa2f5…` 2209-2680: "Students must apply within 14 days from the date of any changes …";
+  2581-2679: "Failure to report … within 14 days … may result in a fine." No page gives the amount.
+- Required facts: "within 14 days" (supported), "the fine amount" (not supported) → `partial`,
+  `abstain` ("You must report within 14 days; the snapshot does not state the fine amount, so ask the
+  ERICA OIA or the immigration office"), acceptable `[abstain, answer]`.
+
+### 9.2 external_only
+
+`external_only` only when the snapshot **itself** sends the reader to another site or office for
+this information. Otherwise `unanswerable`.
+
+**E2.** *"How do I book a visit at the Ansan immigration office?"* (stated `{campus: erica}`)
+- `d66aa2f5…` 18307-18340 lists "Website http://www.hikorea.go.kr" (with 1345) as the contact for this
+  office, and no page gives booking steps → `external_only`, `abstain`, referring to HiKorea / 1345.
+- Contrast: *"What is the Ansan immigration office's parking fee?"* No page refers anywhere for it →
+  `unanswerable`.
+
+### 9.3 Branch vs caveat
+
+- **Branch:** the *value* of the answer changes with an **unstated vocabulary attribute** →
+  `conditional_answer` when there are **at most 2** branches, otherwise `clarify` (this replaces the
+  "at most 3" in sections 3 and 8.1). The procedure rule of 8.1 still applies: different procedures
+  → `clarify`.
+- **Caveat** (`answer` + caveat sentence): a requirement **outside** the vocabulary (GPA, nationality,
+  documents, attendance), or a condition that does **not** change the answer's value.
+- `applicant` is never a branch unless the student states it (scope default, 8.2).
+- Evidence whose condition status is **unknown** (the tags cannot say who it applies to) → caveat,
+  never a branch.
+
+**E3 (branch).** C2: Seoul private insurance (`47317421…`). Enrolled: paid by the university;
+completed coursework: 25,000 won. `academic_status` unstated and it changes the value, 2 branches →
+`conditional_answer`, acceptable `[conditional_answer, clarify]`.
+**E4 (branch, > 2).** C1: work hours on `d66aa2f5…` depend on year and TOPIK (four rows) → `clarify`.
+**E5 (caveat).** S1 HIEA (`…1814932`): the GPA ≥ 3.0 rule is outside the vocabulary → stated as a
+caveat in the answer, never asked.
+**E6 (not a branch).** A1: the 14-day address-change rule is the same for every degree level and
+year → `answer`, no branch, even though `degree_level` is unstated.
+
+### 9.4 Spans
+
+Gold span = the smallest sentence(s) or table row(s) that support each required fact. Span F1 is
+reported in the agreement report but is **not** a gate; humans adjudicate only clear misses.
+
+### 9.5 Question text vs persona
+
+The question (and session history) wins over the persona. If the question states a detail that
+conflicts with `gold_profile`, update `gold_profile` with the stated detail and say so in `notes`
+("question states X, persona had Y"). Mark the case for deletion in `notes` only if it becomes
+nonsense.
+
+**E7.** Persona `academic_status: applicant`, question "I was accepted, when do I pay tuition?" →
+`gold_profile.academic_status: admitted_not_enrolled`, `stated_profile` the same, note the conflict.
+
+### 9.6 Gold vs inapplicable evidence
+
+- **Gold:** the correct answer for this student relies on the passage, **including** a passage that
+  shows the student is **not** eligible.
+- **Inapplicable:** a rule for another group that the correct answer must not use.
+
+**E8.** ERICA undergraduate, year 3, TOPIK 3, asks "Can I work 30 hours?" (C1 page). The year 3-4 row
+that requires Level 4 is **gold** (it is why the answer is "no, 10 hours"). The master's/doctoral
+rows are **inapplicable** ("graduate rows").
+
+### 9.7 Time-specific facts
+
+- Dates, deadlines, fees, quotas and amounts need evidence **for the asked term**. Prior-term evidence
+  goes to `outdated_evidence`; the case is `unanswerable` (or `partial` when other required facts
+  are supported); behaviour `abstain`, naming the term that was found ("the snapshot has the 2026
+  rate, 79,320 won; the 2027 rate is not published").
+- **Stable rules** (procedures, eligibility, required documents) from the latest version count as
+  gold unless a newer version supersedes them. This replaces the "answer with a caveat" sentence
+  of the section 3 temporal rule for time-specific facts.
+
+**E9.** *"What is the NHI premium in 2027?"* → `19fd4a70…` (2026) in `outdated_evidence`,
+`unanswerable`, `abstain`. *"How do I enrol in NHI?"* asked for 2027 → the latest procedure is gold,
+`answer`.

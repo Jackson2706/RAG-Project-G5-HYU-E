@@ -966,3 +966,15 @@ Every report states this (`Report/notes/limitations.md`). Claude Code selected 1
   scope default, unknown-caveat rule, CONFIRM) and the T24 tests, then implements P6 (G0, G1, R16, R9-scope,
   R15 with the scope default) and P7 itself (Ponytail). M1, M2, A7 and ConditionalQA move to "if time".
 - Schedule: G4 Thursday evening; dev runs Thursday night; G5 + test run Friday; report and demo Saturday.
+
+**A30 GUIDELINES v1.1 (decision from the planning chat, 2026-11-12).** After the early check (κ answerability
+0.53 < 0.6), the human approved an amendment, recorded as GUIDELINES section 9: answerability counts required
+facts (partial → abstain, answer acceptable when it names the missing part); external_only only when the corpus
+refers elsewhere; branch = an unstated vocabulary attribute changes the answer's value, `conditional_answer` for
+≤ 2 branches, otherwise clarify; out-of-vocabulary requirements and unknown-status evidence are caveats; spans
+reported, not gated; question text wins over the persona; gold includes passages showing ineligibility;
+time-specific facts need evidence for the asked term. Codex re-checks all 90 rows of 01-03 (one exec per batch,
+change log `annot_codex/v11_changes.jsonl`), then annotates 04-06 (T15b). T16 re-labels part 1 and does part 2
+under v1.1 in a fresh subagent. Final agreement with bootstrap intervals; adjudication sheet to the human.
+G1 is a UI preset, disabled with "needs a labeled demo case" (P8D enables it). The AAES `max_branches`
+default (3) is a system parameter tuned on dev; it is not changed by the labeling rule.

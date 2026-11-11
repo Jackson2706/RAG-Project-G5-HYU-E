@@ -106,7 +106,7 @@ PRESETS: list[dict[str, Any]] = [
      "stages": {"context_construction": {"method": "closed_book"}}},
     {"id": "G1_ORACLE_CONTEXT", "kind": "online", "group": "Brackets", "name": "G1 — Oracle context",
      "description": "The model gets the labeled gold evidence: the upper bracket. Runs only in the evaluation runner with a labeled case.",
-     "stages": {}, "enabled": False},
+     "stages": {}, "enabled": False, "disabled_reason": "needs a labeled demo case"},  # P8D enables it
     {"id": "R9S_SCOPE_PREFILTER", "kind": "aaes", "group": "Advanced", "name": "R9-scope — Prefilter on the student's profile",
      "description": "Removes chunks whose tags do not fit what the student said (and applicant-only pages), before the search.",
      "stages": {**HYBRID, "query_understanding": {"method": "profile_understanding"}, "metadata_prefiltering": {"method": "applicability_prefilter"},
@@ -165,7 +165,7 @@ def presets_json() -> list[dict[str, Any]]:
                                                                            "group": p.get("group")}
         try:
             entry["config"] = preset_config(p["id"]) if entry["enabled"] else None
-            entry["errors"] = []
+            entry["errors"] = [] if entry["enabled"] else [{"stage_id": None, "param": None, "message": p.get("disabled_reason", "not available")}]
         except ConfigError as exc:
             entry["config"], entry["errors"] = None, exc.errors
         result.append(entry)
