@@ -2,9 +2,9 @@
 
 Run from ``Sources/``::
 
-    python -m labeling.auto_audit sample --index-id hyu_20261110_97dc1269_r3
-    python -m labeling.auto_audit compare --index-id hyu_20261110_97dc1269_r3 --reference <reference.jsonl>
-    python -m labeling.auto_audit finalize --index-id hyu_20261110_97dc1269_r3 --reference <reference.jsonl> --decisions <decisions.jsonl>
+    python -m labeling.auto_audit sample --index-id hyu_20261110_97dc1269_r4 --out fresh
+    python -m labeling.auto_audit compare --index-id hyu_20261110_97dc1269_r4 --out fresh --reference <reference.jsonl>
+    python -m labeling.auto_audit finalize --index-id hyu_20261110_97dc1269_r4 --out fresh --reference <reference.jsonl> --decisions <decisions.jsonl>
 """
 
 from __future__ import annotations
@@ -14,6 +14,7 @@ import json
 import math
 import random
 import re
+import shutil
 import sys
 from collections import Counter
 from pathlib import Path
@@ -36,6 +37,7 @@ ATTRIBUTES = (*CONSTRAINT_ATTRIBUTES, "campus", "scope", "effective_term")
 BUCKET_QUOTAS = {
     "rule_tagged": 50,
     "rule_unconditioned": 25,
+    "rule_cue_unknown": 35,
     "llm_tagged": 20,
     "llm_unconditioned": 35,
 }
@@ -60,8 +62,10 @@ class ReferenceValidationError(AuditError):
         self.errors = errors
 
 
-def output_dir(index_id: str) -> Path:
-    return RESULTS_DIR / "tag_audit" / index_id / "auto"
+def output_dir(index_id: str, name: str = "auto") -> Path:
+    if not name or Path(name).name != name or name in {".", ".."}:
+        raise AuditError("--out must be one folder name")
+    return RESULTS_DIR / "tag_audit" / index_id / name
 
 
 def load_records(db: Database, chunk_ids: list[str] | None = None) -> list[dict]:
@@ -91,13 +95,14 @@ def load_records(db: Database, chunk_ids: list[str] | None = None) -> list[dict]
                 "_heading_path": list(heading_path),
             }
         )
-    records.sort(key=lambda row: row["chunk_id"])
     if chunk_ids is not None:
         found = {row["chunk_id"] for row in records}
         missing = [chunk_id for chunk_id in chunk_ids if chunk_id not in found]
         if missing:
             raise AuditError(f"MongoDB is missing sampled chunks: {', '.join(missing)}")
-    return records
+        by_id = {row["chunk_id"]: row for row in records}
+        return [by_id[chunk_id] for chunk_id in chunk_ids]
+    return sorted(records, key=lambda row: row["chunk_id"])
 
 
 def _minimum_erica(target: int, records: list[dict]) -> int:
@@ -106,20 +111,25 @@ def _minimum_erica(target: int, records: list[dict]) -> int:
     return wanted if available >= wanted else available
 
 
+def _scaled(target: int, n: int) -> int:
+    return round(target * n / 150)
+
+
 def _bucket_targets(records: list[dict], n: int, rng: random.Random) -> dict[str, int]:
     by_bucket = {bucket: [row for row in records if row.get("tag_bucket") == bucket] for bucket in BUCKETS}
     invalid = sorted({row.get("tag_bucket") for row in records} - set(BUCKETS), key=str)
     if invalid:
         raise AuditError(f"Index contains unknown tag buckets: {invalid}")
-    targets = {
-        "rule_tagged": BUCKET_QUOTAS["rule_tagged"],
-        "rule_unconditioned": BUCKET_QUOTAS["rule_unconditioned"],
-        "llm_tagged": min(BUCKET_QUOTAS["llm_tagged"], len(by_bucket["llm_tagged"])),
-        "llm_unconditioned": BUCKET_QUOTAS["llm_unconditioned"],
-        "llm_rejected": len(by_bucket["llm_rejected"]),
-        "llm_errors": len(by_bucket["llm_errors"]),
-    }
-    for bucket in ("rule_tagged", "rule_unconditioned", "llm_unconditioned"):
+    targets = {}
+    for bucket, rows in by_bucket.items():
+        if not rows:
+            targets[bucket] = 0
+        elif bucket in {"llm_rejected", "llm_errors"}:
+            targets[bucket] = len(rows)
+        else:
+            quota = _scaled(BUCKET_QUOTAS[bucket], n)
+            targets[bucket] = min(quota, len(rows)) if bucket == "llm_tagged" else quota
+    for bucket in ("rule_tagged", "rule_unconditioned", "rule_cue_unknown", "llm_unconditioned"):
         if len(by_bucket[bucket]) < targets[bucket]:
             raise AuditError(
                 f"Cannot meet {bucket} quota: need {targets[bucket]}, index has {len(by_bucket[bucket])}"
@@ -129,7 +139,7 @@ def _bucket_targets(records: list[dict], n: int, rng: random.Random) -> dict[str
         raise AuditError(f"Bucket quotas require {base} chunks, more than --n {n}")
     fill = [
         bucket
-        for bucket in ("rule_tagged", "llm_unconditioned")
+        for bucket in ("rule_tagged", "rule_cue_unknown", "llm_unconditioned")
         for _ in range(len(by_bucket[bucket]) - targets[bucket])
     ]
     rng.shuffle(fill)
@@ -150,14 +160,31 @@ def _sample_bucket(rows: list[dict], target: int, rng: random.Random) -> list[di
     return chosen + rest[: target - len(chosen)]
 
 
-def _floor_counts(records: list[dict]) -> dict[str, int]:
-    return {name: sum(predicate(row) for row in records) for name, _, predicate in FLOORS}
+def _floor_targets(records: list[dict], n: int) -> list[tuple[str, int, int, Callable[[dict], bool]]]:
+    targets = []
+    for name, base, predicate in FLOORS:
+        requested = _scaled(base, n)
+        available = sum(predicate(row) for row in records)
+        targets.append((name, requested, min(requested, available), predicate))
+    return targets
+
+
+def _floor_report(selected: list[dict], records: list[dict], n: int) -> dict[str, dict[str, int]]:
+    return {
+        name: {
+            "requested": requested,
+            "available": sum(predicate(row) for row in records),
+            "required": required,
+            "achieved": sum(predicate(row) for row in selected),
+        }
+        for name, requested, required, predicate in _floor_targets(records, n)
+    }
 
 
 def _ensure_floors(selected: list[dict], records: list[dict], targets: dict[str, int], rng: random.Random) -> None:
     selected_ids = {row["chunk_id"] for row in selected}
     completed: list[tuple[str, int, Callable[[dict], bool]]] = []
-    for name, target, predicate in FLOORS:
+    for name, requested, target, predicate in _floor_targets(records, len(selected)):
         while sum(predicate(row) for row in selected) < target:
             candidates = [row for row in records if row["chunk_id"] not in selected_ids and predicate(row)]
             candidates.sort(key=lambda row: row["chunk_id"])
@@ -186,7 +213,9 @@ def _ensure_floors(selected: list[dict], records: list[dict], targets: dict[str,
                     break
             if not swapped:
                 achieved = sum(predicate(row) for row in selected)
-                raise AuditError(f"Cannot meet {name} floor: need {target}, achieved {achieved}")
+                raise AuditError(
+                    f"Cannot meet {name} floor: requested {requested}, need {target}, achieved {achieved}"
+                )
         completed.append((name, target, predicate))
 
 
@@ -204,8 +233,12 @@ def sample_records(records: list[dict], n: int = 150, seed: int = 20261111) -> t
         selected.extend(_sample_bucket(rows, targets[bucket], rng))
     _ensure_floors(selected, records, targets, rng)
     selected.sort(key=lambda row: row["chunk_id"])
-    counts = _floor_counts(selected)
-    failures = [f"{name}: need {target}, achieved {counts[name]}" for name, target, _ in FLOORS if counts[name] < target]
+    report = _floor_report(selected, records, n)
+    failures = [
+        f"{name}: requested {values['requested']}, need {values['required']}, achieved {values['achieved']}"
+        for name, values in report.items()
+        if values["achieved"] < values["required"]
+    ]
     if failures:
         raise AuditError("Sampling floors failed: " + "; ".join(failures))
     return selected, targets
@@ -222,14 +255,24 @@ def blind_row(record: dict) -> dict:
     }
 
 
-def sample_metadata(index_id: str, seed: int, records: list[dict], targets: dict[str, int], partition: dict[str, int]) -> dict:
+def sample_metadata(
+    index_id: str,
+    seed: int,
+    records: list[dict],
+    targets: dict[str, int],
+    partition: dict[str, int],
+    *,
+    available_records: list[dict] | None = None,
+    excluded_files: list[dict] | None = None,
+    reused_from: Path | None = None,
+) -> dict:
     by_bucket = Counter(row["tag_bucket"] for row in records)
     by_campus = Counter(row["_campus"] for row in records)
     by_bucket_campus = {
         bucket: dict(Counter(row["_campus"] for row in records if row["tag_bucket"] == bucket))
         for bucket in BUCKETS
     }
-    return {
+    metadata = {
         "index_id": index_id,
         "seed": seed,
         "n": len(records),
@@ -243,10 +286,18 @@ def sample_metadata(index_id: str, seed: int, records: list[dict], targets: dict
             "by_bucket": {bucket: by_bucket[bucket] for bucket in BUCKETS},
             "by_campus": {campus: by_campus[campus] for campus in VOCABULARY["campus"]},
             "by_bucket_campus": by_bucket_campus,
-            "floors": _floor_counts(records),
+            "floors": _floor_report(
+                records,
+                available_records if available_records is not None else records,
+                len(records),
+            ),
         },
         "bucket_partition": partition,
+        "excluded_files": excluded_files or [],
     }
+    if reused_from is not None:
+        metadata["reused_from"] = str(reused_from)
+    return metadata
 
 
 def _write_jsonl(path: Path, rows: list[dict]) -> None:
@@ -264,6 +315,49 @@ def write_sample(records: list[dict], metadata: dict, out: Path, force: bool = F
     meta.write_text(json.dumps(metadata, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
+def sample_chunk_ids(path: Path) -> tuple[dict, list[str]]:
+    try:
+        metadata = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise AuditError(f"Cannot read sample metadata {path}: {exc}") from exc
+    chunk_ids = metadata.get("chunk_ids")
+    if (
+        not isinstance(chunk_ids, list)
+        or any(not isinstance(chunk_id, str) or not chunk_id for chunk_id in chunk_ids)
+        or len(set(chunk_ids)) != len(chunk_ids)
+    ):
+        raise AuditError(f"Sample metadata {path} has invalid chunk_ids")
+    return metadata, chunk_ids
+
+
+def write_reused_sample(
+    records: list[dict], metadata: dict, source_meta: Path, out: Path, force: bool = False
+) -> None:
+    source_blind = source_meta.parent / "blind_inputs.jsonl"
+    blind_rows, errors = _read_jsonl(source_blind, "blind inputs")
+    if errors:
+        raise ReferenceValidationError(errors)
+    for row in blind_rows:
+        row.pop("_line", None)
+    expected_ids = metadata["chunk_ids"]
+    blind_ids = [row.get("chunk_id") for row in blind_rows]
+    if blind_ids != expected_ids:
+        raise AuditError(f"Blind inputs {source_blind} do not match the reused chunk_ids")
+    by_id = {row["chunk_id"]: row for row in blind_rows}
+    for record in records:
+        if by_id[record["chunk_id"]].get("text") != (record.get("text") or ""):
+            raise AuditError(f"Chunk {record['chunk_id']} text changed since {source_blind}")
+
+    blind = out / "blind_inputs.jsonl"
+    meta = out / "sample_meta.json"
+    existing = next((path for path in (blind, meta) if path.exists()), None)
+    if existing and not force:
+        raise AuditError(f"Refusing to overwrite existing audit file: {existing} (use --force)")
+    out.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(source_blind, blind)
+    meta.write_text(json.dumps(metadata, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+
 def read_sample_metadata(path: Path, index_id: str) -> dict:
     try:
         metadata = json.loads(path.read_text(encoding="utf-8"))
@@ -272,10 +366,13 @@ def read_sample_metadata(path: Path, index_id: str) -> dict:
     if metadata.get("index_id") != index_id:
         raise AuditError(f"Sample metadata is for {metadata.get('index_id')!r}, not {index_id!r}")
     partition = metadata.get("bucket_partition")
+    if isinstance(partition, dict):
+        partition = {"rule_cue_unknown": 0, **partition}
+        metadata["bucket_partition"] = partition
     chunks = metadata.get("chunks")
     ids = metadata.get("chunk_ids")
     if not isinstance(partition, dict) or any(not isinstance(partition.get(bucket), int) for bucket in BUCKETS):
-        raise AuditError("Sample metadata has no valid six-bucket partition")
+        raise AuditError("Sample metadata has no valid bucket partition")
     if not isinstance(chunks, dict) or not isinstance(ids, list) or set(chunks) != set(ids):
         raise AuditError("Sample metadata has invalid chunk strata")
     return metadata
@@ -679,6 +776,7 @@ def scores_markdown(scores: dict, final: bool = False) -> str:
                 "",
                 f"Predicted side: {review['predicted']}; reference side: {review['reference']}; "
                 f"both wrong: {review['both_wrong']}; ambiguous: {review['ambiguous']}.",
+                f"Carried decisions: {review.get('carried', 0)}.",
                 "",
                 "## Out-of-vocabulary conditions",
                 "",
@@ -696,21 +794,91 @@ def scores_markdown(scores: dict, final: bool = False) -> str:
     return "\n".join(lines).rstrip() + "\n"
 
 
-def write_comparison(out: Path, scores: dict, disagreements: list[dict], key: dict) -> None:
+def _read_disagreement_key(path: Path) -> dict:
+    try:
+        key = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise AuditError(f"Cannot read disagreement key {path}: {exc}") from exc
+    if not isinstance(key, dict) or not isinstance(key.get("rows"), list):
+        raise AuditError(f"Disagreement key {path} is invalid")
+    return key
+
+
+def _disagreement_values(row: dict) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    return tuple(sorted((tuple(sorted(row["value_a"])), tuple(sorted(row["value_b"])))))
+
+
+def carry_disagreement_decisions(
+    source: Path, disagreements: list[dict]
+) -> tuple[list[dict], list[dict], list[dict]]:
+    old_disagreements, errors = _read_jsonl(source / "disagreements.jsonl", "disagreements")
+    for row in old_disagreements:
+        row.pop("_line", None)
+    if errors:
+        raise ReferenceValidationError(errors)
+    old_key = _read_disagreement_key(source / "disagreements_key.json")
+    read_decisions(source / "decisions.jsonl", old_disagreements, old_key)
+    decision_rows, errors = _read_jsonl(source / "decisions.jsonl", "decisions")
+    if errors:
+        raise ReferenceValidationError(errors)
+
+    old_by_pair = {(row["chunk_id"], row["attribute"]): row for row in old_disagreements}
+    decision_by_pair = {(row["chunk_id"], row["attribute"]): row for row in decision_rows}
+    new_rows, carried_rows, carried_decisions = [], [], []
+    for row in disagreements:
+        pair = (row["chunk_id"], row["attribute"])
+        old = old_by_pair.get(pair)
+        decision = decision_by_pair.get(pair)
+        if old is None or decision is None or _disagreement_values(old) != _disagreement_values(row):
+            new_rows.append(row)
+            continue
+        carried = {field: value for field, value in decision.items() if field != "_line"}
+        if carried["decision"] in {"a", "b"}:
+            chosen = old[f"value_{carried['decision']}"]
+            carried["decision"] = "a" if chosen == row["value_a"] else "b"
+        carried.update(value_a=row["value_a"], value_b=row["value_b"])
+        carried_rows.append(row)
+        carried_decisions.append(carried)
+    return new_rows, carried_rows, carried_decisions
+
+
+def write_comparison(
+    out: Path,
+    scores: dict,
+    disagreements: list[dict],
+    key: dict,
+    carried_disagreements: list[dict] | None = None,
+    carried_decisions: list[dict] | None = None,
+) -> None:
     out.mkdir(parents=True, exist_ok=True)
     _write_jsonl(out / "disagreements.jsonl", disagreements)
+    _write_jsonl(out / "carried_disagreements.jsonl", carried_disagreements or [])
+    _write_jsonl(out / "carried_decisions.jsonl", carried_decisions or [])
     (out / "disagreements_key.json").write_text(json.dumps(key, indent=2) + "\n", encoding="utf-8")
     (out / "scores_raw.json").write_text(json.dumps(scores, indent=2) + "\n", encoding="utf-8")
     (out / "scores_raw.md").write_text(scores_markdown(scores), encoding="utf-8")
 
 
-def compare(db: Database, index_id: str, reference_path: Path, out: Path) -> dict:
+def compare(
+    db: Database,
+    index_id: str,
+    reference_path: Path,
+    out: Path,
+    carry_decisions: Path | None = None,
+) -> dict:
     metadata = read_sample_metadata(out / "sample_meta.json", index_id)
     records = load_records(db, metadata["chunk_ids"])
     references = validate_reference(reference_path, records, metadata["chunk_ids"])
     scores = score_comparison(records, references, metadata)
     disagreements, key = disagreement_rows(records, references, metadata["seed"])
-    write_comparison(out, scores, disagreements, key)
+    carried_disagreements: list[dict] = []
+    carried: list[dict] = []
+    if carry_decisions is not None:
+        disagreements, carried_disagreements, carried = carry_disagreement_decisions(
+            carry_decisions, disagreements
+        )
+    scores["carried_decisions"] = len(carried)
+    write_comparison(out, scores, disagreements, key, carried_disagreements, carried)
     return scores
 
 
@@ -721,8 +889,17 @@ def _decision_values(attribute: str, values: Any, prefix: str, errors: list[str]
     return set(values)
 
 
-def read_decisions(path: Path, disagreements: list[dict], key: dict) -> tuple[dict, set, dict, list[dict]]:
+def read_decisions(
+    path: Path,
+    disagreements: list[dict],
+    key: dict,
+    carried_path: Path | None = None,
+) -> tuple[dict, set, dict, list[dict]]:
     rows, errors = _read_jsonl(path, "decisions")
+    if carried_path is not None:
+        carried, carried_errors = _read_jsonl(carried_path, "carried decisions")
+        rows.extend(carried)
+        errors.extend(carried_errors)
     disagreements_by_key = {(row["chunk_id"], row["attribute"]): row for row in disagreements}
     key_by_pair = {(row["chunk_id"], row["attribute"]): row for row in key.get("rows", [])}
     overrides: dict[tuple[str, str], set[str]] = {}
@@ -794,11 +971,24 @@ def finalize(db: Database, index_id: str, reference_path: Path, decisions_path: 
     disagreements, _ = _read_jsonl(out / "disagreements.jsonl", "disagreements")
     for row in disagreements:
         row.pop("_line", None)
-    try:
-        key = json.loads((out / "disagreements_key.json").read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
-        raise AuditError(f"Cannot read disagreement key: {exc}") from exc
-    overrides, excluded, summary, ambiguous = read_decisions(decisions_path, disagreements, key)
+    carried_disagreements_path = out / "carried_disagreements.jsonl"
+    carried_decisions_path = out / "carried_decisions.jsonl"
+    carried_disagreements = []
+    if carried_disagreements_path.exists():
+        carried_disagreements, errors = _read_jsonl(carried_disagreements_path, "carried disagreements")
+        if errors:
+            raise ReferenceValidationError(errors)
+        for row in carried_disagreements:
+            row.pop("_line", None)
+    all_disagreements = disagreements + carried_disagreements
+    key = _read_disagreement_key(out / "disagreements_key.json")
+    overrides, excluded, summary, ambiguous = read_decisions(
+        decisions_path,
+        all_disagreements,
+        key,
+        carried_decisions_path if carried_decisions_path.exists() else None,
+    )
+    summary["carried"] = len(carried_disagreements)
     scores = score_comparison(records, references, metadata, overrides, excluded)
     oov, audience, topik = _reference_counts(references)
     scores.update(
@@ -826,30 +1016,71 @@ def build_parser() -> argparse.ArgumentParser:
     sample.add_argument("--n", type=int, default=150)
     sample.add_argument("--seed", type=int, default=20261111)
     sample.add_argument("--force", action="store_true")
+    sample_source = sample.add_mutually_exclusive_group()
+    sample_source.add_argument("--exclude", type=Path, action="append", default=[])
+    sample_source.add_argument("--reuse", type=Path)
     compare_parser = commands.add_parser("compare", help="validate and compare a blind reference")
     compare_parser.add_argument("--index-id", required=True)
     compare_parser.add_argument("--reference", type=Path, required=True)
+    compare_parser.add_argument("--carry-decisions", type=Path)
     finalize_parser = commands.add_parser("finalize", help="apply blind disagreement decisions and re-score")
     finalize_parser.add_argument("--index-id", required=True)
     finalize_parser.add_argument("--reference", type=Path, required=True)
     finalize_parser.add_argument("--decisions", type=Path, required=True)
+    for command in (sample, compare_parser, finalize_parser):
+        command.add_argument("--out", default="auto")
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    out = output_dir(args.index_id)
     try:
+        out = output_dir(args.index_id, args.out)
         db = connect_index(args.index_id)
         if args.command == "sample":
-            records, targets = sample_records(load_records(db), args.n, args.seed)
-            metadata = sample_metadata(args.index_id, args.seed, records, targets, manifest_bucket_partition(db))
-            write_sample(records, metadata, out, args.force)
+            partition = manifest_bucket_partition(db)
+            if args.reuse:
+                source_metadata, chunk_ids = sample_chunk_ids(args.reuse)
+                records = load_records(db, chunk_ids)
+                targets = {bucket: sum(row["tag_bucket"] == bucket for row in records) for bucket in BUCKETS}
+                seed = source_metadata.get("seed")
+                if not isinstance(seed, int):
+                    raise AuditError(f"Sample metadata {args.reuse} has no valid seed")
+                metadata = sample_metadata(
+                    args.index_id,
+                    seed,
+                    records,
+                    targets,
+                    partition,
+                    reused_from=args.reuse,
+                )
+                write_reused_sample(records, metadata, args.reuse, out, args.force)
+            else:
+                available = load_records(db)
+                excluded_ids: set[str] = set()
+                excluded_files = []
+                for path in args.exclude:
+                    _, chunk_ids = sample_chunk_ids(path)
+                    excluded_ids.update(chunk_ids)
+                    excluded_files.append({"path": str(path), "count": len(chunk_ids)})
+                available = [row for row in available if row["chunk_id"] not in excluded_ids]
+                records, targets = sample_records(available, args.n, args.seed)
+                metadata = sample_metadata(
+                    args.index_id,
+                    args.seed,
+                    records,
+                    targets,
+                    partition,
+                    available_records=available,
+                    excluded_files=excluded_files,
+                )
+                write_sample(records, metadata, out, args.force)
             print(json.dumps(metadata["achieved_strata"], indent=2))
             print(f"Wrote {len(records)} blind chunks to {out}")
         elif args.command == "compare":
-            scores = compare(db, args.index_id, args.reference, out)
+            scores = compare(db, args.index_id, args.reference, out, args.carry_decisions)
             print(f"G2 raw: {'PASS' if scores['g2']['passed'] else 'FAIL'}")
+            print(f"Carried {scores['carried_decisions']} disagreement decisions")
             print(f"Wrote raw scores and disagreements to {out}")
         else:
             scores = finalize(db, args.index_id, args.reference, args.decisions, out)

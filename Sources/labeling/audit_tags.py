@@ -38,6 +38,7 @@ ATTRIBUTES = (
 BUCKETS = (
     "rule_tagged",
     "rule_unconditioned",
+    "rule_cue_unknown",
     "llm_tagged",
     "llm_unconditioned",
     "llm_rejected",
@@ -256,6 +257,7 @@ def manifest_bucket_partition(db: Database) -> dict[str, int]:
     partition = (manifest.get("applicability") or {}).get("partition")
     if not isinstance(partition, dict):
         raise AuditError(f"Index {db.index_id} manifest has no applicability.partition")
+    partition = {"rule_cue_unknown": 0, **partition}  # r3 manifests predate this r4 bucket.
     missing = [bucket for bucket in BUCKETS if bucket not in partition]
     invalid = [
         bucket

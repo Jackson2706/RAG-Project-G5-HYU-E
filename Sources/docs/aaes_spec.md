@@ -176,13 +176,21 @@ leaves the index in `built` state.
 
 ## Tag audit
 
-The A14 automated audit uses `python -m labeling.auto_audit`. `sample` reads the published MongoDB
-index and writes a seeded 150-chunk sample under
-`Report/results/tag_audit/<index_id>/auto/`. Sampling uses the six A6 buckets and campus within each
-bucket. It includes every `llm_rejected` and `llm_errors` chunk, at least 15 chunks whose text names
-TOPIK, at least 20 `rule_unconditioned` chunks, and at least four predicted `any_of` chunks. The
-blind JSONL contains only the chunk ID, site, title, heading path, post date, and text. Predicted
-conditions, buckets, methods, and status remain in `sample_meta.json`.
+The A14 automated audit uses `python -m labeling.auto_audit`. Each command accepts `--out NAME` and
+writes under `Report/results/tag_audit/<index_id>/<NAME>/`; the default name is `auto`. `sample`
+reads the published MongoDB index and draws from the seven A6 buckets, including
+`rule_cue_unknown`, with campus stratification inside each bucket. At `--n 150`, the bucket quotas
+are 50 `rule_tagged`, 25 `rule_unconditioned`, 35 `rule_cue_unknown`, 20 `llm_tagged`, and 35
+`llm_unconditioned`; all `llm_rejected` and `llm_errors` chunks are included. Quotas and floors
+scale with `--n`, empty buckets have zero quota, and floors are capped by the eligible chunks in
+the index. `sample_meta.json` records the requested, capped, and achieved floor counts.
+
+`sample --exclude META` removes the chunk IDs in each supplied metadata file before sampling and
+records each file and count. `sample --reuse META` keeps the old chunk IDs without applying quotas
+or floors, recalculates their buckets against the current index, and uses the current manifest
+partition. Reuse checks every chunk text against the old blind input and then copies that file byte
+for byte. The blind JSONL contains only the chunk ID, site, title, heading path, post date, and text.
+Predicted conditions, buckets, methods, and status remain in `sample_meta.json`.
 
 The reference annotator follows `Report/notes/tag_audit_rules.md` without seeing the system tags.
 `compare` validates every v1 value and checks whitespace-normalized evidence quotes against the
@@ -193,10 +201,12 @@ weighted by the full bucket partition, and every precision and recall estimate h
 interval.
 
 Disagreements are written with the two sides assigned to `a` and `b` by a seeded shuffle. The side
-key is stored separately and is not provided to the reviewer. `finalize` maps the review decisions
-back through this key, excludes ambiguous rows, and re-scores the adjudicated reference. For an
-attribute with at least five occurrences, Gate G2 passes when precision is at least 0.8 and weighted
-recall is at least 0.7. The final report also records disagreement outcomes, frequent
-out-of-vocabulary conditions, audience counts, and TOPIK-scope counts. The report states that the
-automated reference is not human-validated and that Codex also wrote the tagging rules.
+key is stored separately and is not provided to the reviewer. With `compare --carry-decisions DIR`,
+a decision is copied when its chunk, attribute, and both value sets match a decided row in `DIR`.
+Only unmatched rows are written to `disagreements.jsonl`. `finalize` combines the carried and new
+decisions, maps them through the current side key, excludes ambiguous rows, and reports the carried
+count. For an attribute with at least five occurrences, Gate G2 passes when precision is at least
+0.8 and weighted recall is at least 0.7. The final report also records disagreement outcomes,
+frequent out-of-vocabulary conditions, audience counts, and TOPIK-scope counts. The report states
+that the automated reference is not human-validated and that Codex also wrote the tagging rules.
 
