@@ -1,60 +1,58 @@
-# Claude Code annotation notes (T16, part 1)
+# T16 Claude Code blind annotation notes (GUIDELINES v1.1)
 
-Annotator: `claude-code:claude-opus-5-5`. Blind: only GUIDELINES.md, questions.jsonl, the T16 part-1
-input file, the snapshot (via `labeling.search` and exact slices), and `labeling/validate.py` were read.
+Annotator: `claude-code:claude-opus-5-5`. Rows have `case_version` "1.1" and snapshot `hyu-20261110-97dc1269`.
+Part 1 was relabelled from scratch; the old part 1 file and old notes were overwritten without being read.
 
-File: `part_1.jsonl`, 29 rows, `python -m labeling.validate ... --annotation` passes with no output.
+## Part 1 (`part_1.jsonl`, 29 cases): done
 
-## Hard cases
+`python -m labeling.validate data/HYU/labels/annot_claude/part_1.jsonl --annotation` exits 0.
 
-- **T14-026** ("apply to the international student group"): the snapshot has no clear referent. The
-  candidates were Global Sarang Handae (Korean title, current Seoul undergraduates only), ISF Korean
-  class and ERICA Hanmille. Labeled `unanswerable` / `abstain`, with `clarify` acceptable. The question
-  wording may need a rewrite.
-- **T14-033** (where to apply to return, Seoul): the 2026-1 guide says applications in person or by
-  e-mail are not accepted. The step that names HY-in was a screenshot and was lost in parsing. The
-  explicit "apply only through HY-In portal" line is in the 2021-2 guide. I put that old span in
-  `gold_evidence`, not in `outdated_evidence`, because it is the only explicit source.
-- **T14-035 / T14-102** (extending the residence card; gold persona is on leave): the "must leave Korea
-  within 30 days, return the RC" rule appears only in the ERICA leave-of-absence guidelines. I treated
-  it as national, because it is driven by immigration reporting, and used it for a Seoul persona.
-  T14-035 does not state the leave status, so it gets `conditional_answer` on `academic_status`. T14-102
-  states it and gets `answer`, with `partial` because no page literally says "cannot extend while on leave".
-- **T14-046** (counseling month): the only edition is from December 2021 and is for graduate students.
-  The gold persona is non-degree. Labeled `partial` / `answer` with an "as of" caveat and an
-  eligibility caveat.
-- **T14-081 / T14-084** (admission language requirement by track): the Undergraduate Admission Guide page
-  has only download links and no text. The 2026 acceptance guideline names a "Korean standard pass or
-  exemption" group but does not say who is exempt. Both labeled `partial` / `abstain`. In T14-084,
-  "apply" could also mean HIEA, where English-track students may substitute IELTS/TOEFL, so `clarify`
-  is acceptable.
-- **T14-113** (newly admitted ERICA student, visa): no readable English ERICA guide. The group visa
-  notice text is only "read the attached guides". The Seoul CoA and Korean-standard-fail rules went to
-  `inapplicable_evidence`. Note that the persona's gold profile has `visa: D-2` and
-  `korean_standard: fail`, a combination that Seoul's rules forbid. That is a persona-consistency
-  question for the adjudicator.
-- **T14-078** (NHI after graduation): labeled `external_only` rather than `unanswerable`, because the
-  ERICA page sends all NHI questions to NHIS (1577-1000).
-- **T14-114** (ERICA scholarship with TOPIK 1, English track): `condition_sets` is TOPIK or English
-  track, and both sets fit. The gold persona is `admitted_not_enrolled` and HIEA needs grades from the
-  previous semester, so `academic_status` is a branch.
+Hard cases:
+- T14-017, T14-018, T14-026, T14-032, T14-044: the campus is not stated and the Seoul and ERICA routes, dates or
+  contacts differ, so these are `conditional_answer` on `campus` (8.3). The gold profile is Seoul, so the ERICA spans
+  are inapplicable.
+- T14-026: "international student group" is read as the OIA ambassador group (Global Love Hanyang / GLOBAL LOVE HYU).
+  The 2026 notice has a Korean title and contains only a form link, so the stable rules come from the 2025 English notice.
+- T14-102: no page says outright that students on leave cannot extend their residence card. The answer combines the
+  rule that students on leave must leave Korea within 30 days (ERICA leave guide) with the extension document list.
+- T14-109: "Do visiting students have to join NHI?" No page names visiting students or a minimum stay, so I labelled
+  it `partial`. It could also be read as answerable.
+- T14-113: newly admitted student, campus not stated, ERICA persona. The Seoul CoA steps are campus-specific; I
+  treated the D-2 visa documents as national. ERICA's CoA steps are not in the English text, so `partial`.
+- T14-114: the HIEA language condition is met through `condition_sets` (TOPIK or English track). `academic_status`
+  (newly admitted vs enrolled) changes eligibility, so it is the branch.
+- T14-078: `external_only`, because the ERICA NHI page sends all NHI questions to NHIS (9.2).
 
-## Guideline questions
+v1.1 questions:
+- 9.3 vs 3.4: for a stated campus with no own-campus evidence the answer is `abstain`. When the campus is unstated
+  and only one campus has evidence (T14-113), is it `clarify` or `partial`/`abstain`?
+- Some events are only described in old notices and the question gives no term (T14-046 counseling month, 2021;
+  T14-071 trips, 2024). I labelled them `answer` with a date caveat. Does 9.7 require evidence for the current term here?
 
-1. **May evidence from one campus be used for the other when the rule looks immigration-driven but is
-   published only by one campus** (ERICA's 30-day departure on leave, ERICA's NHI waiver for ≥1 month
-   abroad)? Section 5 lists immigration and NHI as national. I followed that, but a sentence on
-   "national rule found only on one campus's page" would help.
-2. **When the newest version is missing a detail that an older version states** (T14-033), should the
-   older span go to `gold_evidence` or to `outdated_evidence`? Section 3's temporal rule covers only
-   "only an old version exists".
-3. **Do semester vs holiday hours** (library, T14-058) **count as a branch?** `term` is not in
-   vocabulary v1, so I listed both in the answer and gave no branch.
-4. **Unstated `degree_level` in eligibility-limited programs** (KIRD counseling: graduate students
-   only, T14-015; Counseling Month: graduate only, T14-046): branch or caveat? I chose caveat in both,
-   because the question framing ("researchers", "what happens") does not ask about eligibility.
-5. **Implied but unspoken status** ("after I graduate", T14-078): I did not put
-   `academic_status: graduating` in `stated_profile`, following "never infer". Please confirm.
-6. **Outside-vocabulary deciders** (partner-university nomination for exchange vs visiting, T14-107;
-   arts vs non-arts program for the ERICA TOPIK scholarship, T14-114) are written as caveats. These may
-   be candidates for vocabulary v2.
+## Part 2 (`part_2.jsonl`, 25 cases): done
+
+`python -m labeling.validate data/HYU/labels/annot_claude/part_2.jsonl --annotation` exits 0.
+
+Hard cases:
+- T14-130 "Can I work part time here?": nothing is stated, and visa, degree, year and language all matter, so
+  `clarify`. The Seoul part-time confirmation form (45669e0e, 2025-10) gives 20/25/30 hours per week, which conflicts
+  with the ERICA visa table (10/30 and 15/35). This needs adjudication. T14-214 keeps the hours out of the required facts.
+- T14-158 "Which ERICA career event is newer": unclear whether this means posting date or event date, and which events
+  are being compared. The answer names Global Career Start (2025-10) over the 2025 Job Fair (2025-09), plus the newest
+  board event, the Hyundai E&C popup (2026-03).
+- T14-139 / T14-221 (9.5 updates): "I start this fall" means the persona is no longer an applicant, so academic_status
+  becomes `admitted_not_enrolled`. "I passed the university Korean test now" changes korean_standard from `fail` to
+  `pass`. Both are noted in the rows.
+- T14-175: the 2025 NHI notice has an unreadable `.hwp` attachment (Seoul foreigner service centre guide). It might
+  hold the answer, which would make the case `unanswerable_unreadable` instead of `external_only`.
+- T14-195 / T14-230: one required fact can never have a span (a guaranteed approval; the exact D-10 timing), so
+  `partial` -> `abstain`.
+
+v1.1 questions:
+- The validator's stale-profile exception needs `slice == multi_session`, but annotator files have no slice. Any
+  stated update in a multi-session case must therefore be copied into `gold_profile` (done for T14-221).
+- NHI questions the snapshot cannot answer (T14-078, T14-136, T14-174, T14-175): I chose `external_only` because of the
+  ERICA page's blanket NHIS referral. E9 labels a similar NHI question `unanswerable`. Which rule wins outside 9.7?
+- Personal immigration actions and status (T14-170, T14-176, T14-182, T14-187, T14-203): `external_only` with the
+  HiKorea / 1345 contact span, by analogy with E2.
+- 9.1 says `partial` -> `abstain`. When unstated branches also exist (as in T14-130), should `clarify` come first?
