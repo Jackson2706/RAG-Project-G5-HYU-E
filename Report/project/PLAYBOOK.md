@@ -449,7 +449,7 @@ answers, never asked about. Online steps 1–4 and the policy are defined in
 {
   "case_id": "hyu-0042", "case_version": "1.0", "snapshot_id": "hyu-20261110-ab12cd34",
   "split": "dev | test", "slice": "unconditional | conditional | temporal | negative | multi_session",
-  "origin": "human | agent_draft_human_edited | agent_draft",
+  "origin": "human | agent_draft_human_edited | agent_edited | agent_draft",
   "annotator": "codex:<model>", "adjudicated_by": "human:JK",
   "session_history": [{"role": "user", "text": "I'm a degree-seeking undergrad at ERICA."}],
   "question": "How many hours can I work part-time during the semester?",
@@ -940,3 +940,13 @@ GUIDELINES.md v1.0 stands. T14 (question drafts from topics × personas, no page
    `labeling.drafts check`, and reports the slice quotas and the human share (target ≥ 30%).
 4. **Data safety.** The 2026-11-10 21:05 file deletion is still unexplained. Label files are committed and
    pushed after every labeling session.
+
+**A27 Light human review (option B, decision from the planning chat, 2026-11-11).**
+- The human-share target drops from ≥ 30% to **≥ 10%** of the final questions (`origin` human or
+  agent_draft_human_edited). Every result table is also reported separately for the human-written questions.
+- The human writes new questions and marks deletions; Claude Code decides keep / edit / delete for the remaining
+  drafts to hit the 180 targets, without opening `drafts/hints.jsonl` or `drafts/quota_view.jsonl`. Claude Code's
+  edits get the new origin **`agent_edited`** (not human).
+- T16 (Claude Code's blind ~30% subset) runs in a fresh context (a new session or a subagent) that reads only
+  `labels/questions.jsonl`, GUIDELINES.md and the snapshot — never `drafts/` or this session's context.
+- T15: Codex annotates all 180; if its quota runs out, it stops and reports which batches are done.

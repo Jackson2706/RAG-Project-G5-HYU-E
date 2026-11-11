@@ -128,7 +128,7 @@ Use the Ponytail skill for all code. These project overrides win over Ponytail:
 ## Labeling rules
 
 - Every label row records `annotator` (`codex:<model>`, `claude-code:<model>`, `human:<initials>`)
-  and `origin` (`human`, `agent_draft_human_edited`, `agent_draft`).
+  and `origin` (`human`, `agent_draft_human_edited`, `agent_edited`, `agent_draft`).
 - Independent annotation: an annotator never reads another annotator's label file before
   submitting its own.
 - Labeling agents never see system outputs or results.

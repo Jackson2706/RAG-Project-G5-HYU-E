@@ -21,7 +21,7 @@ ANSWERABILITY = (
 )
 BEHAVIORS = ("answer", "conditional_answer", "clarify", "abstain")
 SLICES = ("unconditional", "conditional", "temporal", "negative", "multi_session")
-ORIGINS = ("human", "agent_draft_human_edited", "agent_draft")
+ORIGINS = ("human", "agent_draft_human_edited", "agent_edited", "agent_draft")  # agent_edited: A27
 SCOPES = ("national", "campus")
 ANNOTATOR = re.compile(r"^(?:codex:[^\s]+|claude-code:[^\s]+|human:[A-Za-z][A-Za-z0-9_-]*)$")
 UPDATE_WORD = re.compile(r"\b(?:now|actually|changed?|updated?|instead|no longer|transferred?|switched?|moved?)\b", re.I)

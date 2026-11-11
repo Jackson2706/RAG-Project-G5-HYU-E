@@ -71,3 +71,13 @@ def test_apply_rejects_missing_decisions_and_wrong_campus(tmp_path):
     with pytest.raises(SystemExit, match="no decision row|not a seoul persona"):
         review.apply(labels, initials="JK")
     assert not (labels / "questions.jsonl").exists()
+
+
+def test_agent_edit_is_not_human(tmp_path):
+    labels = _setup(tmp_path)
+    review.make(labels)
+    _decide(labels, {"T14-001": {"decision": "agent_edit", "edited_question": "where do i start?"},
+                     "T14-002": {"decision": "keep"}, "T14-003": {"decision": "keep"}})
+    report = review.apply(labels)
+    assert report["origins"] == {"agent_edited": 1, "agent_draft": 2}
+    assert report["human_share"] == 0

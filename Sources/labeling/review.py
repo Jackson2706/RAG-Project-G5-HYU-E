@@ -4,7 +4,8 @@
     python -m labeling.review apply --initials JK   # review.csv -> questions.jsonl (+ quota view), prints the report
 
 review.csv columns: id, slice, campus, persona, session_history, question, decision, edited_question, notes.
-- decision: keep | edit | delete. `edit` uses edited_question (and the session_history cell as you left it).
+- decision: keep | edit | agent_edit | delete. `edit` (a human edit) and `agent_edit` (an edit by Claude Code,
+  origin agent_edited, A27) use edited_question and the session_history cell as left.
 - A new question of your own: a row with an empty id and decision `new` (fill slice, campus, persona,
   question; session_history only for multi_session). Separate history turns with " || ".
 
@@ -28,6 +29,8 @@ DRAFTS = LABELS / "drafts"
 COLUMNS = ["id", "slice", "campus", "persona", "session_history", "question", "decision", "edited_question", "notes"]
 HINT_FIELDS = ("draft_id", "slice", "campus", "topic_doc_ids", "intended_attributes", "intended_answerability", "why")
 SEP = " || "
+AGENT_EDITOR = "claude-code:claude-opus-5-5"
+HUMAN_SHARE_TARGET = 0.10  # A27 (light human review); was 0.30
 # GUIDELINES.md section 7: final targets per slice x campus (180 cases)
 TARGETS = {("unconditional", "seoul"): 38, ("unconditional", "erica"): 25, ("conditional", "seoul"): 25,
            ("conditional", "erica"): 20, ("temporal", "seoul"): 13, ("temporal", "erica"): 5,
@@ -80,18 +83,19 @@ def apply(labels: Path = LABELS, initials: str = "") -> dict:
             case = {"case_id": f"H-{new_count:03d}", "slice": row.get("slice", "").strip(), "campus": row.get("campus", "").strip(),
                     "persona_id": row.get("persona", "").strip(), "session_history": history,
                     "question": (row.get("question") or "").strip(), "origin": "human", "drafted_by": f"human:{initials}", "edited_by": None}  # fmt: skip
-        elif decision in ("keep", "edit") and draft_id in drafts:
+        elif decision in ("keep", "edit", "agent_edit") and draft_id in drafts:
             seen.add(draft_id)
             draft = drafts[draft_id]
-            edited = decision == "edit"
+            edited = decision in ("edit", "agent_edit")
+            origin = {"keep": "agent_draft", "edit": "agent_draft_human_edited", "agent_edit": "agent_edited"}[decision]
+            editor = {"edit": f"human:{initials}", "agent_edit": AGENT_EDITOR}.get(decision)
             question = (row.get("edited_question") or "").strip() if edited else draft["question"]
             if edited and not question:
                 errors.append(f"line {line}: decision edit needs edited_question")
             changed_history = history != draft["session_history"]
             case = {"case_id": draft_id, "slice": draft["slice"], "campus": draft["campus"], "persona_id": draft["persona_id"],
                     "session_history": history if edited else draft["session_history"], "question": question,
-                    "origin": "agent_draft_human_edited" if edited else "agent_draft", "drafted_by": draft["annotator"],
-                    "edited_by": f"human:{initials}" if edited else None}  # fmt: skip
+                    "origin": origin, "drafted_by": draft["annotator"], "edited_by": editor}  # fmt: skip
             if changed_history and not edited:
                 errors.append(f"line {line}: session_history changed but decision is keep (use edit)")
         else:
@@ -109,7 +113,7 @@ def apply(labels: Path = LABELS, initials: str = "") -> dict:
     missing = sorted(set(drafts) - seen)
     if missing:
         errors.append(f"{len(missing)} drafts have no decision row: {', '.join(missing[:5])}…")
-    if (any(c["origin"] != "agent_draft" for c in final)) and not initials:
+    if any(c["origin"] in ("human", "agent_draft_human_edited") for c in final) and not initials:
         errors.append("--initials is required when you edit or add questions")
     if errors:
         raise SystemExit("review.csv errors (nothing written):\n  " + "\n  ".join(errors))
@@ -141,7 +145,7 @@ def main(argv: list[str] | None = None) -> int:
     report = apply(initials=args.initials)
     print(json.dumps(report, indent=2))
     share = report["human_share"]
-    print(f"Human share {share:.1%} ({'meets' if share >= 0.3 else 'BELOW'} the 30% target); "
+    print(f"Human share {share:.1%} ({'meets' if share >= HUMAN_SHARE_TARGET else 'BELOW'} the {HUMAN_SHARE_TARGET:.0%} target); "
           f"{report['cases']} cases (target 180). Annotators get only {LABELS / 'questions.jsonl'}.")
     return 0
 
