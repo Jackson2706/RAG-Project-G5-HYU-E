@@ -9,6 +9,7 @@
 - Batch 05: not done.
 - Batch 06: not done.
 - Recheck 01 (GUIDELINES v1.1): done; `labeling.validate --annotation` exited 0 with no output.
+- Recheck 03 (GUIDELINES v1.1): done; `labeling.validate --annotation` exited 0 with no output.
 
 ## Batch 01
 
@@ -74,6 +75,22 @@ Hard cases:
 - T14-050 is answerable under section 9.1 because all three required facts have gold spans; an exhaustive dormitory inventory is not a separate required fact.
 - T14-062 now clarifies TOPIK level: GPA is a caveat outside the vocabulary, while the remaining language conditions create more than two eligibility branches under section 9.3.
 - Alternate campus passages used by conditional or clarifying behavior are gold evidence under section 9.6, and overbroad spans were narrowed under section 9.4.
+
+Guideline questions:
+
+- None.
+
+## Recheck 03 (GUIDELINES v1.1)
+
+Status: done; `labeling.validate --annotation` exited 0 with no output.
+
+Hard cases:
+
+- T14-086 and T14-093 now follow section 9.5: the question's stated academic status overrides the conflicting persona value.
+- Partial cases now abstain under section 9.1 while allowing an answer that gives supported facts and names the missing part.
+- T14-078 and T14-113 remain `external_only` because the snapshot itself directs the student to the responsible national service.
+- T14-087 and T14-107 treat partner-university nomination as a caveat outside the AAES vocabulary, not a `student_type` branch.
+- Alternate campus, status, and program passages used by the answer are gold evidence under section 9.6, with narrower spans under section 9.4.
 
 Guideline questions:
 
