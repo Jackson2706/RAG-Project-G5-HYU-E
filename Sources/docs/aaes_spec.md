@@ -61,26 +61,39 @@ rows, whose text repeats cells as `Header: value`.
   chunk gives a campus-specific procedure.
 - Bachelor's and undergraduate text maps to `undergraduate`; Master's and Doctoral/Ph.D. map to
   their respective levels. Explicit language-program and non-degree audiences use those values.
-- `Year 1-2` expands to `1`, `2`, and `Year 3-4` expands to `3`, `4`. `Year: N/A` adds nothing.
+- The tagger unions every stated study-year range in a chunk. It handles numeric forms such as
+  `Year 1-2`, `Year 3, 4`, and `Bachelor's degree 1~2 years`, plus ordinal forms such as `First
+  year` and `Third and fourth years`. Durations such as `four-year scholarship`, `1 year`, and `up
+  to 2 years` add nothing. `Year: N/A` also adds nothing.
 - In a required-level table row, `X` means `none` through the level below the stated level; `O`
   means the stated level through `6`. “TOPIK level N or higher” also expands through `6`.
 - The Korean Language Standards wording maps separately from TOPIK: satisfied or exempted maps to
   `pass, exempt`, exempted alone maps to `exempt`, and did not satisfy or Korean Standard Fail maps
   to `fail`.
-- Visa codes are read literally. `D-10-1` normalizes to `D-10`. For “transferring from X to Y,” the
-  tag is the visa held now, `X`.
-- Degree, exchange, visiting and language-program wording maps to `student_type`. English-track or
+- Visa codes are read literally, and `D-10-1` normalizes to `D-10`. A status change from one visa
+  to another keeps only the target visa, including OCR-spaced forms such as `D -4` to `D -2`.
+- Degree, exchange, visiting and language-program wording maps to `student_type`. `Degree Program
+  Students` maps to `degree_seeking`. A parenthesized or colon-delimited ineligibility list does
+  not contribute `student_type`, `degree_level`, or `academic_status` values. English-track or
   English-taught wording maps to `english_track` when explicit.
-- Academic-status words map to the vocabulary. An exclusions list removes its listed statuses; if
-  it excludes graduates, leave, extra semesters and completed students from current students, the
-  remaining status is `enrolled`.
-- `applicant` is added only when the document title identifies an admission guide and that chunk
-  mentions applicants, application or admission. Acceptance guides remain
-  `admitted_not_enrolled`; scholarship references to applicants do not gain this tag.
+- Academic status needs stated wording. `enrolled` comes from phrases such as `currently enrolled`,
+  `enrolled students`, `students who enrolled at`, or `currently in school`, not from an audience
+  such as international students or freshmen. A leave-of-absence application notice is for
+  `enrolled` students, while a return-to-school or re-registration notice is for
+  `leave_of_absence` students.
+- Every chunk in a document whose title identifies an admission guide gets `applicant`, even if the
+  chunk has no applicant wording. Sections about successful candidates, an admission certificate,
+  deposit payment after the result, or an admission result get `admitted_not_enrolled` instead.
+  Leave-of-absence information inside an admission guide does not change the applicant status.
+  Scholarship references to applicants do not gain the applicant tag.
 - Within one sentence or list line, a TOPIK condition joined by “or” to IELTS, TOEFL, TEPS or an
   English-track condition becomes `any_of`. A TOPIK threshold expands through level 6; a valid
   certificate without a level means levels 1–6. The two attributes are removed from ordinary
   `constraints`.
+- If a TOPIK threshold is an alternative to a condition outside vocabulary v1, the tagger stores
+  the sentence or `Sort:` row as a requirement of at most 200 characters. Social Integration/KIIP,
+  IIE levels, King Sejong Institute levels, and pre-assessment scores are outside the vocabulary.
+  The tagger writes no TOPIK constraint or TOPIK `any_of` set for that alternative.
 - GPA, attendance, monetary thresholds, English standards, and a required higher TOPIK score are
   short free-text requirements.
 - Preferred, additional-points, bonus, advantage and optional wording never creates a constraint.
@@ -121,6 +134,10 @@ Prompt v3 asks for JSON only, includes the complete v1 constraint vocabulary, te
 to tag preferences, and requires an evidence quote for every field. It does not ask the model for
 `any_of`; alternatives are rule-only. The auxiliary Ollama call uses `qwen3.5:4b` by default,
 temperature 0, thinking off, a fixed seed and a bounded output.
+
+With the fallback disabled, a chunk that has an LLM cue but no rule constraint or `any_of` set goes
+to `rule_cue_unknown`, with `condition_status="unknown"`. A chunk without a cue remains
+`rule_unconditioned`. No model is resolved or called in either case.
 
 Postcheck p1 first maps unknown F and D- visa codes to `other`, drops `student_type` values
 `international` and `volunteer`, and drops the unknown `semester` attribute. It then matches the

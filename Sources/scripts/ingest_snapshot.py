@@ -31,7 +31,12 @@ from app.config import DATA_DIR, RESULTS_DIR, get_settings  # noqa: E402
 from app.database import DEFAULT_INDEX, Database  # noqa: E402
 from app.ollama import OllamaClient  # noqa: E402
 from app.rag.applicability import ChunkCondition  # noqa: E402
-from app.rag.blocks.ingestion.metadata_extraction.applicability_extractor import LLM_CUE, ApplicabilityExtractor  # noqa: E402
+from app.rag.blocks.ingestion.metadata_extraction.applicability_extractor import (  # noqa: E402
+    LLM_CUE,
+    RULE_5B_OPTION,
+    TAG_BUCKETS,
+    ApplicabilityExtractor,
+)
 from app.rag.pipeline import _with_embedder, index_documents  # noqa: E402
 from app.rag.registry import create_block, validate_config  # noqa: E402
 from app.rag.schemas import Services, make_doc_id  # noqa: E402
@@ -83,14 +88,21 @@ def dry_run(args, services: Services, docs) -> int:
     tokens = [services.embedder.count_tokens(embedded_text(c)) + 2 for c in chunks]  # +2: [CLS] and [SEP]
     would_call = sum(1 for c, i in zip(conditions, inputs, strict=True)
                      if not c["constraints"] and not c.get("any_of") and LLM_CUE.search(i["text"]))  # fmt: skip
+    partition = Counter(extractor.buckets)
     print(f"Snapshot {args.snapshot}: {len(docs)} documents, {len(chunks)} chunks (section_tokens {CHUNK_SIZE}/{CHUNK_OVERLAP})")
     print(f"Embedded tokens: max {max(tokens)}, median {statistics.median(tokens)}; over {MAX_EMBED_TOKENS}: {sum(t > MAX_EMBED_TOKENS for t in tokens)}")
     print(f"Hangul in headers: {sum(bool(c['section'] and HANGUL.search(c['section'])) for c in chunks)}; "
           f"unmasked e-mails: {sum(unmasked_emails(c['text']) for c in chunks)}")
     print(f"Rule-tagged chunks: {sum(bool(c['constraints'] or c.get('any_of')) for c in conditions)}; would call the LLM: {would_call}")
+    print("Tag partition estimate: " + "; ".join(f"{bucket}: {partition[bucket]}" for bucket in TAG_BUCKETS))
     print(f"Chunks with any_of: {sum(bool(c.get('any_of')) for c in conditions)}; "
           f"korean_standard: {sum('korean_standard' in c['constraints'] for c in conditions)}; "
           f"applicant: {sum('applicant' in c['constraints'].get('academic_status', []) for c in conditions)}")
+    print(f"R4 rule counts: applicant: {sum('applicant' in c['constraints'].get('academic_status', []) for c in conditions)}; "
+          f"admitted_not_enrolled: {sum('admitted_not_enrolled' in c['constraints'].get('academic_status', []) for c in conditions)}; "
+          f"enrolled: {sum('enrolled' in c['constraints'].get('academic_status', []) for c in conditions)}; "
+          f"year constraint: {sum('year' in c['constraints'] for c in conditions)}; "
+          f"rule-5b requirement: {sum(any(RULE_5B_OPTION.search(r) for r in c['requirements']) for c in conditions)}")
     print("\nAttribute frequency (rules only):")
     for key, n in sorted(frequency(conditions).items()):
         print(f"  {key:40s} {n}")

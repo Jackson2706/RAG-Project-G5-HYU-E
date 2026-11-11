@@ -55,13 +55,23 @@ MONTHS = {
 
 # "graduate school/students/courses" or a "Graduate:" table cell = master + doctoral ("undergraduate" never matches \b)
 GRADUATE = r"\bgraduate(?: school| students?| courses?| programs?|\s*:)"
-# "Except students who took a leave of absence, …" names statuses that are NOT eligible
-NEGATED = re.compile(r"\b(?:except|excluding|excluded|not eligible|cannot apply|are not allowed)\b[^.\n)]*", re.IGNORECASE)
+# "Except students who took a leave of absence, …" and ineligibility lists name groups that are NOT eligible.
+NEGATED = re.compile(
+    r"\b(?:except|excluding|excluded|cannot apply|are not allowed)\b[^.\n)]*|"
+    r"\(\s*\b(?:ineligibility|ineligible|not eligible|exclusions?)\b\s*:?\s*(?:[^()]|\([^)]*\))*\)|"
+    r"\b(?:ineligibility|ineligible|not eligible|exclusions?)\b\s*:\s*[^.\n]*",
+    re.IGNORECASE,
+)
 PREFERENCE = re.compile(r"\b(?:prefer\w*|additional points?|bonus|advantage|optional)\b", re.IGNORECASE)
 ADMISSION_GUIDE = re.compile(
     r"\b(?:admission (?:guidelines?|guides?)|application forms?\s*&\s*guidelines?)\b|"
     r"\b(?:GKS|scholarship program|degree program)[^\n]{0,60}\bapplication guidelines?\b|"  # not "Visa Application Guideline"
     r"\brecruitment of\b.{0,120}\bstudents?\b",
+    re.IGNORECASE,
+)
+RULE_5B_OPTION = re.compile(
+    r"\b(?:Social Integration Program|Korea Immigration and Integration Program|KIIP|"
+    r"IIE(?:\s+level)?|King Sejong Institute|pre[- ]assessment(?:\s+score)?)\b",
     re.IGNORECASE,
 )
 
@@ -94,14 +104,33 @@ def _degree_level(context: str) -> tuple[list[str], str | None]:
 
 
 def _year(context: str) -> tuple[list[str], str | None]:
-    # "Year: Year 1-2", "Year 3, 4", "Year 3~4"
-    match = re.search(r"\bYear\s*:?\s*(?:Year\s*)?([1-4])(?:\s*(?:[-–~,]|and)\s*([1-4]))?\b", context, re.IGNORECASE)
-    if not match:
-        return [], None
-    first, last = int(match.group(1)), int(match.group(2) or match.group(1))
-    if first > last:
-        first, last = last, first
-    return [str(value) for value in range(first, last + 1)], match.group(0)
+    values: set[int] = set()
+    evidence: str | None = None
+    explicit_year = r"\bYear\s*:?\s*(?:Year\s*)?([1-4])(?:\s*(?:[-–~,]|and)\s*([1-4]))?\b"
+    for match in re.finditer(explicit_year, context, re.IGNORECASE):
+        evidence = evidence or match.group(0)
+        first, last = int(match.group(1)), int(match.group(2) or match.group(1))
+        values.update(range(min(first, last), max(first, last) + 1))
+
+    for line in context.splitlines():
+        if not re.search(r"\b(?:bachelor(?:'s|’s)?\s+degree|undergraduate)\b", line, re.IGNORECASE):
+            continue
+        for match in re.finditer(r"\b([1-4])\s*(?:[-–~,]|and)\s*([1-4])\s+years?\b", line, re.IGNORECASE):
+            evidence = evidence or match.group(0)
+            first, last = int(match.group(1)), int(match.group(2))
+            values.update(range(min(first, last), max(first, last) + 1))
+
+    ordinals = {"first": 1, "second": 2, "third": 3, "fourth": 4}
+    for match in re.finditer(
+        r"\b(first|second|third|fourth)(?:\s+and\s+(first|second|third|fourth))?\s+years?\b",
+        context,
+        re.IGNORECASE,
+    ):
+        evidence = evidence or match.group(0)
+        values.add(ordinals[match.group(1).lower()])
+        if match.group(2):
+            values.add(ordinals[match.group(2).lower()])
+    return [str(value) for value in sorted(values)], evidence
 
 
 def _topik_level(context: str) -> tuple[list[str], str | None]:
@@ -133,19 +162,41 @@ def topik_at_least(level: int) -> list[str]:
     return [str(value) for value in range(level, 7)]
 
 
+VISA_CODE = r"D\s*-\s*(?:10(?:\s*-\s*1)?|2(?:\s*-\s*(?:5|8))?|4)"
+
+
+def _normalized_visa(code: str) -> str:
+    value = re.sub(r"\s+", "", code).upper()
+    return "D-10" if value == "D-10-1" else value
+
+
 def _visa(context: str) -> tuple[list[str], str | None]:
-    transfer = re.search(r"\btransferring from\b.{0,180}?\b(D-(?:10(?:-1)?|2(?:-5|-8)?|4))\b.{0,180}?\bto\b", context, re.IGNORECASE)
+    # "When transferring from D-4 to D-2" is the procedure for current D-4 holders: keep the old visa (C03)
+    transfer = re.search(rf"\btransferring from\b.{{0,180}}?\b(?P<old>{VISA_CODE})\b.{{0,180}}?\bto\b", context, re.IGNORECASE)
     if transfer:
-        value = transfer.group(1).upper()
-        return ["D-10" if value == "D-10-1" else value], transfer.group(1)
-    matches = list(re.finditer(r"\bD-(?:10(?:-1)?|2(?:-5|-8)?|4)\b", context, re.IGNORECASE))
-    values = [("D-10" if match.group(0).upper() == "D-10-1" else match.group(0).upper()) for match in matches]
+        return [_normalized_visa(transfer.group("old"))], transfer.group("old")
+    # "received permission to change … to D-10", "If you change from D-4 visa to D-2 visa": the new visa (R07, R12)
+    change = re.search(
+        rf"\bchang\w*\b[^.\n]{{0,300}}?\bt\s*o\b[^.\n]{{0,120}}?\b(?P<target>{VISA_CODE})\b",
+        context,
+        re.IGNORECASE,
+    )
+    if not change:
+        change = re.search(
+            rf"\bfrom\b[^.\n]{{0,120}}?\b{VISA_CODE}\b[^.\n]{{0,120}}?\bt\s*o\b[^.\n]{{0,80}}?\b(?P<target>{VISA_CODE})\b",
+            context,
+            re.IGNORECASE,
+        )
+    if change:
+        return [_normalized_visa(change.group("target"))], change.group("target")
+    matches = list(re.finditer(rf"\b{VISA_CODE}\b", context, re.IGNORECASE))
+    values = [_normalized_visa(match.group(0)) for match in matches]
     return list(dict.fromkeys(values)), matches[0].group(0) if matches else None
 
 
 def _student_type(context: str) -> tuple[list[str], str | None]:
     patterns = {
-        "degree_seeking": (r"\b(?:international\s+)?degree students?\b",),
+        "degree_seeking": (r"\b(?:international\W+)?degree\W+(?:program\W+)?students?\b",),
         "exchange": (r"\bexchange students?\b",),
         "visiting": (r"\bvisiting students?\b", r"\bvisiting program participants?\b"),
         "language_program": (r"\b(?:korean )?language program(?: students?)?\b",),
@@ -163,30 +214,50 @@ def _english_track(context: str) -> tuple[list[str], str | None]:
     return (["yes"], yes.group(0)) if yes else ([], None)
 
 
-def _academic_status(context: str) -> tuple[list[str], str | None]:
+def _academic_status(title: str, context: str) -> tuple[list[str], str | None]:
+    # an exclusion list that removes every other status states "enrolled" (C04)
     exclusions = re.search(r"\bExclusions\s*:(.*)", context, re.IGNORECASE | re.DOTALL)
     if exclusions and re.search(r"expected graduates|leave of absence|completed students|extra semesters", exclusions.group(1), re.IGNORECASE):
-        evidence = _evidence((r"\bInternational students studying\b", r"\bEligibility\b"), context)
-        return ["enrolled"], evidence
-
+        return ["enrolled"], _evidence((r"\bInternational students studying\b", r"\bEligibility\b"), context)
+    context = NEGATED.sub(" ", context)  # statuses in an exclusion clause are not constraints
+    if re.search(r"\b(?:return to school|re[- ]registration)\b", title, re.IGNORECASE):
+        match = re.search(r"\bstudents? who (?:took|take|have taken) (?:a )?leave of absence\b", context, re.IGNORECASE)
+        return ["leave_of_absence"], match.group(0) if match else None
+    if re.search(r"\bleave of absence\b", title, re.IGNORECASE):
+        match = re.search(r"\b(?:currently in school|currently enrolled|enrolled students?)\b", context, re.IGNORECASE)
+        return ["enrolled"], match.group(0) if match else None
     patterns = {
-        "enrolled": (r"\benrolled students?\b", r"\bstudents? (?:who are )?enrolled\b", r"\bcurrently enrolled\b"),
-        "leave_of_absence": (r"\bleave of absence\b", r"\bstudents? on leave\b"),
+        "enrolled": (
+            r"\benrolled students?\b",
+            r"\bstudents? who (?:are )?enrolled(?: at)?\b",
+            r"\bcurrently enrolled\b",
+            r"\bcurrently in school\b",
+        ),
+        "leave_of_absence": (
+            r"\bstudents? (?:who (?:took|take|have taken) (?:a )?leave of absence|on leave)\b",
+        ),
         "completed_coursework": (r"\bcompleted coursework\b", r"\bcompleted students?\b"),
         "graduating": (r"\bexpected graduates?\b", r"\bgraduating students?\b"),
         "admitted_not_enrolled": (r"\bacceptance\b", r"\badmitted students?\b", r"\badmission result page\b"),
     }
-    positive = NEGATED.sub(" ", context)  # statuses in an exclusion clause are not constraints
-    values = [value for value, value_patterns in patterns.items() if _first_match(value_patterns, positive)]
+    values = [value for value, value_patterns in patterns.items() if _first_match(value_patterns, context)]
     matched_patterns = tuple(pattern for value in values for pattern in patterns[value])
-    return values, _evidence(matched_patterns, positive) if matched_patterns else None
+    return values, _evidence(matched_patterns, context) if matched_patterns else None
 
 
 def _applicant(title: str, text: str) -> tuple[list[str], str | None]:
     if not ADMISSION_GUIDE.search(title):
         return [], None
+    admitted = re.search(
+        r"\bsuccessful candidates?\b|\bcertificate of admission\b|\badmission certificate\b|"
+        r"\bafter\s+deposit\s+payment\b",
+        text,
+        re.IGNORECASE,
+    )
+    if admitted:
+        return ["admitted_not_enrolled"], admitted.group(0)
     mention = re.search(r"\b(?:applicants?|applications?|admission)\b", text, re.IGNORECASE)
-    return (["applicant"], mention.group(0)) if mention else ([], None)
+    return ["applicant"], mention.group(0) if mention else None
 
 
 def _korean_standard(context: str) -> tuple[list[str], str | None]:
@@ -225,6 +296,19 @@ def _any_of(text: str) -> tuple[list[dict[str, list[str]]], str | None]:
             levels = topik_at_least(int(threshold.group(1))) if threshold else [str(level) for level in range(1, 7)]
             return [{"topik_level": levels}, {"english_track": ["yes"]}], phrase
     return [], None
+
+
+def _rule_5b_requirements(text: str) -> list[str]:
+    """Return TOPIK alternatives that include an option outside vocabulary v1."""
+    requirements = []
+    for line in text.splitlines():
+        phrases = [line.strip()] if re.match(r"\s*Sort\s*:", line, re.IGNORECASE) else [
+            sentence.group(0).strip() for sentence in re.finditer(r"[^.!?]+(?:[.!?]|$)", line)
+        ]
+        for phrase in phrases:
+            if re.search(r"\bTOPIK\b", phrase, re.IGNORECASE) and RULE_5B_OPTION.search(phrase):
+                requirements.append(phrase[:200].rstrip())
+    return list(dict.fromkeys(requirements))
 
 
 def _preference_context(text: str, quote: str | None) -> str | None:
@@ -304,7 +388,7 @@ def _first_json_object(text: str) -> dict[str, Any] | None:
 
 
 # Every chunk lands in exactly one bucket; VERIFY checks the buckets add up to the chunk count.
-TAG_BUCKETS = ("rule_tagged", "rule_unconditioned", "llm_tagged", "llm_unconditioned", "llm_rejected", "llm_errors")
+TAG_BUCKETS = ("rule_tagged", "rule_unconditioned", "rule_cue_unknown", "llm_tagged", "llm_unconditioned", "llm_rejected", "llm_errors")
 TAG_PROMPT_VERSION = "v3"  # bump whenever the fallback prompt below changes
 POSTCHECK_VERSION = "p1"
 
@@ -437,6 +521,7 @@ def tag_chunk(
     if scope == "national" and national_quote:
         condition.evidence.update(scope=national_quote, campus=national_quote)
 
+    positive_context = NEGATED.sub(" ", context)
     extractors = {
         "degree_level": _degree_level,
         "year": _year,
@@ -444,11 +529,11 @@ def tag_chunk(
         "visa": _visa,
         "student_type": _student_type,
         "english_track": _english_track,
-        "academic_status": _academic_status,
         "korean_standard": _korean_standard,
     }
     for attribute, extractor in extractors.items():
-        values, quote = extractor(context)
+        source = positive_context if attribute in ("degree_level", "student_type") else context
+        values, quote = extractor(source)
         if not values:
             continue
         if preference := _preference_context(text, quote):
@@ -459,11 +544,20 @@ def tag_chunk(
         if quote and quote in text:
             condition.evidence[attribute] = quote
 
+    status, status_quote = _academic_status(chunk.get("title", ""), context)
+    if status:
+        condition.constraints["academic_status"] = status
+        condition.extraction_method["academic_status"] = "rule"
+        if status_quote and status_quote in text:
+            condition.evidence["academic_status"] = status_quote
+
     applicant, applicant_quote = _applicant(chunk.get("title", ""), text)
     if applicant:
         condition.constraints["academic_status"] = applicant
         condition.extraction_method["academic_status"] = "rule"
-        condition.evidence["academic_status"] = applicant_quote
+        condition.evidence.pop("academic_status", None)
+        if applicant_quote:
+            condition.evidence["academic_status"] = applicant_quote
 
     alternatives, alternatives_quote = _any_of(text)
     if alternatives:
@@ -478,7 +572,17 @@ def tag_chunk(
                 condition.extraction_method.pop(attribute, None)
                 condition.evidence.pop(attribute, None)
 
-    rule_requirements = _requirements(text)
+    rule_5b_requirements = _rule_5b_requirements(text)
+    if rule_5b_requirements:
+        condition.constraints.pop("topik_level", None)
+        condition.extraction_method.pop("topik_level", None)
+        condition.evidence.pop("topik_level", None)
+        if any("topik_level" in group for group in condition.any_of):
+            condition.any_of = []
+            condition.extraction_method.pop("any_of", None)
+            condition.evidence.pop("any_of", None)
+
+    rule_requirements = [*_requirements(text), *rule_5b_requirements]
     condition.requirements.extend(requirement for requirement in rule_requirements if requirement not in condition.requirements)
     if condition.requirements:
         condition.extraction_method["requirements"] = "rule"
@@ -568,7 +672,8 @@ class ApplicabilityExtractor(BaseMetadataExtractor):
             self.buckets: list[str] = []  # one TAG_BUCKETS entry per chunk, in order
             for index, chunk in enumerate(chunks):
                 details: dict[str, Any] = {"chunk_index": index, "doc_id": chunk.get("doc_id")}
-                ask = use_llm and LLM_CUE.search(chunk["text"]) is not None
+                has_cue = LLM_CUE.search(chunk["text"]) is not None
+                ask = use_llm and has_cue
                 result = tag_chunk(chunk, llm=make_llm(details, chunk["text"]) if ask else None, trace_details=details)
                 if "llm_fallback" in details:
                     counts["llm_candidates"] += 1
@@ -589,7 +694,10 @@ class ApplicabilityExtractor(BaseMetadataExtractor):
                     fallback_details.append(details)
                 tagged.append(result)
                 status = details.get("llm_fallback", {}).get("status")
-                self.buckets.append({None: "rule_tagged" if result.constraints or result.any_of else "rule_unconditioned", "accepted": "llm_tagged",
+                rule_bucket = "rule_tagged" if result.constraints or result.any_of else (
+                    "rule_cue_unknown" if not use_llm and has_cue else "rule_unconditioned"
+                )
+                self.buckets.append({None: rule_bucket, "accepted": "llm_tagged",
                                      "unconditioned": "llm_unconditioned", "error": "llm_errors"}.get(status, "llm_rejected"))  # fmt: skip
         finally:
             if loop is not None:
