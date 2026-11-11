@@ -234,6 +234,12 @@ Roles:
 > - the chosen action.
 >
 > The chat message shows an action badge: ANSWER, CONDITIONAL, CLARIFY, ABSTAIN, or CONFIRM.
+>
+> **A23 addition (unknown condition status):** T24 also tests that evidence with
+> `condition_status = "unknown"` is never treated as unconditioned. When the answer relies on it, AAES
+> still answers, adds the caveat "This may depend on your situation; please confirm with the OIA
+> office.", and sets the trace flag `unknown_condition_evidence = true`. P8 adds the metric
+> unknown-caveat rate per slice (spec: `aaes_spec.md`, "Unknown condition status").
 
 ---
 
@@ -874,7 +880,31 @@ criterion is not met on the raw r3 scores.
 
 ## 2026-11-11 (Gate G3 approved)
 
-**A22 G3 approved by the human** ("approve. i trust u"). GUIDELINES.md becomes v1.0 and section 8 records
+**A22 G3 approved by the human** ("approve. i trust u"; reading pending confirmation, see A23.5). GUIDELINES.md becomes v1.0 and section 8 records
 the three decisions: the clarify threshold is kept (> 3 branches or different procedures); the applicant
 scope default is kept, and a question about applying for admission states `applicant`; a missing campus is
 an ordinary branch attribute. T13 (topics, personas) starts. G2b is still open and runs alongside.
+
+## 2026-11-11 (after r4; decisions from the planning chat)
+
+**A23 r4 follow-up.**
+1. **Parallel Codex jobs:** T10d writes only audit-tool code (`Sources/labeling/`, the Tag audit section of
+   `aaes_spec.md`); T10e writes only reference data (`reference_r8b*` in the r3 audit folder). The paths do
+   not overlap. Claude Code's own `aaes_spec.md` edit (item 2) waits until T10d has finished.
+2. **Unknown condition status in AAES** (387 r4 chunks, 21%): spec section "Unknown condition status" in
+   `aaes_spec.md`; tests in T24 (see the P7 start prompt); metric unknown-caveat rate per slice in P8.
+   Unknown is never treated as silently unconditioned.
+3. **G2b scoring on the fresh sample** (~100 chunks, none of the first 150), task T10f after T10d:
+   - oversample `rule_cue_unknown` (~30 chunks);
+   - per attribute: coverage (share of reference occurrences in resolved chunks), precision and
+     recall on resolved chunks, and strict recall (an unknown chunk's reference values count as misses),
+     all with Wilson intervals; bucket-weighted with the r4 partition;
+   - an estimate, with interval, of the share of the 387 unknown chunks that truly carry a condition;
+   - old sample (r4, reference after rule 8b) and fresh sample side by side.
+   - The gate test (precision ≥ 0.8, weighted recall ≥ 0.7) uses the resolved-chunk numbers; strict
+     recall and coverage are reported next to it (Claude Code's reading, to confirm at G2b).
+4. **Time box:** at most one more tagger fix round after the fresh-sample scores. If G2b still fails, the
+   scores are recorded as a documented limitation in `DATA.md` and the report, and the project moves on.
+5. **P5 continues in parallel.** The planning chat says G3 still waits for the human's guideline
+   approval. A22 recorded G3 as approved from the message "approve. i trust u"; that reading is now
+   **pending the human's confirmation**. T14 (question drafting) does not start until G3 is confirmed.
