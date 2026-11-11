@@ -202,7 +202,7 @@ are 50 `rule_tagged`, 25 `rule_unconditioned`, 35 `rule_cue_unknown`, 20 `llm_ta
 `llm_unconditioned`; all `llm_rejected` and `llm_errors` chunks are included. Quotas and floors
 scale with `--n`, empty buckets have zero quota, and floors are capped by the eligible chunks in
 the index. Repeatable `sample --quota BUCKET=N` values replace the scaled quota for those buckets;
-an explicit quota is exact, while unlisted buckets can still receive fill chunks. The G2b sample
+an explicit quota is exact, while unlisted buckets can still receive fill chunks. The dev-100 sample
 uses `--n 100 --quota rule_cue_unknown=30`. `sample_meta.json` records the requested, capped, and
 achieved floor counts.
 
@@ -213,6 +213,17 @@ partition. Reuse checks every chunk text against the old blind input and then co
 for byte. The blind JSONL contains only the chunk ID, site, title, heading path, post date, and text.
 Predicted conditions, buckets, methods, and status remain in `sample_meta.json`.
 
+The test-100 audit uses `sample --design cue --n 100` with `--min-cue visa=20`, `--min-cue
+student_type=20`, and `--min-cue degree=20`. Cue matching reads the chunk text, document title, and
+heading path. It does not read predicted tags. The first match wins in this order: visa code or
+`visa`; exchange, visiting, degree-program, language-program, or non-degree wording; degree wording;
+then `none`. The sampler allocates each cue minimum across tag buckets in proportion to the eligible
+population and keeps at least 30% ERICA chunks inside a stratum when enough are available. Remaining
+places are allocated in proportion to the remaining bucket-by-cue strata. `sample_meta.json` records
+the stratum of each sampled chunk and the population (`N_h`) and sample count (`n_h`) of every
+eligible stratum. The command prints the achieved count for each cue. These counts estimate where an
+attribute may occur; only blind annotation establishes the number of reference occurrences.
+
 The reference annotator follows `Report/notes/tag_audit_rules.md` without seeing the system tags.
 `compare` validates every v1 value and checks whitespace-normalized evidence quotes against the
 chunk text before it reads the current predicted tags from MongoDB. It expands `any_of` sets into
@@ -222,13 +233,24 @@ and effective term remain resolved. Per attribute, coverage is the share of refe
 that fall in resolved chunks. Precision, recall, and bucket-weighted recall use resolved chunks
 only. Strict recall uses all chunks and counts every reference value on an unknown chunk as a miss;
 strict weighted recall uses the full index bucket partition. These proportions have Wilson 95%
-intervals. Scores are also split by rule/LLM family, bucket, and campus.
+intervals. Scores are also split by rule/LLM family, bucket, and campus. This bucket-weighted method
+is retained for samples without a recorded design.
+
+For a cue-designed sample, a chunk in stratum `h` has weight `N_h / n_h`. TP, FP, FN, coverage,
+resolved precision and recall, strict recall, and the unknown-condition share use these weights.
+Their Wilson intervals use the Kish effective sample size `(sum(w))^2 / sum(w^2)` over the units in
+that denominator. Reports show the design-weighted estimates and the unweighted sample values. The
+degree-level error section gives the raw FP and FN units in chunks whose predicted academic status
+contains `applicant`, together with each group's design-weighted share of all degree-level FP or FN
+units.
 
 The report gives the share of sampled unknown chunks whose reference contains a constraint or
 `any_of`, its Wilson interval, and the share and interval scaled by the index's unknown-chunk count.
 It also lists the most frequent reference attributes in those chunks. `report --side-by-side OUT_A
-OUT_B --to FILE.md` reads `scores_final.json` from two audit folders and puts their occurrences,
-coverage, resolved gate scores, strict recall, gate result, and unknown estimate next to each other.
+OUT_B [OUT_C ...] --label LABEL_A --label LABEL_B [--label LABEL_C ...] --to FILE.md` reads two or
+more `scores_final.json` files and puts their occurrences, coverage, resolved gate scores, strict
+recall, gate result, unknown estimate, and applicant-chunk degree errors next to each other. The
+number of labels must match the number of folders. The last folder is marked as the gate sample.
 
 Disagreements are written with the two sides assigned to `a` and `b` by a seeded shuffle. The side
 key is stored separately and is not provided to the reviewer. With `compare --carry-decisions DIR`,

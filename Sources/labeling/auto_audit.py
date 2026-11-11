@@ -2,9 +2,9 @@
 
 Run from ``Sources/``::
 
-    python -m labeling.auto_audit sample --index-id hyu_20261110_97dc1269_r4 --out fresh
-    python -m labeling.auto_audit compare --index-id hyu_20261110_97dc1269_r4 --out fresh --reference <reference.jsonl>
-    python -m labeling.auto_audit finalize --index-id hyu_20261110_97dc1269_r4 --out fresh --reference <reference.jsonl> --decisions <decisions.jsonl>
+    python -m labeling.auto_audit sample --index-id hyu_20261110_97dc1269_r5 --out test-100
+    python -m labeling.auto_audit compare --index-id hyu_20261110_97dc1269_r5 --out test-100 --reference <reference.jsonl>
+    python -m labeling.auto_audit finalize --index-id hyu_20261110_97dc1269_r5 --out test-100 --reference <reference.jsonl> --decisions <decisions.jsonl>
 """
 
 from __future__ import annotations
@@ -48,6 +48,15 @@ FLOORS: tuple[tuple[str, int, Callable[[dict], bool]], ...] = (
     ("rule_unconditioned", 20, lambda row: row.get("tag_bucket") == "rule_unconditioned"),
     ("any_of", 4, lambda row: bool((row.get("applicability") or {}).get("any_of"))),
 )
+CUES = ("visa", "student_type", "degree")
+CUE_PATTERNS = {
+    "visa": re.compile(r"\b(?:D\s*-\s*\d|F-\d|visa)\b", re.IGNORECASE),
+    "student_type": re.compile(
+        r"\b(?:exchange|visiting|degree program|language (?:program|training|school)|non-degree)\b",
+        re.IGNORECASE,
+    ),
+    "degree": re.compile(r"\b(?:bachelor|undergraduate|master|doctoral|Ph\.?D\.?|graduate)\b", re.IGNORECASE),
+}
 REFERENCE_FIELDS = {
     "chunk_id", "constraints", "any_of", "scope", "campus", "effective_term", "evidence",
     "topik_scope", "audience", "out_of_vocabulary_condition", "notes",
@@ -263,6 +272,101 @@ def sample_records(
     return selected, targets
 
 
+def cue_name(record: dict) -> str:
+    context = "\n".join(
+        [record.get("text") or "", record.get("_title") or "", *(record.get("_heading_path") or [])]
+    )
+    return next((cue for cue in CUES if CUE_PATTERNS[cue].search(context)), "none")
+
+
+def cue_stratum(record: dict) -> str:
+    return f"{record['tag_bucket']}:{cue_name(record)}"
+
+
+def _proportional_allocation(capacities: dict[str, int], total: int) -> dict[str, int]:
+    available = sum(capacities.values())
+    if total < 0 or total > available:
+        raise AuditError(f"Cannot allocate {total} chunks from {available} available")
+    allocation = {key: 0 for key in capacities}
+    if total == 0:
+        return allocation
+    remainders = {}
+    for key, capacity in capacities.items():
+        allocation[key], remainders[key] = divmod(total * capacity, available)
+    left = total - sum(allocation.values())
+    for key in sorted(capacities, key=lambda item: (-remainders[item], item)):
+        if left == 0:
+            break
+        if allocation[key] < capacities[key]:
+            allocation[key] += 1
+            left -= 1
+    return allocation
+
+
+def sample_cue_records(
+    records: list[dict],
+    n: int,
+    seed: int,
+    minimums: dict[str, int],
+) -> tuple[list[dict], dict]:
+    """Sample bucket-by-cue strata and return their design metadata."""
+    if n <= 0:
+        raise AuditError("--n must be positive")
+    if set(minimums) - set(CUES) or any(not isinstance(value, int) or value < 0 for value in minimums.values()):
+        raise AuditError(f"Invalid cue minimums: {minimums}")
+    if sum(minimums.values()) > n:
+        raise AuditError(f"Cue minimums require {sum(minimums.values())} chunks, more than --n {n}")
+    records = sorted(records, key=lambda row: row["chunk_id"])
+    if len({row["chunk_id"] for row in records}) != len(records):
+        raise AuditError("Index contains duplicate chunk_id values")
+    invalid = sorted({row.get("tag_bucket") for row in records} - set(BUCKETS), key=str)
+    if invalid:
+        raise AuditError(f"Index contains unknown tag buckets: {invalid}")
+    if n > len(records):
+        raise AuditError(f"Cannot sample {n} chunks from {len(records)} available")
+
+    by_stratum: dict[str, list[dict]] = {}
+    for record in records:
+        by_stratum.setdefault(cue_stratum(record), []).append(record)
+    remaining = {key: len(rows) for key, rows in by_stratum.items()}
+    targets = {key: 0 for key in by_stratum}
+    for cue in CUES:
+        requested = minimums.get(cue, 0)
+        cue_capacities = {key: count for key, count in remaining.items() if key.endswith(f":{cue}")}
+        available = sum(cue_capacities.values())
+        if requested > available:
+            raise AuditError(f"Cannot meet {cue} cue minimum: need {requested}, available {available}")
+        for key, count in _proportional_allocation(cue_capacities, requested).items():
+            targets[key] += count
+            remaining[key] -= count
+    for key, count in _proportional_allocation(remaining, n - sum(targets.values())).items():
+        targets[key] += count
+
+    rng = random.Random(seed)
+    selected = []
+    for key in sorted(by_stratum):
+        selected.extend(_sample_bucket(by_stratum[key], targets[key], rng))
+    selected.sort(key=lambda row: row["chunk_id"])
+    achieved = Counter(cue_name(row) for row in selected)
+    failures = [cue for cue, target in minimums.items() if achieved[cue] < target]
+    if failures:
+        raise AuditError(f"Cue sampling minimums failed: {', '.join(failures)}")
+    design = {
+        "name": "cue",
+        "minimums": {cue: minimums.get(cue, 0) for cue in CUES},
+        "strata": {
+            key: {
+                "bucket": rows[0]["tag_bucket"],
+                "cue": cue_name(rows[0]),
+                "N_h": len(rows),
+                "n_h": targets[key],
+            }
+            for key, rows in sorted(by_stratum.items())
+        },
+    }
+    return selected, design
+
+
 def blind_row(record: dict) -> dict:
     return {
         "chunk_id": record["chunk_id"],
@@ -284,9 +388,11 @@ def sample_metadata(
     available_records: list[dict] | None = None,
     excluded_files: list[dict] | None = None,
     reused_from: Path | None = None,
+    design: dict | None = None,
 ) -> dict:
     by_bucket = Counter(row["tag_bucket"] for row in records)
     by_campus = Counter(row["_campus"] for row in records)
+    by_cue = Counter(cue_name(row) for row in records) if design else Counter()
     by_bucket_campus = {
         bucket: dict(Counter(row["_campus"] for row in records if row["tag_bucket"] == bucket))
         for bucket in BUCKETS
@@ -297,7 +403,11 @@ def sample_metadata(
         "n": len(records),
         "chunk_ids": [row["chunk_id"] for row in records],
         "chunks": {
-            row["chunk_id"]: {"bucket": row["tag_bucket"], "campus": row["_campus"]}
+            row["chunk_id"]: {
+                "bucket": row["tag_bucket"],
+                "campus": row["_campus"],
+                **({"stratum": cue_stratum(row)} if design else {}),
+            }
             for row in records
         },
         "bucket_targets": targets,
@@ -305,6 +415,16 @@ def sample_metadata(
             "by_bucket": {bucket: by_bucket[bucket] for bucket in BUCKETS},
             "by_campus": {campus: by_campus[campus] for campus in VOCABULARY["campus"]},
             "by_bucket_campus": by_bucket_campus,
+            **(
+                {
+                    "by_cue": {
+                        cue: by_cue[cue]
+                        for cue in (*CUES, "none")
+                    }
+                }
+                if design
+                else {}
+            ),
             "floors": _floor_report(
                 records,
                 available_records if available_records is not None else records,
@@ -316,6 +436,8 @@ def sample_metadata(
     }
     if reused_from is not None:
         metadata["reused_from"] = str(reused_from)
+    if design is not None:
+        metadata["design"] = design
     return metadata
 
 
@@ -559,9 +681,19 @@ def _empty_counts() -> dict[str, dict[str, Any]]:
             "fn": 0,
             "strict_tp": 0,
             "strict_fn": 0,
+            "weighted_tp": 0.0,
+            "weighted_fp": 0.0,
+            "weighted_fn": 0.0,
+            "weighted_strict_tp": 0.0,
+            "weighted_strict_fn": 0.0,
+            "precision_weight_squares": 0.0,
+            "recall_weight_squares": 0.0,
+            "strict_recall_weight_squares": 0.0,
             "rows": set(),
             "reference_rows": set(),
             "resolved_reference_rows": set(),
+            "reference_weights": {},
+            "resolved_reference_weights": {},
         }
         for attribute in ATTRIBUTES
     }
@@ -579,22 +711,56 @@ def _add(
     strict_fn: int | None = None,
     reference: bool = False,
     resolved_reference: bool = False,
+    weight: float = 1.0,
 ) -> None:
     entry = counts[attribute]
+    actual_strict_tp = tp if strict_tp is None else strict_tp
+    actual_strict_fn = fn if strict_fn is None else strict_fn
     entry["tp"] += tp
     entry["fp"] += fp
     entry["fn"] += fn
-    entry["strict_tp"] += tp if strict_tp is None else strict_tp
-    entry["strict_fn"] += fn if strict_fn is None else strict_fn
+    entry["strict_tp"] += actual_strict_tp
+    entry["strict_fn"] += actual_strict_fn
+    entry["weighted_tp"] += tp * weight
+    entry["weighted_fp"] += fp * weight
+    entry["weighted_fn"] += fn * weight
+    entry["weighted_strict_tp"] += actual_strict_tp * weight
+    entry["weighted_strict_fn"] += actual_strict_fn * weight
+    entry["precision_weight_squares"] += (tp + fp) * weight**2
+    entry["recall_weight_squares"] += (tp + fn) * weight**2
+    entry["strict_recall_weight_squares"] += (actual_strict_tp + actual_strict_fn) * weight**2
     if tp or fp or fn or strict_tp or strict_fn:
         entry["rows"].add(chunk_id)
     if reference:
         entry["reference_rows"].add(chunk_id)
+        entry["reference_weights"][chunk_id] = weight
     if resolved_reference:
         entry["resolved_reference_rows"].add(chunk_id)
+        entry["resolved_reference_weights"][chunk_id] = weight
 
 
-def _metric(entry: dict, bucket_entries: dict[str, dict], partition: dict[str, int], sampled: dict[str, int]) -> dict:
+def _kish_effective_size(weight_sum: float, weight_square_sum: float) -> float:
+    return weight_sum**2 / weight_square_sum if weight_square_sum else 0.0
+
+
+def _weighted_interval(
+    success_weight: float,
+    total_weight: float,
+    weight_square_sum: float,
+) -> tuple[list[float] | None, float]:
+    n_eff = _kish_effective_size(total_weight, weight_square_sum)
+    if not total_weight or not n_eff:
+        return None, n_eff
+    return wilson_interval(success_weight / total_weight * n_eff, n_eff), n_eff
+
+
+def _metric(
+    entry: dict,
+    bucket_entries: dict[str, dict],
+    partition: dict[str, int],
+    sampled: dict[str, int],
+    design_weighted: bool = False,
+) -> dict:
     tp, fp, fn = entry["tp"], entry["fp"], entry["fn"]
     precision_n, recall_n = tp + fp, tp + fn
     weighted = bucket_weighted_recall(bucket_entries, partition, sampled)
@@ -607,7 +773,7 @@ def _metric(entry: dict, bucket_entries: dict[str, dict], partition: dict[str, i
     strict_weighted = bucket_weighted_recall(strict_bucket_entries, partition, sampled)
     occurrences = len(entry["reference_rows"])
     resolved_occurrences = len(entry["resolved_reference_rows"])
-    return {
+    unweighted = {
         "tp": tp,
         "fp": fp,
         "fn": fn,
@@ -633,18 +799,128 @@ def _metric(entry: dict, bucket_entries: dict[str, dict], partition: dict[str, i
         "resolved_occurrences": resolved_occurrences,
         "gated": occurrences >= 5,
     }
+    if not design_weighted:
+        return unweighted
+
+    weighted_tp = entry["weighted_tp"]
+    weighted_fp = entry["weighted_fp"]
+    weighted_fn = entry["weighted_fn"]
+    weighted_precision_n = weighted_tp + weighted_fp
+    weighted_recall_n = weighted_tp + weighted_fn
+    precision_ci, precision_n_eff = _weighted_interval(
+        weighted_tp,
+        weighted_precision_n,
+        entry["precision_weight_squares"],
+    )
+    recall_ci, recall_n_eff = _weighted_interval(
+        weighted_tp,
+        weighted_recall_n,
+        entry["recall_weight_squares"],
+    )
+    weighted_strict_tp = entry["weighted_strict_tp"]
+    weighted_strict_fn = entry["weighted_strict_fn"]
+    weighted_strict_n = weighted_strict_tp + weighted_strict_fn
+    strict_recall_ci, strict_recall_n_eff = _weighted_interval(
+        weighted_strict_tp,
+        weighted_strict_n,
+        entry["strict_recall_weight_squares"],
+    )
+    reference_weight = sum(entry["reference_weights"].values())
+    resolved_reference_weight = sum(entry["resolved_reference_weights"].values())
+    coverage_ci, coverage_n_eff = _weighted_interval(
+        resolved_reference_weight,
+        reference_weight,
+        sum(weight**2 for weight in entry["reference_weights"].values()),
+    )
+    recall = weighted_tp / weighted_recall_n if weighted_recall_n else None
+    strict_recall = weighted_strict_tp / weighted_strict_n if weighted_strict_n else None
+    return {
+        "tp": weighted_tp,
+        "fp": weighted_fp,
+        "fn": weighted_fn,
+        "strict_tp": weighted_strict_tp,
+        "strict_fn": weighted_strict_fn,
+        "coverage": resolved_reference_weight / reference_weight if reference_weight else None,
+        "coverage_ci": coverage_ci,
+        "precision": weighted_tp / weighted_precision_n if weighted_precision_n else None,
+        "precision_ci": precision_ci,
+        "recall": recall,
+        "recall_ci": recall_ci,
+        "weighted_recall": recall,
+        "weighted_recall_ci": recall_ci,
+        "strict_recall": strict_recall,
+        "strict_recall_ci": strict_recall_ci,
+        "strict_weighted_recall": strict_recall,
+        "strict_weighted_recall_ci": strict_recall_ci,
+        "occurrences": occurrences,
+        "resolved_occurrences": resolved_occurrences,
+        "weighted_occurrences": reference_weight,
+        "resolved_weighted_occurrences": resolved_reference_weight,
+        "effective_sample_size": {
+            "coverage": coverage_n_eff,
+            "precision": precision_n_eff,
+            "recall": recall_n_eff,
+            "strict_recall": strict_recall_n_eff,
+        },
+        "gated": occurrences >= 5,
+        "design_weighted": True,
+        "unweighted": unweighted,
+    }
 
 
-def _metrics(counts: dict, counts_by_bucket: dict[str, dict], partition: dict[str, int], sampled: dict[str, int]) -> dict:
+def _metrics(
+    counts: dict,
+    counts_by_bucket: dict[str, dict],
+    partition: dict[str, int],
+    sampled: dict[str, int],
+    design_weighted: bool = False,
+) -> dict:
     return {
         attribute: _metric(
             entry,
             {bucket: bucket_counts[attribute] for bucket, bucket_counts in counts_by_bucket.items()},
             partition,
             sampled,
+            design_weighted,
         )
         for attribute, entry in counts.items()
     }
+
+
+def _design_weights(metadata: dict) -> dict[str, float] | None:
+    design = metadata.get("design")
+    if design is None:
+        return None
+    if not isinstance(design, dict) or design.get("name") != "cue" or not isinstance(design.get("strata"), dict):
+        raise AuditError("sample_meta.json has an invalid cue design")
+    chunks = metadata.get("chunks")
+    if not isinstance(chunks, dict):
+        raise AuditError("sample_meta.json has no chunk strata")
+    if any(not isinstance(item, dict) or not isinstance(item.get("stratum"), str) for item in chunks.values()):
+        raise AuditError("sample_meta.json has a cue-designed chunk without a stratum")
+    sampled_by_stratum = Counter(item["stratum"] for item in chunks.values())
+    weights = {}
+    for stratum, values in design["strata"].items():
+        if not isinstance(values, dict):
+            raise AuditError(f"sample_meta.json has invalid design stratum {stratum}")
+        population, sample = values.get("N_h"), values.get("n_h")
+        if (
+            not isinstance(population, int)
+            or not isinstance(sample, int)
+            or population <= 0
+            or sample < 0
+            or sample > population
+            or sampled_by_stratum[stratum] != sample
+        ):
+            raise AuditError(f"sample_meta.json has invalid N_h/n_h for stratum {stratum}")
+    unknown = sorted(set(sampled_by_stratum) - set(design["strata"]))
+    if unknown:
+        raise AuditError(f"sample_meta.json has unknown chunk strata: {', '.join(unknown)}")
+    for chunk_id, values in chunks.items():
+        stratum = values["stratum"]
+        stratum_design = design["strata"][stratum]
+        weights[chunk_id] = stratum_design["N_h"] / stratum_design["n_h"]
+    return weights
 
 
 def _unknown_share(
@@ -653,10 +929,12 @@ def _unknown_share(
     metadata: dict,
     overrides: dict[tuple[str, str], set[str]],
     excluded: set[tuple[str, str]],
+    weights: dict[str, float] | None = None,
 ) -> dict:
     reference_by_id = {row["chunk_id"]: row for row in references}
     unknown_records = [row for row in records if row.get("condition_status") == "unknown"]
     conditioned = 0
+    conditioned_weight = 0.0
     attributes: Counter[str] = Counter()
     for record in unknown_records:
         chunk_id = record["chunk_id"]
@@ -669,13 +947,27 @@ def _unknown_share(
         }
         if present:
             conditioned += 1
+            conditioned_weight += weights.get(chunk_id, 1.0) if weights is not None else 1.0
             attributes.update(present)
 
     sampled_unknown = len(unknown_records)
-    share = conditioned / sampled_unknown if sampled_unknown else None
-    share_ci = wilson_interval(conditioned, sampled_unknown)
+    sampled_unknown_weight = sum(
+        weights.get(row["chunk_id"], 1.0) if weights is not None else 1.0
+        for row in unknown_records
+    )
+    if weights is None:
+        share = conditioned / sampled_unknown if sampled_unknown else None
+        share_ci = wilson_interval(conditioned, sampled_unknown)
+        share_n_eff = float(sampled_unknown)
+    else:
+        share = conditioned_weight / sampled_unknown_weight if sampled_unknown_weight else None
+        share_ci, share_n_eff = _weighted_interval(
+            conditioned_weight,
+            sampled_unknown_weight,
+            sum(weights[row["chunk_id"]] ** 2 for row in unknown_records),
+        )
     index_unknown = sum(metadata["bucket_partition"].get(bucket, 0) for bucket in UNKNOWN_BUCKETS)
-    return {
+    result = {
         "sampled_unknown_chunks": sampled_unknown,
         "reference_conditioned_chunks": conditioned,
         "share": share,
@@ -687,6 +979,17 @@ def _unknown_share(
         ),
         "top_attributes": dict(sorted(attributes.items(), key=lambda item: (-item[1], item[0]))[:5]),
     }
+    if weights is not None:
+        result.update(
+            weighted_sampled_unknown_chunks=sampled_unknown_weight,
+            weighted_reference_conditioned_chunks=conditioned_weight,
+            share_effective_sample_size=share_n_eff,
+            unweighted={
+                "share": conditioned / sampled_unknown if sampled_unknown else None,
+                "share_ci": wilson_interval(conditioned, sampled_unknown),
+            },
+        )
+    return result
 
 
 def score_comparison(
@@ -710,6 +1013,12 @@ def score_comparison(
     by_method_bucket = {family: {bucket: _empty_counts() for bucket in BUCKETS} for family in ("rule", "llm")}
     by_campus_bucket = {campus: {bucket: _empty_counts() for bucket in BUCKETS} for campus in VOCABULARY["campus"]}
     sampled = Counter(item["bucket"] for item in metadata["chunks"].values())
+    weights = _design_weights(metadata)
+    design_weighted = weights is not None
+    applicant_errors = {
+        error: {"count": 0, "total": 0, "weighted": 0.0, "weighted_total": 0.0}
+        for error in ("fp", "fn")
+    }
     any_of_all = any_of_all_correct = any_of_present = any_of_present_correct = 0
 
     for record in records:
@@ -717,6 +1026,8 @@ def score_comparison(
         predicted = record.get("applicability") or {}
         reference = reference_by_id[chunk_id]
         bucket, campus = record["tag_bucket"], record["_campus"]
+        weight = weights[chunk_id] if weights is not None else 1.0
+        applicant_chunk = "applicant" in _values(predicted, "academic_status")
         pred_any, ref_any = _canonical_any_of(predicted), _canonical_any_of(reference)
         any_of_all += 1
         any_of_all_correct += pred_any == ref_any
@@ -739,6 +1050,7 @@ def score_comparison(
                 "strict_fn": strict_fn,
                 "reference": bool(ref),
                 "resolved_reference": bool(ref) and resolved,
+                "weight": weight,
             }
             _add(overall, attribute, chunk_id, resolved_tp, resolved_fp, resolved_fn, **add_kwargs)
             _add(by_bucket[bucket], attribute, chunk_id, resolved_tp, resolved_fp, resolved_fn, **add_kwargs)
@@ -760,6 +1072,7 @@ def score_comparison(
                     "strict_fn": 0,
                     "reference": bool(tp),
                     "resolved_reference": bool(tp),
+                    "weight": weight,
                 }
                 _add(by_method[family], attribute, chunk_id, tp, fp, 0, **method_kwargs)
                 _add(by_method_bucket[family][bucket], attribute, chunk_id, tp, fp, 0, **method_kwargs)
@@ -770,6 +1083,7 @@ def score_comparison(
                     "strict_fn": fn,
                     "reference": True,
                     "resolved_reference": True,
+                    "weight": weight,
                 }
                 _add(by_method[family], attribute, chunk_id, 0, 0, fn, **method_kwargs)
                 _add(by_method_bucket[family][bucket], attribute, chunk_id, 0, 0, fn, **method_kwargs)
@@ -780,12 +1094,20 @@ def score_comparison(
                     "strict_fn": len(ref),
                     "reference": True,
                     "resolved_reference": False,
+                    "weight": weight,
                 }
                 _add(by_method[family], attribute, chunk_id, 0, 0, 0, **method_kwargs)
                 _add(by_method_bucket[family][bucket], attribute, chunk_id, 0, 0, 0, **method_kwargs)
+            if attribute == "degree_level":
+                for error, count in (("fp", resolved_fp), ("fn", resolved_fn)):
+                    applicant_errors[error]["total"] += count
+                    applicant_errors[error]["weighted_total"] += count * weight
+                    if applicant_chunk:
+                        applicant_errors[error]["count"] += count
+                        applicant_errors[error]["weighted"] += count * weight
 
     partition = metadata["bucket_partition"]
-    per_attribute = _metrics(overall, by_bucket, partition, sampled)
+    per_attribute = _metrics(overall, by_bucket, partition, sampled, design_weighted)
     failing = [
         attribute for attribute, metric in per_attribute.items()
         if metric["gated"] and (
@@ -798,22 +1120,35 @@ def score_comparison(
         "sample_n": len(records),
         "per_attribute": per_attribute,
         "by_method": {
-            family: _metrics(counts, by_method_bucket[family], partition, sampled)
+            family: _metrics(counts, by_method_bucket[family], partition, sampled, design_weighted)
             for family, counts in by_method.items()
         },
         "by_bucket": {
-            bucket: _metrics(counts, {bucket: counts}, partition, sampled)
+            bucket: _metrics(counts, {bucket: counts}, partition, sampled, design_weighted)
             for bucket, counts in by_bucket.items()
         },
         "by_campus": {
-            campus: _metrics(counts, by_campus_bucket[campus], partition, sampled)
+            campus: _metrics(counts, by_campus_bucket[campus], partition, sampled, design_weighted)
             for campus, counts in by_campus.items()
         },
         "any_of_exact_match": {
             "all_chunks": {"matches": any_of_all_correct, "n": any_of_all, "rate": any_of_all_correct / any_of_all if any_of_all else None},
             "chunks_with_any_of": {"matches": any_of_present_correct, "n": any_of_present, "rate": any_of_present_correct / any_of_present if any_of_present else None},
         },
-        "unknown_share": _unknown_share(records, references, metadata, overrides, excluded),
+        "unknown_share": _unknown_share(records, references, metadata, overrides, excluded, weights),
+        "applicant_chunk_degree_errors": {
+            error: {
+                "count": values["count"],
+                "total": values["total"],
+                "weighted_share": (
+                    values["weighted"] / values["weighted_total"]
+                    if values["weighted_total"]
+                    else None
+                ),
+            }
+            for error, values in applicant_errors.items()
+        },
+        "sampling_design": metadata.get("design", {}).get("name"),
         "g2": {"passed": not failing, "failing_attributes": failing},
     }
 
@@ -864,7 +1199,14 @@ def _format_metric(value: float | None, interval: list[float] | None) -> str:
     return f"{value:.3f} [{interval[0]:.3f}, {interval[1]:.3f}]"
 
 
+def _format_count(value: float | int) -> str:
+    return str(value) if isinstance(value, int) else f"{value:.3f}"
+
+
 def _append_table(lines: list[str], metrics: dict, gate: bool = False) -> None:
+    design_weighted = any(metric.get("design_weighted") for metric in metrics.values())
+    if design_weighted:
+        lines.extend(["Design-weighted values (inverse stratum inclusion probability):", ""])
     if gate:
         lines.extend(
             [
@@ -880,7 +1222,13 @@ def _append_table(lines: list[str], metrics: dict, gate: bool = False) -> None:
                 and metric["weighted_recall"] is not None and metric["weighted_recall"] >= 0.7
             )
             lines.append(
-                f"| {attribute} | {metric['occurrences']} | "
+                f"| {attribute} | {metric['occurrences']}"
+                + (
+                    f" (weighted {_format_count(metric['weighted_occurrences'])})"
+                    if metric.get("design_weighted")
+                    else ""
+                )
+                + " | "
                 f"{_format_metric(metric['coverage'], metric['coverage_ci'])} | "
                 f"{_format_metric(metric['precision'], metric['precision_ci'])} | "
                 f"{_format_metric(metric['recall'], metric['recall_ci'])} | "
@@ -889,23 +1237,45 @@ def _append_table(lines: list[str], metrics: dict, gate: bool = False) -> None:
                 f"{_format_metric(metric['strict_weighted_recall'], metric['strict_weighted_recall_ci'])} | "
                 f"{'PASS' if passed else 'FAIL'} |"
             )
-        return
-    lines.extend(
-        [
-            "| Attribute | Occurrences | TP | FP | FN | Coverage (95% CI) | Resolved precision (95% CI) | Resolved recall (95% CI) | Resolved weighted recall (95% CI) | Strict recall (95% CI) | Strict weighted recall (95% CI) |",
-            "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
-        ]
-    )
-    for attribute, metric in metrics.items():
-        lines.append(
-            f"| {attribute} | {metric['occurrences']} | {metric['tp']} | {metric['fp']} | {metric['fn']} | "
-            f"{_format_metric(metric['coverage'], metric['coverage_ci'])} | "
-            f"{_format_metric(metric['precision'], metric['precision_ci'])} | "
-            f"{_format_metric(metric['recall'], metric['recall_ci'])} | "
-            f"{_format_metric(metric['weighted_recall'], metric['weighted_recall_ci'])} | "
-            f"{_format_metric(metric['strict_recall'], metric['strict_recall_ci'])} | "
-            f"{_format_metric(metric['strict_weighted_recall'], metric['strict_weighted_recall_ci'])} |"
+    else:
+        lines.extend(
+            [
+                "| Attribute | Occurrences | TP | FP | FN | Coverage (95% CI) | Resolved precision (95% CI) | Resolved recall (95% CI) | Resolved weighted recall (95% CI) | Strict recall (95% CI) | Strict weighted recall (95% CI) |",
+                "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
+            ]
         )
+        for attribute, metric in metrics.items():
+            lines.append(
+                f"| {attribute} | {metric['occurrences']} | {_format_count(metric['tp'])} | "
+                f"{_format_count(metric['fp'])} | {_format_count(metric['fn'])} | "
+                f"{_format_metric(metric['coverage'], metric['coverage_ci'])} | "
+                f"{_format_metric(metric['precision'], metric['precision_ci'])} | "
+                f"{_format_metric(metric['recall'], metric['recall_ci'])} | "
+                f"{_format_metric(metric['weighted_recall'], metric['weighted_recall_ci'])} | "
+                f"{_format_metric(metric['strict_recall'], metric['strict_recall_ci'])} | "
+                f"{_format_metric(metric['strict_weighted_recall'], metric['strict_weighted_recall_ci'])} |"
+            )
+    if design_weighted:
+        lines.extend(
+            [
+                "",
+                "Unweighted sample values:",
+                "",
+                "| Attribute | TP | FP | FN | Coverage (95% CI) | Precision (95% CI) | Recall (95% CI) | Strict recall (95% CI) |",
+                "|---|---:|---:|---:|---:|---:|---:|---:|",
+            ]
+        )
+        for attribute, metric in metrics.items():
+            if gate and not metric["gated"]:
+                continue
+            raw = metric["unweighted"]
+            lines.append(
+                f"| {attribute} | {raw['tp']} | {raw['fp']} | {raw['fn']} | "
+                f"{_format_metric(raw['coverage'], raw['coverage_ci'])} | "
+                f"{_format_metric(raw['precision'], raw['precision_ci'])} | "
+                f"{_format_metric(raw['recall'], raw['recall_ci'])} | "
+                f"{_format_metric(raw['strict_recall'], raw['strict_recall_ci'])} |"
+            )
 
 
 def _append_unknown_share(lines: list[str], unknown: dict) -> None:
@@ -913,10 +1283,22 @@ def _append_unknown_share(lines: list[str], unknown: dict) -> None:
     share = _format_metric(unknown["share"], unknown["share_ci"])
     estimate = unknown["estimated_conditioned_chunks"]
     estimate_ci = unknown["estimated_conditioned_chunks_ci"]
-    lines.append(
-        f"Reference-conditioned unknown chunks: {unknown['reference_conditioned_chunks']}/"
-        f"{unknown['sampled_unknown_chunks']} ({share})."
-    )
+    if "unweighted" in unknown:
+        lines.append(
+            "Reference-conditioned unknown chunks: "
+            f"{unknown['reference_conditioned_chunks']}/{unknown['sampled_unknown_chunks']}; "
+            f"design-weighted sums {_format_count(unknown['weighted_reference_conditioned_chunks'])}/"
+            f"{_format_count(unknown['weighted_sampled_unknown_chunks'])} ({share})."
+        )
+        lines.append(
+            "Unweighted sample share: "
+            f"{_format_metric(unknown['unweighted']['share'], unknown['unweighted']['share_ci'])}."
+        )
+    else:
+        lines.append(
+            f"Reference-conditioned unknown chunks: {unknown['reference_conditioned_chunks']}/"
+            f"{unknown['sampled_unknown_chunks']} ({share})."
+        )
     if estimate is None or estimate_ci is None:
         lines.append(f"Estimated conditioned chunks among {unknown['index_unknown_chunks']} index unknowns: null.")
     else:
@@ -937,6 +1319,20 @@ def scores_markdown(scores: dict, final: bool = False) -> str:
     _append_table(lines, scores["per_attribute"], gate=True)
     lines.extend(["", f"G2 verdict: **{'PASS' if scores['g2']['passed'] else 'FAIL'}**."])
     _append_unknown_share(lines, scores["unknown_share"])
+    errors = scores["applicant_chunk_degree_errors"]
+    lines.extend(
+        [
+            "",
+            "## Degree-level errors in applicant-tagged chunks",
+            "",
+            "| Error | Applicant units | All units | Design-weighted share |",
+            "|---|---:|---:|---:|",
+        ]
+    )
+    for error in ("fp", "fn"):
+        values = errors[error]
+        share = "null" if values["weighted_share"] is None else f"{values['weighted_share']:.3f}"
+        lines.append(f"| {error.upper()} | {values['count']} | {values['total']} | {share} |")
     for split in ("by_method", "by_bucket", "by_campus"):
         lines.extend(["", f"## {split.replace('_', ' ')}", ""])
         for name, metrics in scores[split].items():
@@ -1212,11 +1608,34 @@ def _gate_result(metric: dict) -> str:
     return "PASS" if passed else "FAIL"
 
 
-def side_by_side_report(folder_a: Path, folder_b: Path, destination: Path) -> None:
-    scores_a, scores_b = _load_final_scores(folder_a), _load_final_scores(folder_b)
-    attributes_a = scores_a["per_attribute"]
-    attributes_b = scores_b["per_attribute"]
-    if set(attributes_a) != set(attributes_b):
+def _side_metric(metric: dict, field: str, interval_field: str) -> str:
+    value = _format_metric(metric[field], metric[interval_field])
+    if metric.get("design_weighted"):
+        raw = metric["unweighted"]
+        raw_field, raw_interval = (
+            ("recall", "recall_ci")
+            if field == "weighted_recall"
+            else (field, interval_field)
+        )
+        value += f"; unweighted {_format_metric(raw[raw_field], raw[raw_interval])}"
+    return value
+
+
+def side_by_side_report(
+    folders: list[Path],
+    destination: Path,
+    labels: list[str] | None = None,
+) -> None:
+    if len(folders) < 2:
+        raise AuditError("--side-by-side requires at least two audit folders")
+    if labels and len(labels) != len(folders):
+        raise AuditError("The number of --label values must match the audit folders")
+    labels = labels or [chr(ord("A") + index) for index in range(len(folders))]
+    if len(set(labels)) != len(labels):
+        raise AuditError("--label values must be unique")
+    score_sets = [_load_final_scores(folder) for folder in folders]
+    attributes = score_sets[0]["per_attribute"]
+    if any(set(scores["per_attribute"]) != set(attributes) for scores in score_sets[1:]):
         raise AuditError("Side-by-side audit folders have different attribute rows")
 
     lines = [
@@ -1224,25 +1643,40 @@ def side_by_side_report(folder_a: Path, folder_b: Path, destination: Path) -> No
         "",
         "# G2b side-by-side audit",
         "",
-        f"A: `{folder_a}`  ",
-        f"B: `{folder_b}`",
-        "",
-        "| Attribute | A occurrences | A coverage | A precision | A recall | A weighted recall | A strict recall | A gate | B occurrences | B coverage | B precision | B recall | B weighted recall | B strict recall | B gate |",
-        "|---|---:|---:|---:|---:|---:|---:|---|---:|---:|---:|---:|---:|---:|---|",
     ]
+    lines.extend(
+        f"{label}{' (gate sample)' if index == len(folders) - 1 else ''}: `{folder}`  "
+        for index, (label, folder) in enumerate(zip(labels, folders))
+    )
+    lines.extend(["", "Cue-designed cells show design-weighted values first and unweighted sample values second.", ""])
+    columns = [
+        f"{label} {name}"
+        for label in labels
+        for name in ("occurrences", "coverage", "precision", "recall", "weighted recall", "strict recall", "gate")
+    ]
+    lines.extend(
+        [
+            "| Attribute | " + " | ".join(columns) + " |",
+            "|---|" + "|".join("---:" if not column.endswith("gate") else "---" for column in columns) + "|",
+        ]
+    )
     for attribute in ATTRIBUTES:
-        if attribute not in attributes_a:
+        if attribute not in attributes:
             continue
         cells = [attribute]
-        for metric in (attributes_a[attribute], attributes_b[attribute]):
+        for scores in score_sets:
+            metric = scores["per_attribute"][attribute]
+            occurrence = str(metric["occurrences"])
+            if metric.get("design_weighted"):
+                occurrence += f"; weighted {_format_count(metric['weighted_occurrences'])}"
             cells.extend(
                 [
-                    str(metric["occurrences"]),
-                    _format_metric(metric["coverage"], metric["coverage_ci"]),
-                    _format_metric(metric["precision"], metric["precision_ci"]),
-                    _format_metric(metric["recall"], metric["recall_ci"]),
-                    _format_metric(metric["weighted_recall"], metric["weighted_recall_ci"]),
-                    _format_metric(metric["strict_recall"], metric["strict_recall_ci"]),
+                    occurrence,
+                    _side_metric(metric, "coverage", "coverage_ci"),
+                    _side_metric(metric, "precision", "precision_ci"),
+                    _side_metric(metric, "recall", "recall_ci"),
+                    _side_metric(metric, "weighted_recall", "weighted_recall_ci"),
+                    _side_metric(metric, "strict_recall", "strict_recall_ci"),
                     _gate_result(metric),
                 ]
             )
@@ -1257,7 +1691,7 @@ def side_by_side_report(folder_a: Path, folder_b: Path, destination: Path) -> No
             "|---|---:|---:|---:|---:|---:|---|",
         ]
     )
-    for label, scores in (("A", scores_a), ("B", scores_b)):
+    for label, scores in zip(labels, score_sets):
         unknown = scores["unknown_share"]
         estimate = unknown["estimated_conditioned_chunks"]
         estimate_ci = unknown["estimated_conditioned_chunks_ci"]
@@ -1269,11 +1703,39 @@ def side_by_side_report(folder_a: Path, folder_b: Path, destination: Path) -> No
         top = ", ".join(
             f"{attribute} ({count})" for attribute, count in unknown["top_attributes"].items()
         ) or "none"
+        share = _format_metric(unknown["share"], unknown["share_ci"])
+        if "unweighted" in unknown:
+            share += "; unweighted " + _format_metric(
+                unknown["unweighted"]["share"],
+                unknown["unweighted"]["share_ci"],
+            )
         lines.append(
             f"| {label} | {unknown['sampled_unknown_chunks']} | "
             f"{unknown['reference_conditioned_chunks']} | "
-            f"{_format_metric(unknown['share'], unknown['share_ci'])} | "
+            f"{share} | "
             f"{unknown['index_unknown_chunks']} | {estimate_text} | {top} |"
+        )
+
+    lines.extend(
+        [
+            "",
+            "## Degree-level errors in applicant-tagged chunks",
+            "",
+            "| Audit | Applicant FP / all FP | FP design-weighted share | Applicant FN / all FN | FN design-weighted share |",
+            "|---|---:|---:|---:|---:|",
+        ]
+    )
+    for label, scores in zip(labels, score_sets):
+        errors = scores.get("applicant_chunk_degree_errors")
+        if not errors:
+            lines.append(f"| {label} | N/A | N/A | N/A | N/A |")
+            continue
+        fp, fn = errors["fp"], errors["fn"]
+        fp_share = "null" if fp["weighted_share"] is None else f"{fp['weighted_share']:.3f}"
+        fn_share = "null" if fn["weighted_share"] is None else f"{fn['weighted_share']:.3f}"
+        lines.append(
+            f"| {label} | {fp['count']} / {fp['total']} | {fp_share} | "
+            f"{fn['count']} / {fn['total']} | {fn_share} |"
         )
 
     destination.parent.mkdir(parents=True, exist_ok=True)
@@ -1306,6 +1768,28 @@ def _quotas(values: list[tuple[str, int]]) -> dict[str, int]:
     return dict(values)
 
 
+def _minimum_cue(value: str) -> tuple[str, int]:
+    cue, separator, count_text = value.partition("=")
+    if not separator or cue not in CUES:
+        choices = ", ".join(CUES)
+        raise argparse.ArgumentTypeError(f"minimum must be CUE=N, where CUE is one of {choices}")
+    try:
+        count = int(count_text)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError("minimum N must be a non-negative integer") from exc
+    if count < 0:
+        raise argparse.ArgumentTypeError("minimum N must be a non-negative integer")
+    return cue, count
+
+
+def _cue_minimums(values: list[tuple[str, int]]) -> dict[str, int]:
+    counts = Counter(cue for cue, _ in values)
+    duplicates = sorted(cue for cue, count in counts.items() if count > 1)
+    if duplicates:
+        raise AuditError(f"Duplicate --min-cue values: {', '.join(duplicates)}")
+    return dict(values)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run the blind automated AAES tag audit")
     commands = parser.add_subparsers(dest="command", required=True)
@@ -1314,6 +1798,8 @@ def build_parser() -> argparse.ArgumentParser:
     sample.add_argument("--n", type=int, default=150)
     sample.add_argument("--seed", type=int, default=20261111)
     sample.add_argument("--quota", type=_quota, action="append", default=[], metavar="BUCKET=N")
+    sample.add_argument("--design", choices=("cue",))
+    sample.add_argument("--min-cue", type=_minimum_cue, action="append", default=[], metavar="CUE=N")
     sample.add_argument("--force", action="store_true")
     sample_source = sample.add_mutually_exclusive_group()
     sample_source.add_argument("--exclude", type=Path, action="append", default=[])
@@ -1326,8 +1812,9 @@ def build_parser() -> argparse.ArgumentParser:
     finalize_parser.add_argument("--index-id", required=True)
     finalize_parser.add_argument("--reference", type=Path, required=True)
     finalize_parser.add_argument("--decisions", type=Path, required=True)
-    report = commands.add_parser("report", help="compare two finalized audit folders")
-    report.add_argument("--side-by-side", type=Path, nargs=2, required=True, metavar=("OUT_A", "OUT_B"))
+    report = commands.add_parser("report", help="compare finalized audit folders")
+    report.add_argument("--side-by-side", type=Path, nargs="+", required=True, metavar="OUT")
+    report.add_argument("--label", action="append", default=[])
     report.add_argument("--to", type=Path, required=True)
     for command in (sample, compare_parser, finalize_parser):
         command.add_argument("--out", default="auto")
@@ -1338,15 +1825,20 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
         if args.command == "report":
-            side_by_side_report(*args.side_by_side, args.to)
+            side_by_side_report(args.side_by_side, args.to, args.label)
             print(f"Wrote side-by-side report to {args.to}")
             return 0
         out = output_dir(args.index_id, args.out)
         db = connect_index(args.index_id)
         if args.command == "sample":
             quotas = _quotas(args.quota)
-            if args.reuse and quotas:
-                raise AuditError("--quota cannot be combined with --reuse")
+            minimums = _cue_minimums(args.min_cue)
+            if minimums and args.design != "cue":
+                raise AuditError("--min-cue requires --design cue")
+            if args.design and quotas:
+                raise AuditError("--quota cannot be combined with --design")
+            if args.reuse and (quotas or args.design or minimums):
+                raise AuditError("--quota, --design and --min-cue cannot be combined with --reuse")
             partition = manifest_bucket_partition(db)
             if args.reuse:
                 source_metadata, chunk_ids = sample_chunk_ids(args.reuse)
@@ -1373,7 +1865,18 @@ def main(argv: list[str] | None = None) -> int:
                     excluded_ids.update(chunk_ids)
                     excluded_files.append({"path": str(path), "count": len(chunk_ids)})
                 available = [row for row in available if row["chunk_id"] not in excluded_ids]
-                records, targets = sample_records(available, args.n, args.seed, quotas)
+                design = None
+                if args.design == "cue":
+                    records, design = sample_cue_records(available, args.n, args.seed, minimums)
+                    targets = {
+                        bucket: sum(row["tag_bucket"] == bucket for row in records)
+                        for bucket in BUCKETS
+                    }
+                else:
+                    records, targets = sample_records(available, args.n, args.seed, quotas)
+                overlap = sorted({row["chunk_id"] for row in records} & excluded_ids)
+                if overlap:
+                    raise AuditError(f"Sample overlaps excluded chunks: {', '.join(overlap)}")
                 metadata = sample_metadata(
                     args.index_id,
                     args.seed,
@@ -1382,6 +1885,7 @@ def main(argv: list[str] | None = None) -> int:
                     partition,
                     available_records=available,
                     excluded_files=excluded_files,
+                    design=design,
                 )
                 write_sample(records, metadata, out, args.force)
             print(json.dumps(metadata["achieved_strata"], indent=2))

@@ -49,3 +49,4 @@
 | 2026-11-11 | P4 | T09 r5 | done | r5 built (--no-llm), verified 15/15 and published by the human; partition = r4; HYU default; r4 kept for rollback. |
 | 2026-11-11 | P5 | G3 | confirmed | Human: 'approved with the three section-8 decisions as written'. T14 starts (Codex drafts ~230 questions; humans then delete/edit/add, >= 30% human). |
 | 2026-11-11 | P5 | A26 | recorded | Hints split from annotator inputs; test-100 reference after T15 if quota remains; review.csv + apply script; push labels after every session. |
+| 2026-11-11 | P4 | T10g | done | Codex: --design cue sampling (text-cue strata visa/student_type/degree, minimums, excludes), design weights w=N_h/n_h with Kish n_eff for Wilson CIs, applicant-chunk degree errors, labelled N-folder report. Claude Code checked the weighted hand case. Tool only: test-100 reference waits for T15 (A26). Tests 173 + 210. |
