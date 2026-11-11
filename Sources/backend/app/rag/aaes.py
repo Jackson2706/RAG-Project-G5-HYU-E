@@ -270,3 +270,47 @@ def branch_note(decision: dict, evidence_ids: list[str]) -> str:
         use = "".join(label[c] for c in row["evidence"] if c in label) or "no evidence: say the student should ask the OIA office"
         lines.append(f"- {when}: use {use}")
     return "\n".join(lines)
+
+
+# --------------------------------------------------------------------------- baselines that reuse step 1 (R9-scope, R15)
+
+
+def prefilter_conditions(profile: dict[str, dict]) -> dict[str, list[str]]:
+    """Payload predicate {app_<attribute>: allowed values} for the known profile values plus the scope default.
+
+    A chunk passes when each field is missing (no constraint) or shares a value, so an applicant-only chunk is
+    dropped unless the student says they are applying. `any_of` attributes are not in the payload, so a
+    chunk with alternatives is never dropped on them.
+
+    >>> prefilter_conditions(extract_profile("I'm at ERICA"))
+    {'app_campus': ['erica'], 'app_academic_status': ['admitted_not_enrolled', 'enrolled', 'leave_of_absence', 'completed_coursework', 'graduating']}
+    """
+    known = known_values(profile)
+    conditions = {f"app_{a}": v for a, v in known.items()}
+    for attribute, values in SCOPE_DEFAULTS.items():
+        conditions.setdefault(f"app_{attribute}", list(values))
+    return conditions
+
+
+def profile_from_llm(raw: str) -> tuple[dict[str, dict], list[str]]:
+    """R15: the LLM's JSON {attribute: value or [values]} → a step-1 profile (status "stated"). Values outside
+    the vocabulary are dropped and listed, so the filter never uses an invented value."""
+    import json
+
+    match = re.search(r"\{.*\}", raw, re.S)
+    try:
+        data = json.loads(match.group(0)) if match else {}
+    except json.JSONDecodeError:
+        data = {}
+    profile = {a: {"values": [], "status": "missing", "evidence": ""} for a in VOCABULARY}
+    dropped = []
+    for attribute, value in (data if isinstance(data, dict) else {}).items():
+        values = [str(v).strip() for v in (value if isinstance(value, list) else [value]) if v not in (None, "")]
+        good = [v for v in values if attribute in VOCABULARY and v in VOCABULARY[attribute]]
+        dropped += [f"{attribute}={v}" for v in values if v not in good]
+        if good:
+            profile[attribute] = {"values": good, "status": "stated", "evidence": "llm"}
+    for attribute, values in SCOPE_DEFAULTS.items():
+        if profile[attribute]["status"] == "missing":
+            profile[attribute] = {"values": list(values), "status": "scope_default", "evidence": ""}
+    return profile, dropped

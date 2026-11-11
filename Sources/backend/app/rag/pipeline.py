@@ -325,7 +325,7 @@ async def run_rag(question: str, config: dict, services: Services, emit: Callabl
         queries = [query] + rewritten.alternatives  # several queries = multi-query expansion
         rrf_k = blocks["query_rewriting"].params.get("rrf_k", 60) if "query_rewriting" in blocks else 60
         # Prefiltering builds a predicate; it is NOT applied here but passed INTO candidate retrieval.
-        prefilter = await step("metadata_prefiltering", lambda b: b.build_filter(criteria), {"criteria": criteria})
+        prefilter = await step("metadata_prefiltering", lambda b: b.build_filter(criteria, profile=profile), {"criteria": criteria})
 
         # ---- candidate retrieval: dense, lexical, or both merged by hybrid fusion (all use the same prefilter)
         hyde = rewritten.embedding_text

@@ -42,6 +42,7 @@ from app.rag.blocks.ingestion.vector_indexing.qdrant_indexer import QdrantMongoI
 from app.rag.blocks.query_processing.query_understanding.base import BaseQueryUnderstanding
 from app.rag.blocks.query_processing.query_understanding.llm_understanding import LLMQueryUnderstanding
 from app.rag.blocks.query_processing.query_understanding.profile_understanding import ProfileUnderstanding
+from app.rag.blocks.query_processing.query_understanding.self_query import SelfQueryUnderstanding
 from app.rag.blocks.query_processing.query_understanding.stated_criteria import StatedCriteria
 from app.rag.blocks.query_processing.query_rewriting.base import BaseQueryRewriter
 from app.rag.blocks.query_processing.query_rewriting.hyde import HyDERewriter
@@ -49,6 +50,7 @@ from app.rag.blocks.query_processing.query_rewriting.llm_rewriter import LLMQuer
 from app.rag.blocks.query_processing.query_rewriting.multi_query import MultiQueryRewriter
 
 # ---- blocks/metadata_filtering/
+from app.rag.blocks.metadata_filtering.metadata_prefiltering.applicability_prefilter import ApplicabilityPrefilter
 from app.rag.blocks.metadata_filtering.metadata_prefiltering.base import BaseMetadataPrefilter
 from app.rag.blocks.metadata_filtering.metadata_prefiltering.qdrant_prefilter import QdrantMetadataPrefilter
 from app.rag.blocks.metadata_filtering.metadata_postfiltering.base import BaseMetadataPostfilter
@@ -81,6 +83,8 @@ from app.rag.blocks.evidence.evidence_sufficiency.sufficiency_checker import Sco
 # ---- blocks/grounded_generation/
 from app.rag.blocks.grounded_generation.context_construction.base import BaseContextBuilder
 from app.rag.blocks.grounded_generation.context_construction.standard_context import StandardContextBuilder
+from app.rag.blocks.grounded_generation.context_construction.closed_book import ClosedBookBuilder
+from app.rag.blocks.grounded_generation.context_construction.conditional_prompt import ConditionalPromptBuilder
 from app.rag.blocks.grounded_generation.generation.base import BaseGenerator
 from app.rag.blocks.grounded_generation.generation.ollama_generator import OllamaGenerator
 from app.rag.schemas import Services
@@ -287,6 +291,9 @@ PIPELINE: list[Stage] = [
               Method("llm_understanding", "LLM understanding", LLMQueryUnderstanding, False, "The LLM extracts intent and criteria."),
               Method("profile_understanding", "Student profile (AAES step 1)", ProfileUnderstanding, True,
                      "Campus, degree, year, visa, TOPIK … from the question and earlier turns, each stated / remembered / missing."),
+              Method("self_query", "Self-query (LLM → profile)", SelfQueryUnderstanding, True,
+                     "The LLM writes the student's stated attributes as JSON; values outside the vocabulary are dropped.",
+                     parameters=_llm_params(128, 512)),
           ]),
     Stage("query_rewriting", "Query Rewriting", "online", BaseQueryRewriter,
           "Turn the question into a better search query.", default_method=None, optional=True, methods=[
@@ -306,6 +313,8 @@ PIPELINE: list[Stage] = [
           default_method=None, optional=True, methods=[
               Method("qdrant_prefilter", "Qdrant payload filter", QdrantMetadataPrefilter, True,
                      "Eligibility predicate on Qdrant payload fields (BM25 applies the same predicate).", parameters=_filter_params()),
+              Method("applicability_prefilter", "Applicability tags + profile", ApplicabilityPrefilter, True,
+                     "Hard filter on the chunk tags with the student's profile and the applicant scope default."),
           ]),
     Stage("dense_retrieval", "Dense Retrieval", "online", BaseDenseRetriever,
           "Find the chunks whose meaning is closest to the question.", default_method="qdrant_cosine", optional=True,
@@ -414,6 +423,9 @@ PIPELINE: list[Stage] = [
     Stage("context_construction", "Context Construction", "online", BaseContextBuilder,
           "Write the evidence into the prompt as [E1], [E2], …", default_method="standard_context", methods=[
               Method("standard_context", "Numbered evidence blocks", StandardContextBuilder, True, "Title, section, page and text for each block."),
+              Method("conditional_prompt", "Evidence + 'answer per case or ask'", ConditionalPromptBuilder, True,
+                     "The standard blocks plus an instruction to state conditions or ask one question (R16)."),
+              Method("closed_book", "No evidence (closed book)", ClosedBookBuilder, True, "The question alone; the model answers from memory (G0)."),
           ]),
     Stage("generation", "Generation", "online", BaseGenerator,
           "Grounded generation: the local LLM answers using only the evidence.", default_method="ollama_chat", methods=[

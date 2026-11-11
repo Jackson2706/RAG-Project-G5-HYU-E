@@ -16,5 +16,5 @@ class QdrantMetadataPrefilter(BaseMetadataPrefilter):
     while ranking. Only eligible chunks are ranked, so Top K is filled with eligible chunks.
     """
 
-    async def build_filter(self, criteria: FilterCriteria) -> RetrievalFilter | None:
+    async def build_filter(self, criteria: FilterCriteria, profile: dict | None = None) -> RetrievalFilter | None:
         return criteria.to_filter(self.params["include_unknown"], "all" if self.params["include_campus_wide"] else None)

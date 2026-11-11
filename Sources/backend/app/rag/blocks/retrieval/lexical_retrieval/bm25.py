@@ -10,6 +10,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from app.rag.applicability import ChunkCondition
 from app.rag.blocks.retrieval.lexical_retrieval.base import BaseLexicalRetriever
 from app.rag.schemas import Candidate, RetrievalFilter, RetrievalResult
 
@@ -39,17 +40,22 @@ class LexicalIndex:
 _CACHE: dict[tuple, LexicalIndex] = {}
 
 
+def app_payload(chunk: dict) -> dict:
+    """The chunk's app_* fields, exactly as in its Qdrant payload, so BM25 applies the same prefilter (empty if untagged)."""
+    return ChunkCondition.from_dict(chunk["applicability"]).to_payload() if chunk.get("applicability") else {}
+
+
 def build_lexical_index(db) -> LexicalIndex:
     """Read every chunk from MongoDB once. The text is "section heading + chunk text" — exactly what
     dense retrieval embeds — so both retrievers rank the same units."""
     start = time.perf_counter()
     documents = {d["doc_id"]: d.get("metadata", {}) for d in db.documents.find({}, {"_id": 0, "doc_id": 1, "metadata": 1})}
     chunk_ids, doc_ids, metadata, lengths, postings = [], [], [], [], {}
-    for position, c in enumerate(db.chunks.find({}, {"_id": 0, "chunk_id": 1, "doc_id": 1, "section": 1, "text": 1})):
+    for position, c in enumerate(db.chunks.find({}, {"_id": 0, "chunk_id": 1, "doc_id": 1, "section": 1, "text": 1, "applicability": 1})):
         words = tokenize(f"{c['section']}\n{c['text']}" if c.get("section") else c["text"])
         chunk_ids.append(c["chunk_id"])
         doc_ids.append(c["doc_id"])
-        metadata.append(documents.get(c["doc_id"], {}))
+        metadata.append({**documents.get(c["doc_id"], {}), **app_payload(c)})
         lengths.append(len(words))
         for word, count in Counter(words).items():
             postings.setdefault(word, ([], []))
