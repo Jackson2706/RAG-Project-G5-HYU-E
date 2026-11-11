@@ -30,7 +30,7 @@ sys.path.insert(0, str(SOURCES))  # so `import crawler` works
 from app.config import DATA_DIR, RESULTS_DIR, get_settings  # noqa: E402
 from app.database import DEFAULT_INDEX, Database  # noqa: E402
 from app.ollama import OllamaClient  # noqa: E402
-from app.rag.applicability import ChunkCondition  # noqa: E402
+from app.rag.applicability import VOCABULARY, ChunkCondition  # noqa: E402
 from app.rag.blocks.ingestion.metadata_extraction.applicability_extractor import (  # noqa: E402
     LLM_CUE,
     RULE_5B_OPTION,
@@ -103,6 +103,10 @@ def dry_run(args, services: Services, docs) -> int:
           f"enrolled: {sum('enrolled' in c['constraints'].get('academic_status', []) for c in conditions)}; "
           f"year constraint: {sum('year' in c['constraints'] for c in conditions)}; "
           f"rule-5b requirement: {sum(any(RULE_5B_OPTION.search(r) for r in c['requirements']) for c in conditions)}")
+    print(f"R5 rule counts: degree_inherited: {extractor.summary['degree_inherited']}")
+    for attribute in ("degree_level", "student_type", "visa"):
+        counts = Counter(value for c in conditions for value in c["constraints"].get(attribute, []))
+        print(f"  {attribute}: " + "; ".join(f"{value}: {counts[value]}" for value in VOCABULARY[attribute]))
     print("\nAttribute frequency (rules only):")
     for key, n in sorted(frequency(conditions).items()):
         print(f"  {key:40s} {n}")

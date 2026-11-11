@@ -55,6 +55,29 @@ MONTHS = {
 
 # "graduate school/students/courses" or a "Graduate:" table cell = master + doctoral ("undergraduate" never matches \b)
 GRADUATE = r"\bgraduate(?: school| students?| courses?| programs?|\s*:)"
+GUIDE_DEGREE_LEVELS = (
+    (re.compile(r"\bundergraduate\s+admission\s+(?:guides?|guidelines?)\b|\bGKS\s*[-–]\s*U\b", re.IGNORECASE),
+     ["undergraduate"]),
+    (re.compile(r"\bgraduate\s+admission\s+(?:guides?|guidelines?)\b|\bGKS\s*[-–]\s*G\b", re.IGNORECASE),
+     ["master", "doctoral"]),
+)
+PRIOR_QUALIFICATION = re.compile(
+    r"\b(?:must\s+hold|(?:must\s+)?have\s+completed|holders?\s+of|graduated\s+with)\s+"
+    r"(?:an?\s+)?bachelor(?:'s|’s)?(?:\s+degree)?\b|"
+    r"\bcompleted\s+(?:your|an?)\s+undergraduate\s+program\b|"
+    r"\bfield of study\s*:\s*bachelor(?:'s|’s)?(?:\s+degree)?\b|"  # S06: a required prior field
+    r"\bbachelor(?:'s|’s)?\s+degree\s*(?:\([^\n)]*\)\s*)?or\s+higher\b",
+    re.IGNORECASE,
+)
+VISA_NOISE = re.compile(
+    r"\bvisa\b.*\b(?:contact|inquir(?:y|ies))\b|\b(?:contact|inquir(?:y|ies))\b.*\bvisa\b|"
+    r"abus\s*ing\s+visa|\basylum\b|countries?\s+subject\s+to\s+intensive\s+management",
+    re.IGNORECASE,
+)
+NAMED_GRADUATE_SCHOOL = re.compile(
+    r"\b(?:[A-Z][\w&.'’()-]*[ \t]+){1,6}Graduate School of[ \t]+"
+    r"(?:[A-Z][\w&.'’()-]*(?:[ \t]+|(?=[,;:.\n]|$))){1,6}",
+)
 # "Except students who took a leave of absence, …" and ineligibility lists name groups that are NOT eligible.
 NEGATED = re.compile(
     r"\b(?:except|excluding|excluded|cannot apply|are not allowed)\b[^.\n)]*|"
@@ -90,7 +113,17 @@ def _scope(context: str) -> str:
     return "national" if national and not CAMPUS_PROCEDURE.search(context) else "campus"
 
 
+def _guide_degree_level(chunk: dict) -> tuple[list[str], str | None]:
+    for label in [chunk.get("title", ""), *(chunk.get("heading_path") or [])]:
+        for pattern, values in GUIDE_DEGREE_LEVELS:
+            if pattern.search(label):
+                return values, label
+    return [], None
+
+
 def _degree_level(context: str) -> tuple[list[str], str | None]:
+    context = PRIOR_QUALIFICATION.sub(" ", context)
+    context = NAMED_GRADUATE_SCHOOL.sub(" ", context)
     patterns = {
         "undergraduate": (r"\bbachelor(?:'s|’s)?\b", r"\bundergraduate(?: school| students?)?\b"),
         "master": (r"\bmaster(?:'s|’s)?\b", GRADUATE),
@@ -171,6 +204,8 @@ def _normalized_visa(code: str) -> str:
 
 
 def _visa(context: str) -> tuple[list[str], str | None]:
+    # Contact details and misuse warnings mention visa codes without defining their audience (one sentence each).
+    context = re.sub(r"[^.\n]+", lambda m: " " if VISA_NOISE.search(m.group(0)) else m.group(0), context)
     # "When transferring from D-4 to D-2" is the procedure for current D-4 holders: keep the old visa (C03)
     transfer = re.search(rf"\btransferring from\b.{{0,180}}?\b(?P<old>{VISA_CODE})\b.{{0,180}}?\bto\b", context, re.IGNORECASE)
     if transfer:
@@ -196,10 +231,19 @@ def _visa(context: str) -> tuple[list[str], str | None]:
 
 def _student_type(context: str) -> tuple[list[str], str | None]:
     patterns = {
-        "degree_seeking": (r"\b(?:international\W+)?degree\W+(?:program\W+)?students?\b",),
+        "degree_seeking": (
+            r"\b(?:international\W+)?degree\W+(?:program\W+)?students?\b",
+            r"\benrolled\s+in\s+(?:an?\s+)?degree\s+program\b",
+            r"\bdegree\s+programs?\b",
+            r"\bmaster(?:'s|’s|s)?\s*/\s*doctoral\s+degree\s+students?\b",
+        ),
         "exchange": (r"\bexchange students?\b",),
         "visiting": (r"\bvisiting students?\b", r"\bvisiting program participants?\b"),
-        "language_program": (r"\b(?:korean )?language program(?: students?)?\b",),
+        "language_program": (
+            r"\b(?:korean )?language program(?: students?)?\b",
+            r"\blanguage training\b[^.;\n]{0,60}\bstudents?\b",
+            r"\blanguage school program\b",  # not "language school attendance rate" (a requirement, C03)
+        ),
     }
     values = [value for value, value_patterns in patterns.items() if _first_match(value_patterns, context)]
     matched_patterns = tuple(pattern for value in values for pattern in patterns[value])
@@ -522,6 +566,7 @@ def tag_chunk(
         condition.evidence.update(scope=national_quote, campus=national_quote)
 
     positive_context = NEGATED.sub(" ", context)
+    guide_degree, guide_quote = _guide_degree_level(chunk)
     extractors = {
         "degree_level": _degree_level,
         "year": _year,
@@ -543,6 +588,13 @@ def tag_chunk(
         condition.extraction_method[attribute] = "rule"
         if quote and quote in text:
             condition.evidence[attribute] = quote
+
+    if guide_degree:
+        condition.constraints["degree_level"] = guide_degree
+        condition.extraction_method["degree_level"] = "rule"
+        condition.evidence.pop("degree_level", None)
+        if guide_quote and guide_quote in text:
+            condition.evidence["degree_level"] = guide_quote
 
     status, status_quote = _academic_status(chunk.get("title", ""), context)
     if status:
@@ -704,7 +756,9 @@ class ApplicabilityExtractor(BaseMetadataExtractor):
                 loop.run_until_complete(loop.shutdown_asyncgens())
                 loop.close()
         self.trace_details = {"llm_fallbacks": fallback_details[:50]}
-        self.summary = {**counts, "llm": {"enabled": use_llm, "role": "auxiliary", "model": model_name,
+        degree_inherited = sum(bool(_guide_degree_level(chunk)[0]) for chunk in chunks)
+        self.summary = {**counts, "degree_inherited": degree_inherited,
+                        "llm": {"enabled": use_llm, "role": "auxiliary", "model": model_name,
                                           "digest": selected.get("digest"), "prompt_version": TAG_PROMPT_VERSION,
                                           "postcheck_version": POSTCHECK_VERSION, "vocabulary_version": VOCABULARY_VERSION,
                                           "temperature": 0, "num_ctx": LLM_NUM_CTX, "seed": LLM_SEED, "thinking": "off",
