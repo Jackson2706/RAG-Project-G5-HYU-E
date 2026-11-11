@@ -28,6 +28,7 @@ class ChatRequest(BaseModel):
     question: str = Field(min_length=1, max_length=2000)
     stages: StageChoices = Field(default_factory=dict, description="Methods and parameters per stage; missing stages use defaults")
     index_id: str = Field(default=DEFAULT_INDEX, description="Which index revision to search (GET /api/indexes)")
+    history: list[str] = Field(default_factory=list, max_length=20, description="Earlier user turns of this session (AAES step 1)")
 
 
 class IngestRequest(BaseModel):
@@ -59,6 +60,10 @@ async def check_runnable(request: Request, config: dict, index_id: str) -> None:
     if built_with and built_with != config["embedding"]["method"]:
         errors.append({"stage_id": "embedding", "param": None, "message": f"Index '{index_id}' was built with the '{built_with}' embedding; "
                        f"select it (vectors of different models cannot be compared)"})  # fmt: skip
+    tagged = [s.stage_id for s in PIPELINE if config[s.stage_id]["method"] in ("applicability_reranker", "applicability_sufficiency")]
+    if tagged and not (manifest or {}).get("applicability"):
+        errors.append({"stage_id": tagged[0], "param": None, "message": f"Index '{index_id}' has no applicability tags. AAES needs the "
+                       f"tagged HYU index ('{get_settings().hyu_index_id}')."})  # fmt: skip
     wanted = {(s.stage_id, name, config[s.stage_id]["params"][name]) for s in PIPELINE for m in s.methods
               if config[s.stage_id]["method"] == m.method_id for name, p in m.parameters.items()
               if p.ui == "ollama_model" and config[s.stage_id]["params"].get(name)}  # fmt: skip
@@ -169,7 +174,7 @@ async def chat(body: ChatRequest, request: Request):
     """Answer a question and return the complete trace (no streaming)."""
     config = checked(body.stages)
     await check_runnable(request, config, body.index_id)
-    return await run_rag(body.question.strip(), config, services(request, body.index_id))
+    return await run_rag(body.question.strip(), config, services(request, body.index_id), history=body.history)
 
 
 @router.post("/chat/stream")
@@ -182,7 +187,7 @@ async def chat_stream(body: ChatRequest, request: Request):
 
     async def run():
         try:
-            await run_rag(body.question.strip(), config, run_services, emit=queue.put_nowait)
+            await run_rag(body.question.strip(), config, run_services, emit=queue.put_nowait, history=body.history)
         finally:
             queue.put_nowait(None)  # tells the stream below that we are finished
 

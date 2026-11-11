@@ -20,7 +20,7 @@ class ScoreThresholdChecker(BaseSufficiencyChecker):
     No evidence at all always abstains.
     """
 
-    async def check(self, question: str, evidence: list[Evidence]) -> SufficiencyDecision:
+    async def check(self, question: str, evidence: list[Evidence], profile: dict | None = None) -> SufficiencyDecision:
         signal, threshold = self.params["signal"], self.params["threshold"]
         if not evidence:
             return SufficiencyDecision(sufficient=False, reason="no evidence was selected", signals={"evidence": 0})

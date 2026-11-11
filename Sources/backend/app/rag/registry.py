@@ -41,6 +41,7 @@ from app.rag.blocks.ingestion.vector_indexing.qdrant_indexer import QdrantMongoI
 # ---- blocks/query_processing/
 from app.rag.blocks.query_processing.query_understanding.base import BaseQueryUnderstanding
 from app.rag.blocks.query_processing.query_understanding.llm_understanding import LLMQueryUnderstanding
+from app.rag.blocks.query_processing.query_understanding.profile_understanding import ProfileUnderstanding
 from app.rag.blocks.query_processing.query_understanding.stated_criteria import StatedCriteria
 from app.rag.blocks.query_processing.query_rewriting.base import BaseQueryRewriter
 from app.rag.blocks.query_processing.query_rewriting.hyde import HyDERewriter
@@ -64,6 +65,7 @@ from app.rag.blocks.retrieval.hybrid_fusion.rrf import ReciprocalRankFusion
 # ---- blocks/evidence/
 from app.rag.blocks.evidence.metadata_enrichment.base import BaseMetadataEnricher
 from app.rag.blocks.evidence.metadata_enrichment.mongodb_enrichment import MongoChunkLookup
+from app.rag.blocks.evidence.reranking.applicability_reranker import ApplicabilityReranker
 from app.rag.blocks.evidence.reranking.base import BaseReranker
 from app.rag.blocks.evidence.reranking.coverage_reranker import CoverageReranker
 from app.rag.blocks.evidence.reranking.cross_encoder import CrossEncoderReranker
@@ -72,6 +74,7 @@ from app.rag.blocks.evidence.reranking.rankgpt import RankGPTReranker
 from app.rag.blocks.evidence.evidence_selection.base import BaseEvidenceSelector
 from app.rag.blocks.evidence.evidence_selection.token_budget_selector import TokenBudgetSelector
 from app.rag.blocks.evidence.evidence_selection.top_k_selector import TopKSelector
+from app.rag.blocks.evidence.evidence_sufficiency.applicability_sufficiency import ApplicabilitySufficiency
 from app.rag.blocks.evidence.evidence_sufficiency.base import BaseSufficiencyChecker
 from app.rag.blocks.evidence.evidence_sufficiency.sufficiency_checker import ScoreThresholdChecker
 
@@ -282,6 +285,8 @@ PIPELINE: list[Stage] = [
                                                     ("document_type", "Document type", "this type of (e.g. handbook)"))
                      }),
               Method("llm_understanding", "LLM understanding", LLMQueryUnderstanding, False, "The LLM extracts intent and criteria."),
+              Method("profile_understanding", "Student profile (AAES step 1)", ProfileUnderstanding, True,
+                     "Campus, degree, year, visa, TOPIK … from the question and earlier turns, each stated / remembered / missing."),
           ]),
     Stage("query_rewriting", "Query Rewriting", "online", BaseQueryRewriter,
           "Turn the question into a better search query.", default_method=None, optional=True, methods=[
@@ -360,6 +365,17 @@ PIPELINE: list[Stage] = [
                                             ui="number", min=20, max=300, advanced=True),
                      }),
               Method("metadata_aware", "Metadata-aware", MetadataAwareReranker, False, "Prefer chunks matching the student's situation."),
+              Method("applicability_reranker", "Applicability reranker (AAES step 2)", ApplicabilityReranker, True,
+                     "Cross-encoder relevance, minus a penalty for evidence that does not apply to the student.", parameters={
+                         "rerank_depth": _rerank_depth(20),
+                         "batch_size": Param("integer", 32, "Batch size", "Pairs scored per model call.", ui="number", min=1, max=256, advanced=True),
+                         "device": Param("enum", "auto", "Device", "auto = Apple GPU (mps) when available.", ui="select",
+                                         options=("auto", "cpu", "mps"), advanced=True),
+                         "lam": Param("float", 4.0, "λ (conflicting penalty)", "Subtracted from the logit of evidence that conflicts with the profile.",
+                                      min=0, max=20, step=0.5),
+                         "mu": Param("float", 2.0, "μ (outdated penalty)", "Subtracted from the logit of a superseded version.", min=0, max=20, step=0.5),
+                         "hard_filter": Param("boolean", False, "Hard filter (A1)", "Drop conflicting evidence instead of penalizing it.", ui="toggle"),
+                     }),
           ]),
     Stage("evidence_selection", "Evidence Selection", "online", BaseEvidenceSelector,
           "Choose which evidence goes into the prompt.", default_method="top_k", methods=[
@@ -383,6 +399,16 @@ PIPELINE: list[Stage] = [
                          "threshold": Param("float", 0.30, "Threshold", "Proceed when the signal is at least this value.", min=0, max=1, step=0.01),
                          "on_missing_signal": Param("enum", "abstain", "If the signal is missing", "abstain or proceed.",
                                                     ui="select", options=("abstain", "proceed"), advanced=True),
+                     }),
+              Method("applicability_sufficiency", "Applicability sufficiency (AAES steps 3–4)", ApplicabilitySufficiency, True,
+                     "Branches + information gain → ANSWER, CONDITIONAL, CLARIFY, ABSTAIN or CONFIRM.", parameters={
+                         "relevance_threshold": Param("float", 0.30, "Relevance threshold", "Query coverage a chunk needs to count as relevant.",
+                                                      min=0, max=1, step=0.01),
+                         "max_branches": Param("integer", 3, "Max branches", "More branches than this → ask one clarifying question.",
+                                               ui="number", min=1, max=10),
+                         "temporal": Param("boolean", True, "Temporal rule", "Prefer the newest version (off = A6).", ui="toggle"),
+                         "policy": Param("enum", "aaes", "Policy", "aaes, or always_clarify (A3: ask whenever an attribute is missing).",
+                                         ui="select", options=("aaes", "always_clarify")),
                      }),
           ]),
     Stage("context_construction", "Context Construction", "online", BaseContextBuilder,

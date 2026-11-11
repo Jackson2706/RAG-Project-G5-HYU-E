@@ -50,7 +50,7 @@ class RankGPTReranker(BaseReranker):
     The LLM returns an order, not relevance scores, so `score` stays the incoming score.
     """
 
-    async def rerank(self, query: str, evidence: list[Evidence]) -> list[Evidence]:
+    async def rerank(self, query: str, evidence: list[Evidence], profile: dict | None = None) -> list[Evidence]:
         depth = self.params["rerank_depth"]
         head, tail = evidence[:depth], evidence[depth:]
         if len(head) < 2:

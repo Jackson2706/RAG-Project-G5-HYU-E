@@ -28,7 +28,7 @@ class CrossEncoderReranker(BaseReranker):
     not probabilities, not cosine similarities). Inputs longer than 512 word pieces are cut off.
     """
 
-    async def rerank(self, query: str, evidence: list[Evidence]) -> list[Evidence]:
+    async def rerank(self, query: str, evidence: list[Evidence], profile: dict | None = None) -> list[Evidence]:
         depth = self.params["rerank_depth"]
         head, tail = evidence[:depth], evidence[depth:]
         if not head:

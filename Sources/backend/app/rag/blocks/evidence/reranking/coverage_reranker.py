@@ -15,7 +15,7 @@ class CoverageReranker(BaseReranker):
     answers the question (that is Evidence Sufficiency's job, and even that is only a heuristic).
     """
 
-    async def rerank(self, query: str, evidence: list[Evidence]) -> list[Evidence]:
+    async def rerank(self, query: str, evidence: list[Evidence], profile: dict | None = None) -> list[Evidence]:
         depth = self.params["rerank_depth"]
         head, tail = evidence[:depth], evidence[depth:]
         coverage = {e.chunk_id: query_coverage(query, e.text) for e in head}

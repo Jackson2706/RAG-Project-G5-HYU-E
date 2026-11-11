@@ -258,3 +258,15 @@ def with_caveat(answer: str, decision: dict) -> str:
     if decision.get("unknown_condition_evidence") and decision["action"] in ("ANSWER", "CONDITIONAL"):
         return f"{answer.rstrip()}\n\n{UNKNOWN_CAVEAT}"
     return answer
+
+
+def branch_note(decision: dict, evidence_ids: list[str]) -> str:
+    """CONDITIONAL: one line per branch for the prompt; evidence labels are E1.. in `evidence_ids` order."""
+    label = {cid: f"[E{i}]" for i, cid in enumerate(evidence_ids, start=1)}
+    lines = [f"The answer depends on the student's {' and '.join(NAMES[a] for a in decision['branch_attributes'])}. "
+             "Answer every case below separately, starting each with 'If you'; do not pick one for the student."]  # fmt: skip
+    for row in decision["branch_table"]:
+        when = "; ".join(f"{NAMES[a]} {_show(values)}" for a, values in row["when"].items())
+        use = "".join(label[c] for c in row["evidence"] if c in label) or "no evidence: say the student should ask the OIA office"
+        lines.append(f"- {when}: use {use}")
+    return "\n".join(lines)

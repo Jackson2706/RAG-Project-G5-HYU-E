@@ -23,6 +23,9 @@ HYBRID = {"dense_retrieval": {"method": "qdrant_cosine", "params": {"top_k": 10}
 WIDE_DENSE = {"dense_retrieval": {"method": "qdrant_cosine", "params": {"top_k": 20}}}  # rerankers need more than 5 candidates
 GATE = {"evidence_sufficiency": {"method": "score_threshold", "params": {"signal": "query_coverage", "threshold": 0.30}}}
 CRITERIA = {"query_understanding": {"method": "stated_criteria"}}  # the user fills in campus, audience, …
+# AAES: fixed retrieval (hybrid + cross-encoder, Appendix E) with the three AAES steps
+AAES = {**HYBRID, "query_understanding": {"method": "profile_understanding"}, "reranking": {"method": "applicability_reranker"},
+        "evidence_sufficiency": {"method": "applicability_sufficiency"}}
 
 PRESETS: list[dict[str, Any]] = [
     # ---------------------------------------------------------------- the frozen basic baseline
@@ -97,6 +100,19 @@ PRESETS: list[dict[str, Any]] = [
     {"id": "R14_FULL_ADVANCED", "kind": "online", "name": "R14 — Full advanced RAG",
      "description": "Query rewriting → hybrid RRF → cross-encoder → Top-3 → sufficiency gate → generation (no metadata filter).",
      "stages": {"query_rewriting": {"method": "llm_rewrite"}, **HYBRID, "reranking": {"method": "cross_encoder"}, **GATE}},
+    # ---------------------------------------------------------------- AAES (need the tagged HYU index)
+    {"id": "A0_AAES", "kind": "aaes", "group": "Ours (AAES)", "name": "A0 — AAES full",
+     "description": "Reads the student's profile, demotes evidence that does not apply, then answers, answers per case, asks, or refers.",
+     "stages": AAES},
+    {"id": "A1_AAES_HARD_FILTER", "kind": "aaes", "group": "Ablations", "name": "A1 — AAES with a hard filter",
+     "description": "A0, but evidence that does not apply is removed instead of moved down.",
+     "stages": {**AAES, "reranking": {"method": "applicability_reranker", "params": {"hard_filter": True}}}},
+    {"id": "A3_AAES_ALWAYS_CLARIFY", "kind": "aaes", "group": "Ablations", "name": "A3 — Always clarify",
+     "description": "A0, but it asks a question whenever any student detail is missing.",
+     "stages": {**AAES, "evidence_sufficiency": {"method": "applicability_sufficiency", "params": {"policy": "always_clarify"}}}},
+    {"id": "A6_AAES_NO_TEMPORAL", "kind": "aaes", "group": "Ablations", "name": "A6 — AAES without the temporal rule",
+     "description": "A0, but old versions of a notice count as much as the newest one.",
+     "stages": {**AAES, "evidence_sufficiency": {"method": "applicability_sufficiency", "params": {"temporal": False}}}},
     # ---------------------------------------------------------------- reserved
     {"id": "PROPOSED_APPROACH", "kind": "proposed", "name": "Proposed approach (not defined yet)",
      "description": "Reserved for the team's own method. Disabled until it is designed and implemented.", "stages": {}, "enabled": False},
@@ -127,7 +143,8 @@ def presets_json() -> list[dict[str, Any]]:
     """For GET /api/pipeline/presets: each preset with its validated config (or why it is unavailable)."""
     result = []
     for p in PRESETS:
-        entry = {k: p[k] for k in ("id", "kind", "name", "description")} | {"enabled": p.get("enabled", True), "stages": p["stages"]}
+        entry = {k: p[k] for k in ("id", "kind", "name", "description")} | {"enabled": p.get("enabled", True), "stages": p["stages"],
+                                                                           "group": p.get("group")}
         try:
             entry["config"] = preset_config(p["id"]) if entry["enabled"] else None
             entry["errors"] = []

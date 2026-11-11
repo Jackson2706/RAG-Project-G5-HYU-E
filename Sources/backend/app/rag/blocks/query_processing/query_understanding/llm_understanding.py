@@ -7,7 +7,7 @@ from app.rag.schemas import QueryAnalysis
 
 
 class LLMQueryUnderstanding(BaseQueryUnderstanding):
-    async def analyze(self, question: str) -> QueryAnalysis:
+    async def analyze(self, question: str, history: list[str] | tuple = ()) -> QueryAnalysis:
         # TODO:
         # 1. Ask the LLM (self.services.ollama) for JSON: {"intent": ..., "campus": ..., "audience": ...}.
         # 2. Keep only values from allowed lists (e.g. campus in {"SEOUL", "ERICA"}); drop anything else.

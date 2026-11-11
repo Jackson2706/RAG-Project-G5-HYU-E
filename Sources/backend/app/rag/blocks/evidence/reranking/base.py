@@ -11,7 +11,7 @@ from app.rag.schemas import Evidence
 class BaseReranker(PipelineBlock):
     """Reorder evidence by relevance.
 
-    Input:  the query and the Evidence list (with text)
+    Input:  the query and the Evidence list (with text); `profile` (AAES step 1) for applicability-aware rerankers
     Output: the same Evidence objects in a new order (renumber `rank` from 1)
 
     Rerankers reorder the first `rerank_depth` items and keep the rest in their original order behind
@@ -19,7 +19,7 @@ class BaseReranker(PipelineBlock):
     """
 
     @abstractmethod
-    async def rerank(self, query: str, evidence: list[Evidence]) -> list[Evidence]: ...
+    async def rerank(self, query: str, evidence: list[Evidence], profile: dict | None = None) -> list[Evidence]: ...
 
     @staticmethod
     def reordered(head: list[Evidence], tail: list[Evidence], new_scores: dict[str, float] | None = None, score_name: str = "") -> list[Evidence]:

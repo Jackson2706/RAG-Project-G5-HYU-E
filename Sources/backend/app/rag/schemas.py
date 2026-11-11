@@ -139,6 +139,7 @@ class QueryAnalysis(BaseModel):
 
     intent: str | None = None
     criteria: FilterCriteria = Field(default_factory=FilterCriteria)
+    profile: dict[str, Any] = Field(default_factory=dict)  # AAES step 1: {attribute: {values, status, evidence}}
 
 
 class RewrittenQuery(BaseModel):
@@ -234,6 +235,7 @@ class Evidence(BaseModel):
     token_count: int = 0
     scores: dict[str, float] = Field(default_factory=dict)  # see Candidate.scores
     label: str = ""  # "E1", "E2", … set by context construction
+    applicability: dict[str, Any] = Field(default_factory=dict)  # AAES: condition, condition_status, superseded, label
 
 
 class SufficiencyDecision(BaseModel):
@@ -242,6 +244,10 @@ class SufficiencyDecision(BaseModel):
     sufficient: bool
     reason: str
     signals: dict[str, Any] = Field(default_factory=dict)  # the observed values the decision used
+    action: str | None = None  # AAES: ANSWER | CONDITIONAL | CLARIFY | ABSTAIN | CONFIRM (None for the plain gate)
+    evidence_ids: list[str] | None = None  # AAES: the evidence the answer may use (None = all selected evidence)
+    message: str | None = None  # AAES: the fixed reply for CLARIFY / ABSTAIN / CONFIRM (no generation)
+    prompt_note: str | None = None  # AAES: added to the question for CONDITIONAL (one line per branch)
 
 
 class PromptContext(BaseModel):

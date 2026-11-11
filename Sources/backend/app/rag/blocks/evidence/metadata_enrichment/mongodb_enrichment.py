@@ -6,6 +6,14 @@ from app.rag.blocks.evidence.metadata_enrichment.base import BaseMetadataEnriche
 from app.rag.schemas import Candidate, Evidence
 
 
+def _applicability(chunk: dict) -> dict:
+    """The AAES tags of a chunk (empty for an untagged index)."""
+    condition = chunk.get("applicability")
+    if condition is None:
+        return {}
+    return {"condition": condition, "condition_status": chunk.get("condition_status"), "superseded": bool(condition.get("superseded_by"))}
+
+
 class MongoChunkLookup(BaseMetadataEnricher):
     """A chunk that is in Qdrant but missing in MongoDB raises an error instead of being skipped
     silently (the two databases are out of sync: re-index)."""
@@ -21,6 +29,7 @@ class MongoChunkLookup(BaseMetadataEnricher):
             Evidence(rank=c.rank, chunk_id=c.chunk_id, doc_id=c.doc_id, score=c.score, text=chunks[c.chunk_id]["text"],
                      title=documents[c.doc_id]["title"], source_uri=documents[c.doc_id]["source_uri"],
                      section=chunks[c.chunk_id].get("section"), page_number=chunks[c.chunk_id].get("page_number"),
-                     token_count=chunks[c.chunk_id].get("token_count", 0), scores=dict(c.scores))
+                     token_count=chunks[c.chunk_id].get("token_count", 0), scores=dict(c.scores),
+                     applicability=_applicability(chunks[c.chunk_id]))
             for c in candidates
         ]  # fmt: skip

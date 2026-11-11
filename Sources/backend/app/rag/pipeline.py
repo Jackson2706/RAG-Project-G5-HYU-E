@@ -18,6 +18,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from app.rag.aaes import with_caveat
 from app.rag.blocks.retrieval.hybrid_fusion.rrf import reciprocal_rank_fusion
 from app.rag.registry import PIPELINE, STAGES, create_block, get_method
 from app.rag.schemas import (INSUFFICIENT_ANSWER, INSUFFICIENT_MARKER, Evidence, FilterCriteria, FinalAnswer, GenerationResult,
@@ -264,18 +265,20 @@ async def _retrieve(block: Any, queries: list[str], prefilter: RetrievalFilter |
 
 
 async def run_rag(question: str, config: dict, services: Services, emit: Callable[[dict], None] = lambda event: None, *,
-                  stop_after: str | None = None, save_trace: bool = True) -> dict:
+                  stop_after: str | None = None, save_trace: bool = True, history: list[str] | None = None) -> dict:
     """Answer one question with the validated `config`. Returns the full trace (also saved to MongoDB).
 
     stop_after: a stage id; later stages are skipped (the benchmark runner uses "evidence_sufficiency"
                 for retrieval-only runs, so no LLM answer is generated).
     save_trace: False = do not store the trace in MongoDB (the benchmark keeps its own results).
+    history:    earlier user turns of the session (AAES step 1 reads them as "remembered" profile facts).
     """
     request_id = uuid.uuid4().hex
     tracer = Tracer(request_id, emit)
     trace: dict[str, Any] = {"request_id": request_id, "question": question, "created_at": datetime.now(UTC).isoformat(),
                              "config": config, "status": "running", "stages": tracer.stages, "answer": "", "outcome": None,
-                             "sources": [], "model": None, "error": None}  # fmt: skip
+                             "sources": [], "model": None, "error": None, "history": list(history or []),
+                             "action": None, "unknown_condition_evidence": None}  # fmt: skip
     emit({"type": "started", "request_id": request_id, "config": config})
     start = time.perf_counter()
 
@@ -312,8 +315,10 @@ async def run_rag(question: str, config: dict, services: Services, emit: Callabl
             return result
 
         # ---- before candidate retrieval
-        analysis = await step("query_understanding", lambda b: b.analyze(question), {"question": question}, default=QueryAnalysis())
+        analysis = await step("query_understanding", lambda b: b.analyze(question, history or ()), {"question": question, "history": history or []},
+                              default=QueryAnalysis())
         criteria: FilterCriteria = analysis.criteria  # the eligibility conditions both filters enforce
+        profile = analysis.profile or None  # AAES step 1 (None: the AAES blocks read the question themselves)
         rewritten = await step("query_rewriting", lambda b: b.rewrite(question), {"question": question},
                                default=RewrittenQuery(query=question))  # fmt: skip
         query = rewritten.query
@@ -338,9 +343,11 @@ async def run_rag(question: str, config: dict, services: Services, emit: Callabl
 
         # ---- evidence
         evidence = await step("metadata_enrichment", lambda b: b.enrich(candidates), {"candidates": candidates})
-        evidence = await step("reranking", lambda b: b.rerank(query, evidence), {"query": query, "evidence": evidence}, default=evidence)
+        evidence = await step("reranking", lambda b: b.rerank(query, evidence, profile=profile), {"query": query, "evidence": evidence},
+                              default=evidence)
         evidence = await step("evidence_selection", lambda b: b.select(evidence), {"evidence": evidence})
-        decision = await step("evidence_sufficiency", lambda b: b.check(question, evidence), {"question": question, "evidence": evidence})
+        decision = await step("evidence_sufficiency", lambda b: b.check(question, evidence, profile=profile),
+                              {"question": question, "evidence": evidence})
 
         # ---- grounded generation, or abstention when there is no (sufficient) evidence
         prompt = generated = None
@@ -348,17 +355,30 @@ async def run_rag(question: str, config: dict, services: Services, emit: Callabl
             for stage_id in ("context_construction", "generation"):
                 tracer.skip(stage_id, STAGES[stage_id].name, f"Not run: this run stops after {STAGES[stop_after].name}.")
             trace.update(status="completed", outcome="stopped", decision=to_jsonable(decision))
+        elif decision is not None and decision.message is not None:  # AAES CLARIFY / ABSTAIN / CONFIRM: a fixed reply
+            for stage_id in ("context_construction", "generation"):
+                tracer.skip(stage_id, STAGES[stage_id].name, f"Skipped: AAES action {decision.action} is answered without the LLM.")
+            trace.update(status="completed", answer=decision.message, outcome=decision.action.lower(), action=decision.action,
+                         unknown_condition_evidence=False, decision=to_jsonable(decision))
         else:
+            if decision is not None and decision.evidence_ids is not None:  # AAES: only evidence that may apply goes to the LLM
+                evidence = [e for e in evidence if e.chunk_id in set(decision.evidence_ids)]
             if not evidence or (decision is not None and not decision.sufficient):
                 reason = "Skipped: no evidence, so the model is not asked to guess (abstention)." if not evidence else f"Skipped: {decision.reason}"
                 for stage_id in ("context_construction", "generation"):
                     tracer.skip(stage_id, STAGES[stage_id].name, reason)
             else:
-                prompt = await step("context_construction", lambda b: b.build(question, evidence), {"question": question, "evidence": evidence})
+                asked = f"{question}\n\n{decision.prompt_note}" if decision is not None and decision.prompt_note else question
+                prompt = await step("context_construction", lambda b: b.build(asked, evidence), {"question": asked, "evidence": evidence})
                 on_token = lambda text: emit({"type": "answer_delta", "request_id": request_id, "text": text})  # noqa: E731
                 generated = await step("generation", lambda b: b.generate(prompt, on_token), {"messages": prompt.messages})
                 trace["model"] = generated.model
             final = attach_sources(generated, prompt)
+            if decision is not None and decision.action:
+                answered = final.outcome == "answered"
+                if answered:
+                    final.answer = with_caveat(final.answer, decision.signals)  # A23: unknown-condition caveat
+                trace.update(action=decision.action, unknown_condition_evidence=answered and decision.signals["unknown_condition_evidence"])
             trace.update(status="completed", answer=final.answer, outcome=final.outcome, sources=to_jsonable(final.sources),
                          decision=to_jsonable(decision), usage=generated.usage if generated else None)
     except Exception as exc:
