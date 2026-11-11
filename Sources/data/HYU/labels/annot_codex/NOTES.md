@@ -8,6 +8,7 @@
 - Batch 04: not done.
 - Batch 05: not done.
 - Batch 06: not done.
+- Recheck 01 (GUIDELINES v1.1): done; `labeling.validate --annotation` exited 0 with no output.
 
 ## Batch 01
 
@@ -21,6 +22,19 @@ Hard cases:
 Guideline questions:
 
 - When the question explicitly states an academic status that conflicts with the immutable input `gold_profile`, should adjudication correct the persona/case pair, or should the stated field continue to be omitted to satisfy validation?
+
+## Recheck 01 (GUIDELINES v1.1)
+
+Hard cases:
+
+- T14-009 now follows section 9.5: the question's accepted status overrides the applicant persona value, so both profiles use `admitted_not_enrolled`.
+- Partial cases now abstain under section 9.1 while allowing an answer that gives supported facts and names the missing part.
+- Alternate campus or status passages used by a conditional or clarifying answer are now gold evidence under section 9.6, with sentence-level spans where the snapshot text permits them.
+- T14-027 is no longer a student-type branch because the advertised trip has passed for every student type; T14-034 treats prior insurance payment as a caveat outside the AAES vocabulary.
+
+Guideline questions:
+
+- None.
 
 ## Batch 02
 
