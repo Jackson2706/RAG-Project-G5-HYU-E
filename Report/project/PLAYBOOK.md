@@ -880,7 +880,7 @@ criterion is not met on the raw r3 scores.
 
 ## 2026-11-11 (Gate G3 approved)
 
-**A22 G3 approved by the human** ("approve. i trust u"; reading pending confirmation, see A23.5). GUIDELINES.md becomes v1.0 and section 8 records
+**A22 G3 approved by the human** ("approve. i trust u"; confirmed by the human on 2026-11-11, A25). GUIDELINES.md becomes v1.0 and section 8 records
 the three decisions: the clarify threshold is kept (> 3 branches or different procedures); the applicant
 scope default is kept, and a question about applying for admission states `applicant`; a missing campus is
 an ordinary branch attribute. T13 (topics, personas) starts. G2b is still open and runs alongside.
@@ -921,3 +921,6 @@ an ordinary branch attribute. T13 (topics, personas) starts. G2b is still open a
 - **After this round, tagger work stops whatever the result.** The final scores and limitations go into
   `Sources/data/DATA.md`.
 - Runs in parallel with P5 and must not delay labeling. (T14 still waits for the G3 confirmation, A23.5.)
+
+**A25 G3 confirmed by the human (2026-11-11):** "approved with the three section-8 decisions as written".
+GUIDELINES.md v1.0 stands. T14 (question drafts from topics × personas, no page bodies) starts.

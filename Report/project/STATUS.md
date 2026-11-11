@@ -47,3 +47,4 @@
 | 2026-11-11 | P4 | A24 / T08e / T10g | started | Last tagger round: tests/test_tagger_r5.py first (12 real r4 chunks; 14 fail, 2 pass). Codex: T08e (tagger) and T10g (test-100 cue strata, design weights, 3-way report) in parallel. |
 | 2026-11-11 | P4 | T08e | done | r5 rules (guide degree level inherited by 804 chunks, prior qualifications, institution names, student_type phrases, visa noise); finished by Claude Code after the Codex limit (S06, C03 fixes, regex speed fix). Tests 210 + 166. Dry run partition = r4. |
 | 2026-11-11 | P4 | T09 r5 | done | r5 built (--no-llm), verified 15/15 and published by the human; partition = r4; HYU default; r4 kept for rollback. |
+| 2026-11-11 | P5 | G3 | confirmed | Human: 'approved with the three section-8 decisions as written'. T14 starts (Codex drafts ~230 questions; humans then delete/edit/add, >= 30% human). |
