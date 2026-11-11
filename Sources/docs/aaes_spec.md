@@ -1,8 +1,9 @@
-# AAES offline applicability tagging
+# AAES: applicability tagging (offline) and online steps 1–4
 
-This document covers the offline step only. The tagger records who a chunk applies to before the
-chunk is stored. Online profile matching, evidence selection, evidence sufficiency and answer policy
-are outside this specification.
+The first part covers the offline step: the tagger records who a chunk applies to before the chunk
+is stored. The section "Online steps (P7)" specifies profile understanding, applicability labels,
+branches with information gain, and the answer policy. Its pure functions live in
+`backend/app/rag/aaes.py`; T24 (`backend/tests/test_aaes_t24.py`) tests them.
 
 ## Vocabulary v1
 
@@ -144,6 +145,104 @@ chunks; also `llm_rejected` / `llm_errors` in older revisions).
   typed output, so the Execution tab shows it.
 - **Metric (P8).** Unknown-caveat rate per slice: the share of answered cases whose answer carries the
   caveat, per slice and campus.
+
+## Online steps (P7)
+
+Four steps run per question. They reuse `condition_fit` and the scope defaults above. Every step writes its
+typed input and output into the trace. The pure logic is in `app/rag/aaes.py`. The blocks are thin wrappers:
+
+| Step | Block (stage) | Method id | `aaes.py` |
+|---|---|---|---|
+| 1 Profile | query_understanding | `profile_understanding` | `extract_profile`, `known_values` |
+| 2 Labels + soft penalty | reranking | `applicability_reranker` | `label_chunk`, `penalized_score` |
+| 3 Branches + IG, 4 Policy | evidence_sufficiency | `applicability_sufficiency` | `information_gain`, `decide` |
+| templates | (pipeline, after step 4) | — | `render_action`, `with_caveat` |
+
+### Step 1: profile
+
+`extract_profile(question, history=(), remembered=None)` returns one entry per vocabulary attribute:
+`{"values": [...], "status": s, "evidence": "<quote>"}` with `s` one of:
+
+- `stated`: said in the current question (rule patterns: campus names incl. Ansan, degree words, "year N" /
+  freshman, exchange/visiting/language-program, visa codes, "TOPIK N" / "no TOPIK", English track,
+  leave of absence, completed coursework, graduating, "I was admitted");
+- `remembered`: said in an earlier user turn of `history`, or given by a memory with status `remembered`.
+  A later statement replaces an earlier one (the latest turn wins; the current question wins over history);
+- `stale`: a remembered value that the memory flags as possibly outdated (M2). It is used for the labels,
+  but step 4 may ask to CONFIRM it;
+- `scope_default`: unstated `academic_status` (excludes `applicant`, A17). A question about applying for
+  admission ("how do I apply", "admission requirements") states `applicant` (GUIDELINES 8.2);
+- `missing`: unknown, values `[]`.
+
+`known_values(profile)` keeps the stated, remembered and stale values as `{attribute: [values]}`, the input
+of `condition_fit` (which adds the scope default itself).
+
+### Step 2: applicability labels and the soft penalty
+
+`label_chunk(condition, condition_status, known)` gives one label per candidate:
+
+| Label | When |
+|---|---|
+| `conflicting` | `condition_fit` is conflicting (campus included; an applicant-only chunk under the scope default) |
+| `unknown` | `condition_status == "unknown"` and not conflicting. **Never** treated as unconditioned (A23) |
+| `unconditioned` | no `constraints` and no `any_of`, and the campus fits |
+| `compatible` / `open` | `condition_fit` otherwise |
+
+**Condition sets.** A chunk with `any_of` applies when its `constraints` fit and at least one set fits. It is
+conflicting only when every set conflicts (an English-track student without TOPIK fits "TOPIK or
+IELTS/TOEFL for English track").
+
+**Soft penalty.** `penalized_score(score, label, outdated, lam, mu) = score − lam·[conflicting] −
+mu·[outdated]`; `outdated` means `superseded_by` is set. Nothing is removed. λ and μ are tuned on dev only.
+Variant A1 (`hard_filter: true`) drops conflicting candidates instead.
+
+### Step 3: branches and information gain
+
+Step 3 looks only at the *relevant* selected evidence (query coverage ≥ `relevance_threshold`, the
+Lesson-5 signal; A5 swaps in an LLM judge). Its *support* is the relevant evidence that is not
+conflicting. With the temporal rule on (A6 turns it off), outdated support is dropped when non-outdated
+support exists.
+
+For an attribute `a` that is not known (missing or scope default), the value space `V_a` is its vocabulary
+values, narrowed by the scope default (no `applicant`). For each `v ∈ V_a`, the *outcome* is the set of
+support chunks that are not conflicting when `a = v`. With a uniform prior over `V_a`:
+
+- `D(a)` = number of distinct outcomes;
+- `IG(a)` = entropy of the outcome distribution in bits, so `IG(a) = 0` exactly when no value of `a` changes
+  which evidence applies.
+
+Branch attributes are those with `IG > 0`. Campus is an ordinary branch attribute when unstated (GUIDELINES
+8.3); a national rule never splits on campus.
+
+### Step 4: policy
+
+`decide(chunks, profile, max_branches=3, temporal=True, policy="aaes")`, in this order:
+
+1. **ABSTAIN**: no relevant evidence (`reason: no_evidence`), or every relevant chunk conflicts
+   (`reason: not_applicable`, refer to the office of the student's own campus; never answer from the other
+   campus's rule).
+2. **CONFIRM**: a `stale` attribute would have `IG > 0` if it were unknown. Ask whether the remembered value
+   still holds, before answering.
+3. **ANSWER**: no branch attribute.
+4. **CONDITIONAL**: the joint number of outcomes over all branch attributes is ≤ `max_branches` and the
+   branches share one procedure.
+5. **CLARIFY**: otherwise. Ask one question about the branch attribute with the highest IG (ties: vocabulary
+   order). shortcut: "different procedure" means the chunks that differ between branches come from more
+   than one document; upgrade to an office/form check if dev shows false CLARIFYs.
+
+Variant A3 (`policy: "always_clarify"`) clarifies whenever any attribute of a relevant chunk's condition is
+not known, without information gain.
+
+**Unknown caveat (A23).** When the action is ANSWER or CONDITIONAL and the support contains at least one
+`unknown` chunk, `unknown_condition_evidence = true` and `with_caveat(answer, decision)` appends: "This may
+depend on your situation; please confirm with the OIA office." Otherwise the flag is false and the answer is
+unchanged.
+
+`decide` returns `{action, reason, support, branch_attributes, branches: {attr: {ig, outcomes}},
+clarify_attribute, confirm_attribute, unknown_condition_evidence}`. CLARIFY, ABSTAIN and CONFIRM are
+rendered by `render_action(decision, profile)` from fixed templates without an LLM call. ANSWER and
+CONDITIONAL go to generation; CONDITIONAL adds the branch table to the prompt so each branch is stated
+with its citation. The chat shows the action as a badge.
 
 ## LLM fallback contract
 
