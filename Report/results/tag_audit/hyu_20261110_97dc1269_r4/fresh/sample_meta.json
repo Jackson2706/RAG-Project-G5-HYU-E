@@ -1,0 +1,586 @@
+{
+  "index_id": "hyu_20261110_97dc1269_r4",
+  "seed": 20261111,
+  "n": 100,
+  "chunk_ids": [
+    "03f8083f-382d-5a47-a0a2-1a1acd1ae02e",
+    "06bbe27b-a7a3-5bab-b7ec-b4f228a9839a",
+    "082a12b2-7fc3-5e30-b613-af0020ecc1fd",
+    "0d1c03cc-dc41-52d3-bcd7-84ff72b4c329",
+    "10030739-f856-5ad0-b878-39fc4bf328f5",
+    "154533da-2d76-5179-83db-f3a9886ea3a2",
+    "15a057ce-e47a-5aa1-a3e8-d675090cb776",
+    "1833c155-5a82-5d19-95b4-5e8e7390c275",
+    "1b0e25df-4885-5f28-932e-f66cebd1e190",
+    "1b7c289b-ba46-5ac5-8a01-46f9df838dc5",
+    "1e7da5d9-175d-5af6-b33a-96a686836c18",
+    "213a7af3-98e6-53d1-9eee-f4da17cf5561",
+    "22ef6b02-d1e1-5b4f-88ed-0b20f2a7b75e",
+    "23375b40-5838-5e24-be64-f5eadcb6ba8c",
+    "2989dba1-48c3-515a-8eab-273cd79e0f1a",
+    "2cb33a32-b42d-5d54-9f7a-38ef6f32dbb9",
+    "2d21a537-872d-5032-baa2-a53c83f1dfe7",
+    "304503b9-3c61-5c18-b533-82423d222188",
+    "314edd8e-4f2b-5885-ac43-38e23d54cdd3",
+    "314fa26b-273d-5f70-970f-dd5a00a39834",
+    "331beff7-8840-5665-8860-b71611095f3c",
+    "35dbb2a3-5e23-500e-87f2-57e1d1194eba",
+    "36b61526-347f-59ed-9823-a48042a138eb",
+    "38a12c04-196b-5244-80fd-1b5e3ec89f67",
+    "39fad4cf-904d-5d87-bb65-0969230db2e4",
+    "3a554d5d-af86-5c18-8e87-1e2baecef809",
+    "40059834-e07f-5b29-abe9-384101cbd885",
+    "402a9b86-986a-527e-9d7f-81d795fc7884",
+    "4a357c66-927e-5432-98df-efb61d1af461",
+    "4a95e1b6-0fe6-556a-a926-5b41aa13a1e8",
+    "4f9e0055-e449-544d-95db-a5845bcdf21a",
+    "50763c25-5962-560b-8e34-375ac4b937af",
+    "50f67731-cc1e-5bb9-995f-65d66a576b5e",
+    "55d5f524-d74a-5d6f-87c9-a2902e03fda6",
+    "5675fc19-a3ca-5f50-b6bd-581fca6a85ef",
+    "58fe37d1-1128-569e-8abd-952a329a32aa",
+    "5beef72f-b12c-5d3a-b32f-0a3044e50bfd",
+    "5f16d7da-1e41-51b2-b00f-b748f71af242",
+    "5f602ac1-d348-5780-b354-9dc94ce4317c",
+    "6171d714-3ecc-53dd-b626-3eab387c97de",
+    "665df22f-e3a0-508f-83a6-48e8343fde5d",
+    "6b1462a4-d060-5b2d-abe5-c0ad0a401789",
+    "70b480a1-81ac-5797-bdc9-9d03e2e0c01d",
+    "72d9f5a9-22a2-567d-b2fb-4703eb3c9c7f",
+    "72fe6c0c-8f52-5e61-ae4d-07b1e153324f",
+    "7408d819-cfee-5a6a-9d79-d602bcb0d356",
+    "74913e09-3e08-5656-aca7-a6d0317d829c",
+    "77ce1f34-688c-55d4-8819-23cb8e97d125",
+    "793c73f3-7bee-5777-a6c6-0ab359a77479",
+    "7c5c6f5a-62d8-5db4-8e3b-53b5ebcc4237",
+    "7d16078c-c50b-583a-a26d-8f506848b04c",
+    "812a6bae-1b31-5905-92dc-b371b5b42e26",
+    "87b3e745-4e7e-56c5-818a-ecbbd5db8901",
+    "8a5250c9-85d4-5fc2-a992-8377c175d1b1",
+    "8b721de1-39cc-53c7-8a85-bf203095a346",
+    "8c729219-430b-5d77-8230-16c17115660b",
+    "8cf2eea5-9fc9-52ca-b4b3-d5bdbdce908e",
+    "935d09fa-3661-5e04-b3ee-2c91ed954475",
+    "93834c30-970e-5381-8769-7ac853907296",
+    "988b85cc-9d3e-59ed-9411-7f72f06bdb67",
+    "9c37244c-6cca-5213-8416-2685d1e97422",
+    "9f21edf8-1761-51f7-933e-e4e7ed5a4381",
+    "a34a44d9-382b-5556-8e7e-be3b0fe23e39",
+    "a43026d7-3494-5f15-a055-7a4162139363",
+    "a5b0835e-15b8-5b67-8ae2-cebe6887157a",
+    "aa13e2b4-e738-5765-93e1-0cd85ca6d186",
+    "aea0765d-2704-5eaa-b0e6-96bc6d1fa24c",
+    "af73cf3c-ce5b-58c6-8591-56bc1a66193a",
+    "b0a6fcca-5507-57e7-8065-2cb67e12be87",
+    "b1f8cb26-d6fb-5aab-8111-dd39b8b8032c",
+    "b47bac25-9484-5ba8-bba4-0c5d4d01ad26",
+    "b7f7d5f9-f157-5309-b246-b7634f5154ef",
+    "bb1b1423-1636-5391-9ce5-5cc247a5200c",
+    "bbf8ece7-4447-5705-bfac-07ff099c05ea",
+    "bd200082-c31c-546a-a52d-b2cca7ba5981",
+    "c2bdd37f-d3e0-5b0f-9249-d030f7fe6294",
+    "c34447db-dc24-528b-89b8-57c960addfd9",
+    "c40391e2-20fd-5750-9789-0e99a25ef097",
+    "c7b3f8b1-66cc-50d6-8243-c3b228bfeb0c",
+    "c8d6cf2d-3e6c-5031-8acf-17294e86c479",
+    "cffc45e8-6a04-5677-a91b-fefed0773c46",
+    "d003211f-3cce-5f83-8013-5ce6631d5522",
+    "d334e7f4-58bd-53f4-9bd9-b05b0d0638f9",
+    "d444b5bc-3e64-547c-bfea-7cdaf2da3f80",
+    "d474ac2d-ed5b-539a-8948-225d351174db",
+    "d813550f-49b5-5923-953c-9080a850740e",
+    "db5772d1-9ef5-590a-b2f9-69292a6cdffc",
+    "dc296e03-d483-54f0-a95b-afae3100a28e",
+    "e1115cb5-c41e-5985-a9ae-d1d9eaf03fbe",
+    "e727df3e-52b0-5695-bb65-065dbbdd7100",
+    "e846164f-73b9-5528-afcc-e3561f414376",
+    "e9dd2ca4-5b92-5475-a905-ea79493f8267",
+    "ed6f17af-9092-57ac-a967-b330199ee52c",
+    "f245ff1a-09ae-5a87-908f-e6f7b2792612",
+    "f42dc670-c493-5f90-b72b-f4edce382a55",
+    "f75f9c0c-ab24-5990-b261-cc9503af7fed",
+    "f8f2c6f3-d681-5c86-9d97-b09cfcab74d4",
+    "f90817bd-b03e-5310-b668-5c06795e969a",
+    "fc181cc4-b286-5f37-8be1-4919f00f7d44",
+    "ff4faed2-7eaf-50e3-8e2a-1bdc781565e7"
+  ],
+  "chunks": {
+    "03f8083f-382d-5a47-a0a2-1a1acd1ae02e": {
+      "bucket": "rule_unconditioned",
+      "campus": "erica"
+    },
+    "06bbe27b-a7a3-5bab-b7ec-b4f228a9839a": {
+      "bucket": "rule_cue_unknown",
+      "campus": "seoul"
+    },
+    "082a12b2-7fc3-5e30-b613-af0020ecc1fd": {
+      "bucket": "rule_cue_unknown",
+      "campus": "erica"
+    },
+    "0d1c03cc-dc41-52d3-bcd7-84ff72b4c329": {
+      "bucket": "rule_tagged",
+      "campus": "seoul"
+    },
+    "10030739-f856-5ad0-b878-39fc4bf328f5": {
+      "bucket": "rule_cue_unknown",
+      "campus": "seoul"
+    },
+    "154533da-2d76-5179-83db-f3a9886ea3a2": {
+      "bucket": "rule_cue_unknown",
+      "campus": "erica"
+    },
+    "15a057ce-e47a-5aa1-a3e8-d675090cb776": {
+      "bucket": "rule_tagged",
+      "campus": "erica"
+    },
+    "1833c155-5a82-5d19-95b4-5e8e7390c275": {
+      "bucket": "rule_cue_unknown",
+      "campus": "seoul"
+    },
+    "1b0e25df-4885-5f28-932e-f66cebd1e190": {
+      "bucket": "rule_unconditioned",
+      "campus": "seoul"
+    },
+    "1b7c289b-ba46-5ac5-8a01-46f9df838dc5": {
+      "bucket": "rule_tagged",
+      "campus": "seoul"
+    },
+    "1e7da5d9-175d-5af6-b33a-96a686836c18": {
+      "bucket": "rule_tagged",
+      "campus": "erica"
+    },
+    "213a7af3-98e6-53d1-9eee-f4da17cf5561": {
+      "bucket": "rule_tagged",
+      "campus": "seoul"
+    },
+    "22ef6b02-d1e1-5b4f-88ed-0b20f2a7b75e": {
+      "bucket": "rule_unconditioned",
+      "campus": "erica"
+    },
+    "23375b40-5838-5e24-be64-f5eadcb6ba8c": {
+      "bucket": "rule_cue_unknown",
+      "campus": "erica"
+    },
+    "2989dba1-48c3-515a-8eab-273cd79e0f1a": {
+      "bucket": "rule_tagged",
+      "campus": "erica"
+    },
+    "2cb33a32-b42d-5d54-9f7a-38ef6f32dbb9": {
+      "bucket": "rule_tagged",
+      "campus": "seoul"
+    },
+    "2d21a537-872d-5032-baa2-a53c83f1dfe7": {
+      "bucket": "rule_tagged",
+      "campus": "erica"
+    },
+    "304503b9-3c61-5c18-b533-82423d222188": {
+      "bucket": "rule_unconditioned",
+      "campus": "seoul"
+    },
+    "314edd8e-4f2b-5885-ac43-38e23d54cdd3": {
+      "bucket": "rule_tagged",
+      "campus": "erica"
+    },
+    "314fa26b-273d-5f70-970f-dd5a00a39834": {
+      "bucket": "rule_tagged",
+      "campus": "seoul"
+    },
+    "331beff7-8840-5665-8860-b71611095f3c": {
+      "bucket": "rule_cue_unknown",
+      "campus": "seoul"
+    },
+    "35dbb2a3-5e23-500e-87f2-57e1d1194eba": {
+      "bucket": "rule_tagged",
+      "campus": "erica"
+    },
+    "36b61526-347f-59ed-9823-a48042a138eb": {
+      "bucket": "rule_unconditioned",
+      "campus": "erica"
+    },
+    "38a12c04-196b-5244-80fd-1b5e3ec89f67": {
+      "bucket": "rule_cue_unknown",
+      "campus": "seoul"
+    },
+    "39fad4cf-904d-5d87-bb65-0969230db2e4": {
+      "bucket": "rule_cue_unknown",
+      "campus": "seoul"
+    },
+    "3a554d5d-af86-5c18-8e87-1e2baecef809": {
+      "bucket": "rule_tagged",
+      "campus": "erica"
+    },
+    "40059834-e07f-5b29-abe9-384101cbd885": {
+      "bucket": "rule_tagged",
+      "campus": "seoul"
+    },
+    "402a9b86-986a-527e-9d7f-81d795fc7884": {
+      "bucket": "rule_tagged",
+      "campus": "seoul"
+    },
+    "4a357c66-927e-5432-98df-efb61d1af461": {
+      "bucket": "rule_tagged",
+      "campus": "seoul"
+    },
+    "4a95e1b6-0fe6-556a-a926-5b41aa13a1e8": {
+      "bucket": "rule_tagged",
+      "campus": "seoul"
+    },
+    "4f9e0055-e449-544d-95db-a5845bcdf21a": {
+      "bucket": "rule_tagged",
+      "campus": "seoul"
+    },
+    "50763c25-5962-560b-8e34-375ac4b937af": {
+      "bucket": "rule_tagged",
+      "campus": "seoul"
+    },
+    "50f67731-cc1e-5bb9-995f-65d66a576b5e": {
+      "bucket": "rule_cue_unknown",
+      "campus": "erica"
+    },
+    "55d5f524-d74a-5d6f-87c9-a2902e03fda6": {
+      "bucket": "rule_tagged",
+      "campus": "seoul"
+    },
+    "5675fc19-a3ca-5f50-b6bd-581fca6a85ef": {
+      "bucket": "rule_cue_unknown",
+      "campus": "seoul"
+    },
+    "58fe37d1-1128-569e-8abd-952a329a32aa": {
+      "bucket": "rule_tagged",
+      "campus": "erica"
+    },
+    "5beef72f-b12c-5d3a-b32f-0a3044e50bfd": {
+      "bucket": "rule_tagged",
+      "campus": "seoul"
+    },
+    "5f16d7da-1e41-51b2-b00f-b748f71af242": {
+      "bucket": "rule_unconditioned",
+      "campus": "erica"
+    },
+    "5f602ac1-d348-5780-b354-9dc94ce4317c": {
+      "bucket": "rule_cue_unknown",
+      "campus": "erica"
+    },
+    "6171d714-3ecc-53dd-b626-3eab387c97de": {
+      "bucket": "rule_tagged",
+      "campus": "seoul"
+    },
+    "665df22f-e3a0-508f-83a6-48e8343fde5d": {
+      "bucket": "rule_unconditioned",
+      "campus": "erica"
+    },
+    "6b1462a4-d060-5b2d-abe5-c0ad0a401789": {
+      "bucket": "rule_cue_unknown",
+      "campus": "seoul"
+    },
+    "70b480a1-81ac-5797-bdc9-9d03e2e0c01d": {
+      "bucket": "rule_tagged",
+      "campus": "seoul"
+    },
+    "72d9f5a9-22a2-567d-b2fb-4703eb3c9c7f": {
+      "bucket": "rule_cue_unknown",
+      "campus": "seoul"
+    },
+    "72fe6c0c-8f52-5e61-ae4d-07b1e153324f": {
+      "bucket": "rule_unconditioned",
+      "campus": "erica"
+    },
+    "7408d819-cfee-5a6a-9d79-d602bcb0d356": {
+      "bucket": "rule_cue_unknown",
+      "campus": "erica"
+    },
+    "74913e09-3e08-5656-aca7-a6d0317d829c": {
+      "bucket": "rule_tagged",
+      "campus": "seoul"
+    },
+    "77ce1f34-688c-55d4-8819-23cb8e97d125": {
+      "bucket": "rule_cue_unknown",
+      "campus": "erica"
+    },
+    "793c73f3-7bee-5777-a6c6-0ab359a77479": {
+      "bucket": "rule_cue_unknown",
+      "campus": "erica"
+    },
+    "7c5c6f5a-62d8-5db4-8e3b-53b5ebcc4237": {
+      "bucket": "rule_cue_unknown",
+      "campus": "erica"
+    },
+    "7d16078c-c50b-583a-a26d-8f506848b04c": {
+      "bucket": "rule_tagged",
+      "campus": "seoul"
+    },
+    "812a6bae-1b31-5905-92dc-b371b5b42e26": {
+      "bucket": "rule_unconditioned",
+      "campus": "seoul"
+    },
+    "87b3e745-4e7e-56c5-818a-ecbbd5db8901": {
+      "bucket": "rule_tagged",
+      "campus": "seoul"
+    },
+    "8a5250c9-85d4-5fc2-a992-8377c175d1b1": {
+      "bucket": "rule_cue_unknown",
+      "campus": "seoul"
+    },
+    "8b721de1-39cc-53c7-8a85-bf203095a346": {
+      "bucket": "rule_tagged",
+      "campus": "seoul"
+    },
+    "8c729219-430b-5d77-8230-16c17115660b": {
+      "bucket": "rule_tagged",
+      "campus": "seoul"
+    },
+    "8cf2eea5-9fc9-52ca-b4b3-d5bdbdce908e": {
+      "bucket": "rule_unconditioned",
+      "campus": "seoul"
+    },
+    "935d09fa-3661-5e04-b3ee-2c91ed954475": {
+      "bucket": "rule_unconditioned",
+      "campus": "seoul"
+    },
+    "93834c30-970e-5381-8769-7ac853907296": {
+      "bucket": "rule_unconditioned",
+      "campus": "erica"
+    },
+    "988b85cc-9d3e-59ed-9411-7f72f06bdb67": {
+      "bucket": "rule_tagged",
+      "campus": "seoul"
+    },
+    "9c37244c-6cca-5213-8416-2685d1e97422": {
+      "bucket": "rule_cue_unknown",
+      "campus": "erica"
+    },
+    "9f21edf8-1761-51f7-933e-e4e7ed5a4381": {
+      "bucket": "rule_tagged",
+      "campus": "seoul"
+    },
+    "a34a44d9-382b-5556-8e7e-be3b0fe23e39": {
+      "bucket": "rule_tagged",
+      "campus": "seoul"
+    },
+    "a43026d7-3494-5f15-a055-7a4162139363": {
+      "bucket": "rule_tagged",
+      "campus": "erica"
+    },
+    "a5b0835e-15b8-5b67-8ae2-cebe6887157a": {
+      "bucket": "rule_cue_unknown",
+      "campus": "erica"
+    },
+    "aa13e2b4-e738-5765-93e1-0cd85ca6d186": {
+      "bucket": "rule_cue_unknown",
+      "campus": "erica"
+    },
+    "aea0765d-2704-5eaa-b0e6-96bc6d1fa24c": {
+      "bucket": "rule_tagged",
+      "campus": "seoul"
+    },
+    "af73cf3c-ce5b-58c6-8591-56bc1a66193a": {
+      "bucket": "rule_tagged",
+      "campus": "seoul"
+    },
+    "b0a6fcca-5507-57e7-8065-2cb67e12be87": {
+      "bucket": "rule_tagged",
+      "campus": "seoul"
+    },
+    "b1f8cb26-d6fb-5aab-8111-dd39b8b8032c": {
+      "bucket": "rule_tagged",
+      "campus": "seoul"
+    },
+    "b47bac25-9484-5ba8-bba4-0c5d4d01ad26": {
+      "bucket": "rule_tagged",
+      "campus": "erica"
+    },
+    "b7f7d5f9-f157-5309-b246-b7634f5154ef": {
+      "bucket": "rule_cue_unknown",
+      "campus": "seoul"
+    },
+    "bb1b1423-1636-5391-9ce5-5cc247a5200c": {
+      "bucket": "rule_tagged",
+      "campus": "erica"
+    },
+    "bbf8ece7-4447-5705-bfac-07ff099c05ea": {
+      "bucket": "rule_unconditioned",
+      "campus": "erica"
+    },
+    "bd200082-c31c-546a-a52d-b2cca7ba5981": {
+      "bucket": "rule_tagged",
+      "campus": "erica"
+    },
+    "c2bdd37f-d3e0-5b0f-9249-d030f7fe6294": {
+      "bucket": "rule_tagged",
+      "campus": "erica"
+    },
+    "c34447db-dc24-528b-89b8-57c960addfd9": {
+      "bucket": "rule_cue_unknown",
+      "campus": "erica"
+    },
+    "c40391e2-20fd-5750-9789-0e99a25ef097": {
+      "bucket": "rule_tagged",
+      "campus": "seoul"
+    },
+    "c7b3f8b1-66cc-50d6-8243-c3b228bfeb0c": {
+      "bucket": "rule_cue_unknown",
+      "campus": "erica"
+    },
+    "c8d6cf2d-3e6c-5031-8acf-17294e86c479": {
+      "bucket": "rule_unconditioned",
+      "campus": "erica"
+    },
+    "cffc45e8-6a04-5677-a91b-fefed0773c46": {
+      "bucket": "rule_cue_unknown",
+      "campus": "seoul"
+    },
+    "d003211f-3cce-5f83-8013-5ce6631d5522": {
+      "bucket": "rule_cue_unknown",
+      "campus": "seoul"
+    },
+    "d334e7f4-58bd-53f4-9bd9-b05b0d0638f9": {
+      "bucket": "rule_cue_unknown",
+      "campus": "seoul"
+    },
+    "d444b5bc-3e64-547c-bfea-7cdaf2da3f80": {
+      "bucket": "rule_tagged",
+      "campus": "seoul"
+    },
+    "d474ac2d-ed5b-539a-8948-225d351174db": {
+      "bucket": "rule_tagged",
+      "campus": "erica"
+    },
+    "d813550f-49b5-5923-953c-9080a850740e": {
+      "bucket": "rule_tagged",
+      "campus": "erica"
+    },
+    "db5772d1-9ef5-590a-b2f9-69292a6cdffc": {
+      "bucket": "rule_tagged",
+      "campus": "seoul"
+    },
+    "dc296e03-d483-54f0-a95b-afae3100a28e": {
+      "bucket": "rule_tagged",
+      "campus": "erica"
+    },
+    "e1115cb5-c41e-5985-a9ae-d1d9eaf03fbe": {
+      "bucket": "rule_tagged",
+      "campus": "seoul"
+    },
+    "e727df3e-52b0-5695-bb65-065dbbdd7100": {
+      "bucket": "rule_tagged",
+      "campus": "erica"
+    },
+    "e846164f-73b9-5528-afcc-e3561f414376": {
+      "bucket": "rule_unconditioned",
+      "campus": "erica"
+    },
+    "e9dd2ca4-5b92-5475-a905-ea79493f8267": {
+      "bucket": "rule_tagged",
+      "campus": "seoul"
+    },
+    "ed6f17af-9092-57ac-a967-b330199ee52c": {
+      "bucket": "rule_unconditioned",
+      "campus": "seoul"
+    },
+    "f245ff1a-09ae-5a87-908f-e6f7b2792612": {
+      "bucket": "rule_cue_unknown",
+      "campus": "seoul"
+    },
+    "f42dc670-c493-5f90-b72b-f4edce382a55": {
+      "bucket": "rule_tagged",
+      "campus": "seoul"
+    },
+    "f75f9c0c-ab24-5990-b261-cc9503af7fed": {
+      "bucket": "rule_tagged",
+      "campus": "seoul"
+    },
+    "f8f2c6f3-d681-5c86-9d97-b09cfcab74d4": {
+      "bucket": "rule_tagged",
+      "campus": "seoul"
+    },
+    "f90817bd-b03e-5310-b668-5c06795e969a": {
+      "bucket": "rule_unconditioned",
+      "campus": "seoul"
+    },
+    "fc181cc4-b286-5f37-8be1-4919f00f7d44": {
+      "bucket": "rule_cue_unknown",
+      "campus": "erica"
+    },
+    "ff4faed2-7eaf-50e3-8e2a-1bdc781565e7": {
+      "bucket": "rule_tagged",
+      "campus": "seoul"
+    }
+  },
+  "bucket_targets": {
+    "rule_tagged": 53,
+    "rule_unconditioned": 17,
+    "rule_cue_unknown": 30,
+    "llm_tagged": 0,
+    "llm_unconditioned": 0,
+    "llm_rejected": 0,
+    "llm_errors": 0
+  },
+  "achieved_strata": {
+    "by_bucket": {
+      "rule_tagged": 53,
+      "rule_unconditioned": 17,
+      "rule_cue_unknown": 30,
+      "llm_tagged": 0,
+      "llm_unconditioned": 0,
+      "llm_rejected": 0,
+      "llm_errors": 0
+    },
+    "by_campus": {
+      "seoul": 58,
+      "erica": 42
+    },
+    "by_bucket_campus": {
+      "rule_tagged": {
+        "seoul": 36,
+        "erica": 17
+      },
+      "rule_unconditioned": {
+        "erica": 10,
+        "seoul": 7
+      },
+      "rule_cue_unknown": {
+        "seoul": 15,
+        "erica": 15
+      },
+      "llm_tagged": {},
+      "llm_unconditioned": {},
+      "llm_rejected": {},
+      "llm_errors": {}
+    },
+    "floors": {
+      "topik_text": {
+        "requested": 10,
+        "available": 420,
+        "required": 10,
+        "achieved": 23
+      },
+      "rule_unconditioned": {
+        "requested": 13,
+        "available": 270,
+        "required": 13,
+        "achieved": 17
+      },
+      "any_of": {
+        "requested": 3,
+        "available": 2,
+        "required": 2,
+        "achieved": 2
+      }
+    }
+  },
+  "bucket_partition": {
+    "rule_tagged": 1189,
+    "rule_unconditioned": 291,
+    "rule_cue_unknown": 387,
+    "llm_tagged": 0,
+    "llm_unconditioned": 0,
+    "llm_rejected": 0,
+    "llm_errors": 0
+  },
+  "excluded_files": [
+    {
+      "path": "../Report/results/tag_audit/hyu_20261110_97dc1269_r3/auto/sample_meta.json",
+      "count": 150
+    }
+  ]
+}

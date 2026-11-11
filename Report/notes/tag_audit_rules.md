@@ -19,6 +19,8 @@ applies to, using only the v1 vocabulary.
    heading path).
    - Do not use other chunks, outside knowledge, or what the page "usually" says.
 2. **A value needs textual support.** Quote the supporting words for every value in `evidence`.
+   The quote may come from the chunk text, its heading path or its title (rule 1; added 2026-11-11 for
+   rule 8, where a whole admission guide is `applicant`).
    - Campus is the only exception: it may come from the site (`seoul` → `["seoul"]`, `erica` →
      `["erica"]`).
 3. **Thresholds cover the full range.**

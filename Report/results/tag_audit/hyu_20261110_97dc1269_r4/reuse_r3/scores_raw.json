@@ -1,0 +1,4067 @@
+{
+  "index_id": "hyu_20261110_97dc1269_r4",
+  "sample_n": 150,
+  "per_attribute": {
+    "degree_level": {
+      "tp": 45,
+      "fp": 10,
+      "fn": 17,
+      "strict_tp": 45,
+      "strict_fn": 33,
+      "coverage": 0.717948717948718,
+      "coverage_ci": [
+        0.5622438267752261,
+        0.8345667498605671
+      ],
+      "precision": 0.8181818181818182,
+      "precision_ci": [
+        0.6966928866143076,
+        0.898124385519693
+      ],
+      "recall": 0.7258064516129032,
+      "recall_ci": [
+        0.6040722415667276,
+        0.8211908140090788
+      ],
+      "weighted_recall": 0.7258064516129032,
+      "weighted_recall_ci": [
+        0.6040722415667276,
+        0.8211908140090788
+      ],
+      "strict_recall": 0.5769230769230769,
+      "strict_recall_ci": [
+        0.46621355164287304,
+        0.680411147776493
+      ],
+      "strict_weighted_recall": 0.6671042366511469,
+      "strict_weighted_recall_ci": [
+        0.5568609471609647,
+        0.7616599629578371
+      ],
+      "occurrences": 39,
+      "resolved_occurrences": 28,
+      "gated": true
+    },
+    "year": {
+      "tp": 14,
+      "fp": 0,
+      "fn": 0,
+      "strict_tp": 14,
+      "strict_fn": 2,
+      "coverage": 0.6666666666666666,
+      "coverage_ci": [
+        0.29998832134152864,
+        0.9032306674407831
+      ],
+      "precision": 1.0,
+      "precision_ci": [
+        0.7846829880728186,
+        1.0
+      ],
+      "recall": 1.0,
+      "recall_ci": [
+        0.7846829880728186,
+        1.0
+      ],
+      "weighted_recall": 1.0,
+      "weighted_recall_ci": [
+        0.7846829880728186,
+        1.0
+      ],
+      "strict_recall": 0.875,
+      "strict_recall_ci": [
+        0.6397666856325173,
+        0.9650232506629428
+      ],
+      "strict_weighted_recall": 0.9535507946120231,
+      "strict_weighted_recall_ci": [
+        0.7381180084490314,
+        0.9933565413647306
+      ],
+      "occurrences": 6,
+      "resolved_occurrences": 4,
+      "gated": true
+    },
+    "student_type": {
+      "tp": 1,
+      "fp": 1,
+      "fn": 0,
+      "strict_tp": 1,
+      "strict_fn": 0,
+      "coverage": 1.0,
+      "coverage_ci": [
+        0.20654329147389294,
+        1.0
+      ],
+      "precision": 0.5,
+      "precision_ci": [
+        0.09452865480086614,
+        0.9054713451991339
+      ],
+      "recall": 1.0,
+      "recall_ci": [
+        0.20654329147389294,
+        1.0
+      ],
+      "weighted_recall": 1.0,
+      "weighted_recall_ci": [
+        0.20654329147389294,
+        1.0
+      ],
+      "strict_recall": 1.0,
+      "strict_recall_ci": [
+        0.20654329147389294,
+        1.0
+      ],
+      "strict_weighted_recall": 1.0,
+      "strict_weighted_recall_ci": [
+        0.20654329147389294,
+        1.0
+      ],
+      "occurrences": 1,
+      "resolved_occurrences": 1,
+      "gated": false
+    },
+    "visa": {
+      "tp": 6,
+      "fp": 1,
+      "fn": 4,
+      "strict_tp": 6,
+      "strict_fn": 7,
+      "coverage": 0.6666666666666666,
+      "coverage_ci": [
+        0.35419734749908977,
+        0.879418401317257
+      ],
+      "precision": 0.8571428571428571,
+      "precision_ci": [
+        0.48686549668097007,
+        0.9743210440510253
+      ],
+      "recall": 0.6,
+      "recall_ci": [
+        0.3126695474501864,
+        0.8318224187964902
+      ],
+      "weighted_recall": 0.6,
+      "weighted_recall_ci": [
+        0.3126695474501864,
+        0.8318224187964902
+      ],
+      "strict_recall": 0.46153846153846156,
+      "strict_recall_ci": [
+        0.2320575430148814,
+        0.7085656756816796
+      ],
+      "strict_weighted_recall": 0.5443189745378445,
+      "strict_weighted_recall_ci": [
+        0.29613490124994196,
+        0.7722845682769413
+      ],
+      "occurrences": 9,
+      "resolved_occurrences": 6,
+      "gated": true
+    },
+    "topik_level": {
+      "tp": 74,
+      "fp": 6,
+      "fn": 8,
+      "strict_tp": 74,
+      "strict_fn": 8,
+      "coverage": 1.0,
+      "coverage_ci": [
+        0.8241154494176252,
+        1.0
+      ],
+      "precision": 0.925,
+      "precision_ci": [
+        0.8458779990261992,
+        0.9651752251489122
+      ],
+      "recall": 0.9024390243902439,
+      "recall_ci": [
+        0.8191260766932333,
+        0.949731912906215
+      ],
+      "weighted_recall": 0.9024390243902439,
+      "weighted_recall_ci": [
+        0.8191260766932333,
+        0.949731912906215
+      ],
+      "strict_recall": 0.9024390243902439,
+      "strict_recall_ci": [
+        0.8191260766932333,
+        0.949731912906215
+      ],
+      "strict_weighted_recall": 0.9024390243902439,
+      "strict_weighted_recall_ci": [
+        0.8191260766932333,
+        0.949731912906215
+      ],
+      "occurrences": 18,
+      "resolved_occurrences": 18,
+      "gated": true
+    },
+    "english_track": {
+      "tp": 5,
+      "fp": 0,
+      "fn": 0,
+      "strict_tp": 5,
+      "strict_fn": 0,
+      "coverage": 1.0,
+      "coverage_ci": [
+        0.5655085052479191,
+        1.0000000000000002
+      ],
+      "precision": 1.0,
+      "precision_ci": [
+        0.5655085052479191,
+        1.0000000000000002
+      ],
+      "recall": 1.0,
+      "recall_ci": [
+        0.5655085052479191,
+        1.0000000000000002
+      ],
+      "weighted_recall": 1.0,
+      "weighted_recall_ci": [
+        0.5655085052479191,
+        1.0000000000000002
+      ],
+      "strict_recall": 1.0,
+      "strict_recall_ci": [
+        0.5655085052479191,
+        1.0000000000000002
+      ],
+      "strict_weighted_recall": 1.0,
+      "strict_weighted_recall_ci": [
+        0.5655085052479191,
+        1.0000000000000002
+      ],
+      "occurrences": 5,
+      "resolved_occurrences": 5,
+      "gated": true
+    },
+    "academic_status": {
+      "tp": 47,
+      "fp": 1,
+      "fn": 5,
+      "strict_tp": 47,
+      "strict_fn": 14,
+      "coverage": 0.85,
+      "coverage_ci": [
+        0.7388517410884038,
+        0.9190265075770431
+      ],
+      "precision": 0.9791666666666666,
+      "precision_ci": [
+        0.8910053086246883,
+        0.9963129840206002
+      ],
+      "recall": 0.9038461538461539,
+      "recall_ci": [
+        0.79390118138839,
+        0.9582262648165898
+      ],
+      "weighted_recall": 0.903846153846154,
+      "weighted_recall_ci": [
+        0.7939011813883903,
+        0.9582262648165898
+      ],
+      "strict_recall": 0.7704918032786885,
+      "strict_recall_ci": [
+        0.6508635609254849,
+        0.858068976211168
+      ],
+      "strict_weighted_recall": 0.8534771282328762,
+      "strict_weighted_recall_ci": [
+        0.7439489095742398,
+        0.9211211942543349
+      ],
+      "occurrences": 60,
+      "resolved_occurrences": 51,
+      "gated": true
+    },
+    "korean_standard": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 1,
+      "strict_tp": 0,
+      "strict_fn": 1,
+      "coverage": 1.0,
+      "coverage_ci": [
+        0.20654329147389294,
+        1.0
+      ],
+      "precision": null,
+      "precision_ci": null,
+      "recall": 0.0,
+      "recall_ci": [
+        0.0,
+        0.7934567085261071
+      ],
+      "weighted_recall": 0.0,
+      "weighted_recall_ci": [
+        0.0,
+        0.7934567085261071
+      ],
+      "strict_recall": 0.0,
+      "strict_recall_ci": [
+        0.0,
+        0.7934567085261071
+      ],
+      "strict_weighted_recall": 0.0,
+      "strict_weighted_recall_ci": [
+        0.0,
+        0.7934567085261071
+      ],
+      "occurrences": 1,
+      "resolved_occurrences": 1,
+      "gated": false
+    },
+    "campus": {
+      "tp": 151,
+      "fp": 11,
+      "fn": 8,
+      "strict_tp": 151,
+      "strict_fn": 8,
+      "coverage": 1.0,
+      "coverage_ci": [
+        0.9750288608542812,
+        1.0
+      ],
+      "precision": 0.9320987654320988,
+      "precision_ci": [
+        0.8825134184560102,
+        0.9616656053836057
+      ],
+      "recall": 0.949685534591195,
+      "recall_ci": [
+        0.9038663529203274,
+        0.974287632302122
+      ],
+      "weighted_recall": 0.9451302539404554,
+      "weighted_recall_ci": [
+        0.8981095799473581,
+        0.971148771438681
+      ],
+      "strict_recall": 0.949685534591195,
+      "strict_recall_ci": [
+        0.9038663529203274,
+        0.974287632302122
+      ],
+      "strict_weighted_recall": 0.9451302539404554,
+      "strict_weighted_recall_ci": [
+        0.8981095799473581,
+        0.971148771438681
+      ],
+      "occurrences": 150,
+      "resolved_occurrences": 150,
+      "gated": true
+    },
+    "scope": {
+      "tp": 137,
+      "fp": 13,
+      "fn": 13,
+      "strict_tp": 137,
+      "strict_fn": 13,
+      "coverage": 1.0,
+      "coverage_ci": [
+        0.9750288608542812,
+        1.0
+      ],
+      "precision": 0.9133333333333333,
+      "precision_ci": [
+        0.8573705468757646,
+        0.9486533114304412
+      ],
+      "recall": 0.9133333333333333,
+      "recall_ci": [
+        0.8573705468757646,
+        0.9486533114304412
+      ],
+      "weighted_recall": 0.9254319149873516,
+      "weighted_recall_ci": [
+        0.871959128358277,
+        0.9576576625240687
+      ],
+      "strict_recall": 0.9133333333333333,
+      "strict_recall_ci": [
+        0.8573705468757646,
+        0.9486533114304412
+      ],
+      "strict_weighted_recall": 0.9254319149873516,
+      "strict_weighted_recall_ci": [
+        0.871959128358277,
+        0.9576576625240687
+      ],
+      "occurrences": 150,
+      "resolved_occurrences": 150,
+      "gated": true
+    },
+    "effective_term": {
+      "tp": 86,
+      "fp": 12,
+      "fn": 13,
+      "strict_tp": 86,
+      "strict_fn": 13,
+      "coverage": 1.0,
+      "coverage_ci": [
+        0.9626454664260378,
+        1.0
+      ],
+      "precision": 0.8775510204081632,
+      "precision_ci": [
+        0.7980698895315725,
+        0.9285487024779795
+      ],
+      "recall": 0.8686868686868687,
+      "recall_ci": [
+        0.7882011546038707,
+        0.9216283307405815
+      ],
+      "weighted_recall": 0.8431363512924117,
+      "weighted_recall_ci": [
+        0.7588714098895241,
+        0.9017658959857008
+      ],
+      "strict_recall": 0.8686868686868687,
+      "strict_recall_ci": [
+        0.7882011546038707,
+        0.9216283307405815
+      ],
+      "strict_weighted_recall": 0.8431363512924117,
+      "strict_weighted_recall_ci": [
+        0.7588714098895241,
+        0.9017658959857008
+      ],
+      "occurrences": 99,
+      "resolved_occurrences": 99,
+      "gated": true
+    }
+  },
+  "by_method": {
+    "rule": {
+      "degree_level": {
+        "tp": 45,
+        "fp": 10,
+        "fn": 17,
+        "strict_tp": 45,
+        "strict_fn": 33,
+        "coverage": 0.717948717948718,
+        "coverage_ci": [
+          0.5622438267752261,
+          0.8345667498605671
+        ],
+        "precision": 0.8181818181818182,
+        "precision_ci": [
+          0.6966928866143076,
+          0.898124385519693
+        ],
+        "recall": 0.7258064516129032,
+        "recall_ci": [
+          0.6040722415667276,
+          0.8211908140090788
+        ],
+        "weighted_recall": 0.7258064516129032,
+        "weighted_recall_ci": [
+          0.6040722415667276,
+          0.8211908140090788
+        ],
+        "strict_recall": 0.5769230769230769,
+        "strict_recall_ci": [
+          0.46621355164287304,
+          0.680411147776493
+        ],
+        "strict_weighted_recall": 0.6671042366511469,
+        "strict_weighted_recall_ci": [
+          0.5568609471609647,
+          0.7616599629578371
+        ],
+        "occurrences": 39,
+        "resolved_occurrences": 28,
+        "gated": true
+      },
+      "year": {
+        "tp": 14,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 14,
+        "strict_fn": 2,
+        "coverage": 0.6666666666666666,
+        "coverage_ci": [
+          0.29998832134152864,
+          0.9032306674407831
+        ],
+        "precision": 1.0,
+        "precision_ci": [
+          0.7846829880728186,
+          1.0
+        ],
+        "recall": 1.0,
+        "recall_ci": [
+          0.7846829880728186,
+          1.0
+        ],
+        "weighted_recall": 1.0,
+        "weighted_recall_ci": [
+          0.7846829880728186,
+          1.0
+        ],
+        "strict_recall": 0.875,
+        "strict_recall_ci": [
+          0.6397666856325173,
+          0.9650232506629428
+        ],
+        "strict_weighted_recall": 0.9535507946120231,
+        "strict_weighted_recall_ci": [
+          0.7381180084490314,
+          0.9933565413647306
+        ],
+        "occurrences": 6,
+        "resolved_occurrences": 4,
+        "gated": true
+      },
+      "student_type": {
+        "tp": 1,
+        "fp": 1,
+        "fn": 0,
+        "strict_tp": 1,
+        "strict_fn": 0,
+        "coverage": 1.0,
+        "coverage_ci": [
+          0.20654329147389294,
+          1.0
+        ],
+        "precision": 0.5,
+        "precision_ci": [
+          0.09452865480086614,
+          0.9054713451991339
+        ],
+        "recall": 1.0,
+        "recall_ci": [
+          0.20654329147389294,
+          1.0
+        ],
+        "weighted_recall": 1.0,
+        "weighted_recall_ci": [
+          0.20654329147389294,
+          1.0
+        ],
+        "strict_recall": 1.0,
+        "strict_recall_ci": [
+          0.20654329147389294,
+          1.0
+        ],
+        "strict_weighted_recall": 1.0,
+        "strict_weighted_recall_ci": [
+          0.20654329147389294,
+          1.0
+        ],
+        "occurrences": 1,
+        "resolved_occurrences": 1,
+        "gated": false
+      },
+      "visa": {
+        "tp": 6,
+        "fp": 1,
+        "fn": 4,
+        "strict_tp": 6,
+        "strict_fn": 7,
+        "coverage": 0.6666666666666666,
+        "coverage_ci": [
+          0.35419734749908977,
+          0.879418401317257
+        ],
+        "precision": 0.8571428571428571,
+        "precision_ci": [
+          0.48686549668097007,
+          0.9743210440510253
+        ],
+        "recall": 0.6,
+        "recall_ci": [
+          0.3126695474501864,
+          0.8318224187964902
+        ],
+        "weighted_recall": 0.6,
+        "weighted_recall_ci": [
+          0.3126695474501864,
+          0.8318224187964902
+        ],
+        "strict_recall": 0.46153846153846156,
+        "strict_recall_ci": [
+          0.2320575430148814,
+          0.7085656756816796
+        ],
+        "strict_weighted_recall": 0.5443189745378445,
+        "strict_weighted_recall_ci": [
+          0.29613490124994196,
+          0.7722845682769413
+        ],
+        "occurrences": 9,
+        "resolved_occurrences": 6,
+        "gated": true
+      },
+      "topik_level": {
+        "tp": 74,
+        "fp": 6,
+        "fn": 8,
+        "strict_tp": 74,
+        "strict_fn": 8,
+        "coverage": 1.0,
+        "coverage_ci": [
+          0.8241154494176252,
+          1.0
+        ],
+        "precision": 0.925,
+        "precision_ci": [
+          0.8458779990261992,
+          0.9651752251489122
+        ],
+        "recall": 0.9024390243902439,
+        "recall_ci": [
+          0.8191260766932333,
+          0.949731912906215
+        ],
+        "weighted_recall": 0.9024390243902439,
+        "weighted_recall_ci": [
+          0.8191260766932333,
+          0.949731912906215
+        ],
+        "strict_recall": 0.9024390243902439,
+        "strict_recall_ci": [
+          0.8191260766932333,
+          0.949731912906215
+        ],
+        "strict_weighted_recall": 0.9024390243902439,
+        "strict_weighted_recall_ci": [
+          0.8191260766932333,
+          0.949731912906215
+        ],
+        "occurrences": 18,
+        "resolved_occurrences": 18,
+        "gated": true
+      },
+      "english_track": {
+        "tp": 5,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 5,
+        "strict_fn": 0,
+        "coverage": 1.0,
+        "coverage_ci": [
+          0.5655085052479191,
+          1.0000000000000002
+        ],
+        "precision": 1.0,
+        "precision_ci": [
+          0.5655085052479191,
+          1.0000000000000002
+        ],
+        "recall": 1.0,
+        "recall_ci": [
+          0.5655085052479191,
+          1.0000000000000002
+        ],
+        "weighted_recall": 1.0,
+        "weighted_recall_ci": [
+          0.5655085052479191,
+          1.0000000000000002
+        ],
+        "strict_recall": 1.0,
+        "strict_recall_ci": [
+          0.5655085052479191,
+          1.0000000000000002
+        ],
+        "strict_weighted_recall": 1.0,
+        "strict_weighted_recall_ci": [
+          0.5655085052479191,
+          1.0000000000000002
+        ],
+        "occurrences": 5,
+        "resolved_occurrences": 5,
+        "gated": true
+      },
+      "academic_status": {
+        "tp": 47,
+        "fp": 1,
+        "fn": 5,
+        "strict_tp": 47,
+        "strict_fn": 14,
+        "coverage": 0.85,
+        "coverage_ci": [
+          0.7388517410884038,
+          0.9190265075770431
+        ],
+        "precision": 0.9791666666666666,
+        "precision_ci": [
+          0.8910053086246883,
+          0.9963129840206002
+        ],
+        "recall": 0.9038461538461539,
+        "recall_ci": [
+          0.79390118138839,
+          0.9582262648165898
+        ],
+        "weighted_recall": 0.903846153846154,
+        "weighted_recall_ci": [
+          0.7939011813883903,
+          0.9582262648165898
+        ],
+        "strict_recall": 0.7704918032786885,
+        "strict_recall_ci": [
+          0.6508635609254849,
+          0.858068976211168
+        ],
+        "strict_weighted_recall": 0.8534771282328762,
+        "strict_weighted_recall_ci": [
+          0.7439489095742398,
+          0.9211211942543349
+        ],
+        "occurrences": 60,
+        "resolved_occurrences": 51,
+        "gated": true
+      },
+      "korean_standard": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "strict_tp": 0,
+        "strict_fn": 1,
+        "coverage": 1.0,
+        "coverage_ci": [
+          0.20654329147389294,
+          1.0
+        ],
+        "precision": null,
+        "precision_ci": null,
+        "recall": 0.0,
+        "recall_ci": [
+          0.0,
+          0.7934567085261071
+        ],
+        "weighted_recall": 0.0,
+        "weighted_recall_ci": [
+          0.0,
+          0.7934567085261071
+        ],
+        "strict_recall": 0.0,
+        "strict_recall_ci": [
+          0.0,
+          0.7934567085261071
+        ],
+        "strict_weighted_recall": 0.0,
+        "strict_weighted_recall_ci": [
+          0.0,
+          0.7934567085261071
+        ],
+        "occurrences": 1,
+        "resolved_occurrences": 1,
+        "gated": false
+      },
+      "campus": {
+        "tp": 151,
+        "fp": 11,
+        "fn": 8,
+        "strict_tp": 151,
+        "strict_fn": 8,
+        "coverage": 1.0,
+        "coverage_ci": [
+          0.9750288608542812,
+          1.0
+        ],
+        "precision": 0.9320987654320988,
+        "precision_ci": [
+          0.8825134184560102,
+          0.9616656053836057
+        ],
+        "recall": 0.949685534591195,
+        "recall_ci": [
+          0.9038663529203274,
+          0.974287632302122
+        ],
+        "weighted_recall": 0.9451302539404554,
+        "weighted_recall_ci": [
+          0.8981095799473581,
+          0.971148771438681
+        ],
+        "strict_recall": 0.949685534591195,
+        "strict_recall_ci": [
+          0.9038663529203274,
+          0.974287632302122
+        ],
+        "strict_weighted_recall": 0.9451302539404554,
+        "strict_weighted_recall_ci": [
+          0.8981095799473581,
+          0.971148771438681
+        ],
+        "occurrences": 150,
+        "resolved_occurrences": 150,
+        "gated": true
+      },
+      "scope": {
+        "tp": 137,
+        "fp": 13,
+        "fn": 13,
+        "strict_tp": 137,
+        "strict_fn": 13,
+        "coverage": 1.0,
+        "coverage_ci": [
+          0.9750288608542812,
+          1.0
+        ],
+        "precision": 0.9133333333333333,
+        "precision_ci": [
+          0.8573705468757646,
+          0.9486533114304412
+        ],
+        "recall": 0.9133333333333333,
+        "recall_ci": [
+          0.8573705468757646,
+          0.9486533114304412
+        ],
+        "weighted_recall": 0.9254319149873516,
+        "weighted_recall_ci": [
+          0.871959128358277,
+          0.9576576625240687
+        ],
+        "strict_recall": 0.9133333333333333,
+        "strict_recall_ci": [
+          0.8573705468757646,
+          0.9486533114304412
+        ],
+        "strict_weighted_recall": 0.9254319149873516,
+        "strict_weighted_recall_ci": [
+          0.871959128358277,
+          0.9576576625240687
+        ],
+        "occurrences": 150,
+        "resolved_occurrences": 150,
+        "gated": true
+      },
+      "effective_term": {
+        "tp": 86,
+        "fp": 12,
+        "fn": 13,
+        "strict_tp": 86,
+        "strict_fn": 13,
+        "coverage": 1.0,
+        "coverage_ci": [
+          0.9626454664260378,
+          1.0
+        ],
+        "precision": 0.8775510204081632,
+        "precision_ci": [
+          0.7980698895315725,
+          0.9285487024779795
+        ],
+        "recall": 0.8686868686868687,
+        "recall_ci": [
+          0.7882011546038707,
+          0.9216283307405815
+        ],
+        "weighted_recall": 0.8431363512924117,
+        "weighted_recall_ci": [
+          0.7588714098895241,
+          0.9017658959857008
+        ],
+        "strict_recall": 0.8686868686868687,
+        "strict_recall_ci": [
+          0.7882011546038707,
+          0.9216283307405815
+        ],
+        "strict_weighted_recall": 0.8431363512924117,
+        "strict_weighted_recall_ci": [
+          0.7588714098895241,
+          0.9017658959857008
+        ],
+        "occurrences": 99,
+        "resolved_occurrences": 99,
+        "gated": true
+      }
+    },
+    "llm": {
+      "degree_level": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "year": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "student_type": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "visa": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "topik_level": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "english_track": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "academic_status": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "korean_standard": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "campus": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "scope": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "effective_term": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      }
+    }
+  },
+  "by_bucket": {
+    "rule_tagged": {
+      "degree_level": {
+        "tp": 45,
+        "fp": 10,
+        "fn": 17,
+        "strict_tp": 45,
+        "strict_fn": 17,
+        "coverage": 1.0,
+        "coverage_ci": [
+          0.8793527963418923,
+          1.0
+        ],
+        "precision": 0.8181818181818182,
+        "precision_ci": [
+          0.6966928866143076,
+          0.898124385519693
+        ],
+        "recall": 0.7258064516129032,
+        "recall_ci": [
+          0.6040722415667276,
+          0.8211908140090788
+        ],
+        "weighted_recall": 0.7258064516129032,
+        "weighted_recall_ci": [
+          0.6040722415667276,
+          0.8211908140090788
+        ],
+        "strict_recall": 0.7258064516129032,
+        "strict_recall_ci": [
+          0.6040722415667276,
+          0.8211908140090788
+        ],
+        "strict_weighted_recall": 0.7258064516129032,
+        "strict_weighted_recall_ci": [
+          0.6040722415667276,
+          0.8211908140090788
+        ],
+        "occurrences": 28,
+        "resolved_occurrences": 28,
+        "gated": true
+      },
+      "year": {
+        "tp": 14,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 14,
+        "strict_fn": 0,
+        "coverage": 1.0,
+        "coverage_ci": [
+          0.5100999795960008,
+          1.0
+        ],
+        "precision": 1.0,
+        "precision_ci": [
+          0.7846829880728186,
+          1.0
+        ],
+        "recall": 1.0,
+        "recall_ci": [
+          0.7846829880728186,
+          1.0
+        ],
+        "weighted_recall": 1.0,
+        "weighted_recall_ci": [
+          0.7846829880728186,
+          1.0
+        ],
+        "strict_recall": 1.0,
+        "strict_recall_ci": [
+          0.7846829880728186,
+          1.0
+        ],
+        "strict_weighted_recall": 1.0,
+        "strict_weighted_recall_ci": [
+          0.7846829880728186,
+          1.0
+        ],
+        "occurrences": 4,
+        "resolved_occurrences": 4,
+        "gated": false
+      },
+      "student_type": {
+        "tp": 1,
+        "fp": 1,
+        "fn": 0,
+        "strict_tp": 1,
+        "strict_fn": 0,
+        "coverage": 1.0,
+        "coverage_ci": [
+          0.20654329147389294,
+          1.0
+        ],
+        "precision": 0.5,
+        "precision_ci": [
+          0.09452865480086614,
+          0.9054713451991339
+        ],
+        "recall": 1.0,
+        "recall_ci": [
+          0.20654329147389294,
+          1.0
+        ],
+        "weighted_recall": 1.0,
+        "weighted_recall_ci": [
+          0.20654329147389294,
+          1.0
+        ],
+        "strict_recall": 1.0,
+        "strict_recall_ci": [
+          0.20654329147389294,
+          1.0
+        ],
+        "strict_weighted_recall": 1.0,
+        "strict_weighted_recall_ci": [
+          0.20654329147389294,
+          1.0
+        ],
+        "occurrences": 1,
+        "resolved_occurrences": 1,
+        "gated": false
+      },
+      "visa": {
+        "tp": 6,
+        "fp": 1,
+        "fn": 4,
+        "strict_tp": 6,
+        "strict_fn": 4,
+        "coverage": 1.0,
+        "coverage_ci": [
+          0.6096569663469354,
+          0.9999999999999999
+        ],
+        "precision": 0.8571428571428571,
+        "precision_ci": [
+          0.48686549668097007,
+          0.9743210440510253
+        ],
+        "recall": 0.6,
+        "recall_ci": [
+          0.3126695474501864,
+          0.8318224187964902
+        ],
+        "weighted_recall": 0.6,
+        "weighted_recall_ci": [
+          0.3126695474501864,
+          0.8318224187964902
+        ],
+        "strict_recall": 0.6,
+        "strict_recall_ci": [
+          0.3126695474501864,
+          0.8318224187964902
+        ],
+        "strict_weighted_recall": 0.6,
+        "strict_weighted_recall_ci": [
+          0.3126695474501864,
+          0.8318224187964902
+        ],
+        "occurrences": 6,
+        "resolved_occurrences": 6,
+        "gated": true
+      },
+      "topik_level": {
+        "tp": 74,
+        "fp": 6,
+        "fn": 8,
+        "strict_tp": 74,
+        "strict_fn": 8,
+        "coverage": 1.0,
+        "coverage_ci": [
+          0.8241154494176252,
+          1.0
+        ],
+        "precision": 0.925,
+        "precision_ci": [
+          0.8458779990261992,
+          0.9651752251489122
+        ],
+        "recall": 0.9024390243902439,
+        "recall_ci": [
+          0.8191260766932333,
+          0.949731912906215
+        ],
+        "weighted_recall": 0.9024390243902439,
+        "weighted_recall_ci": [
+          0.8191260766932333,
+          0.949731912906215
+        ],
+        "strict_recall": 0.9024390243902439,
+        "strict_recall_ci": [
+          0.8191260766932333,
+          0.949731912906215
+        ],
+        "strict_weighted_recall": 0.9024390243902439,
+        "strict_weighted_recall_ci": [
+          0.8191260766932333,
+          0.949731912906215
+        ],
+        "occurrences": 18,
+        "resolved_occurrences": 18,
+        "gated": true
+      },
+      "english_track": {
+        "tp": 5,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 5,
+        "strict_fn": 0,
+        "coverage": 1.0,
+        "coverage_ci": [
+          0.5655085052479191,
+          1.0000000000000002
+        ],
+        "precision": 1.0,
+        "precision_ci": [
+          0.5655085052479191,
+          1.0000000000000002
+        ],
+        "recall": 1.0,
+        "recall_ci": [
+          0.5655085052479191,
+          1.0000000000000002
+        ],
+        "weighted_recall": 1.0,
+        "weighted_recall_ci": [
+          0.5655085052479191,
+          1.0000000000000002
+        ],
+        "strict_recall": 1.0,
+        "strict_recall_ci": [
+          0.5655085052479191,
+          1.0000000000000002
+        ],
+        "strict_weighted_recall": 1.0,
+        "strict_weighted_recall_ci": [
+          0.5655085052479191,
+          1.0000000000000002
+        ],
+        "occurrences": 5,
+        "resolved_occurrences": 5,
+        "gated": true
+      },
+      "academic_status": {
+        "tp": 47,
+        "fp": 1,
+        "fn": 5,
+        "strict_tp": 47,
+        "strict_fn": 5,
+        "coverage": 1.0,
+        "coverage_ci": [
+          0.9299509861127319,
+          0.9999999999999999
+        ],
+        "precision": 0.9791666666666666,
+        "precision_ci": [
+          0.8910053086246883,
+          0.9963129840206002
+        ],
+        "recall": 0.9038461538461539,
+        "recall_ci": [
+          0.79390118138839,
+          0.9582262648165898
+        ],
+        "weighted_recall": 0.903846153846154,
+        "weighted_recall_ci": [
+          0.7939011813883903,
+          0.9582262648165898
+        ],
+        "strict_recall": 0.9038461538461539,
+        "strict_recall_ci": [
+          0.79390118138839,
+          0.9582262648165898
+        ],
+        "strict_weighted_recall": 0.903846153846154,
+        "strict_weighted_recall_ci": [
+          0.7939011813883903,
+          0.9582262648165898
+        ],
+        "occurrences": 51,
+        "resolved_occurrences": 51,
+        "gated": true
+      },
+      "korean_standard": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "strict_tp": 0,
+        "strict_fn": 1,
+        "coverage": 1.0,
+        "coverage_ci": [
+          0.20654329147389294,
+          1.0
+        ],
+        "precision": null,
+        "precision_ci": null,
+        "recall": 0.0,
+        "recall_ci": [
+          0.0,
+          0.7934567085261071
+        ],
+        "weighted_recall": 0.0,
+        "weighted_recall_ci": [
+          0.0,
+          0.7934567085261071
+        ],
+        "strict_recall": 0.0,
+        "strict_recall_ci": [
+          0.0,
+          0.7934567085261071
+        ],
+        "strict_weighted_recall": 0.0,
+        "strict_weighted_recall_ci": [
+          0.0,
+          0.7934567085261071
+        ],
+        "occurrences": 1,
+        "resolved_occurrences": 1,
+        "gated": false
+      },
+      "campus": {
+        "tp": 65,
+        "fp": 4,
+        "fn": 5,
+        "strict_tp": 65,
+        "strict_fn": 5,
+        "coverage": 1.0,
+        "coverage_ci": [
+          0.9449955327483907,
+          1.0
+        ],
+        "precision": 0.9420289855072463,
+        "precision_ci": [
+          0.8602055747557683,
+          0.9772279796966324
+        ],
+        "recall": 0.9285714285714286,
+        "recall_ci": [
+          0.8434438687669077,
+          0.9691062384897065
+        ],
+        "weighted_recall": 0.9285714285714286,
+        "weighted_recall_ci": [
+          0.8434438687669077,
+          0.9691062384897065
+        ],
+        "strict_recall": 0.9285714285714286,
+        "strict_recall_ci": [
+          0.8434438687669077,
+          0.9691062384897065
+        ],
+        "strict_weighted_recall": 0.9285714285714286,
+        "strict_weighted_recall_ci": [
+          0.8434438687669077,
+          0.9691062384897065
+        ],
+        "occurrences": 66,
+        "resolved_occurrences": 66,
+        "gated": true
+      },
+      "scope": {
+        "tp": 61,
+        "fp": 5,
+        "fn": 5,
+        "strict_tp": 61,
+        "strict_fn": 5,
+        "coverage": 1.0,
+        "coverage_ci": [
+          0.9449955327483907,
+          1.0
+        ],
+        "precision": 0.9242424242424242,
+        "precision_ci": [
+          0.834605945487485,
+          0.9672084459353918
+        ],
+        "recall": 0.9242424242424242,
+        "recall_ci": [
+          0.834605945487485,
+          0.9672084459353918
+        ],
+        "weighted_recall": 0.9242424242424243,
+        "weighted_recall_ci": [
+          0.8346059454874851,
+          0.9672084459353919
+        ],
+        "strict_recall": 0.9242424242424242,
+        "strict_recall_ci": [
+          0.834605945487485,
+          0.9672084459353918
+        ],
+        "strict_weighted_recall": 0.9242424242424243,
+        "strict_weighted_recall_ci": [
+          0.8346059454874851,
+          0.9672084459353919
+        ],
+        "occurrences": 66,
+        "resolved_occurrences": 66,
+        "gated": true
+      },
+      "effective_term": {
+        "tp": 45,
+        "fp": 10,
+        "fn": 10,
+        "strict_tp": 45,
+        "strict_fn": 10,
+        "coverage": 1.0,
+        "coverage_ci": [
+          0.9347128562105721,
+          0.9999999999999999
+        ],
+        "precision": 0.8181818181818182,
+        "precision_ci": [
+          0.6966928866143076,
+          0.898124385519693
+        ],
+        "recall": 0.8181818181818182,
+        "recall_ci": [
+          0.6966928866143076,
+          0.898124385519693
+        ],
+        "weighted_recall": 0.8181818181818182,
+        "weighted_recall_ci": [
+          0.6966928866143076,
+          0.898124385519693
+        ],
+        "strict_recall": 0.8181818181818182,
+        "strict_recall_ci": [
+          0.6966928866143076,
+          0.898124385519693
+        ],
+        "strict_weighted_recall": 0.8181818181818182,
+        "strict_weighted_recall_ci": [
+          0.6966928866143076,
+          0.898124385519693
+        ],
+        "occurrences": 55,
+        "resolved_occurrences": 55,
+        "gated": true
+      }
+    },
+    "rule_unconditioned": {
+      "degree_level": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "year": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "student_type": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "visa": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "topik_level": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "english_track": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "academic_status": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "korean_standard": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "campus": {
+        "tp": 22,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 22,
+        "strict_fn": 0,
+        "coverage": 1.0,
+        "coverage_ci": [
+          0.8453561767357979,
+          0.9999999999999999
+        ],
+        "precision": 1.0,
+        "precision_ci": [
+          0.8513404742740388,
+          1.0
+        ],
+        "recall": 1.0,
+        "recall_ci": [
+          0.8513404742740388,
+          1.0
+        ],
+        "weighted_recall": 1.0,
+        "weighted_recall_ci": [
+          0.8513404742740388,
+          1.0
+        ],
+        "strict_recall": 1.0,
+        "strict_recall_ci": [
+          0.8513404742740388,
+          1.0
+        ],
+        "strict_weighted_recall": 1.0,
+        "strict_weighted_recall_ci": [
+          0.8513404742740388,
+          1.0
+        ],
+        "occurrences": 21,
+        "resolved_occurrences": 21,
+        "gated": true
+      },
+      "scope": {
+        "tp": 21,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 21,
+        "strict_fn": 0,
+        "coverage": 1.0,
+        "coverage_ci": [
+          0.8453561767357979,
+          0.9999999999999999
+        ],
+        "precision": 1.0,
+        "precision_ci": [
+          0.8453561767357979,
+          0.9999999999999999
+        ],
+        "recall": 1.0,
+        "recall_ci": [
+          0.8453561767357979,
+          0.9999999999999999
+        ],
+        "weighted_recall": 1.0,
+        "weighted_recall_ci": [
+          0.8453561767357979,
+          0.9999999999999999
+        ],
+        "strict_recall": 1.0,
+        "strict_recall_ci": [
+          0.8453561767357979,
+          0.9999999999999999
+        ],
+        "strict_weighted_recall": 1.0,
+        "strict_weighted_recall_ci": [
+          0.8453561767357979,
+          0.9999999999999999
+        ],
+        "occurrences": 21,
+        "resolved_occurrences": 21,
+        "gated": true
+      },
+      "effective_term": {
+        "tp": 6,
+        "fp": 1,
+        "fn": 1,
+        "strict_tp": 6,
+        "strict_fn": 1,
+        "coverage": 1.0,
+        "coverage_ci": [
+          0.6456611570247934,
+          1.0
+        ],
+        "precision": 0.8571428571428571,
+        "precision_ci": [
+          0.48686549668097007,
+          0.9743210440510253
+        ],
+        "recall": 0.8571428571428571,
+        "recall_ci": [
+          0.48686549668097007,
+          0.9743210440510253
+        ],
+        "weighted_recall": 0.8571428571428571,
+        "weighted_recall_ci": [
+          0.48686549668097007,
+          0.9743210440510253
+        ],
+        "strict_recall": 0.8571428571428571,
+        "strict_recall_ci": [
+          0.48686549668097007,
+          0.9743210440510253
+        ],
+        "strict_weighted_recall": 0.8571428571428571,
+        "strict_weighted_recall_ci": [
+          0.48686549668097007,
+          0.9743210440510253
+        ],
+        "occurrences": 7,
+        "resolved_occurrences": 7,
+        "gated": true
+      }
+    },
+    "rule_cue_unknown": {
+      "degree_level": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 16,
+        "coverage": 0.0,
+        "coverage_ci": [
+          2.7755575615628914e-17,
+          0.2588400172488141
+        ],
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": 0.0,
+        "strict_recall_ci": [
+          0.0,
+          0.19361341827271994
+        ],
+        "strict_weighted_recall": 0.0,
+        "strict_weighted_recall_ci": [
+          0.0,
+          0.19361341827271994
+        ],
+        "occurrences": 11,
+        "resolved_occurrences": 0,
+        "gated": true
+      },
+      "year": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 2,
+        "coverage": 0.0,
+        "coverage_ci": [
+          0.0,
+          0.6576280471103807
+        ],
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": 0.0,
+        "strict_recall_ci": [
+          0.0,
+          0.6576280471103807
+        ],
+        "strict_weighted_recall": 0.0,
+        "strict_weighted_recall_ci": [
+          0.0,
+          0.6576280471103807
+        ],
+        "occurrences": 2,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "student_type": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "visa": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 3,
+        "coverage": 0.0,
+        "coverage_ci": [
+          0.0,
+          0.5615060804490177
+        ],
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": 0.0,
+        "strict_recall_ci": [
+          0.0,
+          0.5615060804490177
+        ],
+        "strict_weighted_recall": 0.0,
+        "strict_weighted_recall_ci": [
+          0.0,
+          0.5615060804490177
+        ],
+        "occurrences": 3,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "topik_level": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "english_track": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "academic_status": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 9,
+        "coverage": 0.0,
+        "coverage_ci": [
+          0.0,
+          0.2991527535509594
+        ],
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": 0.0,
+        "strict_recall_ci": [
+          0.0,
+          0.2991527535509594
+        ],
+        "strict_weighted_recall": 0.0,
+        "strict_weighted_recall_ci": [
+          0.0,
+          0.2991527535509594
+        ],
+        "occurrences": 9,
+        "resolved_occurrences": 0,
+        "gated": true
+      },
+      "korean_standard": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "campus": {
+        "tp": 64,
+        "fp": 7,
+        "fn": 3,
+        "strict_tp": 64,
+        "strict_fn": 3,
+        "coverage": 1.0,
+        "coverage_ci": [
+          0.9425268096514744,
+          0.9999999999999999
+        ],
+        "precision": 0.9014084507042254,
+        "precision_ci": [
+          0.8101907235136308,
+          0.951417793674671
+        ],
+        "recall": 0.9552238805970149,
+        "recall_ci": [
+          0.8764196748946068,
+          0.9846563030618481
+        ],
+        "weighted_recall": 0.9552238805970149,
+        "weighted_recall_ci": [
+          0.8764196748946068,
+          0.9846563030618481
+        ],
+        "strict_recall": 0.9552238805970149,
+        "strict_recall_ci": [
+          0.8764196748946068,
+          0.9846563030618481
+        ],
+        "strict_weighted_recall": 0.9552238805970149,
+        "strict_weighted_recall_ci": [
+          0.8764196748946068,
+          0.9846563030618481
+        ],
+        "occurrences": 63,
+        "resolved_occurrences": 63,
+        "gated": true
+      },
+      "scope": {
+        "tp": 55,
+        "fp": 8,
+        "fn": 8,
+        "strict_tp": 55,
+        "strict_fn": 8,
+        "coverage": 1.0,
+        "coverage_ci": [
+          0.9425268096514744,
+          0.9999999999999999
+        ],
+        "precision": 0.873015873015873,
+        "precision_ci": [
+          0.7689273848938224,
+          0.9342275365921983
+        ],
+        "recall": 0.873015873015873,
+        "recall_ci": [
+          0.7689273848938224,
+          0.9342275365921983
+        ],
+        "weighted_recall": 0.8730158730158731,
+        "weighted_recall_ci": [
+          0.7689273848938225,
+          0.9342275365921984
+        ],
+        "strict_recall": 0.873015873015873,
+        "strict_recall_ci": [
+          0.7689273848938224,
+          0.9342275365921983
+        ],
+        "strict_weighted_recall": 0.8730158730158731,
+        "strict_weighted_recall_ci": [
+          0.7689273848938225,
+          0.9342275365921984
+        ],
+        "occurrences": 63,
+        "resolved_occurrences": 63,
+        "gated": true
+      },
+      "effective_term": {
+        "tp": 35,
+        "fp": 1,
+        "fn": 2,
+        "strict_tp": 35,
+        "strict_fn": 2,
+        "coverage": 1.0,
+        "coverage_ci": [
+          0.9059390425448564,
+          1.0000000000000002
+        ],
+        "precision": 0.9722222222222222,
+        "precision_ci": [
+          0.8582996626496918,
+          0.9950797197044302
+        ],
+        "recall": 0.9459459459459459,
+        "recall_ci": [
+          0.822950349364601,
+          0.9850493372294601
+        ],
+        "weighted_recall": 0.9459459459459458,
+        "weighted_recall_ci": [
+          0.8229503493646007,
+          0.98504933722946
+        ],
+        "strict_recall": 0.9459459459459459,
+        "strict_recall_ci": [
+          0.822950349364601,
+          0.9850493372294601
+        ],
+        "strict_weighted_recall": 0.9459459459459458,
+        "strict_weighted_recall_ci": [
+          0.8229503493646007,
+          0.98504933722946
+        ],
+        "occurrences": 37,
+        "resolved_occurrences": 37,
+        "gated": true
+      }
+    },
+    "llm_tagged": {
+      "degree_level": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "year": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "student_type": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "visa": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "topik_level": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "english_track": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "academic_status": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "korean_standard": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "campus": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "scope": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "effective_term": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      }
+    },
+    "llm_unconditioned": {
+      "degree_level": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "year": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "student_type": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "visa": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "topik_level": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "english_track": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "academic_status": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "korean_standard": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "campus": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "scope": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "effective_term": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      }
+    },
+    "llm_rejected": {
+      "degree_level": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "year": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "student_type": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "visa": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "topik_level": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "english_track": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "academic_status": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "korean_standard": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "campus": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "scope": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "effective_term": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      }
+    },
+    "llm_errors": {
+      "degree_level": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "year": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "student_type": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "visa": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "topik_level": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "english_track": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "academic_status": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "korean_standard": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "campus": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "scope": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "effective_term": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      }
+    }
+  },
+  "by_campus": {
+    "seoul": {
+      "degree_level": {
+        "tp": 27,
+        "fp": 10,
+        "fn": 12,
+        "strict_tp": 27,
+        "strict_fn": 28,
+        "coverage": 0.6333333333333333,
+        "coverage_ci": [
+          0.45513246433604937,
+          0.7812629779598231
+        ],
+        "precision": 0.7297297297297297,
+        "precision_ci": [
+          0.5702152452607867,
+          0.8460270175300932
+        ],
+        "recall": 0.6923076923076923,
+        "recall_ci": [
+          0.535784513844354,
+          0.8143424655401694
+        ],
+        "weighted_recall": 0.6923076923076923,
+        "weighted_recall_ci": [
+          0.535784513844354,
+          0.8143424655401694
+        ],
+        "strict_recall": 0.4909090909090909,
+        "strict_recall_ci": [
+          0.36376560487101584,
+          0.6192396159251554
+        ],
+        "strict_weighted_recall": 0.6073458466777476,
+        "strict_weighted_recall_ci": [
+          0.4753631856962449,
+          0.7253119002047542
+        ],
+        "occurrences": 30,
+        "resolved_occurrences": 19,
+        "gated": true
+      },
+      "year": {
+        "tp": 6,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 6,
+        "strict_fn": 2,
+        "coverage": 0.5,
+        "coverage_ci": [
+          0.15003570882017148,
+          0.8499642911798285
+        ],
+        "precision": 1.0,
+        "precision_ci": [
+          0.6096569663469354,
+          0.9999999999999999
+        ],
+        "recall": 1.0,
+        "recall_ci": [
+          0.6096569663469354,
+          0.9999999999999999
+        ],
+        "weighted_recall": 1.0,
+        "weighted_recall_ci": [
+          0.6096569663469354,
+          0.9999999999999999
+        ],
+        "strict_recall": 0.75,
+        "strict_recall_ci": [
+          0.40926987910258916,
+          0.9285223111419724
+        ],
+        "strict_weighted_recall": 0.8979393677850901,
+        "strict_weighted_recall_ci": [
+          0.5534418594177906,
+          0.9842413830968562
+        ],
+        "occurrences": 4,
+        "resolved_occurrences": 2,
+        "gated": false
+      },
+      "student_type": {
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": 0.0,
+        "precision_ci": [
+          0.0,
+          0.7934567085261071
+        ],
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "visa": {
+        "tp": 2,
+        "fp": 0,
+        "fn": 1,
+        "strict_tp": 2,
+        "strict_fn": 4,
+        "coverage": 0.4,
+        "coverage_ci": [
+          0.1176182311592533,
+          0.769280067791163
+        ],
+        "precision": 1.0,
+        "precision_ci": [
+          0.34237195288961925,
+          1.0
+        ],
+        "recall": 0.6666666666666666,
+        "recall_ci": [
+          0.2076549551264879,
+          0.9385096847238394
+        ],
+        "weighted_recall": 0.6666666666666666,
+        "weighted_recall_ci": [
+          0.2076549551264879,
+          0.9385096847238394
+        ],
+        "strict_recall": 0.3333333333333333,
+        "strict_recall_ci": [
+          0.09676933255921683,
+          0.7000116786584712
+        ],
+        "strict_weighted_recall": 0.4971478063494908,
+        "strict_weighted_recall_ci": [
+          0.18587704579534964,
+          0.8106452347478434
+        ],
+        "occurrences": 5,
+        "resolved_occurrences": 2,
+        "gated": true
+      },
+      "topik_level": {
+        "tp": 67,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 67,
+        "strict_fn": 0,
+        "coverage": 1.0,
+        "coverage_ci": [
+          0.7961107336956521,
+          1.0
+        ],
+        "precision": 1.0,
+        "precision_ci": [
+          0.9457719757882374,
+          0.9999999999999999
+        ],
+        "recall": 1.0,
+        "recall_ci": [
+          0.9457719757882374,
+          0.9999999999999999
+        ],
+        "weighted_recall": 1.0,
+        "weighted_recall_ci": [
+          0.9457719757882374,
+          0.9999999999999999
+        ],
+        "strict_recall": 1.0,
+        "strict_recall_ci": [
+          0.9457719757882374,
+          0.9999999999999999
+        ],
+        "strict_weighted_recall": 1.0,
+        "strict_weighted_recall_ci": [
+          0.9457719757882374,
+          0.9999999999999999
+        ],
+        "occurrences": 15,
+        "resolved_occurrences": 15,
+        "gated": true
+      },
+      "english_track": {
+        "tp": 4,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 4,
+        "strict_fn": 0,
+        "coverage": 1.0,
+        "coverage_ci": [
+          0.5100999795960008,
+          1.0
+        ],
+        "precision": 1.0,
+        "precision_ci": [
+          0.5100999795960008,
+          1.0
+        ],
+        "recall": 1.0,
+        "recall_ci": [
+          0.5100999795960008,
+          1.0
+        ],
+        "weighted_recall": 1.0,
+        "weighted_recall_ci": [
+          0.5100999795960008,
+          1.0
+        ],
+        "strict_recall": 1.0,
+        "strict_recall_ci": [
+          0.5100999795960008,
+          1.0
+        ],
+        "strict_weighted_recall": 1.0,
+        "strict_weighted_recall_ci": [
+          0.5100999795960008,
+          1.0
+        ],
+        "occurrences": 4,
+        "resolved_occurrences": 4,
+        "gated": false
+      },
+      "academic_status": {
+        "tp": 33,
+        "fp": 1,
+        "fn": 5,
+        "strict_tp": 33,
+        "strict_fn": 13,
+        "coverage": 0.8222222222222222,
+        "coverage_ci": [
+          0.6866989315634587,
+          0.9070572107414617
+        ],
+        "precision": 0.9705882352941176,
+        "precision_ci": [
+          0.8508409778365519,
+          0.9947892280744034
+        ],
+        "recall": 0.868421052631579,
+        "recall_ci": [
+          0.7267282994850112,
+          0.9424621712426856
+        ],
+        "weighted_recall": 0.8684210526315789,
+        "weighted_recall_ci": [
+          0.7267282994850112,
+          0.9424621712426856
+        ],
+        "strict_recall": 0.717391304347826,
+        "strict_recall_ci": [
+          0.5745116426970621,
+          0.8267595845508592
+        ],
+        "strict_weighted_recall": 0.8102561228162299,
+        "strict_weighted_recall_ci": [
+          0.6748904101165094,
+          0.8977951236362824
+        ],
+        "occurrences": 45,
+        "resolved_occurrences": 37,
+        "gated": true
+      },
+      "korean_standard": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "strict_tp": 0,
+        "strict_fn": 1,
+        "coverage": 1.0,
+        "coverage_ci": [
+          0.20654329147389294,
+          1.0
+        ],
+        "precision": null,
+        "precision_ci": null,
+        "recall": 0.0,
+        "recall_ci": [
+          0.0,
+          0.7934567085261071
+        ],
+        "weighted_recall": 0.0,
+        "weighted_recall_ci": [
+          0.0,
+          0.7934567085261071
+        ],
+        "strict_recall": 0.0,
+        "strict_recall_ci": [
+          0.0,
+          0.7934567085261071
+        ],
+        "strict_weighted_recall": 0.0,
+        "strict_weighted_recall_ci": [
+          0.0,
+          0.7934567085261071
+        ],
+        "occurrences": 1,
+        "resolved_occurrences": 1,
+        "gated": false
+      },
+      "campus": {
+        "tp": 92,
+        "fp": 10,
+        "fn": 4,
+        "strict_tp": 92,
+        "strict_fn": 4,
+        "coverage": 1.0,
+        "coverage_ci": [
+          0.9607365374237544,
+          1.0
+        ],
+        "precision": 0.9019607843137255,
+        "precision_ci": [
+          0.8288700711192171,
+          0.9458725631569088
+        ],
+        "recall": 0.9583333333333334,
+        "recall_ci": [
+          0.8977165749246647,
+          0.9836795565475875
+        ],
+        "weighted_recall": 0.9600504693470305,
+        "weighted_recall_ci": [
+          0.9000517854677593,
+          0.9846464777274405
+        ],
+        "strict_recall": 0.9583333333333334,
+        "strict_recall_ci": [
+          0.8977165749246647,
+          0.9836795565475875
+        ],
+        "strict_weighted_recall": 0.9600504693470305,
+        "strict_weighted_recall_ci": [
+          0.9000517854677593,
+          0.9846464777274405
+        ],
+        "occurrences": 94,
+        "resolved_occurrences": 94,
+        "gated": true
+      },
+      "scope": {
+        "tp": 86,
+        "fp": 8,
+        "fn": 8,
+        "strict_tp": 86,
+        "strict_fn": 8,
+        "coverage": 1.0,
+        "coverage_ci": [
+          0.9607365374237544,
+          1.0
+        ],
+        "precision": 0.9148936170212766,
+        "precision_ci": [
+          0.8409618787007068,
+          0.9562450353317701
+        ],
+        "recall": 0.9148936170212766,
+        "recall_ci": [
+          0.8409618787007068,
+          0.9562450353317701
+        ],
+        "weighted_recall": 0.9391153885792084,
+        "weighted_recall_ci": [
+          0.8714534465018589,
+          0.9722949494042916
+        ],
+        "strict_recall": 0.9148936170212766,
+        "strict_recall_ci": [
+          0.8409618787007068,
+          0.9562450353317701
+        ],
+        "strict_weighted_recall": 0.9391153885792084,
+        "strict_weighted_recall_ci": [
+          0.8714534465018589,
+          0.9722949494042916
+        ],
+        "occurrences": 94,
+        "resolved_occurrences": 94,
+        "gated": true
+      },
+      "effective_term": {
+        "tp": 77,
+        "fp": 4,
+        "fn": 4,
+        "strict_tp": 77,
+        "strict_fn": 4,
+        "coverage": 1.0,
+        "coverage_ci": [
+          0.954720325877871,
+          0.9999999999999999
+        ],
+        "precision": 0.9506172839506173,
+        "precision_ci": [
+          0.8797959524607503,
+          0.9806310078983188
+        ],
+        "recall": 0.9506172839506173,
+        "recall_ci": [
+          0.8797959524607503,
+          0.9806310078983188
+        ],
+        "weighted_recall": 0.9462535711912831,
+        "weighted_recall_ci": [
+          0.8739790004926854,
+          0.9781157093311258
+        ],
+        "strict_recall": 0.9506172839506173,
+        "strict_recall_ci": [
+          0.8797959524607503,
+          0.9806310078983188
+        ],
+        "strict_weighted_recall": 0.9462535711912831,
+        "strict_weighted_recall_ci": [
+          0.8739790004926854,
+          0.9781157093311258
+        ],
+        "occurrences": 81,
+        "resolved_occurrences": 81,
+        "gated": true
+      }
+    },
+    "erica": {
+      "degree_level": {
+        "tp": 18,
+        "fp": 0,
+        "fn": 5,
+        "strict_tp": 18,
+        "strict_fn": 5,
+        "coverage": 1.0,
+        "coverage_ci": [
+          0.7008472464490407,
+          1.0
+        ],
+        "precision": 1.0,
+        "precision_ci": [
+          0.8241154494176252,
+          1.0
+        ],
+        "recall": 0.782608695652174,
+        "recall_ci": [
+          0.5809611981726508,
+          0.9033616439828094
+        ],
+        "weighted_recall": 0.7826086956521738,
+        "weighted_recall_ci": [
+          0.5809611981726508,
+          0.9033616439828094
+        ],
+        "strict_recall": 0.782608695652174,
+        "strict_recall_ci": [
+          0.5809611981726508,
+          0.9033616439828094
+        ],
+        "strict_weighted_recall": 0.7826086956521738,
+        "strict_weighted_recall_ci": [
+          0.5809611981726508,
+          0.9033616439828094
+        ],
+        "occurrences": 9,
+        "resolved_occurrences": 9,
+        "gated": true
+      },
+      "year": {
+        "tp": 8,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 8,
+        "strict_fn": 0,
+        "coverage": 1.0,
+        "coverage_ci": [
+          0.34237195288961925,
+          1.0
+        ],
+        "precision": 1.0,
+        "precision_ci": [
+          0.6755843804891231,
+          1.0
+        ],
+        "recall": 1.0,
+        "recall_ci": [
+          0.6755843804891231,
+          1.0
+        ],
+        "weighted_recall": 1.0,
+        "weighted_recall_ci": [
+          0.6755843804891231,
+          1.0
+        ],
+        "strict_recall": 1.0,
+        "strict_recall_ci": [
+          0.6755843804891231,
+          1.0
+        ],
+        "strict_weighted_recall": 1.0,
+        "strict_weighted_recall_ci": [
+          0.6755843804891231,
+          1.0
+        ],
+        "occurrences": 2,
+        "resolved_occurrences": 2,
+        "gated": false
+      },
+      "student_type": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 1,
+        "strict_fn": 0,
+        "coverage": 1.0,
+        "coverage_ci": [
+          0.20654329147389294,
+          1.0
+        ],
+        "precision": 1.0,
+        "precision_ci": [
+          0.20654329147389294,
+          1.0
+        ],
+        "recall": 1.0,
+        "recall_ci": [
+          0.20654329147389294,
+          1.0
+        ],
+        "weighted_recall": 1.0,
+        "weighted_recall_ci": [
+          0.20654329147389294,
+          1.0
+        ],
+        "strict_recall": 1.0,
+        "strict_recall_ci": [
+          0.20654329147389294,
+          1.0
+        ],
+        "strict_weighted_recall": 1.0,
+        "strict_weighted_recall_ci": [
+          0.20654329147389294,
+          1.0
+        ],
+        "occurrences": 1,
+        "resolved_occurrences": 1,
+        "gated": false
+      },
+      "visa": {
+        "tp": 4,
+        "fp": 1,
+        "fn": 3,
+        "strict_tp": 4,
+        "strict_fn": 3,
+        "coverage": 1.0,
+        "coverage_ci": [
+          0.5100999795960008,
+          1.0
+        ],
+        "precision": 0.8,
+        "precision_ci": [
+          0.3755282641185388,
+          0.9637768390302125
+        ],
+        "recall": 0.5714285714285714,
+        "recall_ci": [
+          0.2504542304090258,
+          0.8417830777373732
+        ],
+        "weighted_recall": 0.5714285714285714,
+        "weighted_recall_ci": [
+          0.2504542304090258,
+          0.8417830777373732
+        ],
+        "strict_recall": 0.5714285714285714,
+        "strict_recall_ci": [
+          0.2504542304090258,
+          0.8417830777373732
+        ],
+        "strict_weighted_recall": 0.5714285714285714,
+        "strict_weighted_recall_ci": [
+          0.2504542304090258,
+          0.8417830777373732
+        ],
+        "occurrences": 4,
+        "resolved_occurrences": 4,
+        "gated": false
+      },
+      "topik_level": {
+        "tp": 7,
+        "fp": 6,
+        "fn": 8,
+        "strict_tp": 7,
+        "strict_fn": 8,
+        "coverage": 1.0,
+        "coverage_ci": [
+          0.43849391955098227,
+          1.0
+        ],
+        "precision": 0.5384615384615384,
+        "precision_ci": [
+          0.2914343243183205,
+          0.7679424569851186
+        ],
+        "recall": 0.4666666666666667,
+        "recall_ci": [
+          0.24809225259746442,
+          0.6988336984894921
+        ],
+        "weighted_recall": 0.4666666666666666,
+        "weighted_recall_ci": [
+          0.2480922525974643,
+          0.6988336984894921
+        ],
+        "strict_recall": 0.4666666666666667,
+        "strict_recall_ci": [
+          0.24809225259746442,
+          0.6988336984894921
+        ],
+        "strict_weighted_recall": 0.4666666666666666,
+        "strict_weighted_recall_ci": [
+          0.2480922525974643,
+          0.6988336984894921
+        ],
+        "occurrences": 3,
+        "resolved_occurrences": 3,
+        "gated": false
+      },
+      "english_track": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 1,
+        "strict_fn": 0,
+        "coverage": 1.0,
+        "coverage_ci": [
+          0.20654329147389294,
+          1.0
+        ],
+        "precision": 1.0,
+        "precision_ci": [
+          0.20654329147389294,
+          1.0
+        ],
+        "recall": 1.0,
+        "recall_ci": [
+          0.20654329147389294,
+          1.0
+        ],
+        "weighted_recall": 1.0,
+        "weighted_recall_ci": [
+          0.20654329147389294,
+          1.0
+        ],
+        "strict_recall": 1.0,
+        "strict_recall_ci": [
+          0.20654329147389294,
+          1.0
+        ],
+        "strict_weighted_recall": 1.0,
+        "strict_weighted_recall_ci": [
+          0.20654329147389294,
+          1.0
+        ],
+        "occurrences": 1,
+        "resolved_occurrences": 1,
+        "gated": false
+      },
+      "academic_status": {
+        "tp": 14,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 14,
+        "strict_fn": 1,
+        "coverage": 0.9333333333333333,
+        "coverage_ci": [
+          0.7018292244757601,
+          0.9881334113938051
+        ],
+        "precision": 1.0,
+        "precision_ci": [
+          0.7846829880728186,
+          1.0
+        ],
+        "recall": 1.0,
+        "recall_ci": [
+          0.7846829880728186,
+          1.0
+        ],
+        "weighted_recall": 1.0,
+        "weighted_recall_ci": [
+          0.7846829880728186,
+          1.0
+        ],
+        "strict_recall": 0.9333333333333333,
+        "strict_recall_ci": [
+          0.7018292244757601,
+          0.9881334113938051
+        ],
+        "strict_weighted_recall": 0.9762231903485254,
+        "strict_weighted_recall_ci": [
+          0.7601290903152753,
+          0.9981236966272222
+        ],
+        "occurrences": 15,
+        "resolved_occurrences": 14,
+        "gated": true
+      },
+      "korean_standard": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "strict_tp": 0,
+        "strict_fn": 0,
+        "coverage": null,
+        "coverage_ci": null,
+        "precision": null,
+        "precision_ci": null,
+        "recall": null,
+        "recall_ci": null,
+        "weighted_recall": null,
+        "weighted_recall_ci": null,
+        "strict_recall": null,
+        "strict_recall_ci": null,
+        "strict_weighted_recall": null,
+        "strict_weighted_recall_ci": null,
+        "occurrences": 0,
+        "resolved_occurrences": 0,
+        "gated": false
+      },
+      "campus": {
+        "tp": 59,
+        "fp": 1,
+        "fn": 4,
+        "strict_tp": 59,
+        "strict_fn": 4,
+        "coverage": 1.0,
+        "coverage_ci": [
+          0.9358038555118846,
+          1.0
+        ],
+        "precision": 0.9833333333333333,
+        "precision_ci": [
+          0.9114466177322051,
+          0.9970519161391262
+        ],
+        "recall": 0.9365079365079365,
+        "recall_ci": [
+          0.8478060794692326,
+          0.975034786099515
+        ],
+        "weighted_recall": 0.9216362073581422,
+        "weighted_recall_ci": [
+          0.8285695096217665,
+          0.9662373490878682
+        ],
+        "strict_recall": 0.9365079365079365,
+        "strict_recall_ci": [
+          0.8478060794692326,
+          0.975034786099515
+        ],
+        "strict_weighted_recall": 0.9216362073581422,
+        "strict_weighted_recall_ci": [
+          0.8285695096217665,
+          0.9662373490878682
+        ],
+        "occurrences": 56,
+        "resolved_occurrences": 56,
+        "gated": true
+      },
+      "scope": {
+        "tp": 51,
+        "fp": 5,
+        "fn": 5,
+        "strict_tp": 51,
+        "strict_fn": 5,
+        "coverage": 1.0,
+        "coverage_ci": [
+          0.9358038555118846,
+          1.0
+        ],
+        "precision": 0.9107142857142857,
+        "precision_ci": [
+          0.807437601433565,
+          0.9612584227369118
+        ],
+        "recall": 0.9107142857142857,
+        "recall_ci": [
+          0.807437601433565,
+          0.9612584227369118
+        ],
+        "weighted_recall": 0.9009774618305193,
+        "weighted_recall_ci": [
+          0.795298766765831,
+          0.9551737427429078
+        ],
+        "strict_recall": 0.9107142857142857,
+        "strict_recall_ci": [
+          0.807437601433565,
+          0.9612584227369118
+        ],
+        "strict_weighted_recall": 0.9009774618305193,
+        "strict_weighted_recall_ci": [
+          0.795298766765831,
+          0.9551737427429078
+        ],
+        "occurrences": 56,
+        "resolved_occurrences": 56,
+        "gated": true
+      },
+      "effective_term": {
+        "tp": 9,
+        "fp": 8,
+        "fn": 9,
+        "strict_tp": 9,
+        "strict_fn": 9,
+        "coverage": 1.0,
+        "coverage_ci": [
+          0.8241154494176252,
+          1.0
+        ],
+        "precision": 0.5294117647058824,
+        "precision_ci": [
+          0.30962897311549487,
+          0.738351988039119
+        ],
+        "recall": 0.5,
+        "recall_ci": [
+          0.2903070395897999,
+          0.7096929604102
+        ],
+        "weighted_recall": 0.44882614943669463,
+        "weighted_recall_ci": [
+          0.24904094376194572,
+          0.6666127345272367
+        ],
+        "strict_recall": 0.5,
+        "strict_recall_ci": [
+          0.2903070395897999,
+          0.7096929604102
+        ],
+        "strict_weighted_recall": 0.44882614943669463,
+        "strict_weighted_recall_ci": [
+          0.24904094376194572,
+          0.6666127345272367
+        ],
+        "occurrences": 18,
+        "resolved_occurrences": 18,
+        "gated": true
+      }
+    }
+  },
+  "any_of_exact_match": {
+    "all_chunks": {
+      "matches": 148,
+      "n": 150,
+      "rate": 0.9866666666666667
+    },
+    "chunks_with_any_of": {
+      "matches": 4,
+      "n": 6,
+      "rate": 0.6666666666666666
+    }
+  },
+  "unknown_share": {
+    "sampled_unknown_chunks": 63,
+    "reference_conditioned_chunks": 20,
+    "share": 0.31746031746031744,
+    "share_ci": [
+      0.21586527168091207,
+      0.44003763908124804
+    ],
+    "index_unknown_chunks": 387,
+    "estimated_conditioned_chunks": 122.85714285714285,
+    "estimated_conditioned_chunks_ci": [
+      83.53986014051297,
+      170.294566324443
+    ],
+    "top_attributes": {
+      "degree_level": 11,
+      "academic_status": 9,
+      "visa": 3,
+      "year": 2
+    }
+  },
+  "g2": {
+    "passed": false,
+    "failing_attributes": [
+      "visa"
+    ]
+  },
+  "carried_decisions": 83
+}

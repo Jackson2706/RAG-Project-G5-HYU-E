@@ -436,6 +436,8 @@ def _valid_attribute_values(attribute: str, values: Any) -> bool:
 def validate_reference(path: Path, records: list[dict], expected_ids: list[str]) -> list[dict]:
     rows, errors = _read_jsonl(path, "reference")
     text_by_id = {row["chunk_id"]: row.get("text") or "" for row in records}
+    # rule 1: the title and heading path count as chunk text for evidence (rule 8 tags whole admission guides)
+    context_by_id = {row["chunk_id"]: "\n".join([row.get("_title") or "", *(row.get("_heading_path") or []), row.get("text") or ""]) for row in records}
     seen: set[str] = set()
     valid_rows: list[dict] = []
     for row in rows:
@@ -487,7 +489,7 @@ def validate_reference(path: Path, records: list[dict], expected_ids: list[str])
         if not isinstance(evidence, dict) or any(not isinstance(key, str) or not isinstance(value, str) for key, value in evidence.items()):
             errors.append(f"{prefix} evidence: expected an object of string quotes")
             evidence = {}
-        normalized_text = _normalized(text_by_id[chunk_id])
+        normalized_text = _normalized(context_by_id[chunk_id])
         for field, quote in evidence.items():
             if not quote or _normalized(quote) not in normalized_text:
                 errors.append(f"{prefix} evidence.{field}: quote is not in the chunk text")
