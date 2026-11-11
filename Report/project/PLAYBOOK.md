@@ -908,3 +908,16 @@ an ordinary branch attribute. T13 (topics, personas) starts. G2b is still open a
 5. **P5 continues in parallel.** The planning chat says G3 still waits for the human's guideline
    approval. A22 recorded G3 as approved from the message "approve. i trust u"; that reading is now
    **pending the human's confirmation**. T14 (question drafting) does not start until G3 is confirmed.
+
+**A24 G2b: last tagger round (human decision, option (a)).**
+- r5 = fixes 1–4 from the dev-100 causes (T08e, tests first by Claude Code): degree level inherited only from an
+  admission guide's own title or heading path, only inside that guide, with the count logged; prior
+  qualifications and institution names give no degree level; student_type phrases; visa contact lines and
+  misuse warnings. 0 LLM calls. Built, verified, published and made the HYU default; r4 kept for rollback.
+- Samples are renamed: **dev-150** (r3 sample, rule 8b reference), **dev-100** (r4 fresh), **test-100** (new).
+  test-100 excludes all 250, oversamples by text cues so that degree_level, student_type and visa each have ≥ 15
+  expected occurrences, and is scored with design weights (T10g). G2b is decided on test-100 only. The report
+  also counts degree_level errors in applicant-tagged chunks (AAES demotes those for in-scope students).
+- **After this round, tagger work stops whatever the result.** The final scores and limitations go into
+  `Sources/data/DATA.md`.
+- Runs in parallel with P5 and must not delay labeling. (T14 still waits for the G3 confirmation, A23.5.)
