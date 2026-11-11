@@ -63,3 +63,18 @@ Hard cases:
 Guideline questions:
 
 - For future-term procedural questions such as T14-101, should the latest prior-year guide always be recorded as `outdated_evidence`, even when its process may later be reused unchanged?
+
+## Recheck 02 (GUIDELINES v1.1)
+
+Status: done.
+
+Hard cases:
+
+- T14-046, T14-065, T14-067, and T14-068 remain partial and now abstain under section 9.1 while allowing an answer that gives supported facts and names the missing part.
+- T14-050 is answerable under section 9.1 because all three required facts have gold spans; an exhaustive dormitory inventory is not a separate required fact.
+- T14-062 now clarifies TOPIK level: GPA is a caveat outside the vocabulary, while the remaining language conditions create more than two eligibility branches under section 9.3.
+- Alternate campus passages used by conditional or clarifying behavior are gold evidence under section 9.6, and overbroad spans were narrowed under section 9.4.
+
+Guideline questions:
+
+- None.
