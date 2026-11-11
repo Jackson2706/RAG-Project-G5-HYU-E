@@ -127,6 +127,24 @@ The result is `compatible`, `conflicting` or `open`.
 - **The Qdrant payload** carries `app_any_of: true` for chunks with alternatives. A hard prefilter
   must not drop those chunks on the alternative attributes.
 
+## Unknown condition status (PLAYBOOK A23; P7 must implement, T24 tests it)
+
+Every chunk has `condition_status` = `conditioned`, `unconditioned` or `unknown` (A6). `unknown` means the
+chunk has an eligibility cue but no rule resolved it (bucket `rule_cue_unknown` in r4, 387 of 1,867
+chunks; also `llm_rejected` / `llm_errors` in older revisions).
+
+- **Never silently unconditioned.** An unknown chunk is not treated as "applies to everyone". Its
+  applicability label in Step 2 is `unknown`, shown as such in the trace, next to compatible / conflicting /
+  open.
+- **AAES still answers** from it when it is the best evidence (it is not dropped and does not force
+  ABSTAIN on its own).
+- **Caveat.** When the answer relies on at least one unknown chunk, the generated answer ends with:
+  "This may depend on your situation; please confirm with the OIA office."
+- **Trace flag.** The sufficiency step sets `unknown_condition_evidence = true` (false otherwise) in its
+  typed output, so the Execution tab shows it.
+- **Metric (P8).** Unknown-caveat rate per slice: the share of answered cases whose answer carries the
+  caveat, per slice and campus.
+
 ## LLM fallback contract
 
 The fallback runs only when enabled and the rules found no vocabulary constraint or `any_of` set.
