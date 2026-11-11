@@ -30,7 +30,7 @@ COLUMNS = ["id", "slice", "campus", "persona", "session_history", "question", "d
 HINT_FIELDS = ("draft_id", "slice", "campus", "topic_doc_ids", "intended_attributes", "intended_answerability", "why")
 SEP = " || "
 AGENT_EDITOR = "claude-code:claude-opus-5-5"
-HUMAN_SHARE_TARGET = 0.10  # A27 (light human review); was 0.30
+HUMAN_SHARE_TARGET = 0.0  # A28: no human questions (A27 had 0.10, A26 0.30); the share is reported, not gated
 # GUIDELINES.md section 7: final targets per slice x campus (180 cases)
 TARGETS = {("unconditional", "seoul"): 38, ("unconditional", "erica"): 25, ("conditional", "seoul"): 25,
            ("conditional", "erica"): 20, ("temporal", "seoul"): 13, ("temporal", "erica"): 5,
@@ -145,7 +145,7 @@ def main(argv: list[str] | None = None) -> int:
     report = apply(initials=args.initials)
     print(json.dumps(report, indent=2))
     share = report["human_share"]
-    print(f"Human share {share:.1%} ({'meets' if share >= HUMAN_SHARE_TARGET else 'BELOW'} the {HUMAN_SHARE_TARGET:.0%} target); "
+    print(f"Human share {share:.1%}" + (" (the set is 100% agent-written, A28)" if share == 0 else "") + "; "
           f"{report['cases']} cases (target 180). Annotators get only {LABELS / 'questions.jsonl'}.")
     return 0
 

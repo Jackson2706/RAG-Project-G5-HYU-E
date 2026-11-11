@@ -950,3 +950,8 @@ GUIDELINES.md v1.0 stands. T14 (question drafts from topics × personas, no page
 - T16 (Claude Code's blind ~30% subset) runs in a fresh context (a new session or a subagent) that reads only
   `labels/questions.jsonl`, GUIDELINES.md and the snapshot — never `drafts/` or this session's context.
 - T15: Codex annotates all 180; if its quota runs out, it stops and reports which batches are done.
+
+**A28 No human questions (option C, decision from the planning chat, 2026-11-11).** Replaces the human-share
+target of A27 (and A26's 30%). The question set is 100% agent-written: origin `agent_draft` or `agent_edited`.
+Every report states this (`Report/notes/limitations.md`). Claude Code selected 180 of 230 drafts: 161 kept,
+19 `agent_edited`, 50 deleted; all slice × campus targets met exactly.
