@@ -924,3 +924,19 @@ an ordinary branch attribute. T13 (topics, personas) starts. G2b is still open a
 
 **A25 G3 confirmed by the human (2026-11-11):** "approved with the three section-8 decisions as written".
 GUIDELINES.md v1.0 stands. T14 (question drafts from topics × personas, no page bodies) starts.
+
+**A26 Drafting and annotation inputs (decisions from the planning chat, 2026-11-11).**
+1. **Hints never reach an annotator.** The drafter's hints (`intended_attributes`, `intended_answerability`,
+   `why`, `topic_doc_ids`, and the slice) are moved to `labels/drafts/hints.jsonl`, used only for quotas and the
+   human review. T15 (Codex) and T16 (Claude Code, blind subset) see only the question, the session history
+   and the persona's `gold_profile` (the guideline needs it for `gold_evidence`; `stated_profile` is what they
+   derive from the question).
+2. **T10g builds the tool only.** The blind Codex reference for test-100 runs after T15 is finished, and only
+   if Codex quota remains. T10g writes `labeling/auto_audit.py` and its own new test file; T14 writes
+   `labeling/drafts.py`, its own new test file and `labels/drafts/`. No path overlaps.
+3. **Human review sheet.** `labels/drafts/review.csv` (id, slice, campus, persona, session_history, question,
+   decision keep/edit/delete, edited_question, notes) and an apply script: applies the decisions, sets
+   `origin` (agent_draft / agent_draft_human_edited / human), appends the human's new questions, runs
+   `labeling.drafts check`, and reports the slice quotas and the human share (target ≥ 30%).
+4. **Data safety.** The 2026-11-10 21:05 file deletion is still unexplained. Label files are committed and
+   pushed after every labeling session.

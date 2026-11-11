@@ -48,3 +48,4 @@
 | 2026-11-11 | P4 | T08e | done | r5 rules (guide degree level inherited by 804 chunks, prior qualifications, institution names, student_type phrases, visa noise); finished by Claude Code after the Codex limit (S06, C03 fixes, regex speed fix). Tests 210 + 166. Dry run partition = r4. |
 | 2026-11-11 | P4 | T09 r5 | done | r5 built (--no-llm), verified 15/15 and published by the human; partition = r4; HYU default; r4 kept for rollback. |
 | 2026-11-11 | P5 | G3 | confirmed | Human: 'approved with the three section-8 decisions as written'. T14 starts (Codex drafts ~230 questions; humans then delete/edit/add, >= 30% human). |
+| 2026-11-11 | P5 | A26 | recorded | Hints split from annotator inputs; test-100 reference after T15 if quota remains; review.csv + apply script; push labels after every session. |
