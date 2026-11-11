@@ -5,11 +5,13 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import random
 from pathlib import Path
 
 FIELDS = ("answerability", "expected_behavior", "branch_attributes", "gold_evidence")
 CSV_COLUMNS = (
     "case_id",
+    "question",
     "annotator_a",
     "annotator_b",
     "answerability_a",
@@ -20,6 +22,8 @@ CSV_COLUMNS = (
     "branch_attributes_b",
     "gold_evidence_a",
     "gold_evidence_b",
+    "notes_a",
+    "notes_b",
     "agree",
     "final_answerability",
     "final_expected_behavior",
@@ -43,6 +47,22 @@ def cohens_kappa(a: list[str], b: list[str]) -> float:
     if expected == 1:
         return 1.0 if observed == 1 else 0.0
     return (observed - expected) / (1 - expected)
+
+
+def kappa_interval(a: list[str], b: list[str], draws: int = 2000, seed: int = 13) -> tuple[float, float]:
+    """95% percentile-bootstrap interval for Cohen's kappa, resampling cases with replacement.
+
+    Identical sequences with two categories give kappa 1.0 in every draw that has both
+    categories (and 1.0 by convention when a draw has one), so the interval is (1.0, 1.0).
+    """
+    rng = random.Random(seed)
+    n = len(a)
+    scores = []
+    for _ in range(draws):
+        idx = [rng.randrange(n) for _ in range(n)]
+        scores.append(cohens_kappa([a[i] for i in idx], [b[i] for i in idx]))
+    scores.sort()
+    return scores[int(0.025 * draws)], scores[int(0.975 * draws) - 1]
 
 
 def mean_jaccard(a: list[list[str]], b: list[list[str]]) -> float:
@@ -71,12 +91,19 @@ def mean_span_f1(a: list[list[dict]], b: list[list[dict]]) -> float:
 
 
 def _load(path: Path) -> dict[str, dict]:
-    with path.open(encoding="utf-8") as handle:
-        rows = [json.loads(line) for line in handle if line.strip()]
+    """One label file, or a folder: every *.jsonl in it, keeping only label rows (with expected_behavior)."""
+    rows = []
+    for file in sorted(path.glob("*.jsonl")) if path.is_dir() else [path]:
+        with file.open(encoding="utf-8") as handle:
+            rows += [row for row in map(json.loads, filter(str.strip, handle)) if "expected_behavior" in row]
     cases = {row["case_id"]: row for row in rows}
     if len(cases) != len(rows):
         raise ValueError(f"duplicate case_id in {path}")
     return cases
+
+
+def _ci(interval: tuple[float, float]) -> str:
+    return f"[{interval[0]:.3f}, {interval[1]:.3f}]"
 
 
 def _json(value: object) -> str:
@@ -100,10 +127,12 @@ def agreement(a_path: Path, b_path: Path, out_dir: Path) -> dict[str, float | in
     evidence_b = [right["gold_evidence"] for _, right in pairs]
     span_scores = [span_f1(left, right) for left, right in zip(evidence_a, evidence_b, strict=True)]
 
-    report: dict[str, float | int] = {
+    report: dict = {
         "cases": len(case_ids),
         "answerability_kappa": cohens_kappa(answerability_a, answerability_b),
         "expected_behavior_kappa": cohens_kappa(behavior_a, behavior_b),
+        "answerability_kappa_ci": kappa_interval(answerability_a, answerability_b),
+        "expected_behavior_kappa_ci": kappa_interval(behavior_a, behavior_b),
         "branch_attributes_jaccard": mean_jaccard(branches_a, branches_b),
         "gold_evidence_span_f1": sum(span_scores) / len(span_scores),
         "answerability_disagreements": sum(a != b for a, b in zip(answerability_a, answerability_b, strict=True)),
@@ -130,6 +159,7 @@ def agreement(a_path: Path, b_path: Path, out_dir: Path) -> dict[str, float | in
             writer.writerow(
                 {
                     "case_id": case_id,
+                    "question": left.get("question", ""),
                     "annotator_a": left["annotator"],
                     "annotator_b": right["annotator"],
                     "answerability_a": left["answerability"],
@@ -140,6 +170,8 @@ def agreement(a_path: Path, b_path: Path, out_dir: Path) -> dict[str, float | in
                     "branch_attributes_b": _json(right["branch_attributes"]),
                     "gold_evidence_a": _json(left["gold_evidence"]),
                     "gold_evidence_b": _json(right["gold_evidence"]),
+                    "notes_a": left.get("notes", ""),
+                    "notes_b": right.get("notes", ""),
                     "agree": "yes" if values_agree else "no",
                 }
             )
@@ -149,12 +181,12 @@ def agreement(a_path: Path, b_path: Path, out_dir: Path) -> dict[str, float | in
         "",
         f"Cases in both files: {len(case_ids)}",
         "",
-        "| Field | Measure | Score | Disagreements |",
-        "|---|---|---:|---:|",
-        f"| answerability | Cohen's kappa | {report['answerability_kappa']:.6f} | {report['answerability_disagreements']} |",
-        f"| expected_behavior | Cohen's kappa | {report['expected_behavior_kappa']:.6f} | {report['expected_behavior_disagreements']} |",
-        f"| branch_attributes | Mean Jaccard | {report['branch_attributes_jaccard']:.6f} | {report['branch_attributes_disagreements']} |",
-        f"| gold_evidence | Mean character span F1 | {report['gold_evidence_span_f1']:.6f} | {report['gold_evidence_disagreements']} |",
+        "| Field | Measure | Score | 95% bootstrap CI | Disagreements |",
+        "|---|---|---:|---|---:|",
+        f"| answerability | Cohen's kappa | {report['answerability_kappa']:.6f} | {_ci(report['answerability_kappa_ci'])} | {report['answerability_disagreements']} |",
+        f"| expected_behavior | Cohen's kappa | {report['expected_behavior_kappa']:.6f} | {_ci(report['expected_behavior_kappa_ci'])} | {report['expected_behavior_disagreements']} |",
+        f"| branch_attributes | Mean Jaccard | {report['branch_attributes_jaccard']:.6f} | | {report['branch_attributes_disagreements']} |",
+        f"| gold_evidence | Mean character span F1 | {report['gold_evidence_span_f1']:.6f} | | {report['gold_evidence_disagreements']} |",
         "",
     ]
     (out_dir / "agreement.md").write_text("\n".join(markdown), encoding="utf-8")

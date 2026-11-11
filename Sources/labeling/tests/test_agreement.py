@@ -5,7 +5,7 @@ import json
 
 import pytest
 
-from labeling.agreement import CSV_COLUMNS, agreement, cohens_kappa, mean_jaccard, span_f1
+from labeling.agreement import CSV_COLUMNS, agreement, cohens_kappa, kappa_interval, mean_jaccard, span_f1
 
 
 def test_kappa_matches_hand_computed_two_by_two_example():
@@ -55,3 +55,11 @@ def test_agreement_writes_adjudication_columns_and_markdown(tmp_path):
     assert rows[0]["final_answerability"] == rows[0]["adjudicator"] == ""
     assert report["answerability_disagreements"] == 1
     assert "Cohen's kappa" in (out / "agreement.md").read_text(encoding="utf-8")
+
+
+def test_kappa_interval_brackets_the_point_estimate_and_is_degenerate_for_identical_labels():
+    a = ["yes", "yes", "yes", "no", "no", "no"] * 5
+    b = ["yes", "yes", "no", "yes", "no", "no"] * 5
+    low, high = kappa_interval(a, b)
+    assert low <= cohens_kappa(a, b) <= high and low < high
+    assert kappa_interval(a, a) == (1.0, 1.0)
