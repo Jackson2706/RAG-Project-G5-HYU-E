@@ -54,7 +54,7 @@ class Settings(BaseSettings):
     qdrant_collection: str = "hyu_chunks"
     # The HYU snapshot index revision that HYU experiments, labeling and the demo use (PLAYBOOK A13).
     # r1/r2 stay in the databases for rollback; switch back with HYU_INDEX_ID=hyu_20261110_97dc1269_r2.
-    hyu_index_id: str = "hyu_20261110_97dc1269_r4"
+    hyu_index_id: str = "hyu_20261110_97dc1269_r5"
 
     # Embedding model (must be the same for documents and questions)
     embedding_model: str = "BAAI/bge-small-en-v1.5"

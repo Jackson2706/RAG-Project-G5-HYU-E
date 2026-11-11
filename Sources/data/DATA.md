@@ -104,9 +104,10 @@ synthetic fixture: 5 documents, 23 chunks) is separate and never touched.
 | r1 | first build | vocabulary v0, prompt v2, qwen3.5:4b `7f3251fa6878…`, 772 LLM calls | 695 / 400 / 165 / 581 / 26 / 0 | published, kept for rollback |
 | r2 | TOPIK thresholds were stored as a single level ("3 or above" → `3`) on about 40 LLM chunks (A9) | same + ordinal TOPIK rule and LLM post-check; **0 new LLM calls** (all cache hits) | 900 / 400 / 26 / 522 / 19 / 0 | published, kept for rollback |
 | r3 | vocabulary v1 (A17) and the postcheck fixes (A13) | vocabulary v1, prompt v3 (re-called), postcheck p1 | 1058 / 392 / 27 / 378 / 12 / 0 | published, kept for rollback |
-| r4 | audit causes on r3 (A20/A21): stated status, year union, target visa, rule 5b; LLM fallback off | rules only (`--no-llm`), **0 LLM calls**; new bucket `rule_cue_unknown` (cue, no rule → condition unknown) | 1189 / 291 / 0 / 0 / 0 / 0, plus rule_cue_unknown 387 | **HYU default** (`Settings.hyu_index_id`, env `HYU_INDEX_ID`) |
+| r4 | audit causes on r3 (A20/A21): stated status, year union, target visa, rule 5b; LLM fallback off | rules only (`--no-llm`), **0 LLM calls**; new bucket `rule_cue_unknown` (cue, no rule → condition unknown) | 1189 / 291 / 0 / 0 / 0 / 0, plus rule_cue_unknown 387 | published, kept for rollback |
+| r5 | last tagger round (A24): guide degree level from the guide's own title (804 chunks), prior qualifications, institution names, student_type phrases, visa noise | rules only (`--no-llm`), **0 LLM calls** | 1189 / 291 / 0 / 0 / 0 / 0, plus rule_cue_unknown 387 | **HYU default** (`Settings.hyu_index_id`, env `HYU_INDEX_ID`) |
 
-All four revisions use 1,867 chunks from 362 documents: max 344 embedded tokens, 0 truncated, and
+All five revisions use 1,867 chunks from 362 documents: max 344 embedded tokens, 0 truncated, and
 `llm_errors` = 0.
 
 **Versions:**
