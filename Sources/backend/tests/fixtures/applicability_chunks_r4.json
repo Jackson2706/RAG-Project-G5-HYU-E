@@ -1,0 +1,240 @@
+[
+ {
+  "case_id": "R01",
+  "chunk_id": "395bcd0d-32c6-502d-b0f5-40e47775c3ba",
+  "note": "GKS-G guide chunk without the word 'applicant': the whole admission guide addresses applicants (audit rule 8).",
+  "chunk": {
+   "doc_id": "291a6a82-cae6-5e56-be71-18c5dcf5318f",
+   "site": "seoul",
+   "title": "2023 GKS-G Application Forms & Guidelines (University Track)",
+   "post_date": "2023-02-09",
+   "heading_path": [
+    "2023 GKS-G Application Forms & Guidelines (University Track)"
+   ],
+   "kind": null,
+   "text": "March or September; Column 15: ○; Column 16: Korean 100%; Column 17: TOPIK 3 or above; Column 18: March or September; Column 19: http://lawschool.hanyang.ac.kr/; Column 20: \n2023 GKS-G Available Departments: 63; Column 2: 한양대학교; Column 3: Hanyang University; Column 4: A; Column 5: General; Column 6: Seoul; Column 7: 행정학과; Column 8: Department of Public Administration; Column 9: 사회; Column 10: Social Science; Column 11: ○; Column 12: Korean 100%; Column 13: TOPIK 3 or above; Column 14: March or September; Column 15: ○; Column 16: Korean 100%; Column 17: TOPIK 3 or above; Column 18: March or September; Column 19: https://policy.hanyang.ac.kr/; Column 20: \n2023 GKS-G Available Departments: 64; Column 2: 한양대학교; Column 3: Hanyang University; Column 4: A; Column 5: General; Column 6: Seoul; Column 7: 정책학과; Column 8: Department of Policy Studies; Column 9: 사회; Column 10: Social Science; Column 11: ○; Column 12: Korean 100%; Column 13: TOPIK 3 or above; Column 14: March or September; Column 15: ○; Column 16: Korean 100%; Column 17: TOP",
+   "superseded_by": null
+  }
+ },
+ {
+  "case_id": "R02",
+  "chunk_id": "243af01a-b4b5-551a-91af-b1700f0ac756",
+  "note": "Admission guide, 'After Deposit payment' / 'certificate of admission' section: acceptance procedure -> admitted_not_enrolled, not applicant.",
+  "chunk": {
+   "doc_id": "2c3543ee-72f6-52f2-8454-aa5fed034546",
+   "site": "seoul",
+   "title": "Graduate Admission Guideline",
+   "post_date": "2021-02-24",
+   "heading_path": [
+    "Graduate Admission Guideline"
+   ],
+   "kind": null,
+   "text": "Deposit\npayment\nthrough\naccount\ntransfer\n1. Login the result announcement(http://www.dic.hanyang.ac.kr/front/admissions/results)\n2. Print Deposit bill (applicants can select the language among Korean, English, or Chinese)\n3. Visit bank and pay the deposit, or transfer the amount to the virtual account written on the bill\nWechat Pay\n3. Confirm your deposit amount (KRW)\n4. Confirm the amount which will be paid (USD)\n5. Make payment through your QR code\n** Wechat pay service operation hour\n: 10:00 am to 19:00 pm during bank working day (closed on weekend)\nProcedure Contents\nAfter Deposit\npayment\nProcedure\nThose who\nare residing\nin Korea\n1. Check student ID number in Jan. 2021\n2. Pay tuition fee (Immigration office may ask students to bring a certificate of tuition payment)\nThose who\nare residing\noutside\nKorea\n1. OIA will send a certificate of admission by e-mail after confirm your deposit payment.\n2. Visit the Embassy to apply for visa. (Please check other requirements before you visit)\n3. Check student ID number in Jan. 2021\n4. Pay tuition fee\nBank\nInformation\nfor\nInternational\nTransfer\nName of Bank: SHINHAN BANK (SHB)\nAccount number: Applicant’s virtual account number\nRecipient: Hanyang University\nSwift code: SHBKKRSE\nBank address: Shinhan Bank, Hanyang Univ. branch, Haengdang-dong, Seongdong-gu, Seoul, Korea\n• All transaction fees are covered by students.\n• To avoid",
+   "superseded_by": null
+  }
+ },
+ {
+  "case_id": "R03",
+  "chunk_id": "d78cead4-f316-5f3a-b98e-77df4a2153dd",
+  "note": "Admission guide, 'Successful candidates' / visa after admission: admitted_not_enrolled.",
+  "chunk": {
+   "doc_id": "f7e470ae-cdd0-5a7d-aef7-1663f0186a38",
+   "site": "seoul",
+   "title": "Undergraduate Admission Guideline",
+   "post_date": "2021-02-24",
+   "heading_path": [
+    "Undergraduate Admission Guideline"
+   ],
+   "kind": null,
+   "text": "apply for visa\nindividually by visiting\nthe immigration office\nThose who wish to\napply for visa via\ngroup visa application\nApply for Group\nVisa/Alien Registration\nCard (1st Round: Feb, 2nd\nRound: Mar)\nEntry into Korea and\nself-quarantine\nReceive Standard\nAdmission Certificate\nfrom OIA\n(domestic use)\nApply for Group\nVisa/Alien Registration\nCard (1st Round: End of\nFeb, 2nd Round: Mid of\nMar)\nApply for Group Alien\nRegistration Card\n(In March)\nVisit immigration office\nand apply for visa and\nissue alien registration\ncard\nStudents who are currently\nstaying in a foreign country\nwith a valid visa or ARC and\ngoing to apply for D-2 Visa\nafter arrive in Korea\nADDITIONAL DOCUMENT SUBMISSION\n※ If you did not submit any of original documents below, please submit by Feb 26, 2021.\n(Successful candidates will be notified of their additional documents via e-mail.)\n(1) If you did not submit the documents or have submitted photocopied documents of transcripts,\ncertificate of graduation and etc., you must re-submit the consul’s confirmation documents or\napostille certified copies.\n(2) Applicants who submitted expected graduation or enrollment certificate of high school or former\nuniversity must submit certified copies of graduation and final transcripts to the Office of\nInternational Affairs as soon as they are issued.\n(3) Transfer students must submit the final certificate of graduation and transcripts following the\nguidance if they haven’t submitted yet. (※ Transferred students should submit the certificate of the\nfinal transcript by Jan 29, or your former school credits might not be transferred. If submitted late,\nstudents will face all of the",
+   "superseded_by": null
+  }
+ },
+ {
+  "case_id": "R04",
+  "chunk_id": "07035742-9b70-569d-8416-d4543bd27688",
+  "note": "Admission guide that mentions leave of absence as information: stays applicant only (reviewer sided with the system).",
+  "chunk": {
+   "doc_id": "2c3543ee-72f6-52f2-8454-aa5fed034546",
+   "site": "seoul",
+   "title": "Graduate Admission Guideline",
+   "post_date": "2021-02-24",
+   "heading_path": [
+    "Graduate Admission Guideline"
+   ],
+   "kind": null,
+   "text": "from IIE.\n(4) Students can re-register during the re-registration period if they satisfy Korean standards.\n(re-registration application period: January – spring semester, July – fall semester)\n(5) Please check with your department office for detailed info about a leave of absence.\n① General Graduate School: able to take a leave of absence up to 1 year at a time\n- Master/PhD program: Max 2 years (able to apply for a leave of absence twice)\n- MS to PhD combined program: Max 3 years (able to apply for a leave of absence 3 times)\n② Professional/Specialized Graduate School: able to take a leave of absence up to 6-month at a time\n- Max 2 years (able to apply for a leave of absence 4 times)\n(6) If you want to take a leave of absence in a row, you need to visit HY-in portal for extension.\n• Application period : Mar 2nd 2021, 10:00 ~ Mar 4th 2021, 23:00\n• How to apply : Log-in to HY-in portal (https://portal.hanyang.ac.kr) and apply for leave of absence after you receive Student\nID number.\n※ For more details, please refer to a notice on OIA website (study.hanyang.ac.kr)\nLeave of absence\n1. Apply for Leave of absence\n2. Note\n2. Those who satisfy\nKorean standards\nAPPLICATION FOR AIRPORT PICK-UP SERVICE\n2. Those who satisfy\nKorean standards\nThose who want pick-up service should fill out the application form via",
+   "superseded_by": null
+  }
+ },
+ {
+  "case_id": "R05",
+  "chunk_id": "edc3bcf7-54b1-56a2-a3ac-ca5e0311991b",
+  "note": "Leave-of-absence APPLICATION notice 'for international students who are currently in school': enrolled only.",
+  "chunk": {
+   "doc_id": "0e543e75-0f07-5d8e-a2bc-d0038244c440",
+   "site": "erica",
+   "title": "Leave of Absence for 2026 Spring…",
+   "post_date": "2025-12-22",
+   "heading_path": [
+    "Leave of Absence for 2026 Spring…"
+   ],
+   "kind": null,
+   "text": "Attachment: 2. HYU ERICA Leave of Absence Guidelines for the 2026 Spring Semester-English application period changed.pdf\nFor international students who are currently in school\n■ Period of Applying for Leave of Absence\n(1st Round) 2026.1.7.(Wed) ~ 2026.1.18.(Sun)\n(2nd Round) 2026.2.12.(Thu) ~ 2026.2.13.(Fri)\n■ Leave of Absence Applicants\nLeave of absence from school due to diseases, employment preparation, language\ntraining, economic reason, etc.\n■ How to apply (Refer to Note 1 for capture image description)\nHY-in log in  Application  Leave of Absence  Upload a copy of passport\n& RC(Only for holders)  Complete\n■ Cautions\n① Those who apply for the leave of absence must leave Korea within 30 days,\nregardless of their visa validity periods.\n② Universities are required to report the list of students who take a leave of absence\nor are not attending school to the Immigration Office each semester. Students who\nstay in Korea without attending school are subject to fines from the Immigration\nOffice.\n③ When you go back to your country after taking a leave of absence, you have to\nreturn your RC card at the airport.\n④ Students who stay and work in Korea illegally while on leave of absence might have\ndisadvantages when returning to the school.\n⑤ Students who pay tuition and take leave of absence, can’t get tuition refunds.\nTuition will be carried over to next semester.\n⑥ ※ Students are not allowed to apply leave of absence by visiting OIA.",
+   "superseded_by": null
+  }
+ },
+ {
+  "case_id": "R06",
+  "chunk_id": "b716b128-ee8b-5302-8a1c-b64dbfd05308",
+  "note": "Leave-of-absence notice 'for enrolled students': enrolled only.",
+  "chunk": {
+   "doc_id": "0e543e75-0f07-5d8e-a2bc-d0038244c440",
+   "site": "erica",
+   "title": "Leave of Absence for 2026 Spring…",
+   "post_date": "2025-12-22",
+   "heading_path": [
+    "Leave of Absence for 2026 Spring…"
+   ],
+   "kind": null,
+   "text": "to the school.\n⑤ Students who pay tuition and take leave of absence, can’t get tuition refunds.\nTuition will be carried over to next semester.\n⑥ ※ Students are not allowed to apply leave of absence by visiting OIA. ※\n■ For further inquiry regarding Leave of absence\nEmail: [email]\nTel: +82-31-400-0791~0795\nERICA Leave of Absence in Spring Semester 2026\nfor enrolled students\n<Note 1>\nHow to take Leave of Absence at HY-IN\n2. Fill out the form and upload the attached file  click save(저장)\n<Note 2> The period and policy for leave of absence\n▶ Period of applying for 2026 Spring Semester leave of absence:\n(1st Round) 2026.1.7.(Wed) ~ 2026.1.18.(Sun)\n(2nd Round) 2026.2.12.(Thu) ~ 2026.2.13.(Fri)\n▶ Undergraduate students\n- Students can take maximum 1 year of leave of absence at once\n- Students will be expelled if they don’t return to school after 1 year of leave of absence. If students would like\nto take more than 1 year of leave of absence, they should return to school first and then take another leave\nof absence\n- Students can take up to 3 years of leave of absence during the period of attendance at university.\n- Students who have been forced to take 6 months off for 3 consecutive academic probations must apply return\nto school\n▶ Graduate students\n* General Graduate school: Students can",
+   "superseded_by": null
+  }
+ },
+ {
+  "case_id": "R07",
+  "chunk_id": "c0e0e7c0-0112-588f-b9e2-66462462cd67",
+  "note": "Return to School notice: leave_of_absence only; visa D-2 only ('change from D-4 visa to D-2 visa' -> D-4 is the old visa).",
+  "chunk": {
+   "doc_id": "cf89bbce-20f7-5fd8-b7f7-6bb951a87d30",
+   "site": "erica",
+   "title": "Return to School for 2025 Fall Semeste…",
+   "post_date": "2025-06-16",
+   "heading_path": [
+    "Return to School for 2025 Fall Semeste…"
+   ],
+   "kind": null,
+   "text": "of completion of HYU IIE (only for students who\ntook leave of absence for studying Korean)\n6. Integrated application form (Available at the immigration office)\n7. Certificate of admission, business license of HYU (Office of International Affairs will send\nit via E-mail)\n8. Tuberculosis (TB) Certificate* (only for students from the countries concerned)\n* check Note 3\n9. A certificate of a Korean bank authenticating balance under the student’s name (amount\nover ₩20,000,000)\n* Only documents issued within 30 days of registration application date / Documents that\nhave not expired are recognized\n* If you change from D -4 visa t o D -2 visa, the ban k balance amount should be over\n₩10,000,000\n10. A certificate of graduation (notarial certificate) *check Note 3\n11. Certificate of tuition payment (can be issued from HY-In)\nB. Students who are currently abroad (need to apply D-2 VISA)\nRequired\ndocuments\nfor return to\nschool\n1. A copy of the passport\n2. Return to school application form\n1) Don’t need to upload HY-in return to school application form.\n2) Please upload return to school application form sent from Office of Int’l Affairs.\n3. Proof of insurance (*Go to section D)\n1) Students who paid tuition fee when they took leave of absence: pay insurance fee and\nupload proof of insurance\n2) Students who didn’t pay tuition when they took leave of absence: pay insurance\nfee at the period of enrolled student’",
+   "superseded_by": null
+  }
+ },
+ {
+  "case_id": "R08",
+  "chunk_id": "00a5e42f-75e9-53e2-8e94-2b796b9dab17",
+  "note": "'International Degree Program Students who enrolled at HYU ERICA (Ineligibility: Exchange / Visiting students, ... researchers (PhD))': degree_seeking + enrolled; nothing from the ineligibility list.",
+  "chunk": {
+   "doc_id": "94daa711-a813-5eb8-8575-b3a4cbb2dbd4",
+   "site": "erica",
+   "title": "！l Field Trip to Lotte World !",
+   "post_date": "2024-10-04",
+   "heading_path": [
+    "！l Field Trip to Lotte World !"
+   ],
+   "kind": null,
+   "text": "Let's go to Lotte World !\n♥ When? Nov 9 08:30 -19:30\n♥ Where?Lotte World and Lotte World Folk Museum\n-Traveling together by bus from the school\n♥ Who? International ★Degree Program★ Students who enrolled at HYU ERICA\n(Ineligibility: Exchange / Visiting students，students who take leave, graduates, IIE students, researchers (PhD), domestic students, etc. )\n♥ Limit ? 150Participants (first come, first serve)\n♥ Application Period: Oct 31 09:30 - 12:00, 13:00 - 16:00\n♥ Application Fee: 10,000 KRW (cash only, non-refundable)",
+   "superseded_by": null
+  }
+ },
+ {
+  "case_id": "R09",
+  "chunk_id": "2cc953bb-6cd9-59e9-b7b7-a10e6cea12be",
+  "note": "HIEA scholarship for current students: enrolled is NOT inferred from the audience (A21 decision c).",
+  "chunk": {
+   "doc_id": "78bd288f-7ebc-55d8-b605-08461741825f",
+   "site": "seoul",
+   "title": "HIEA",
+   "post_date": "2025-03-11",
+   "heading_path": [
+    "HIEA"
+   ],
+   "kind": null,
+   "text": "who is taking another scholarship in the university such as academic scholarships\nfrom your departments or natural sciences engineering scholarships.\n※ But Hanyang International Excellence Award (HIEA) scholarship will be awarded only if\nthe recipient is eligible for an amount greater than the existing scholarship.\n√Case #1 When you are selected for 30%/50% of HIEA while receiving 50% of natural\nsciences engineering scholarship.\n→ You can only take 50% of natural sciences engineering scholarship.\n√Case #2 When you are selected for 50% of HIEA while receiving 30% of academic\nscholarship.\n→ The academic scholarship of 30% will be replaced by the Hanyang\nInternational Excellence Award (HIEA) scholarship of 30%. An additional\nscholarship of 20% corresponding to the difference will also be provided.\n④ Undergraduate & Graduate school students cannot apply for HIEA when taking other\nscholarships outside of university (including KGSP, Pakistan, Vietnam, Samsung global, Chung\nMong-Koo foundation scholarship etc) that does not allow you to benefit from both of\nscholarships.\n3. Qualifications\n① GPA\n1) Undergraduate students who achieved at least GPA of 3.0 last semester\n2) Graduate students who achieved at least GPA of 4.2 last semester\n② Language certificate\nStudents who have valid TOPIK certificate or IELTS/TOEFL iBT(for English track)\n1) TOPIK certificate must be valid until applying HIEA deadline(2025 March 26th)\n2) Students who have entered the English track can submit IELTS or TOEFL iBT(above a\ncertain score) in substitution for TOPIK certificate.\n※ If you",
+   "superseded_by": null
+  }
+ },
+ {
+  "case_id": "R10",
+  "chunk_id": "5ae8204a-d0e0-5772-9aa3-8926341509db",
+  "note": "Table chunk with 'Year 1-2' and 'Year 3-4' rows: all four years.",
+  "chunk": {
+   "doc_id": "a5054e10-1938-5145-beab-5d98b6bbc03d",
+   "site": "erica",
+   "title": "Visa",
+   "post_date": null,
+   "heading_path": [
+    "Permitted Hours"
+   ],
+   "kind": null,
+   "text": "University Type: Bachelor's; Year: Year 1-2; Korean Language Proficiency Level: Level 3; Korean Language Proficiency Level: X; Start: No Restrictions; Permitted Hours / Weekdays: 10 hours; Permitted Hours / Weekends, School holidays: 10 hours\nUniversity Type: Bachelor's; Year: Year 1-2; Korean Language Proficiency Level: Level 3; Korean Language Proficiency Level: O; Start: No Restrictions; Permitted Hours / Weekdays: 30 hours; Permitted Hours / Weekends, School holidays: No Restrictions\nUniversity Type: Bachelor's; Year: Year 3-4; Korean Language Proficiency Level: Level 4; Korean Language Proficiency Level: X; Start: No Restrictions; Permitted Hours / Weekdays: 10 hours; Permitted Hours / Weekends, School holidays: 10 hours\nUniversity Type: Bachelor's; Year: Year 3-4; Korean Language Proficiency Level: Level 4; Korean Language Proficiency Level: O; Start: No Restrictions; Permitted Hours / Weekdays: 30 hours; Permitted Hours / Weekends, School holidays: No Restrictions\nUniversity Type: Master's/Doctoral; Year: N/A; Korean Language Proficiency Level: Level 4; Korean Language Proficiency Level: X; Start: No Restrictions; Permitted Hours / Weekdays: 15 hours; Permitted Hours / Weekends, School holidays: 15 hours\nUniversity Type: Master's/Doctoral; Year: N/A; Korean Language Proficiency Level: Level 4; Korean Language Proficiency Level: O; Start: No Restrictions; Permitted Hours / Weekdays: 35 hours; Permitted Hours / Weekends, School holidays: No Restrictions",
+   "superseded_by": null
+  }
+ },
+ {
+  "case_id": "R11",
+  "chunk_id": "a5e9ec19-1be3-5c41-8bfd-f99dc34144b7",
+  "note": "'Bachelor's degree 1~2 years' and '3~4 years': all four years. TOPIK OR KIIP OR King Sejong (out of vocabulary): rule 5b, no topik constraint.",
+  "chunk": {
+   "doc_id": "a5054e10-1938-5145-beab-5d98b6bbc03d",
+   "site": "erica",
+   "title": "Visa",
+   "post_date": null,
+   "heading_path": [
+    "Korean Language Proficiency Requirements"
+   ],
+   "kind": null,
+   "text": "For English track students, regardless of grade, those who meet earn a score of 530 for TOEFL (197 for CBT, 71 for iBT), 5.5 for IELTS, 82 for CEFR, 601 for TEPS (327 for NEW TEPS) or higher are considered to have met the Korean Language Proficiency Requirement\nSort: Bachelor's degree 1~2 years; Test of Proficiency in Korean (TOPIK): Level 3 or higher; Korea Immigration and Integration Program (KIIP): Complete level 3 or higher, or score of 61 or higher in pre-assessment; King Sejong Institute Korean Language Course: Intermediate 1 or higher\nSort: Bachelor's degree 3~4 years, master's degree; Test of Proficiency in Korean (TOPIK): Level 4 or higher; Korea Immigration and Integration Program (KIIP): Complete level 4 or higher, or score of 81 or higher in pre-assessment; King Sejong Institute Korean Language Course: Intermediate 2 or higher\n※ Special exceptions to language proficiency for English track courses",
+   "superseded_by": null
+  }
+ },
+ {
+  "case_id": "R12",
+  "chunk_id": "14cb8aaa-c2b8-5807-86d9-0d50d39db923",
+  "note": "Change from D-2 to a job seeker visa (D-10): visa D-10 only. 'TOPIK level 4 or higher, ... Social Integration Program, or a pre-assessment score': rule 5b.",
+  "chunk": {
+   "doc_id": "a5054e10-1938-5145-beab-5d98b6bbc03d",
+   "site": "erica",
+   "title": "Visa",
+   "post_date": null,
+   "heading_path": [
+    "Special provisions for permission to engage in part-time employment activities for D-10 visas"
+   ],
+   "kind": null,
+   "text": "Applicants must have received permission to change their residency status from a full-time degree/exchange program visa (D-2-1~4, D-2-7) to a job seeker visa (D-10), and meet all of the requirements below.\nHowever, a startup prep visa (D-10-2) and high-tech internship visa (D-10-3) are excluded.\n(1) Applicants who have obtained an associate's degree or higher from a accredited university in Korea, and no more than 3 years have passed since the date of obtaining the degree\n(2) Applicants who hold a valid score report of TOPIK level 4 or higher, a certificate of passing the mid-term evaluation of the Social Integration Program, or a pre-assessment score card (minimum score of 81)\n(3) Applicants with no experience working in a professional occupation (E-1 ~ E-7)",
+   "superseded_by": null
+  }
+ },
+ {
+  "case_id": "R13",
+  "chunk_id": "c5d940da-9d43-5a1a-915d-a32e6637eadc",
+  "note": "No rule fires; has an LLM cue ('international students'). With the LLM off it is rule_cue_unknown; 'fluent in Korean' never sets english_track.",
+  "chunk": {
+   "doc_id": "d31ede5e-9f45-543c-a31a-c700ba83dbb3",
+   "site": "erica",
+   "title": "Available Support",
+   "post_date": null,
+   "heading_path": [
+    "GLOBAL LOVE HYU"
+   ],
+   "kind": null,
+   "text": "The GLOBAL LOVE HYU at the OIA promotes the internationalization of Hanyang University and it builds loyalty toward the university among international students. Since its first launch in 2010, GLOBAL LOVE HYU has been active in a variety of ways, including campus tours for international visitors, information sessions for overseas admissions, publishing international student newsletters, and hosting multiple cultural events for international students attending the university. Both Korean and international students who are fluent in Korean can apply. If selected as a member, students can receive a scholarship of up to KRW 1,000,000 provided they successfully complete all courses.\nEligibility: Benefits; International students at ERICA Campus: For more information and application instructions, read e-mail notifications sent every December.\nEligibility: Program Duration; International students at ERICA Campus: 1 year",
+   "superseded_by": null
+  }
+ },
+ {
+  "case_id": "R14",
+  "chunk_id": "3a5409dd-1115-516c-bf82-bf86a4c04ddc",
+  "note": "'four-year full scholarship' is a duration, never year 4.",
+  "chunk": {
+   "doc_id": "35e7f91d-416a-53c4-9d73-ce53f730da3c",
+   "site": "seoul",
+   "title": "Major Guidebook for International Students",
+   "post_date": null,
+   "heading_path": [
+    "Major Guidebook for International Students"
+   ],
+   "kind": null,
+   "text": "School of Sport Industry and Science Sports (Sports Management) |\nSchool of Sport Industry and Science Sports (Sports Science) |\nDepartment of Film & Theater | Department of Dance\n61\nCollege of\nPerforming Arts\n& Sport\nSchool of Sport Industry and School of Sport Industry and\nCultivating creative leadership for sports industry advancement\nThe contemporary era has witnessed expanding sports industry markets globally, driven by rising income levels and increased leisure time. This has\nresulted in heightened sports participation and enthusiasm, establishing the sports industry as a significant economic sector in major economies\nworldwide.\nThe Sports Management program addresses these evolving market dynamics by cultivating industry leadership professionals. The curriculum\ntranscends theoretical sports knowledge, advancing into practical strategies for value creation and monetization in the sports business. The program\nemphasizes experiential learning through field experiences and professional internships across diverse industry sectors.\nThe curriculum incorporates a comprehensive analysis of sports spectator behavior and a quantitative evaluation of professional team media exposure\nacross television and digital platforms, measuring direct and indirect team valuations. These analyses inform the development of marketing strategies\nand revenue enhancement methodologies for sports organizations and spectator sports operations. The program addresses emerging sports\nbusiness sectors, including e-sports, sports betting industries, and sports entrepreneurship, providing comprehensive education in contemporary\nsports business domains.\nEstablishment Contact Number\n2007 +82-2-2220-2708\nDiamond+ Department\nAs a Hanyang University Diamond Plus (D+) department, we provide a\nfour-year full scholarship (conditional on a GPA of 3.5 or higher) to students\nadmitted through transcript-based rolling admission or regular admission\n“Na” group (initial successful applicants only",
+   "superseded_by": null
+  }
+ }
+]

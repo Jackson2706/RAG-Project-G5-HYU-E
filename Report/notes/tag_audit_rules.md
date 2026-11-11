@@ -53,6 +53,16 @@ applies to, using only the v1 vocabulary.
      `academic_status: ["applicant"]` and `audience: applicant`.
    - Acceptance guides for admitted students get `admitted_not_enrolled` and `audience: admitted`.
    - Scholarship "applicants" who are already students are `audience: enrolled`, NOT `applicant`.
+   - **8b. A status needs stated wording** (added 2026-11-11, A21). `enrolled`, `leave_of_absence`,
+     `completed_coursework` and `graduating` need words that state the status: "currently enrolled",
+     "enrolled students", "students who enrolled at", "currently in school", "students who took a leave
+     of absence", "expected graduates". An audience such as "international students", "freshmen", or a
+     scholarship for current students gives NO `academic_status` (you may still write
+     `audience: enrolled`). A leave-of-absence application notice is for `enrolled` students; a return to
+     school notice is for `leave_of_absence` students.
+   - Every chunk of an admission guide gets `applicant`, even when the chunk itself does not say
+     "applicant"; its acceptance sections ("Successful candidates", "certificate of admission", deposit
+     payment after the result) get `admitted_not_enrolled`.
 9. **`korean_standard`** (`pass` / `exempt` / `fail`) only when the text names the Korean-language
    admission standard: "satisfied / exempted from / did not satisfy the Korean Language Standards".
    A TOPIK level is `topik_level`, not `korean_standard`.

@@ -856,3 +856,18 @@ criterion is not met on the raw r3 scores.
 - Order: cause breakdown of the failing attributes
   (`Report/results/tag_audit/hyu_20261110_97dc1269_r3/auto/causes_failing.json`) → proposed fixes →
   human OK → r4 build, VERIFY, publish, HYU default → fresh-sample audit → G2b.
+
+**A21 Tagger fixes for r4 approved (human OK, 2026-11-11).**
+- The fix list from the cause breakdown (A20) is approved as a whole: admission-guide applicant /
+  admitted rules, stated-status rules for `enrolled` / `leave_of_absence`, ineligibility lists, year
+  ranges, the target visa of a change, rule 5b in the tagger, audience-only visa and english_track.
+- **Decision (c): `enrolled` only from stated wording,** never inferred from the audience. Audit rule 8b
+  is added to `Report/notes/tag_audit_rules.md`. The applicant scope default (A17) already rules out
+  applicants.
+- **LLM fallback off for every attribute** (LLM precision < 0.8 or recall < 0.5 on all of them). r4 is
+  built with `--no-llm`: 0 LLM calls. A chunk with an LLM cue and no rule goes to the new bucket
+  `rule_cue_unknown` (condition_status `unknown`, A6). The LLM code and cache stay.
+- Tasks: T08d (tagger, tests first by Claude Code), T10d (fresh sample, re-used sample, carried decisions).
+- **Old sample on r4:** the r3 reference was written before rule 8b. Before the old-sample comparison, its
+  `academic_status` rows are re-checked under 8b in a separate blind Codex pass (like the 5b
+  normalization); the original file is kept.
