@@ -871,3 +871,10 @@ criterion is not met on the raw r3 scores.
 - **Old sample on r4:** the r3 reference was written before rule 8b. Before the old-sample comparison, its
   `academic_status` rows are re-checked under 8b in a separate blind Codex pass (like the 5b
   normalization); the original file is kept.
+
+## 2026-11-11 (Gate G3 approved)
+
+**A22 G3 approved by the human** ("approve. i trust u"). GUIDELINES.md becomes v1.0 and section 8 records
+the three decisions: the clarify threshold is kept (> 3 branches or different procedures); the applicant
+scope default is kept, and a question about applying for admission states `applicant`; a missing campus is
+an ordinary branch attribute. T13 (topics, personas) starts. G2b is still open and runs alongside.

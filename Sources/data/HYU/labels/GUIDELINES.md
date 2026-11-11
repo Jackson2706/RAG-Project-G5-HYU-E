@@ -1,8 +1,7 @@
-# HYU Compass labeling guideline (draft v0.3)
+# HYU Compass labeling guideline (v1.0)
 
-Status: **draft for Gate G3.** Written with applicability vocabulary **v1**
-(`Sources/backend/app/rag/applicability.py`; PLAYBOOK A17). G2 is approved (A18). Labels are produced
-only after G3 approves this guideline.
+Status: **approved at Gate G3 (2026-11-11, PLAYBOOK A22).** Written with applicability vocabulary **v1**
+(`Sources/backend/app/rag/applicability.py`; PLAYBOOK A17). G2a is passed (A20); G3 approved this guideline.
 
 **Vocabulary v1 in short** (values are in `applicability.py`; never copy them):
 - `campus`, `degree_level`, `year`, `student_type` (no `short_term`), `visa`, `topik_level`,
@@ -236,12 +235,16 @@ documents but most of the conditional pages, so it gets about 40% of the cases.
 - After every labeling session: run `python -m labeling.validate`, then commit and push the label
   files.
 
-## 8. Open points for G3 (team decision)
+## 8. Decisions at G3 (2026-11-11)
 
-1. **The clarify threshold:** "more than 3 branches, or very different procedures". Is that the
-   rule we want?
-2. **Applicant scope default:** is "assume not an applicant unless stated" right for every slice?
-   Prospective students may ask without saying so. (The Korean standard became `korean_standard`
-   in v1.)
-3. **A missing campus:** should it be a branch attribute when the two campuses' rules differ, or is
-   the default "ask the campus" when it is unstated?
+1. **Clarify threshold:** kept. Choose `clarify` when there are more than 3 branches, or when the
+   branches lead to different procedures (a different office, form or action). With 2–3 branches
+   that share a procedure, choose `conditional_answer`.
+2. **Applicant scope default:** kept, with one addition. A question that is itself about applying
+   for admission ("How do I apply to the graduate school?", "What are the admission requirements?")
+   states `applicant`: write it in `stated_profile` as stated by the question. Otherwise, assume
+   the student is not an applicant.
+3. **A missing campus is an ordinary branch attribute.** When the Seoul and ERICA rules differ and
+   the campus is unstated, `campus` is a branch attribute like any other: `conditional_answer` with
+   one branch per campus, or `clarify` ("Which campus are you at?") under rule 1. When the rules are
+   the same, campus is not a branch.
