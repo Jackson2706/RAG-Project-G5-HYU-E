@@ -81,3 +81,15 @@ def test_agent_edit_is_not_human(tmp_path):
     report = review.apply(labels)
     assert report["origins"] == {"agent_edited": 1, "agent_draft": 2}
     assert report["human_share"] == 0
+
+
+def test_batches_carry_only_question_history_and_gold_profile(tmp_path):
+    labels = _setup(tmp_path)
+    review.make(labels)
+    _decide(labels, {"T14-001": {"decision": "keep"}, "T14-002": {"decision": "keep"}, "T14-003": {"decision": "keep"}})
+    review.apply(labels)
+    paths = review.batches(labels, size=2)
+    rows = [json.loads(line) for p in paths for line in p.read_text().splitlines()]
+    assert [p.name for p in paths] == ["batch_01.jsonl", "batch_02.jsonl"]
+    assert set(rows[2]) == {"case_id", "gold_profile", "session_history", "question"}
+    assert rows[2]["session_history"][0] == {"role": "user", "text": "I hold D-4."}

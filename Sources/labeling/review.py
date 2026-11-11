@@ -130,12 +130,32 @@ def apply(labels: Path = LABELS, initials: str = "") -> dict:
             "per_persona": dict(sorted(Counter(c["persona_id"] for c in final).items()))}  # fmt: skip
 
 
+def batches(labels: Path = LABELS, size: int = 30) -> list[Path]:
+    """questions.jsonl -> annotation_input/batch_NN.jsonl (case_id, gold_profile, session_history turns, question)."""
+    personas = {p["persona_id"]: p["gold_profile"] for p in json.loads((labels / "personas.json").read_text())}
+    cases = _jsonl(labels / "questions.jsonl")
+    out = labels / "annotation_input"
+    out.mkdir(exist_ok=True)
+    paths = []
+    for start in range(0, len(cases), size):
+        path = out / f"batch_{start // size + 1:02d}.jsonl"
+        _write_jsonl(path, [{"case_id": c["case_id"], "gold_profile": personas[c["persona_id"]],
+                             "session_history": [{"role": "user", "text": t} for t in c["session_history"]],
+                             "question": c["question"]} for c in cases[start:start + size]])  # fmt: skip
+        paths.append(path)
+    return paths
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("make").add_argument("--force", action="store_true")
     sub.add_parser("apply").add_argument("--initials", default="")
+    sub.add_parser("batches").add_argument("--size", type=int, default=30)
     args = parser.parse_args(argv)
+    if args.command == "batches":
+        print("\n".join(str(p) for p in batches(size=args.size)))
+        return 0
     if args.command == "make":
         print(f"Wrote {make(force=args.force)} rows to {DRAFTS / 'review.csv'} and hints to {DRAFTS / 'hints.jsonl'}")
         return 0

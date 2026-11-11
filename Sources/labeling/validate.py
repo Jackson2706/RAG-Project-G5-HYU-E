@@ -122,7 +122,11 @@ def _validate_evidence(
                 errors.append(_message(case_id, name, "doc_id is the newest linked version of its family"))
 
 
-def validate_cases(cases: list[dict], rows: list[dict], snapshot_id: str) -> list[str]:
+# Annotator files (T15/T16) never carry slice or origin; the merge adds them from drafts/quota_view.jsonl (A26).
+MERGE_FIELDS = ("slice", "origin")
+
+
+def validate_cases(cases: list[dict], rows: list[dict], snapshot_id: str, annotation: bool = False) -> list[str]:
     errors: list[str] = []
     documents = {row["doc_id"]: row for row in rows}
     seen: set[str] = set()
@@ -133,6 +137,8 @@ def validate_cases(cases: list[dict], rows: list[dict], snapshot_id: str) -> lis
             continue
         case_id = case.get("case_id")
         for field, expected_type in REQUIRED_TYPES.items():
+            if annotation and field in MERGE_FIELDS:
+                continue
             if field not in case:
                 errors.append(_message(case_id, field, "is required"))
             elif not _is_exact_type(case[field], expected_type):
@@ -146,9 +152,9 @@ def validate_cases(cases: list[dict], rows: list[dict], snapshot_id: str) -> lis
             errors.append(_message(case_id, "split", "must be dev or test"))
         if case.get("snapshot_id") != snapshot_id:
             errors.append(_message(case_id, "snapshot_id", f"must equal {snapshot_id}"))
-        if case.get("slice") not in SLICES:
+        if not annotation and case.get("slice") not in SLICES:
             errors.append(_message(case_id, "slice", f"must be one of {sorted(SLICES)}"))
-        if case.get("origin") not in ORIGINS:
+        if not annotation and case.get("origin") not in ORIGINS:
             errors.append(_message(case_id, "origin", f"must be one of {sorted(ORIGINS)}"))
         if not isinstance(case.get("annotator"), str) or not ANNOTATOR.fullmatch(case["annotator"]):
             errors.append(_message(case_id, "annotator", "must match codex:<model>, claude-code:<model>, or human:<initials>"))
@@ -224,17 +230,18 @@ def load_cases(path: Path) -> list[dict]:
         return [json.loads(line) for line in handle if line.strip()]
 
 
-def validate_file(path: Path, snapshot_id: str = DEFAULT_SNAPSHOT_ID) -> list[str]:
-    return validate_cases(load_cases(path), load_snapshot_rows(snapshot_id), snapshot_id)
+def validate_file(path: Path, snapshot_id: str = DEFAULT_SNAPSHOT_ID, annotation: bool = False) -> list[str]:
+    return validate_cases(load_cases(path), load_snapshot_rows(snapshot_id), snapshot_id, annotation)
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("file", type=Path)
     parser.add_argument("--snapshot", default=DEFAULT_SNAPSHOT_ID)
+    parser.add_argument("--annotation", action="store_true", help="annotator file: slice and origin are added at merge")
     args = parser.parse_args(argv)
     try:
-        errors = validate_file(args.file, args.snapshot)
+        errors = validate_file(args.file, args.snapshot, args.annotation)
     except (FileNotFoundError, json.JSONDecodeError) as error:
         print(error, file=sys.stderr)
         return 1
