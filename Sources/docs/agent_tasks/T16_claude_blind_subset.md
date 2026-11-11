@@ -22,3 +22,9 @@ Write ONLY: `Sources/data/HYU/labels/annot_claude/part_1.jsonl` (then `part_2.js
 "1.0", `snapshot_id`, `annotator: "claude-code:claude-opus-5-5"`, no slice/origin/split).
 
 Check: `cd Sources && python -m labeling.validate data/HYU/labels/annot_claude/part_N.jsonl --annotation` exits 0.
+
+## v1.1 run (PLAYBOOK A30, 2026-11-12)
+- The rulebook is GUIDELINES.md **v1.1**; section 9 wins over sections 1-8. Every row has `case_version: "1.1"`.
+- Re-label part 1 from scratch: do not open the old `annot_claude/part_1.jsonl` (or the old NOTES.md); overwrite both.
+- Then do part 2 (`annotation_input/t16_part2.jsonl`) into `annot_claude/part_2.jsonl`.
+- Validate each part file (exit 0) before moving on. NOTES.md: per part, done / not done, hard cases, v1.1 questions.
