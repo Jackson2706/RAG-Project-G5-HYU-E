@@ -201,7 +201,10 @@ reads the published MongoDB index and draws from the seven A6 buckets, including
 are 50 `rule_tagged`, 25 `rule_unconditioned`, 35 `rule_cue_unknown`, 20 `llm_tagged`, and 35
 `llm_unconditioned`; all `llm_rejected` and `llm_errors` chunks are included. Quotas and floors
 scale with `--n`, empty buckets have zero quota, and floors are capped by the eligible chunks in
-the index. `sample_meta.json` records the requested, capped, and achieved floor counts.
+the index. Repeatable `sample --quota BUCKET=N` values replace the scaled quota for those buckets;
+an explicit quota is exact, while unlisted buckets can still receive fill chunks. The G2b sample
+uses `--n 100 --quota rule_cue_unknown=30`. `sample_meta.json` records the requested, capped, and
+achieved floor counts.
 
 `sample --exclude META` removes the chunk IDs in each supplied metadata file before sampling and
 records each file and count. `sample --reuse META` keeps the old chunk IDs without applying quotas
@@ -214,17 +217,28 @@ The reference annotator follows `Report/notes/tag_audit_rules.md` without seeing
 `compare` validates every v1 value and checks whitespace-normalized evidence quotes against the
 chunk text before it reads the current predicted tags from MongoDB. It expands `any_of` sets into
 their attribute values for TP, FP, and FN counts, and also reports chunk-level exact match for the
-sets. Scores are split by rule/LLM family, bucket, and campus. Recall is reported both raw and
-weighted by the full bucket partition, and every precision and recall estimate has a Wilson 95%
-interval.
+sets. A stored `condition_status=unknown` makes constraint attributes unresolved; campus, scope,
+and effective term remain resolved. Per attribute, coverage is the share of reference occurrences
+that fall in resolved chunks. Precision, recall, and bucket-weighted recall use resolved chunks
+only. Strict recall uses all chunks and counts every reference value on an unknown chunk as a miss;
+strict weighted recall uses the full index bucket partition. These proportions have Wilson 95%
+intervals. Scores are also split by rule/LLM family, bucket, and campus.
+
+The report gives the share of sampled unknown chunks whose reference contains a constraint or
+`any_of`, its Wilson interval, and the share and interval scaled by the index's unknown-chunk count.
+It also lists the most frequent reference attributes in those chunks. `report --side-by-side OUT_A
+OUT_B --to FILE.md` reads `scores_final.json` from two audit folders and puts their occurrences,
+coverage, resolved gate scores, strict recall, gate result, and unknown estimate next to each other.
 
 Disagreements are written with the two sides assigned to `a` and `b` by a seeded shuffle. The side
 key is stored separately and is not provided to the reviewer. With `compare --carry-decisions DIR`,
 a decision is copied when its chunk, attribute, and both value sets match a decided row in `DIR`.
 Only unmatched rows are written to `disagreements.jsonl`. `finalize` combines the carried and new
 decisions, maps them through the current side key, excludes ambiguous rows, and reports the carried
-count. For an attribute with at least five occurrences, Gate G2 passes when precision is at least
-0.8 and weighted recall is at least 0.7. The final report also records disagreement outcomes,
-frequent out-of-vocabulary conditions, audience counts, and TOPIK-scope counts. The report states
-that the automated reference is not human-validated and that Codex also wrote the tagging rules.
+count. For an attribute with at least five reference occurrences, Gate G2b passes when resolved
+precision is at least 0.8 and resolved weighted recall is at least 0.7. Coverage and strict recall
+are reported in the same gate row but do not change the verdict. The final report also records
+disagreement outcomes, frequent out-of-vocabulary conditions, audience counts, and TOPIK-scope
+counts. The report states that the automated reference is not human-validated and that Codex also
+wrote the tagging rules.
 

@@ -34,6 +34,8 @@ from labeling.audit_tags import (
 )
 
 ATTRIBUTES = (*CONSTRAINT_ATTRIBUTES, "campus", "scope", "effective_term")
+ALWAYS_RESOLVED = {"campus", "scope", "effective_term"}
+UNKNOWN_BUCKETS = {"rule_cue_unknown", "llm_rejected", "llm_errors"}
 BUCKET_QUOTAS = {
     "rule_tagged": 50,
     "rule_unconditioned": 25,
@@ -115,21 +117,32 @@ def _scaled(target: int, n: int) -> int:
     return round(target * n / 150)
 
 
-def _bucket_targets(records: list[dict], n: int, rng: random.Random) -> dict[str, int]:
+def _bucket_targets(
+    records: list[dict],
+    n: int,
+    rng: random.Random,
+    quotas: dict[str, int] | None = None,
+) -> dict[str, int]:
+    quotas = quotas or {}
+    invalid_quotas = sorted(set(quotas) - set(BUCKETS))
+    if invalid_quotas or any(not isinstance(count, int) or count < 0 for count in quotas.values()):
+        raise AuditError(f"Invalid bucket quotas: {quotas}")
     by_bucket = {bucket: [row for row in records if row.get("tag_bucket") == bucket] for bucket in BUCKETS}
     invalid = sorted({row.get("tag_bucket") for row in records} - set(BUCKETS), key=str)
     if invalid:
         raise AuditError(f"Index contains unknown tag buckets: {invalid}")
     targets = {}
     for bucket, rows in by_bucket.items():
-        if not rows:
+        if bucket in quotas:
+            targets[bucket] = quotas[bucket]
+        elif not rows:
             targets[bucket] = 0
         elif bucket in {"llm_rejected", "llm_errors"}:
             targets[bucket] = len(rows)
         else:
             quota = _scaled(BUCKET_QUOTAS[bucket], n)
             targets[bucket] = min(quota, len(rows)) if bucket == "llm_tagged" else quota
-    for bucket in ("rule_tagged", "rule_unconditioned", "rule_cue_unknown", "llm_unconditioned"):
+    for bucket in BUCKETS:
         if len(by_bucket[bucket]) < targets[bucket]:
             raise AuditError(
                 f"Cannot meet {bucket} quota: need {targets[bucket]}, index has {len(by_bucket[bucket])}"
@@ -140,6 +153,7 @@ def _bucket_targets(records: list[dict], n: int, rng: random.Random) -> dict[str
     fill = [
         bucket
         for bucket in ("rule_tagged", "rule_cue_unknown", "llm_unconditioned")
+        if bucket not in quotas
         for _ in range(len(by_bucket[bucket]) - targets[bucket])
     ]
     rng.shuffle(fill)
@@ -219,14 +233,19 @@ def _ensure_floors(selected: list[dict], records: list[dict], targets: dict[str,
         completed.append((name, target, predicate))
 
 
-def sample_records(records: list[dict], n: int = 150, seed: int = 20261111) -> tuple[list[dict], dict[str, int]]:
+def sample_records(
+    records: list[dict],
+    n: int = 150,
+    seed: int = 20261111,
+    quotas: dict[str, int] | None = None,
+) -> tuple[list[dict], dict[str, int]]:
     if n <= 0:
         raise AuditError("--n must be positive")
     records = sorted(records, key=lambda row: row["chunk_id"])
     if len({row["chunk_id"] for row in records}) != len(records):
         raise AuditError("Index contains duplicate chunk_id values")
     rng = random.Random(seed)
-    targets = _bucket_targets(records, n, rng)
+    targets = _bucket_targets(records, n, rng, quotas)
     selected = []
     for bucket in BUCKETS:
         rows = [row for row in records if row.get("tag_bucket") == bucket]
@@ -531,26 +550,69 @@ def _canonical_any_of(condition: dict) -> tuple:
 
 
 def _empty_counts() -> dict[str, dict[str, Any]]:
-    return {attribute: {"tp": 0, "fp": 0, "fn": 0, "rows": set()} for attribute in ATTRIBUTES}
+    return {
+        attribute: {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "strict_tp": 0,
+            "strict_fn": 0,
+            "rows": set(),
+            "reference_rows": set(),
+            "resolved_reference_rows": set(),
+        }
+        for attribute in ATTRIBUTES
+    }
 
 
-def _add(counts: dict, attribute: str, chunk_id: str, tp: int, fp: int, fn: int) -> None:
+def _add(
+    counts: dict,
+    attribute: str,
+    chunk_id: str,
+    tp: int,
+    fp: int,
+    fn: int,
+    *,
+    strict_tp: int | None = None,
+    strict_fn: int | None = None,
+    reference: bool = False,
+    resolved_reference: bool = False,
+) -> None:
     entry = counts[attribute]
     entry["tp"] += tp
     entry["fp"] += fp
     entry["fn"] += fn
-    if tp or fp or fn:
+    entry["strict_tp"] += tp if strict_tp is None else strict_tp
+    entry["strict_fn"] += fn if strict_fn is None else strict_fn
+    if tp or fp or fn or strict_tp or strict_fn:
         entry["rows"].add(chunk_id)
+    if reference:
+        entry["reference_rows"].add(chunk_id)
+    if resolved_reference:
+        entry["resolved_reference_rows"].add(chunk_id)
 
 
 def _metric(entry: dict, bucket_entries: dict[str, dict], partition: dict[str, int], sampled: dict[str, int]) -> dict:
     tp, fp, fn = entry["tp"], entry["fp"], entry["fn"]
     precision_n, recall_n = tp + fp, tp + fn
     weighted = bucket_weighted_recall(bucket_entries, partition, sampled)
+    strict_tp, strict_fn = entry["strict_tp"], entry["strict_fn"]
+    strict_n = strict_tp + strict_fn
+    strict_bucket_entries = {
+        bucket: {"tp": counts["strict_tp"], "fn": counts["strict_fn"]}
+        for bucket, counts in bucket_entries.items()
+    }
+    strict_weighted = bucket_weighted_recall(strict_bucket_entries, partition, sampled)
+    occurrences = len(entry["reference_rows"])
+    resolved_occurrences = len(entry["resolved_reference_rows"])
     return {
         "tp": tp,
         "fp": fp,
         "fn": fn,
+        "strict_tp": strict_tp,
+        "strict_fn": strict_fn,
+        "coverage": resolved_occurrences / occurrences if occurrences else None,
+        "coverage_ci": wilson_interval(resolved_occurrences, occurrences),
         "precision": tp / precision_n if precision_n else None,
         "precision_ci": wilson_interval(tp, precision_n),
         "recall": tp / recall_n if recall_n else None,
@@ -558,8 +620,16 @@ def _metric(entry: dict, bucket_entries: dict[str, dict], partition: dict[str, i
         "weighted_recall": weighted,
         # Same approximation used by audit_tags; bootstrap if a gate result is borderline.
         "weighted_recall_ci": wilson_interval(weighted * recall_n, recall_n) if weighted is not None else None,
-        "occurrences": len(entry["rows"]),
-        "gated": len(entry["rows"]) >= 5,
+        "strict_recall": strict_tp / strict_n if strict_n else None,
+        "strict_recall_ci": wilson_interval(strict_tp, strict_n),
+        "strict_weighted_recall": strict_weighted,
+        "strict_weighted_recall_ci": (
+            wilson_interval(strict_weighted * strict_n, strict_n)
+            if strict_weighted is not None else None
+        ),
+        "occurrences": occurrences,
+        "resolved_occurrences": resolved_occurrences,
+        "gated": occurrences >= 5,
     }
 
 
@@ -575,6 +645,48 @@ def _metrics(counts: dict, counts_by_bucket: dict[str, dict], partition: dict[st
     }
 
 
+def _unknown_share(
+    records: list[dict],
+    references: list[dict],
+    metadata: dict,
+    overrides: dict[tuple[str, str], set[str]],
+    excluded: set[tuple[str, str]],
+) -> dict:
+    reference_by_id = {row["chunk_id"]: row for row in references}
+    unknown_records = [row for row in records if row.get("condition_status") == "unknown"]
+    conditioned = 0
+    attributes: Counter[str] = Counter()
+    for record in unknown_records:
+        chunk_id = record["chunk_id"]
+        reference = reference_by_id[chunk_id]
+        present = {
+            attribute
+            for attribute in CONSTRAINT_ATTRIBUTES
+            if (chunk_id, attribute) not in excluded
+            and overrides.get((chunk_id, attribute), _values(reference, attribute))
+        }
+        if present:
+            conditioned += 1
+            attributes.update(present)
+
+    sampled_unknown = len(unknown_records)
+    share = conditioned / sampled_unknown if sampled_unknown else None
+    share_ci = wilson_interval(conditioned, sampled_unknown)
+    index_unknown = sum(metadata["bucket_partition"].get(bucket, 0) for bucket in UNKNOWN_BUCKETS)
+    return {
+        "sampled_unknown_chunks": sampled_unknown,
+        "reference_conditioned_chunks": conditioned,
+        "share": share,
+        "share_ci": share_ci,
+        "index_unknown_chunks": index_unknown,
+        "estimated_conditioned_chunks": share * index_unknown if share is not None else None,
+        "estimated_conditioned_chunks_ci": (
+            [bound * index_unknown for bound in share_ci] if share_ci is not None else None
+        ),
+        "top_attributes": dict(sorted(attributes.items(), key=lambda item: (-item[1], item[0]))[:5]),
+    }
+
+
 def score_comparison(
     records: list[dict],
     references: list[dict],
@@ -582,9 +694,9 @@ def score_comparison(
     overrides: dict[tuple[str, str], set[str]] | None = None,
     excluded: set[tuple[str, str]] | None = None,
 ) -> dict:
-    """Compare values. Example: TP=4, FP=2, FN=3 gives P=4/6 and R=4/7.
+    """Compare resolved values and retain unknown references as strict misses.
 
-    A four-chunk test covers an ``any_of`` value and both method families. Predicted
+    Example: TP=4, FP=2, FN=3 gives resolved P=4/6 and R=4/7. Predicted
     TP/FP use the field's extraction method; an FN uses its chunk bucket family.
     """
     overrides, excluded = overrides or {}, excluded or set()
@@ -617,19 +729,58 @@ def score_comparison(
             pred = _values(predicted, attribute)
             ref = overrides.get(key, _values(reference, attribute))
             tp, fp, fn = len(pred & ref), len(pred - ref), len(ref - pred)
-            _add(overall, attribute, chunk_id, tp, fp, fn)
-            _add(by_bucket[bucket], attribute, chunk_id, tp, fp, fn)
-            _add(by_campus[campus], attribute, chunk_id, tp, fp, fn)
-            _add(by_campus_bucket[campus][bucket], attribute, chunk_id, tp, fp, fn)
-            if tp or fp:
+            resolved = attribute in ALWAYS_RESOLVED or record.get("condition_status") != "unknown"
+            resolved_tp, resolved_fp, resolved_fn = (tp, fp, fn) if resolved else (0, 0, 0)
+            strict_tp, strict_fn = (tp, fn) if resolved else (0, len(ref))
+            add_kwargs = {
+                "strict_tp": strict_tp,
+                "strict_fn": strict_fn,
+                "reference": bool(ref),
+                "resolved_reference": bool(ref) and resolved,
+            }
+            _add(overall, attribute, chunk_id, resolved_tp, resolved_fp, resolved_fn, **add_kwargs)
+            _add(by_bucket[bucket], attribute, chunk_id, resolved_tp, resolved_fp, resolved_fn, **add_kwargs)
+            _add(by_campus[campus], attribute, chunk_id, resolved_tp, resolved_fp, resolved_fn, **add_kwargs)
+            _add(
+                by_campus_bucket[campus][bucket],
+                attribute,
+                chunk_id,
+                resolved_tp,
+                resolved_fp,
+                resolved_fn,
+                **add_kwargs,
+            )
+            if resolved and (tp or fp):
                 method = methods.get("any_of") if any(attribute in group for group in predicted.get("any_of") or []) else methods.get(attribute)
                 family = _method_family(method, bucket)
-                _add(by_method[family], attribute, chunk_id, tp, fp, 0)
-                _add(by_method_bucket[family][bucket], attribute, chunk_id, tp, fp, 0)
-            if fn:
+                method_kwargs = {
+                    "strict_tp": tp,
+                    "strict_fn": 0,
+                    "reference": bool(tp),
+                    "resolved_reference": bool(tp),
+                }
+                _add(by_method[family], attribute, chunk_id, tp, fp, 0, **method_kwargs)
+                _add(by_method_bucket[family][bucket], attribute, chunk_id, tp, fp, 0, **method_kwargs)
+            if resolved and fn:
                 family = _method_family(None, bucket)
-                _add(by_method[family], attribute, chunk_id, 0, 0, fn)
-                _add(by_method_bucket[family][bucket], attribute, chunk_id, 0, 0, fn)
+                method_kwargs = {
+                    "strict_tp": 0,
+                    "strict_fn": fn,
+                    "reference": True,
+                    "resolved_reference": True,
+                }
+                _add(by_method[family], attribute, chunk_id, 0, 0, fn, **method_kwargs)
+                _add(by_method_bucket[family][bucket], attribute, chunk_id, 0, 0, fn, **method_kwargs)
+            elif not resolved and ref:
+                family = _method_family(None, bucket)
+                method_kwargs = {
+                    "strict_tp": 0,
+                    "strict_fn": len(ref),
+                    "reference": True,
+                    "resolved_reference": False,
+                }
+                _add(by_method[family], attribute, chunk_id, 0, 0, 0, **method_kwargs)
+                _add(by_method_bucket[family][bucket], attribute, chunk_id, 0, 0, 0, **method_kwargs)
 
     partition = metadata["bucket_partition"]
     per_attribute = _metrics(overall, by_bucket, partition, sampled)
@@ -660,6 +811,7 @@ def score_comparison(
             "all_chunks": {"matches": any_of_all_correct, "n": any_of_all, "rate": any_of_all_correct / any_of_all if any_of_all else None},
             "chunks_with_any_of": {"matches": any_of_present_correct, "n": any_of_present, "rate": any_of_present_correct / any_of_present if any_of_present else None},
         },
+        "unknown_share": _unknown_share(records, references, metadata, overrides, excluded),
         "g2": {"passed": not failing, "failing_attributes": failing},
     }
 
@@ -714,8 +866,8 @@ def _append_table(lines: list[str], metrics: dict, gate: bool = False) -> None:
     if gate:
         lines.extend(
             [
-                "| Attribute | Occurrences | Precision (95% CI) | Raw recall (95% CI) | Weighted recall (95% CI) | Result |",
-                "|---|---:|---:|---:|---:|---|",
+                "| Attribute | Occurrences | Coverage (95% CI) | Resolved precision (95% CI) | Resolved recall (95% CI) | Resolved weighted recall (95% CI) | Strict recall (95% CI) | Strict weighted recall (95% CI) | Result |",
+                "|---|---:|---:|---:|---:|---:|---:|---:|---|",
             ]
         )
         for attribute, metric in metrics.items():
@@ -727,31 +879,62 @@ def _append_table(lines: list[str], metrics: dict, gate: bool = False) -> None:
             )
             lines.append(
                 f"| {attribute} | {metric['occurrences']} | "
+                f"{_format_metric(metric['coverage'], metric['coverage_ci'])} | "
                 f"{_format_metric(metric['precision'], metric['precision_ci'])} | "
                 f"{_format_metric(metric['recall'], metric['recall_ci'])} | "
                 f"{_format_metric(metric['weighted_recall'], metric['weighted_recall_ci'])} | "
+                f"{_format_metric(metric['strict_recall'], metric['strict_recall_ci'])} | "
+                f"{_format_metric(metric['strict_weighted_recall'], metric['strict_weighted_recall_ci'])} | "
                 f"{'PASS' if passed else 'FAIL'} |"
             )
         return
     lines.extend(
         [
-            "| Attribute | Occurrences | TP | FP | FN | Precision (95% CI) | Raw recall (95% CI) | Weighted recall (95% CI) |",
-            "|---|---:|---:|---:|---:|---:|---:|---:|",
+            "| Attribute | Occurrences | TP | FP | FN | Coverage (95% CI) | Resolved precision (95% CI) | Resolved recall (95% CI) | Resolved weighted recall (95% CI) | Strict recall (95% CI) | Strict weighted recall (95% CI) |",
+            "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
         ]
     )
     for attribute, metric in metrics.items():
         lines.append(
             f"| {attribute} | {metric['occurrences']} | {metric['tp']} | {metric['fp']} | {metric['fn']} | "
+            f"{_format_metric(metric['coverage'], metric['coverage_ci'])} | "
             f"{_format_metric(metric['precision'], metric['precision_ci'])} | "
             f"{_format_metric(metric['recall'], metric['recall_ci'])} | "
-            f"{_format_metric(metric['weighted_recall'], metric['weighted_recall_ci'])} |"
+            f"{_format_metric(metric['weighted_recall'], metric['weighted_recall_ci'])} | "
+            f"{_format_metric(metric['strict_recall'], metric['strict_recall_ci'])} | "
+            f"{_format_metric(metric['strict_weighted_recall'], metric['strict_weighted_recall_ci'])} |"
         )
+
+
+def _append_unknown_share(lines: list[str], unknown: dict) -> None:
+    lines.extend(["", "## Unknown-condition estimate", ""])
+    share = _format_metric(unknown["share"], unknown["share_ci"])
+    estimate = unknown["estimated_conditioned_chunks"]
+    estimate_ci = unknown["estimated_conditioned_chunks_ci"]
+    lines.append(
+        f"Reference-conditioned unknown chunks: {unknown['reference_conditioned_chunks']}/"
+        f"{unknown['sampled_unknown_chunks']} ({share})."
+    )
+    if estimate is None or estimate_ci is None:
+        lines.append(f"Estimated conditioned chunks among {unknown['index_unknown_chunks']} index unknowns: null.")
+    else:
+        lines.append(
+            f"Estimated conditioned chunks among {unknown['index_unknown_chunks']} index unknowns: "
+            f"{estimate:.1f} [{estimate_ci[0]:.1f}, {estimate_ci[1]:.1f}]."
+        )
+    top = unknown["top_attributes"]
+    lines.append(
+        "Top attributes: "
+        + (", ".join(f"{attribute} ({count})" for attribute, count in top.items()) if top else "none")
+        + "."
+    )
 
 
 def scores_markdown(scores: dict, final: bool = False) -> str:
     lines = [LIMITATION, "", "# Automated applicability tag audit", "", "## G2", ""]
     _append_table(lines, scores["per_attribute"], gate=True)
     lines.extend(["", f"G2 verdict: **{'PASS' if scores['g2']['passed'] else 'FAIL'}**."])
+    _append_unknown_share(lines, scores["unknown_share"])
     for split in ("by_method", "by_bucket", "by_campus"):
         lines.extend(["", f"## {split.replace('_', ' ')}", ""])
         for name, metrics in scores[split].items():
@@ -1004,8 +1187,121 @@ def finalize(db: Database, index_id: str, reference_path: Path, decisions_path: 
     return scores
 
 
+def _load_final_scores(folder: Path) -> dict:
+    path = folder / "scores_final.json"
+    try:
+        scores = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise AuditError(f"Cannot read final scores {path}: {exc}") from exc
+    if not isinstance(scores, dict) or not isinstance(scores.get("per_attribute"), dict):
+        raise AuditError(f"Final scores {path} have no per_attribute metrics")
+    if not isinstance(scores.get("unknown_share"), dict):
+        raise AuditError(f"Final scores {path} have no unknown_share metrics")
+    return scores
+
+
+def _gate_result(metric: dict) -> str:
+    if not metric.get("gated"):
+        return "N/A"
+    passed = (
+        metric.get("precision") is not None and metric["precision"] >= 0.8
+        and metric.get("weighted_recall") is not None and metric["weighted_recall"] >= 0.7
+    )
+    return "PASS" if passed else "FAIL"
+
+
+def side_by_side_report(folder_a: Path, folder_b: Path, destination: Path) -> None:
+    scores_a, scores_b = _load_final_scores(folder_a), _load_final_scores(folder_b)
+    attributes_a = scores_a["per_attribute"]
+    attributes_b = scores_b["per_attribute"]
+    if set(attributes_a) != set(attributes_b):
+        raise AuditError("Side-by-side audit folders have different attribute rows")
+
+    lines = [
+        LIMITATION,
+        "",
+        "# G2b side-by-side audit",
+        "",
+        f"A: `{folder_a}`  ",
+        f"B: `{folder_b}`",
+        "",
+        "| Attribute | A occurrences | A coverage | A precision | A recall | A weighted recall | A strict recall | A gate | B occurrences | B coverage | B precision | B recall | B weighted recall | B strict recall | B gate |",
+        "|---|---:|---:|---:|---:|---:|---:|---|---:|---:|---:|---:|---:|---:|---|",
+    ]
+    for attribute in ATTRIBUTES:
+        if attribute not in attributes_a:
+            continue
+        cells = [attribute]
+        for metric in (attributes_a[attribute], attributes_b[attribute]):
+            cells.extend(
+                [
+                    str(metric["occurrences"]),
+                    _format_metric(metric["coverage"], metric["coverage_ci"]),
+                    _format_metric(metric["precision"], metric["precision_ci"]),
+                    _format_metric(metric["recall"], metric["recall_ci"]),
+                    _format_metric(metric["weighted_recall"], metric["weighted_recall_ci"]),
+                    _format_metric(metric["strict_recall"], metric["strict_recall_ci"]),
+                    _gate_result(metric),
+                ]
+            )
+        lines.append("| " + " | ".join(cells) + " |")
+
+    lines.extend(
+        [
+            "",
+            "## Unknown-condition estimate",
+            "",
+            "| Audit | Sampled unknown | Reference-conditioned | Share (95% CI) | Index unknown | Estimated conditioned (95% CI) | Top attributes |",
+            "|---|---:|---:|---:|---:|---:|---|",
+        ]
+    )
+    for label, scores in (("A", scores_a), ("B", scores_b)):
+        unknown = scores["unknown_share"]
+        estimate = unknown["estimated_conditioned_chunks"]
+        estimate_ci = unknown["estimated_conditioned_chunks_ci"]
+        estimate_text = (
+            "null [null]"
+            if estimate is None or estimate_ci is None
+            else f"{estimate:.1f} [{estimate_ci[0]:.1f}, {estimate_ci[1]:.1f}]"
+        )
+        top = ", ".join(
+            f"{attribute} ({count})" for attribute, count in unknown["top_attributes"].items()
+        ) or "none"
+        lines.append(
+            f"| {label} | {unknown['sampled_unknown_chunks']} | "
+            f"{unknown['reference_conditioned_chunks']} | "
+            f"{_format_metric(unknown['share'], unknown['share_ci'])} | "
+            f"{unknown['index_unknown_chunks']} | {estimate_text} | {top} |"
+        )
+
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
+
+
 def connect_index(index_id: str) -> Database:
     return Database.connect(get_settings()).for_index(index_id)
+
+
+def _quota(value: str) -> tuple[str, int]:
+    bucket, separator, count_text = value.partition("=")
+    if not separator or bucket not in BUCKETS:
+        choices = ", ".join(BUCKETS)
+        raise argparse.ArgumentTypeError(f"quota must be BUCKET=N, where BUCKET is one of {choices}")
+    try:
+        count = int(count_text)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError("quota N must be a non-negative integer") from exc
+    if count < 0:
+        raise argparse.ArgumentTypeError("quota N must be a non-negative integer")
+    return bucket, count
+
+
+def _quotas(values: list[tuple[str, int]]) -> dict[str, int]:
+    counts = Counter(bucket for bucket, _ in values)
+    duplicates = sorted(bucket for bucket, count in counts.items() if count > 1)
+    if duplicates:
+        raise AuditError(f"Duplicate --quota buckets: {', '.join(duplicates)}")
+    return dict(values)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -1015,6 +1311,7 @@ def build_parser() -> argparse.ArgumentParser:
     sample.add_argument("--index-id", required=True)
     sample.add_argument("--n", type=int, default=150)
     sample.add_argument("--seed", type=int, default=20261111)
+    sample.add_argument("--quota", type=_quota, action="append", default=[], metavar="BUCKET=N")
     sample.add_argument("--force", action="store_true")
     sample_source = sample.add_mutually_exclusive_group()
     sample_source.add_argument("--exclude", type=Path, action="append", default=[])
@@ -1027,6 +1324,9 @@ def build_parser() -> argparse.ArgumentParser:
     finalize_parser.add_argument("--index-id", required=True)
     finalize_parser.add_argument("--reference", type=Path, required=True)
     finalize_parser.add_argument("--decisions", type=Path, required=True)
+    report = commands.add_parser("report", help="compare two finalized audit folders")
+    report.add_argument("--side-by-side", type=Path, nargs=2, required=True, metavar=("OUT_A", "OUT_B"))
+    report.add_argument("--to", type=Path, required=True)
     for command in (sample, compare_parser, finalize_parser):
         command.add_argument("--out", default="auto")
     return parser
@@ -1035,9 +1335,16 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
+        if args.command == "report":
+            side_by_side_report(*args.side_by_side, args.to)
+            print(f"Wrote side-by-side report to {args.to}")
+            return 0
         out = output_dir(args.index_id, args.out)
         db = connect_index(args.index_id)
         if args.command == "sample":
+            quotas = _quotas(args.quota)
+            if args.reuse and quotas:
+                raise AuditError("--quota cannot be combined with --reuse")
             partition = manifest_bucket_partition(db)
             if args.reuse:
                 source_metadata, chunk_ids = sample_chunk_ids(args.reuse)
@@ -1064,7 +1371,7 @@ def main(argv: list[str] | None = None) -> int:
                     excluded_ids.update(chunk_ids)
                     excluded_files.append({"path": str(path), "count": len(chunk_ids)})
                 available = [row for row in available if row["chunk_id"] not in excluded_ids]
-                records, targets = sample_records(available, args.n, args.seed)
+                records, targets = sample_records(available, args.n, args.seed, quotas)
                 metadata = sample_metadata(
                     args.index_id,
                     args.seed,
