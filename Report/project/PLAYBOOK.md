@@ -25,7 +25,7 @@ and pass the gates. Each phase below has a **start prompt** to paste into Claude
 | Gate | Condition to pass |
 |---|---|
 | G1 | Reorg done; all Definition-of-done checks green; same Docker volumes; app starts; `docker volume ls` unchanged |
-| G2 | Crawl report reviewed (counts, English coverage, warnings); attribute vocabulary frozen (v1); 50-chunk tag audit: precision ≥ 0.8 and recall ≥ 0.7 per attribute with ≥ 5 occurrences (A5) |
+| G2 | Crawl report reviewed (counts, English coverage, warnings); attribute vocabulary frozen (v1); 50-chunk tag audit: precision ≥ 0.8 and recall ≥ 0.7 per attribute with ≥ 5 occurrences (A5) — split by A20 into **G2a** (vocabulary v1, passed) and **G2b** (tag quality on a fresh sample, before P7/P9 dev runs) |
 | G3 | Labeling guideline approved by the team |
 | G4 | Labels adjudicated; every test item human-verified; dev/test split frozen with SHA |
 | G5 | Dev results reviewed; AAES and baseline configs frozen and tagged (`git tag config-freeze`) |
@@ -841,3 +841,18 @@ so recall is measured where the tagger said "no conditions".
 - **Rule 5b was added to the audit rules after the reference pass:** an alternative whose other
   options are outside the vocabulary gives no constraint. 4 reference rows were normalized; the
   original file is kept.
+
+## 2026-11-11 (gate record corrected: G2 split into G2a and G2b)
+
+**A20 G2 is split in two.** G2 was marked approved before the audit was scored, and the tag-quality
+criterion is not met on the raw r3 scores.
+- **G2a: vocabulary v1 approved.** Passed (A17, A18). P5 labeling may go on, because labels do not
+  depend on the tags.
+- **G2b: tag quality.** For each attribute with ≥ 5 occurrences: precision ≥ 0.8 and weighted recall
+  ≥ 0.7, measured on a FRESH stratified sample (~100 chunks, none of the first 150) with a new blind
+  Codex reference under the same audit rules, including 5b. Must pass before the P7/P9 dev runs.
+  The r3 sample (150 chunks) is now the development sample for tagger fixes. Its scores are reported
+  next to the fresh-sample scores, but G2b is decided on the fresh sample only.
+- Order: cause breakdown of the failing attributes
+  (`Report/results/tag_audit/hyu_20261110_97dc1269_r3/auto/causes_failing.json`) → proposed fixes →
+  human OK → r4 build, VERIFY, publish, HYU default → fresh-sample audit → G2b.
