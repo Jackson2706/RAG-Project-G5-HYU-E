@@ -125,6 +125,7 @@ def test_multi_session_stated_update_may_differ(valid_case, rows):
         ("gold_evidence", {"doc_id": "new", "char_start": 0, "char_end": 2, "applies_to_gold_profile": False}, "applies_to_gold_profile must be true"),
         ("inapplicable_evidence", {"doc_id": "new", "char_start": 0, "char_end": 2, "why": ""}, "why must be a non-empty string"),
         ("outdated_evidence", {"doc_id": "new", "char_start": 0, "char_end": 2}, "newest linked version"),
+        ("gold_evidence", {"doc_id": "new", "char_start": 0, "char_end": 2, "applies_to_gold_profile": True, "branch": {"campus": "mars"}}, "branch must be"),
     ],
 )
 def test_evidence_rules(valid_case, rows, field, entry, expected):
@@ -178,3 +179,11 @@ def test_case_ids_are_unique(valid_case, rows):
 def test_condition_sets_use_vocabulary_v1(valid_case, rows, condition_sets, expected):
     errors = validate_cases([{**valid_case, "condition_sets": condition_sets}], rows, SNAPSHOT)
     assert (not errors) if expected is None else any("condition_sets" in e and expected in e for e in errors)
+
+
+def test_branch_mark_and_stale_update_are_optional_and_typed(valid_case, rows):
+    valid_case["gold_evidence"][0]["branch"] = {"campus": "erica"}
+    valid_case["stale_update"] = True
+    assert errors(valid_case, rows) == []
+    valid_case["stale_update"] = "yes"
+    assert any("stale_update: must be true or false" in error for error in errors(valid_case, rows))

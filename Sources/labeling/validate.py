@@ -112,6 +112,12 @@ def _validate_evidence(
 
         if field == "gold_evidence" and entry.get("applies_to_gold_profile") is not True:
             errors.append(_message(case_id, name, "applies_to_gold_profile must be true"))
+        branch = entry.get("branch")  # optional, GUIDELINES 11.5: the branch condition this gold span supports
+        if field == "gold_evidence" and branch is not None and (
+            not isinstance(branch, dict) or not branch
+            or any(a not in VOCABULARY or v not in VOCABULARY[a] for a, v in branch.items())
+        ):
+            errors.append(_message(case_id, name, "branch must be a non-empty {attribute: value} object in the vocabulary"))
         if field == "inapplicable_evidence" and not isinstance(entry.get("why"), str):
             errors.append(_message(case_id, name, "why must be a non-empty string"))
         elif field == "inapplicable_evidence" and not entry["why"].strip():
@@ -177,6 +183,8 @@ def validate_cases(cases: list[dict], rows: list[dict], snapshot_id: str, annota
                 if stated[attribute] != gold[attribute]:
                     errors.append(_message(case_id, "stated_profile", f"{attribute} must agree with gold_profile"))
 
+        if "stale_update" in case and type(case["stale_update"]) is not bool:  # GUIDELINES 11.7
+            errors.append(_message(case_id, "stale_update", "must be true or false"))
         branch_attributes = case.get("branch_attributes")
         if isinstance(branch_attributes, list):
             for attribute in branch_attributes:

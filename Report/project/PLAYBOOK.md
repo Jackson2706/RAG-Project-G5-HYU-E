@@ -997,3 +997,17 @@ until 2026-11-17.
 - Claude Code implements P8 and P8D. Metrics, the test-run guard and split/freeze code get a fresh-subagent
   review before commit.
 - **G4 freezes after the human's adjudication and verification.**
+
+**A32 GUIDELINES v1.3, proposals, verification sheet, pre-test-run list (decision from the planning chat, 2026-11-12).**
+- GUIDELINES v1.3 (section 11):
+  - a contact or inquiry block (HiKorea, 1345, NHIS) is not a referral; external_only needs the corpus to say this information or procedure is handled elsewhere;
+  - answer only in an attachment or image without text → unanswerable_unreadable + abstain with the page link;
+  - requests to perform an action → answer with the documented procedure and say the assistant cannot do it;
+  - other-campus-only evidence with a known campus → abstain + refer to the student's campus OIA; unknown campus with differing campuses → branch; national rules are not campus-scoped;
+  - conditional answers: gold evidence for every stated branch, each span marked `branch`; when the profile fixes the branch, the other branch is inapplicable;
+  - branch count = distinct answer values in the gold evidence; ≤ 2 conditional, > 2 clarify;
+  - stale-profile cases: gold_profile = latest stated values, `stale_update: true`, details in notes.
+- Adjudication sheet: Claude Code pre-fills a proposed value and the cited rule only for the 27 flagged 01-03 rows; the 20 disagreement rows stay unproposed.
+- Agreement report adds κ on collapsed answerability (answerable / partial / not answerable).
+- Verification sheet after the split: confirm-or-fix on 3 fields (answerability, expected_behavior, gold evidence supports the required facts), gold span highlighted; 3 files by slice with verifier initials per row; order conditional, temporal, negative, multi_session, then the 20% unconditional spot check; rows unverified at the deadline are listed as a limitation.
+- Before the test run: A4 implemented (comparison 3 must run); A2 and A5 if time; `Report/voice_sample.md` is gitignored (personal writing, public repo); the merge tool and freeze get a fresh-subagent review. Then P8D continues.

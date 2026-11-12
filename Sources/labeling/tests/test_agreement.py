@@ -63,3 +63,10 @@ def test_kappa_interval_brackets_the_point_estimate_and_is_degenerate_for_identi
     low, high = kappa_interval(a, b)
     assert low <= cohens_kappa(a, b) <= high and low < high
     assert kappa_interval(a, a) == (1.0, 1.0)
+
+
+def test_collapse_merges_every_negative_type():
+    from labeling.agreement import collapse
+
+    assert [collapse(x) for x in ("answerable", "partial", "external_only", "unanswerable", "korean_only")] == [
+        "answerable", "partial", "not_answerable", "not_answerable", "not_answerable"]

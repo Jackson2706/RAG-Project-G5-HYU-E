@@ -1,6 +1,6 @@
-# HYU Compass labeling guideline (v1.2)
+# HYU Compass labeling guideline (v1.3)
 
-Status: **v1.0 approved at Gate G3 (2026-11-11, PLAYBOOK A22); v1.1 amendment (section 9, 2026-11-12, A30) and v1.2 amendment (section 10, A31) win where they differ; section 10 wins over section 9.** Written with applicability vocabulary **v1**
+Status: **v1.0 approved at Gate G3 (2026-11-11, PLAYBOOK A22); v1.1 amendment (section 9, 2026-11-12, A30) and v1.2 amendment (section 10, A31) and v1.3 amendment (section 11, A32) win where they differ; a later section wins over an earlier one.** Written with applicability vocabulary **v1**
 (`Sources/backend/app/rag/applicability.py`; PLAYBOOK A17). G2a is passed (A20); G3 approved this guideline.
 
 **Vocabulary v1 in short** (values are in `applicability.py`; never copy them):
@@ -402,7 +402,7 @@ student's stated details already fix. "Different rules might exist somewhere" is
   application steps of a matching group → not `unanswerable`. Only when no fact is supported and no
   page refers elsewhere → `unanswerable`.
 
-### 10.4 Open questions (not decided by v1.2; adjudicated case by case)
+### 10.4 Open questions (not decided by v1.2; questions 2-4 are decided in section 11)
 
 1. Campus unstated and only one campus has evidence (T14-113).
 2. A generic contact block (HiKorea / 1345) counted as "refers elsewhere" for personal immigration
@@ -410,3 +410,64 @@ student's stated details already fix. "Different rules might exist somewhere" is
 3. `partial` and unstated branches together: `clarify` or `abstain` first (T14-130).
 4. Official pages that conflict (T14-130: Seoul part-time form 20/25/30 h vs ERICA table 10/30, 15/35).
 5. A question whose referent is ambiguous ("the international student group", T14-026).
+
+## 11. v1.3 amendment (2026-11-12, PLAYBOOK A32)
+
+Rulings by the human after the v1.2 agreement check. They win over sections 1-10 where they differ.
+
+### 11.1 A contact block is not a referral
+
+A contact or inquiry block (HiKorea, 1345, the NHIS phone number or site "for questions") does **not**
+count as "refers elsewhere". `external_only` needs the corpus to say that **this** information or
+procedure is found or handled elsewhere ("apply at the embassy", "see the HiKorea notice for the fee").
+Otherwise the case is `unanswerable` (10.3 still applies: any supported required fact → `partial`).
+
+**Applies to** T14-170, 174, 175, 176, 182, 187 (the adjudicator checks what each page says).
+
+### 11.2 Answer only in an attachment or image
+
+If the answer exists only in an attachment or an image that has no extracted text in the snapshot →
+`unanswerable_unreadable`; behaviour `abstain`, and the abstention links the page that holds the file.
+
+**Applies to** T14-173, T14-190, T14-205, T14-208.
+
+### 11.3 Requests to perform an action
+
+When the student asks the assistant to do something ("change my address for me"), label the case as a
+question about the documented procedure: `answer` with the procedure, and the reference answer says the
+assistant cannot do it. The procedure's facts are the required facts.
+
+**Applies to** T14-203.
+
+### 11.4 Evidence for the other campus only
+
+- The student's campus is known and the evidence is scoped only to the **other** campus → not answerable
+  for this student: `abstain` and refer to the student's own campus OIA office. The other-campus spans go in
+  `inapplicable_evidence`.
+- The campus is unknown and the campuses' evidence gives different answers → `campus` is a branch (11.6).
+- National rules (immigration, NHI, the Ministry's rules) are not campus-scoped: a page on one campus's
+  site that states a national rule answers for both campuses.
+
+**Applies to** T14-221 and T14-120 (the adjudicator checks whether the evidence is campus-scoped).
+
+### 11.5 Gold evidence in conditional answers
+
+Every branch that the conditional answer states has its evidence in `gold_evidence`, and each such span
+carries `"branch": {"<attribute>": "<value>"}` (for example `{"campus": "erica"}`).
+`applies_to_gold_profile: true` then means "applies to the student under this branch". When the
+student's stated profile fixes the branch, the case is no longer conditional and the other branch's
+spans are `inapplicable_evidence`.
+
+### 11.6 Branch count
+
+Branch count = the number of **distinct answer values** in the gold evidence across the unstated
+vocabulary attributes (10.2). Two values or fewer → `conditional_answer`; more than two → `clarify`.
+Two attributes that give the same two answers count as two branches, not four.
+
+**Applies to** T14-130 (part-time work hours; see the conflicting pages in 10.4.4).
+
+### 11.7 Stale-profile cases
+
+When the session history states a value and a later turn updates it: `gold_profile` holds the **latest**
+stated values, the row gets `"stale_update": true`, and `notes` records the old value and the turn that
+changed it.

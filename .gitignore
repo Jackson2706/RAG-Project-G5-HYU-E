@@ -45,3 +45,6 @@ Report/course/
 
 # LLM tag cache (T09)
 Sources/data/HYU/cache/
+
+# personal writing sample for the Humanizer skill; public repo (A32)
+Report/voice_sample.md

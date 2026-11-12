@@ -65,6 +65,11 @@ def kappa_interval(a: list[str], b: list[str], draws: int = 2000, seed: int = 13
     return scores[int(0.025 * draws)], scores[int(0.975 * draws) - 1]
 
 
+def collapse(answerability: str) -> str:
+    """answerable / partial / not_answerable: every negative type (external_only, unanswerable, ...) is one class."""
+    return answerability if answerability in ("answerable", "partial") else "not_answerable"
+
+
 def mean_jaccard(a: list[list[str]], b: list[list[str]]) -> float:
     scores = []
     for left, right in zip(a, b, strict=True):
@@ -119,6 +124,7 @@ def agreement(a_path: Path, b_path: Path, out_dir: Path) -> dict[str, float | in
 
     answerability_a = [left["answerability"] for left, _ in pairs]
     answerability_b = [right["answerability"] for _, right in pairs]
+    collapsed_a, collapsed_b = [collapse(x) for x in answerability_a], [collapse(x) for x in answerability_b]
     behavior_a = [left["expected_behavior"] for left, _ in pairs]
     behavior_b = [right["expected_behavior"] for _, right in pairs]
     branches_a = [left["branch_attributes"] for left, _ in pairs]
@@ -130,12 +136,15 @@ def agreement(a_path: Path, b_path: Path, out_dir: Path) -> dict[str, float | in
     report: dict = {
         "cases": len(case_ids),
         "answerability_kappa": cohens_kappa(answerability_a, answerability_b),
+        "answerability_collapsed_kappa": cohens_kappa(collapsed_a, collapsed_b),
+        "answerability_collapsed_kappa_ci": kappa_interval(collapsed_a, collapsed_b),
         "expected_behavior_kappa": cohens_kappa(behavior_a, behavior_b),
         "answerability_kappa_ci": kappa_interval(answerability_a, answerability_b),
         "expected_behavior_kappa_ci": kappa_interval(behavior_a, behavior_b),
         "branch_attributes_jaccard": mean_jaccard(branches_a, branches_b),
         "gold_evidence_span_f1": sum(span_scores) / len(span_scores),
         "answerability_disagreements": sum(a != b for a, b in zip(answerability_a, answerability_b, strict=True)),
+        "answerability_collapsed_disagreements": sum(a != b for a, b in zip(collapsed_a, collapsed_b, strict=True)),
         "expected_behavior_disagreements": sum(a != b for a, b in zip(behavior_a, behavior_b, strict=True)),
         "branch_attributes_disagreements": sum(set(a) != set(b) for a, b in zip(branches_a, branches_b, strict=True)),
         "gold_evidence_disagreements": sum(score != 1.0 for score in span_scores),
@@ -184,6 +193,7 @@ def agreement(a_path: Path, b_path: Path, out_dir: Path) -> dict[str, float | in
         "| Field | Measure | Score | 95% bootstrap CI | Disagreements |",
         "|---|---|---:|---|---:|",
         f"| answerability | Cohen's kappa | {report['answerability_kappa']:.6f} | {_ci(report['answerability_kappa_ci'])} | {report['answerability_disagreements']} |",
+        f"| answerability, collapsed (answerable / partial / not answerable) | Cohen's kappa | {report['answerability_collapsed_kappa']:.6f} | {_ci(report['answerability_collapsed_kappa_ci'])} | {report['answerability_collapsed_disagreements']} |",
         f"| expected_behavior | Cohen's kappa | {report['expected_behavior_kappa']:.6f} | {_ci(report['expected_behavior_kappa_ci'])} | {report['expected_behavior_disagreements']} |",
         f"| branch_attributes | Mean Jaccard | {report['branch_attributes_jaccard']:.6f} | | {report['branch_attributes_disagreements']} |",
         f"| gold_evidence | Mean character span F1 | {report['gold_evidence_span_f1']:.6f} | | {report['gold_evidence_disagreements']} |",
