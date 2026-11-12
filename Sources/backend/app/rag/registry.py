@@ -416,8 +416,9 @@ PIPELINE: list[Stage] = [
                          "max_branches": Param("integer", 3, "Max branches", "More branches than this → ask one clarifying question.",
                                                ui="number", min=1, max=10),
                          "temporal": Param("boolean", True, "Temporal rule", "Prefer the newest version (off = A6).", ui="toggle"),
-                         "policy": Param("enum", "aaes", "Policy", "aaes, or always_clarify (A3: ask whenever an attribute is missing).",
-                                         ui="select", options=("aaes", "always_clarify")),
+                         "policy": Param("enum", "aaes", "Policy", "aaes, always_clarify (A3: ask whenever an attribute is missing), or question_only "
+                                         "(A4: ask about what the question mentions, ignoring the evidence).",
+                                         ui="select", options=("aaes", "always_clarify", "question_only")),
                      }),
           ]),
     Stage("context_construction", "Context Construction", "online", BaseContextBuilder,

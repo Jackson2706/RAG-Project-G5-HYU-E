@@ -166,8 +166,30 @@ def _condition_attributes(chunks: list[dict]) -> set[str]:
 
 # --------------------------------------------------------------------------- step 4: policy
 
+# A4: words that make a question depend on an attribute, read from the question alone (no evidence).
+# shortcut: a fixed cue list; it is the ablation's weak point by design, do not tune it on test.
+QUESTION_CUES: dict[str, re.Pattern] = {
+    "campus": re.compile(r"\bcampus\b", _I),
+    "degree_level": re.compile(r"\b(?:degree|graduate|postgraduate|program level)\b", _I),
+    "year": re.compile(r"\b(?:which|what) year\b|\byear of study\b|\bsemesters? completed\b", _I),
+    "student_type": re.compile(r"\b(?:exchange|visiting|non-degree)\b", _I),
+    "visa": re.compile(r"\bvisa\b|\bresidence (?:card|status)\b|\bimmigration\b", _I),
+    "topik_level": re.compile(r"\btopik\b|\bkorean (?:language )?(?:level|proficiency|score)\b", _I),
+    "english_track": re.compile(r"\benglish[- ](?:track|taught)\b|\bielts\b|\btoefl\b", _I),
+    "academic_status": re.compile(r"\b(?:leave|graduat\w*|coursework|enrol\w*|withdraw\w*|return to school)\b", _I),
+    "korean_standard": re.compile(r"\bkorean (?:language )?standard\b", _I),
+}
 
-def decide(chunks: list[dict], profile: dict[str, dict], max_branches: int = 3, temporal: bool = True, policy: str = "aaes") -> dict:
+
+def question_cues(question: str, profile: dict[str, dict]) -> list[str]:
+    """A4: attributes the question text mentions whose value the profile does not fix, in vocabulary order."""
+    known = known_values(profile)
+    return [a for a, cue in QUESTION_CUES.items() if a not in known and cue.search(question)]
+
+
+
+def decide(chunks: list[dict], profile: dict[str, dict], max_branches: int = 3, temporal: bool = True, policy: str = "aaes",
+           question: str = "") -> dict:
     """Step 4 over the RELEVANT selected chunks: ABSTAIN → CONFIRM → ANSWER → CONDITIONAL → CLARIFY (spec order)."""
     known = known_values(profile)
     labels = {c["id"]: label_chunk(c["condition"], c.get("status"), known) for c in chunks}
@@ -179,6 +201,12 @@ def decide(chunks: list[dict], profile: dict[str, dict], max_branches: int = 3, 
            "unknown_condition_evidence": any(labels[c["id"]] == "unknown" for c in support)}  # fmt: skip
     if not support:
         return {**out, "reason": "no_evidence" if not chunks else "not_applicable", "unknown_condition_evidence": False}
+
+    if policy == "question_only":  # A4: ask about what the question mentions; no information gain, no CONDITIONAL
+        cues = question_cues(question, profile)
+        if cues:
+            return {**out, "action": "CLARIFY", "reason": "question_cue", "clarify_attribute": cues[0]}
+        return {**out, "action": "ANSWER", "reason": "no_question_cue"}
 
     order = list(VOCABULARY)
     for attribute in sorted(_condition_attributes(chunks), key=order.index):  # CONFIRM: would the stale value matter?

@@ -233,6 +233,12 @@ Branch attributes are those with `IG > 0`. Campus is an ordinary branch attribut
 Variant A3 (`policy: "always_clarify"`) clarifies whenever any attribute of a relevant chunk's condition is
 not known, without information gain.
 
+Variant A4 (`policy: "question_only"`) is the question-only ambiguity detector: after the ABSTAIN rule it
+asks about the first attribute (vocabulary order) that a fixed cue list (`QUESTION_CUES`) finds in the
+question text and the profile does not fix; otherwise ANSWER. It computes no information gain, never returns
+CONDITIONAL or CONFIRM, and ignores how the evidence splits. Pre-registered comparison 3 is A0 vs A4 on action
+macro-F1.
+
 **Unknown caveat (A23).** When the action is ANSWER or CONDITIONAL and the support contains at least one
 `unknown` chunk, `unknown_condition_evidence = true` and `with_caveat(answer, decision)` appends: "This may
 depend on your situation; please confirm with the OIA office." Otherwise the flag is false and the answer is

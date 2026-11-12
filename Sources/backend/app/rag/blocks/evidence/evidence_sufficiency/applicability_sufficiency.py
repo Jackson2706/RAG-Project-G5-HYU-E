@@ -14,7 +14,7 @@ UNTAGGED = ChunkCondition(campus=list(VOCABULARY["campus"])).to_dict()  # never 
 class ApplicabilitySufficiency(BaseSufficiencyChecker):
     """Hyperparameters: relevance_threshold (query coverage a chunk needs to count as relevant), max_branches
     (more → CLARIFY), temporal (drop outdated support when a newer version exists; off = A6) and policy
-    ("aaes", or "always_clarify" = A3).
+    ("aaes", "always_clarify" = A3, or "question_only" = A4).
 
     Proceeds (generation runs) for ANSWER and CONDITIONAL; CLARIFY, ABSTAIN and CONFIRM get a fixed reply.
     """
@@ -26,7 +26,8 @@ class ApplicabilitySufficiency(BaseSufficiencyChecker):
         chunks = [{"id": e.chunk_id, "doc_id": e.doc_id, "condition": e.applicability.get("condition") or UNTAGGED,
                    "status": e.applicability.get("condition_status") or "unknown", "superseded": e.applicability.get("superseded", False)}
                   for e in relevant]  # fmt: skip
-        d = decide(chunks, profile, max_branches=self.params["max_branches"], temporal=self.params["temporal"], policy=self.params["policy"])
+        d = decide(chunks, profile, max_branches=self.params["max_branches"], temporal=self.params["temporal"], policy=self.params["policy"],
+                     question=question)
         action = d["action"]
         support = [e.chunk_id for e in evidence if e.chunk_id in set(d["support"])]
         proceed = action in ("ANSWER", "CONDITIONAL")

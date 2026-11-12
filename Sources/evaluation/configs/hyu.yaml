@@ -3,11 +3,11 @@
 index: null                  # null = settings.hyu_index_id (the published HYU index)
 generation: {model: "qwen3.5:4b", temperature: 0.0, seed: 42, thinking: "off"}
 presets: [B0_BASIC_DENSE_RAG, R5_HYBRID_CROSS_ENCODER, R9S_SCOPE_PREFILTER, R15_SELF_QUERY, R16_PROMPTED_CONDITIONAL,
-          G0_CLOSED_BOOK, A0_AAES, A1_AAES_HARD_FILTER, A3_AAES_ALWAYS_CLARIFY, A6_AAES_NO_TEMPORAL]
+          G0_CLOSED_BOOK, A0_AAES, A1_AAES_HARD_FILTER, A3_AAES_ALWAYS_CLARIFY, A4_QUESTION_ONLY_AMBIGUITY, A6_AAES_NO_TEMPORAL]
 # Pre-registered comparisons (Holm-corrected).
 ours: A0_AAES
 baselines: [B0_BASIC_DENSE_RAG, R5_HYBRID_CROSS_ENCODER, R15_SELF_QUERY, R16_PROMPTED_CONDITIONAL]
 best_baseline: null          # set from the dev results before the test run (G5); null = lowest AER in this run
-ablation: A4_QUESTION_ONLY_AMBIGUITY   # not implemented yet: comparison 3 reports NOT_RUN until it exists
+ablation: A4_QUESTION_ONLY_AMBIGUITY   # comparison 3: A0 vs A4 on action macro-F1
 bootstrap_resamples: 10000
 smoke_cases: 5

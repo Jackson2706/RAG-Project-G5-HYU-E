@@ -200,6 +200,21 @@ def test_always_clarify_variant_a3():
     assert aaes.decide(chunks, p, policy="always_clarify")["action"] == "CLARIFY"
 
 
+def test_question_only_variant_a4_asks_what_the_question_mentions_not_what_the_evidence_splits_on():
+    chunks = [chunk("seoul", campus=["seoul"]), chunk("erica", campus=["erica"])]  # the evidence splits on campus
+    p = profile("Do I need a visa to work part-time?")
+    assert aaes.question_cues("Do I need a visa to work part-time?", p) == ["visa"]
+    d = aaes.decide(chunks, p, policy="question_only", question="Do I need a visa to work part-time?")
+    assert d["action"] == "CLARIFY" and d["clarify_attribute"] == "visa" and d["reason"] == "question_cue"
+    assert d["branches"] == {} and d["branch_attributes"] == []  # no information gain is computed
+    q = "When does the semester start?"  # no cue: A4 answers although A0 would branch on campus
+    assert aaes.decide(chunks, profile(q), policy="question_only", question=q)["action"] == "ANSWER"
+    assert aaes.decide(chunks, profile(q))["action"] in ("CONDITIONAL", "CLARIFY")
+    stated = "I'm on a D-2 visa. Can I work part-time?"  # a cued attribute the student already stated is not asked
+    assert aaes.decide(chunks, profile(stated), policy="question_only", question=stated)["action"] == "ANSWER"
+    assert aaes.decide([], profile(q), policy="question_only", question=q)["action"] == "ABSTAIN"
+
+
 # ---------------------------------------------------------------- unknown condition status (A23)
 
 
