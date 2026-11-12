@@ -1,6 +1,6 @@
-# HYU Compass labeling guideline (v1.1)
+# HYU Compass labeling guideline (v1.2)
 
-Status: **v1.0 approved at Gate G3 (2026-11-11, PLAYBOOK A22); v1.1 amendment (section 9, 2026-11-12, A30) wins where they differ.** Written with applicability vocabulary **v1**
+Status: **v1.0 approved at Gate G3 (2026-11-11, PLAYBOOK A22); v1.1 amendment (section 9, 2026-11-12, A30) and v1.2 amendment (section 10, A31) win where they differ; section 10 wins over section 9.** Written with applicability vocabulary **v1**
 (`Sources/backend/app/rag/applicability.py`; PLAYBOOK A17). G2a is passed (A20); G3 approved this guideline.
 
 **Vocabulary v1 in short** (values are in `applicability.py`; never copy them):
@@ -343,3 +343,70 @@ rows are **inapplicable** ("graduate rows").
 **E9.** *"What is the NHI premium in 2027?"* → `19fd4a70…` (2026) in `outdated_evidence`,
 `unanswerable`, `abstain`. *"How do I enrol in NHI?"* asked for 2027 → the latest procedure is gold,
 `answer`.
+
+## 10. Amendment v1.2 (2026-11-12, PLAYBOOK A31)
+
+Decided after the v1.1 agreement check (6 disagreements on 29 shared cases). Section 10 wins over
+section 9 and sections 1-8. The examples show how the rule is applied; the final label of each case
+is the human adjudicator's.
+
+### 10.1 No term stated = the current term
+
+- A question that names no term asks about the **current term at the snapshot date** (snapshot
+  2026-11-10: the 2026 fall semester, 2026-2; "next semester" = 2027-1).
+- **Time-specific facts** (dates, deadlines, fees, quotas, amounts, event schedules) found only in an
+  older term's notice → that fact is not supported: `partial` (other facts supported) or
+  `unanswerable`, behaviour `abstain`, naming the term found ("the latest notice is from 2021").
+  The old notice goes to `outdated_evidence`.
+- **Stable rules** (procedures, eligibility, required documents) from the latest version count as
+  supported → can be `answerable`.
+
+**Examples.**
+- T14-105 *"Can a student on leave still receive an international scholarship?"*: the 2026 HIEA
+  guideline and the 2026 TOPIK-scholarship notice exclude students on leave. Eligibility, latest
+  version → supported.
+- T14-046 *"What happens during international student counseling month?"*: the only notice is from
+  2021; the month, sessions and quota are an event schedule → time-specific, not supported for
+  2026-2.
+- T14-033 *"Where do international students apply to return to the Seoul campus?"*: the 2026-1
+  return guide gives the procedure (online, no in-person or e-mail applications) → stable
+  procedure, supported. A detail that is only in an image (the exact menu path) is not a required
+  fact unless the question asks for it.
+
+### 10.2 A branch needs the evidence to split
+
+An attribute is a branch **only if the gold evidence gives different answers for different values of
+it**. Never `clarify` (or branch) on an attribute that the evidence does not split on, or that the
+student's stated details already fix. "Different rules might exist somewhere" is not a split.
+
+**Examples.**
+- T14-109 *"Do visiting students have to join Korean health insurance?"* (stated
+  `student_type: visiting`): the NHI pages give one rule for international students and no
+  different answer per visa → `visa` is not a branch; no `clarify` on visa.
+- T14-035 *"How do I extend my residence card?"*: `visa` is a branch only if the extension pages give
+  different steps for different visas; `academic_status` only if a page gives a different procedure
+  for the asker's possible statuses (e.g. on leave). If the evidence gives one procedure, `answer`.
+
+### 10.3 Negative precedence
+
+1. At least one required fact supported → `partial`, even if the corpus points elsewhere for the rest.
+2. No required fact supported **and** the corpus refers the reader elsewhere for this information →
+   `external_only`.
+3. Otherwise → `unanswerable` (or `korean_only` / `unanswerable_unreadable` when they fit).
+
+**Examples.**
+- T14-113 *"I just got admitted. How do I apply for my student visa?"*: if the snapshot supports some
+  steps (e.g. the D-2 document list or the certificate of admission) → `partial`, even though
+  issuance happens at the embassy. `external_only` only if no step is supported.
+- T14-026 *"How do I apply to the international student group?"*: if a page supports the
+  application steps of a matching group → not `unanswerable`. Only when no fact is supported and no
+  page refers elsewhere → `unanswerable`.
+
+### 10.4 Open questions (not decided by v1.2; adjudicated case by case)
+
+1. Campus unstated and only one campus has evidence (T14-113).
+2. A generic contact block (HiKorea / 1345) counted as "refers elsewhere" for personal immigration
+   actions (T14-170, 176, 182, 187, 203).
+3. `partial` and unstated branches together: `clarify` or `abstain` first (T14-130).
+4. Official pages that conflict (T14-130: Seoul part-time form 20/25/30 h vs ERICA table 10/30, 15/35).
+5. A question whose referent is ambiguous ("the international student group", T14-026).

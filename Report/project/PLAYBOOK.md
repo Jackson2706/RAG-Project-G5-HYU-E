@@ -978,3 +978,22 @@ change log `annot_codex/v11_changes.jsonl`), then annotates 04-06 (T15b). T16 re
 under v1.1 in a fresh subagent. Final agreement with bootstrap intervals; adjudication sheet to the human.
 G1 is a UI preset, disabled with "needs a labeled demo case" (P8D enables it). The AAES `max_branches`
 default (3) is a system parameter tuned on dev; it is not changed by the labeling rule.
+
+**A31 v1.2, option A, verification plan (decision from the planning chat, 2026-11-12).** Codex is out of quota
+until 2026-11-17.
+- GUIDELINES v1.2 (section 10): no term = current term at the snapshot date; time-specific facts only in an
+  older notice → partial/unanswerable + abstain; a branch needs the gold evidence to split; negative precedence
+  partial > external_only > unanswerable. Open questions listed in 10.4 for the adjudicator.
+- A fresh Sonnet 5.5 subagent labels batches 04-06 under v1.2 as primary annotator (`labels/annot_sonnet/`,
+  annotator `claude-code:claude-sonnet-5-5`); it reads only questions.jsonl, GUIDELINES.md, its batch inputs and
+  the snapshot, never `annot_claude/` or `annot_codex/`. Each batch validated, committed, pushed.
+- Codex 01-03 are not relabelled; Claude Code flags the cases v1.2 may affect for the human.
+- Agreement reported separately: Codex vs Claude (29 cases, v1.1) is the main cross-vendor figure; Sonnet vs Opus
+  (part 2, v1.2) is labelled weaker independence. Bootstrap intervals for both. κ is reported, not a gate.
+- Adjudication sheet order: the 6 known disagreements, the part-2 disagreements, the flagged 01-03 cases; both
+  labels, evidence text, the applicable v1.2 rule.
+- After the split: a verification sheet for test items (full check of conditional, temporal, negative,
+  multi_session and every 04-06 test case; 20% spot check of the other unconditional cases).
+- Claude Code implements P8 and P8D. Metrics, the test-run guard and split/freeze code get a fresh-subagent
+  review before commit.
+- **G4 freezes after the human's adjudication and verification.**
