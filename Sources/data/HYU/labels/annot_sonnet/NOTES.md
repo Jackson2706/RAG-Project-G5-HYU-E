@@ -31,3 +31,20 @@ Hard cases
 Guideline questions
 - Should a title-only page whose details are probably in an image count as unanswerable_unreadable?
 - Same as batch 04: "latest notice is from the previous term" treated as time-specific, not supported.
+
+## Batch 06 - done (30 rows, validation exit 0)
+
+Hard cases
+- Stale profiles (9.5, gold_profile updated, validator needs stated = gold): T14-210 and 211 (enrolled -> completed_coursework), T14-221 (korean_standard fail -> pass), T14-223 and 224 (visa D-4 -> D-2, student_type degree_seeking, degree_level removed because the new level is not stated).
+- T14-209: Korean-standard result decides the guideline, so conditional_answer on korean_standard (like example C3); persona is exempt, the Fail guide spans are inapplicable.
+- T14-214: gold campus is Seoul, but the 6-month D-2-8 rule and the English-track alternative are only on the ERICA Visa page (national immigration rules); hours agree with the Seoul form. No condition_sets because the text never says "or".
+- T14-217: "extend before I re-register?": the Seoul guide puts the visa step after re-registration but does not cover extension while on leave: partial.
+- T14-218: only a 2025-1 insurance-certificate notice exists (insurer change, dated); 2026 notice says Hanyang pays for enrolled students: partial (borderline answerable).
+- T14-200, 203: external_only because the ERICA Visa page names HiKorea / 1345 (open 10.4.2). T14-203 could be partial (the 14-day rule is supported). T14-194: external_only, the page sends language-course students to their language school.
+- T14-195, 197, 201, 204, 205, 207, 208, 193: unanswerable. T14-208 is borderline partial (Korean-language documents for admitted students exist, but not the English-track application upload).
+- T14-228: referent "this career program" is not in the history (open 10.4.5); I used the ERICA graduate-only Global Career Start program.
+- T14-221: the snapshot does not mention an in-house "university Korean test"; answered with TOPIK/IIE documents and a caveat.
+
+Guideline questions
+- Stale-profile cases need stated_profile = updated gold_profile for the validator; should the old value be kept somewhere (e.g. in notes)? I record it only in notes.
+- 10.4.2: should external_only apply when the page names HiKorea for the specific procedure (200, 203) but the question asks the assistant to act? I said yes.
