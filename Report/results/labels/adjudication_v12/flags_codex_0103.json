@@ -1,0 +1,164 @@
+[
+ {
+  "case_id": "T14-001",
+  "flags": [
+   "10.2: branch ['campus'] but no evidence for another value -> not a branch?"
+  ]
+ },
+ {
+  "case_id": "T14-003",
+  "flags": [
+   "10.2: branch ['campus', 'degree_level'] but no evidence for another value -> not a branch?"
+  ]
+ },
+ {
+  "case_id": "T14-005",
+  "flags": [
+   "10.1: non-answerable on old evidence but facts look stable -> answerable?"
+  ]
+ },
+ {
+  "case_id": "T14-006",
+  "flags": [
+   "10.2: branch ['campus'] but no evidence for another value -> not a branch?"
+  ]
+ },
+ {
+  "case_id": "T14-009",
+  "flags": [
+   "10.1: non-answerable on old evidence but facts look stable -> answerable?"
+  ]
+ },
+ {
+  "case_id": "T14-013",
+  "flags": [
+   "10.1: answerable from ['2021'] notice with time-specific facts -> partial/unanswerable?"
+  ]
+ },
+ {
+  "case_id": "T14-014",
+  "flags": [
+   "10.2: branch ['academic_status'] but no evidence for another value -> not a branch?"
+  ]
+ },
+ {
+  "case_id": "T14-022",
+  "flags": [
+   "10.1: answerable from ['2022'] notice with time-specific facts -> partial/unanswerable?"
+  ]
+ },
+ {
+  "case_id": "T14-032",
+  "flags": [
+   "10.1: answerable from ['2025'] notice with time-specific facts -> partial/unanswerable?"
+  ]
+ },
+ {
+  "case_id": "T14-034",
+  "flags": [
+   "10.1: answerable from ['2025'] notice with time-specific facts -> partial/unanswerable?"
+  ]
+ },
+ {
+  "case_id": "T14-038",
+  "flags": [
+   "10.1: answerable from ['2025'] notice with time-specific facts -> partial/unanswerable?"
+  ]
+ },
+ {
+  "case_id": "T14-052",
+  "flags": [
+   "10.2: branch ['degree_level'] but no evidence for another value -> not a branch?"
+  ]
+ },
+ {
+  "case_id": "T14-062",
+  "flags": [
+   "10.2: branch ['topik_level', 'english_track'] but no evidence for another value -> not a branch?"
+  ]
+ },
+ {
+  "case_id": "T14-067",
+  "flags": [
+   "10.1: non-answerable on old evidence but facts look stable -> answerable?"
+  ]
+ },
+ {
+  "case_id": "T14-069",
+  "flags": [
+   "10.2: branch ['academic_status'] but no evidence for another value -> not a branch?"
+  ]
+ },
+ {
+  "case_id": "T14-078",
+  "flags": [
+   "10.3: external_only with gold spans -> partial?"
+  ]
+ },
+ {
+  "case_id": "T14-083",
+  "flags": [
+   "10.2: branch ['campus', 'degree_level'] but no evidence for another value -> not a branch?"
+  ]
+ },
+ {
+  "case_id": "T14-086",
+  "flags": [
+   "10.2: branch ['korean_standard'] but no evidence for another value -> not a branch?"
+  ]
+ },
+ {
+  "case_id": "T14-088",
+  "flags": [
+   "10.2: branch ['degree_level', 'year', 'topik_level'] but no evidence for another value -> not a branch?"
+  ]
+ },
+ {
+  "case_id": "T14-089",
+  "flags": [
+   "10.2: branch ['academic_status'] but no evidence for another value -> not a branch?"
+  ]
+ },
+ {
+  "case_id": "T14-092",
+  "flags": [
+   "10.2: branch ['degree_level'] but no evidence for another value -> not a branch?"
+  ]
+ },
+ {
+  "case_id": "T14-093",
+  "flags": [
+   "10.1: answerable from ['2021'] notice with time-specific facts -> partial/unanswerable?"
+  ]
+ },
+ {
+  "case_id": "T14-094",
+  "flags": [
+   "10.2: branch ['visa', 'degree_level', 'year', 'topik_level', 'english_track'] but no evidence for another value -> not a branch?"
+  ]
+ },
+ {
+  "case_id": "T14-102",
+  "flags": [
+   "10.1: answerable from ['2025'] notice with time-specific facts -> partial/unanswerable?"
+  ]
+ },
+ {
+  "case_id": "T14-103",
+  "flags": [
+   "10.1: answerable from ['2025'] notice with time-specific facts -> partial/unanswerable?"
+  ]
+ },
+ {
+  "case_id": "T14-110",
+  "flags": [
+   "10.2: branch ['visa'] but no evidence for another value -> not a branch?"
+  ]
+ },
+ {
+  "case_id": "T14-114",
+  "flags": [
+   "10.2: branch ['academic_status'] but no evidence for another value -> not a branch?"
+  ]
+ }
+]
