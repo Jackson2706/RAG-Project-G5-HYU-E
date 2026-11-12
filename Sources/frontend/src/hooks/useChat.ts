@@ -12,7 +12,21 @@ export interface ChatMessage {
   status?: "streaming" | "done" | "error" | "cancelled";
   trace?: Trace; // final trace (answer, outcome, sources)
   error?: string;
+  runs?: CompareRun[]; // compare mode: one column per preset, run one after another
 }
+
+/** One preset's answer in compare mode. */
+export interface CompareRun {
+  presetId: string;
+  name: string;
+  content: string;
+  status: "queued" | "streaming" | "done" | "error" | "cancelled";
+  requestId?: string;
+  trace?: Trace;
+  error?: string;
+}
+
+type Run = Pick<CompareRun, "content" | "status" | "requestId" | "trace" | "error">;
 
 /** Earlier user turns of this chat, oldest first: AAES reads them as remembered profile facts. */
 export function historyOf(messages: ChatMessage[]): string[] {
@@ -50,6 +64,30 @@ export function useChat() {
   const patch = (id: string, change: Partial<ChatMessage> | ((m: ChatMessage) => Partial<ChatMessage>)) =>
     setMessages((ms) => ms.map((m) => (m.id === id ? { ...m, ...(typeof change === "function" ? change(m) : change) } : m)));
 
+  /** Stream one request; `update` writes into the message (chat) or into one compare column. */
+  const stream = async (question: string, config: StageChoices, indexId: string, history: string[], signal: AbortSignal,
+                        update: (change: Partial<Run> | ((r: Run) => Partial<Run>)) => void) => {
+    try {
+      await streamChat(question, config, indexId, (event) => {
+        if (event.type === "started") {
+          const requestId = event.request_id;
+          setTraces((t) => ({ ...t, [requestId]: { requestId, question, status: "running", stages: {} } }));
+          setSelected(requestId);
+          update({ requestId, status: "streaming" });
+          return;
+        }
+        setTraces((t) => ({ ...t, [event.request_id]: applyEvent(t[event.request_id], event) }));
+        if (event.type === "answer_delta") update((r) => ({ content: r.content + event.text }));
+        if (event.type === "done") {
+          const ok = event.trace.status === "completed";
+          update({ content: event.trace.answer, trace: event.trace, status: ok ? "done" : "error", error: event.trace.error ?? undefined });
+        }
+      }, signal, history);
+    } catch (err) {
+      update({ status: signal.aborted ? "cancelled" : "error", error: signal.aborted ? undefined : (err as Error).message });
+    }
+  };
+
   const send = useCallback(async (question: string, config: StageChoices, indexId = "default") => {
     const answerId = newId();
     const history = historyOf(latest.current);
@@ -57,29 +95,27 @@ export function useChat() {
     const controller = new AbortController();
     abort.current = controller;
     setBusy(true);
-    let requestId = "";
-    try {
-      await streamChat(question, config, indexId, (event) => {
-        if (event.type === "started") {
-          requestId = event.request_id;
-          setTraces((t) => ({ ...t, [requestId]: { requestId, question, status: "running", stages: {} } }));
-          setSelected(requestId);
-          patch(answerId, { requestId });
-          return;
-        }
-        setTraces((t) => ({ ...t, [event.request_id]: applyEvent(t[event.request_id], event) }));
-        if (event.type === "answer_delta") patch(answerId, (m) => ({ content: m.content + event.text }));
-        if (event.type === "done") {
-          const ok = event.trace.status === "completed";
-          patch(answerId, { content: event.trace.answer, trace: event.trace, status: ok ? "done" : "error", error: event.trace.error ?? undefined });
-        }
-      }, controller.signal, history);
-    } catch (err) {
-      const cancelled = controller.signal.aborted;
-      patch(answerId, { status: cancelled ? "cancelled" : "error", error: cancelled ? undefined : (err as Error).message });
-    } finally {
-      setBusy(false);
+    await stream(question, config, indexId, history, controller.signal, (change) => patch(answerId, (m) => (typeof change === "function" ? change(m as Run) : change) as Partial<ChatMessage>));
+    setBusy(false);
+  }, []);
+
+  /** Compare mode: the same question through 2-4 presets, sequentially (the Mac has 16 GB). */
+  const sendCompare = useCallback(async (question: string, presets: { id: string; name: string; config: StageChoices }[], indexId = "default") => {
+    const answerId = newId();
+    const history = historyOf(latest.current);
+    const runs: CompareRun[] = presets.map((p) => ({ presetId: p.id, name: p.name, content: "", status: "queued" }));
+    setMessages((ms) => [...ms, { id: newId(), role: "user", content: question }, { id: answerId, role: "assistant", content: "", status: "streaming", runs }]);
+    const controller = new AbortController();
+    abort.current = controller;
+    setBusy(true);
+    for (const [i, preset] of presets.entries()) {
+      const update = (change: Partial<Run> | ((r: Run) => Partial<Run>)) =>
+        patch(answerId, (m) => ({ runs: m.runs!.map((r, j) => (j === i ? { ...r, ...(typeof change === "function" ? change(r) : change) } : r)) }));
+      if (controller.signal.aborted) update({ status: "cancelled" });
+      else await stream(question, preset.config, indexId, history, controller.signal, update);
     }
+    patch(answerId, { status: controller.signal.aborted ? "cancelled" : "done" });
+    setBusy(false);
   }, []);
 
   const cancel = useCallback(() => abort.current?.abort(), []);
@@ -97,7 +133,7 @@ export function useChat() {
     if (trace) setTraces((t) => ({ ...t, [requestId]: applyEvent({ requestId, question: trace.question, status: trace.status, stages: {} }, { type: "done", request_id: requestId, trace }) }));
   }, [traces]);
 
-  return { messages, traces, selected, select, send, cancel, reset, busy };
+  return { messages, traces, selected, select, send, sendCompare, cancel, reset, busy };
 }
 
 export type ChatState = ReturnType<typeof useChat>;

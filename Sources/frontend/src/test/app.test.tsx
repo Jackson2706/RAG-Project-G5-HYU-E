@@ -195,3 +195,28 @@ describe("AAES in the chat", () => {
     expect(screen.getByTestId("action-badge")).toHaveTextContent("Conditional answer");
   });
 });
+
+describe("compare mode", () => {
+  it("picks at most 4 presets and opens a column's trace on click", async () => {
+    const { ComparePicker, CompareColumns } = await import("@/components/chat/CompareView");
+    const preset = (id: string): Preset => ({ id, kind: "baseline", name: id, description: "", enabled: true, config: {}, errors: [] });
+    const presets = ["P1", "P2", "P3", "P4", "P5"].map(preset).concat({ ...preset("OFF"), enabled: false, config: null });
+    const onChange = vi.fn();
+    render(<ComparePicker presets={presets} chosen={["P1", "P2", "P3", "P4"]} onChange={onChange} />);
+    expect(screen.queryByLabelText("OFF")).toBeNull(); // disabled presets are not offered
+    expect(screen.getByLabelText("P5")).toBeDisabled();
+    fireEvent.click(screen.getByLabelText("P1"));
+    expect(onChange).toHaveBeenCalledWith(["P2", "P3", "P4"]);
+
+    const onInspect = vi.fn();
+    const trace = { action: "CLARIFY", total_ms: 1200, sources: [] } as unknown as NonNullable<import("@/hooks/useChat").CompareRun["trace"]>;
+    render(<CompareColumns onInspect={onInspect} runs={[
+      { presetId: "A0", name: "A0 — AAES full", content: "Which campus?", status: "done", requestId: "r1", trace },
+      { presetId: "B0", name: "B0", content: "", status: "queued" },
+    ]} />);
+    expect(screen.getAllByTestId("action-badge")).toHaveLength(1);
+    expect(screen.getByText("Waiting for the previous preset…")).toBeInTheDocument();
+    fireEvent.click(screen.getAllByTitle("Show this run's execution trace")[0]);
+    expect(onInspect).toHaveBeenCalledWith("r1");
+  });
+});

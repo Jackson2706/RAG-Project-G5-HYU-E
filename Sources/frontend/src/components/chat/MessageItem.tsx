@@ -3,6 +3,7 @@ import { Children, type ReactNode } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
+import { CompareColumns } from "@/components/chat/CompareView";
 import { Sources } from "@/components/chat/Sources";
 import { Badge, CopyButton, IconButton } from "@/components/ui/primitives";
 import type { ChatMessage } from "@/hooks/useChat";
@@ -52,6 +53,7 @@ export function MessageItem({ message, onInspect }: { message: ChatMessage; onIn
       </div>
     );
   }
+  if (message.runs) return <CompareColumns runs={message.runs} onInspect={onInspect} />;
   const streaming = message.status === "streaming";
   const trace = message.trace;
   return (

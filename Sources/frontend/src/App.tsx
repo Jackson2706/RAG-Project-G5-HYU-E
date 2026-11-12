@@ -23,10 +23,18 @@ export default function App() {
     storage.set("hyu-compass:dark", dark);
   }, [dark]);
 
-  const blocked = !config.choices ? "Loading the pipeline configuration…" : !config.valid ? "Fix the configuration error in the RAG Pipeline panel first." : null;
+  const [compare, setCompare] = useState<string[] | null>(null); // compare mode: the chosen preset ids
+  const blocked = compare
+    ? compare.length < 2 ? "Choose at least 2 presets to compare." : null
+    : !config.choices ? "Loading the pipeline configuration…" : !config.valid ? "Fix the configuration error in the RAG Pipeline panel first." : null;
 
   const send = (question: string) => {
     setTab("execution"); // watch the stages run
+    if (compare) {
+      const chosen = compare.map((id) => config.presets.find((p) => p.id === id)!).filter((p) => p?.config);
+      void chat.sendCompare(question, chosen.map((p) => ({ id: p.id, name: p.name, config: p.config! })), config.indexId);
+      return;
+    }
     void chat.send(question, config.choices!, config.indexId); // the exact methods + parameters (and index) for this request
   };
 
@@ -43,7 +51,8 @@ export default function App() {
         <Workspace
           mobileView={mobileView}
           pipeline={<PipelinePanel config={config} system={system} chat={chat} tab={tab} onTabChange={setTab} />}
-          chat={<ChatPanel chat={chat} onSend={send} blockedReason={blocked} onInspect={inspect} />}
+          chat={<ChatPanel chat={chat} onSend={send} blockedReason={blocked} onInspect={inspect}
+                           presets={config.presets} compare={compare} onCompare={setCompare} />}
         />
       </div>
     </TooltipProvider>

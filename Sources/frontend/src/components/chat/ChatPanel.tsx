@@ -1,9 +1,11 @@
-import { ArrowUp, Compass, Plus, Square } from "lucide-react";
+import { ArrowUp, Columns3, Compass, Plus, Square } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
+import { ComparePicker } from "@/components/chat/CompareView";
 import { MessageItem } from "@/components/chat/MessageItem";
 import { Button } from "@/components/ui/primitives";
 import type { ChatState } from "@/hooks/useChat";
+import type { Preset } from "@/types/api";
 
 const EXAMPLES = [
   "How many credits can a first-year student register for?",
@@ -12,8 +14,9 @@ const EXAMPLES = [
   "Where can I find orientation information?",
 ];
 
-export function ChatPanel({ chat, onSend, blockedReason, onInspect }: {
+export function ChatPanel({ chat, onSend, blockedReason, onInspect, presets, compare, onCompare }: {
   chat: ChatState; onSend: (q: string) => void; blockedReason: string | null; onInspect: (requestId: string) => void;
+  presets: Preset[]; compare: string[] | null; onCompare: (ids: string[] | null) => void; // null = compare mode off
 }) {
   const [text, setText] = useState("");
   const scroller = useRef<HTMLDivElement>(null);
@@ -36,14 +39,20 @@ export function ChatPanel({ chat, onSend, blockedReason, onInspect }: {
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between gap-2 border-b border-border px-3 py-2">
-        <h2 className="text-sm font-semibold">Chat</h2>
-        <Button size="sm" onClick={chat.reset} disabled={chat.busy} aria-label="New conversation">
-          <Plus className="h-3.5 w-3.5" /><span className="hidden sm:inline">New conversation</span>
-        </Button>
+        <h2 className="text-sm font-semibold">{compare ? "Compare presets" : "Chat"}</h2>
+        <div className="flex gap-1.5">
+          <Button size="sm" onClick={() => onCompare(compare ? null : [])} disabled={chat.busy} aria-pressed={!!compare} aria-label="Compare mode">
+            <Columns3 className="h-3.5 w-3.5" /><span className="hidden sm:inline">{compare ? "Exit compare" : "Compare"}</span>
+          </Button>
+          <Button size="sm" onClick={chat.reset} disabled={chat.busy} aria-label="New conversation">
+            <Plus className="h-3.5 w-3.5" /><span className="hidden sm:inline">New conversation</span>
+          </Button>
+        </div>
       </div>
+      {compare && <ComparePicker presets={presets} chosen={compare} onChange={onCompare} />}
 
       <div ref={scroller} className="min-h-0 flex-1 overflow-y-auto" aria-live="polite">
-        <div className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-6">
+        <div className={`mx-auto flex flex-col gap-6 px-4 py-6 ${compare ? "max-w-6xl" : "max-w-3xl"}`}>
           {chat.messages.length === 0 ? (
             <div className="flex flex-col items-center gap-5 pt-[8vh] text-center">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent"><Compass className="h-6 w-6 text-primary" /></div>
