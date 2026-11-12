@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+User-agent: Yeti
+Allow: /
+
+Disallow: /index/admin/
+Disallow: /index/adm/

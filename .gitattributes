@@ -1,0 +1,2 @@
+# Preserve original downloaded response bytes and archive hashes.
+data/raw/web_*/batch*/raw/* -text -diff -whitespace

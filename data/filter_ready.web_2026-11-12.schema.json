@@ -1,0 +1,33 @@
+{
+  "version": "web-1",
+  "required_fields": [
+    "metadata_schema_version",
+    "unit_id",
+    "title",
+    "source_url",
+    "raw_source_path",
+    "source_sha256",
+    "retrieved_on",
+    "source_type",
+    "document_type",
+    "topic",
+    "topics",
+    "scope",
+    "language",
+    "temporal_status"
+  ],
+  "optional_filters": [
+    "campus",
+    "academic_level",
+    "audience",
+    "student_category",
+    "academic_year",
+    "term",
+    "college",
+    "department",
+    "degree_level"
+  ],
+  "unknown_policy": "Missing scope/date fields mean unknown, never infer ALL, a current academic year, or international status from English. retrieved_on is collection time, not academic_year/effective_date.",
+  "scope_policy": "College-wide multi-department pages omit department. General campus services omit academic_level unless explicitly scoped.",
+  "tuition_policy": "Academic year is admission cycle. fee_reference_year and fee_reference_term describe the quoted rate period."
+}

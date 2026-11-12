@@ -1,0 +1,6 @@
+﻿﻿User-agent: *
+
+Allow: /
+
+
+Sitemap: http://hyicpbl.hanyang.ac.kr/sitemap.xml

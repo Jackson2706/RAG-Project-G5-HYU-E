@@ -1,0 +1,61 @@
+{
+  "original_sample_records": 14,
+  "sample_questions": 102,
+  "metadata_cases": 33,
+  "sample_answerability": {
+    "answerable": 86,
+    "unanswerable": 16
+  },
+  "source_documents": 55,
+  "review_status": "Drafts migrated to prepared source units. Answerability labels and precise relevance need review against the expanded 713-document corpus.",
+  "fixture_corpora": {
+    "sample_questions.jsonl": "data/samples",
+    "filter_ready_questions.jsonl": "data/filter_ready",
+    "filter_ready_metadata_queries.jsonl": "data/filter_ready"
+  },
+  "question_files_sha256": {
+    "sample_questions.jsonl": "54c5d1913f6dbd416adfd6fca5307fa17c48cd89a0f09ba700a40b2de61a39a7",
+    "filter_ready_questions.jsonl": "6acdb6e7ba1f0ba6335bb680ddf1135e0180517336572dbc470a90b555f5eccf",
+    "filter_ready_metadata_queries.jsonl": "36a0d8bb76f5a759d26213e21be2ed2eaa211d5099ee365ba621cd035f74ae5e"
+  },
+  "filter_ready_questions": 683,
+  "filter_ready_answerability": {
+    "answerable": 653,
+    "unanswerable": 30
+  },
+  "filter_ready_categories": {
+    "major_overview": 53,
+    "career_paths": 53,
+    "program_features": 53,
+    "course_list": 53,
+    "department_contacts": 53,
+    "course_content": 226,
+    "source_scope": 3,
+    "university_overview": 2,
+    "application_procedure": 2,
+    "submission_rules": 3,
+    "document_authenticity": 4,
+    "admission_unit_notation": 2,
+    "program_availability": 22,
+    "source_contacts": 7,
+    "admission_schedule": 6,
+    "graduate_eligibility": 7,
+    "required_documents": 17,
+    "gpa_certification": 4,
+    "language_documents": 2,
+    "major_specific_requirements": 30,
+    "evaluation_process": 2,
+    "language_requirements": 8,
+    "scholarship_rules": 3,
+    "scholarships": 10,
+    "tuition": 5,
+    "refunds_and_source_language": 3,
+    "dormitory_contacts": 2,
+    "academic_verification": 2,
+    "multi_document_comparison": 12,
+    "diagram_understanding": 1,
+    "program_timeline": 1,
+    "source_quality": 2,
+    "unanswerable": 30
+  }
+}

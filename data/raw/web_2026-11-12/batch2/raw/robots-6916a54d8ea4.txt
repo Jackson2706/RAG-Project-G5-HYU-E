@@ -1,0 +1,8 @@
+User-agent: *
+Disallow: /aseoul/
+Disallow: /bbs/
+Disallow: /bbs_skin/
+Disallow: /data/
+Disallow: /lib/
+Disallow: /se2/
+Disallow: /vendor/

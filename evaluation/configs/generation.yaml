@@ -9,4 +9,4 @@ retrieval_preset: B0_BASIC_DENSE_RAG
 annotations: evaluation/annotations/qa_annotations.jsonl
 cases:
   beir: {datasets: [scifact, nfcorpus, arguana], per_dataset: 10}   # first 10 test queries (sorted IDs)
-  hyu_fixture: data/eval/sample_questions.jsonl                     # 14 questions with author-written answerable labels
+  hyu_fixture: data/eval/sample_questions.jsonl                     # 102 synthetic questions; expanded labels require human review (data/eval/README.md)

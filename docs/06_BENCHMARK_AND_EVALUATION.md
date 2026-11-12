@@ -354,10 +354,10 @@ fixture**: the five synthetic HYU sample documents (`data/samples/`) and
 computed from each document's declared metadata by the pipeline's own predicate. R0, R9 and R10 use
 the same candidate cutoff (Top 2), so postfiltering's **starvation** becomes visible.
 
-The **gate** (R12) is scored on the 14 questions of `data/eval/sample_questions.jsonl` with a derived
+The **gate** (R12) is scored on the 102 questions of `data/eval/sample_questions.jsonl` with a derived
 label: sufficient = the question is answerable **and** a relevant document is among the selected
 evidence. Convention (Lesson 6): actual positive = sufficient, predicted positive = proceed.
-These labels were written by the project authors — the numbers show behaviour, not real-world accuracy.
+The original labels were written by the project authors; the expanded questions have draft labels requiring human review. See [the question-bank notes](../data/eval/README.md). The numbers show behaviour, not real-world accuracy.
 
 ---
 
