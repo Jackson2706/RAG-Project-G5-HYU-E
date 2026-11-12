@@ -96,7 +96,11 @@ export interface Trace {
   model: string | null;
   error: string | null;
   total_ms?: number;
+  action?: AaesAction | null; // AAES presets only
+  unknown_condition_evidence?: boolean | null;
 }
+
+export type AaesAction = "ANSWER" | "CONDITIONAL" | "CLARIFY" | "ABSTAIN" | "CONFIRM";
 
 /** Events of POST /api/chat/stream. */
 export type StreamEvent =

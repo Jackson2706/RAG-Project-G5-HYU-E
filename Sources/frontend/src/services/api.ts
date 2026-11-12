@@ -47,13 +47,14 @@ export function parseEvents(buffer: string): { events: StreamEvent[]; rest: stri
  * Ask a question and receive live events. We use fetch() instead of EventSource because we
  * need to POST the question and the chosen methods in the request body.
  */
-export async function streamChat(question: string, stages: StageChoices, indexId: string, onEvent: (e: StreamEvent) => void, signal: AbortSignal) {
+export async function streamChat(question: string, stages: StageChoices, indexId: string, onEvent: (e: StreamEvent) => void, signal: AbortSignal,
+  history: string[] = []) {
   let res: Response;
   try {
     res = await fetch("/api/chat/stream", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question, stages, index_id: indexId }),
+      body: JSON.stringify({ question, stages, index_id: indexId, history }),
       signal,
     });
   } catch (err) {

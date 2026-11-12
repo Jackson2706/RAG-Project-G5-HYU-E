@@ -30,7 +30,8 @@ from typing import Any
 
 import yaml
 
-from evaluation import ROOT, beir
+from evaluation import ROOT, beir, hyu_suite
+from evaluation.guard import GuardError, check_run, record_test_run
 from evaluation.indexes import ensure_folder_index, ensure_index, index_id
 from evaluation.reports import load_jsonl, write_reports
 
@@ -50,7 +51,7 @@ STOP_AFTER = "evidence_sufficiency"  # retrieval-only: never generate an answer 
 
 @dataclass
 class Task:
-    suite: str  # offline | retrieval | fixture | generation
+    suite: str  # offline | retrieval | fixture | generation | hyu
     experiment: str
     dataset: str
     protocol: str = "B"
@@ -81,9 +82,9 @@ def deep_merge(base: dict, extra: dict) -> dict:
 # --------------------------------------------------------------------------------------------- planning
 
 
-def build_plan(args, offline: dict, online: dict, generation: dict) -> list[Task]:
+def build_plan(args, offline: dict, online: dict, generation: dict, hyu: dict | None = None) -> list[Task]:
     suites = {"all": ["offline", "retrieval", "generation"], "offline": ["offline"], "retrieval": ["retrieval"],
-              "generation": ["generation"]}[args.suite]  # fmt: skip
+              "generation": ["generation"], "hyu": ["hyu"]}[args.suite]  # fmt: skip
     wanted_datasets = set(args.dataset.split(",")) if args.dataset else None
     wanted_experiments = set(args.experiment.split(",")) if args.experiment else None
     tasks: list[Task] = []
@@ -120,6 +121,14 @@ def build_plan(args, offline: dict, online: dict, generation: dict) -> list[Task
         for backbone in generation["backbones"]:
             if keep("cases", f"GEN_{backbone}") or (wanted_experiments and "GENERATION" in wanted_experiments):
                 tasks.append(Task("generation", f"GEN_{backbone}", "cases", "-", generation["retrieval_preset"], options={"model": backbone}))
+    if "hyu" in suites:
+        split = args.split or "dev"
+        for preset in hyu["presets"]:
+            if keep(f"hyu_{split}", preset) or keep(split, preset):
+                limit = hyu["smoke_cases"] if args.smoke else None
+                if args.max_queries:
+                    limit = min(limit or args.max_queries, args.max_queries)
+                tasks.append(Task("hyu", preset, split, "-", preset, query_limit=limit))
     return tasks
 
 
@@ -162,7 +171,8 @@ class Run:
         self.dir = RESULTS_DIR / self.run_id
         self.raw = self.dir / "raw"
         self.offline, self.online, self.generation = load_yaml("offline.yaml"), load_yaml("online.yaml"), load_yaml("generation.yaml")
-        self.split = args.split or self.online["split"]
+        self.hyu = load_yaml("hyu.yaml")
+        self.split = args.split or ("dev" if args.suite == "hyu" else self.online["split"])
         self.settings = get_settings().model_copy(update={"embedding_device": "auto"})
         self.db = Database.connect(self.settings)
         self.ollama = OllamaClient(self.settings.ollama_base_url, timeout=self.settings.ollama_timeout)
@@ -404,6 +414,31 @@ async def run_generation_task(run: Run, task: Task) -> dict:
     return {"queries": len(read_done(path)), "model_identity": identity, "config": config}
 
 
+async def run_hyu_task(run: Run, task: Task) -> dict:
+    """One preset on the frozen HYU labels of task.dataset (dev or test), with each case's session history."""
+    db = run.db.for_index(run.hyu["index"] or run.settings.hyu_index_id)
+    services = Services(db=db, ollama=run.ollama, settings=run.settings)
+    overrides = {"generation": {"params": run.hyu["generation"]}} if "generation" in preset_config(task.preset) else {}
+    config = preset_config(task.preset, overrides)
+    path = run.raw_file(task)
+    done = read_done(path)
+    cases = hyu_suite.load_cases(task.dataset)[: task.query_limit]
+    to_snapshot = hyu_suite.snapshot_doc_ids(cases[0]["snapshot_id"]) if cases else {}
+
+    def lookup(ids):  # chunk spans with the SNAPSHOT doc id, the one the label spans use
+        return {c["chunk_id"]: {"doc_id": to_snapshot.get(c["doc_id"], c["doc_id"]), "source_spans": c.get("source_spans", [])}
+                for c in db.chunks.find({"chunk_id": {"$in": sorted(ids)}}, {"_id": 0, "chunk_id": 1, "doc_id": 1, "source_spans": 1})}  # fmt: skip
+
+    for n, case in enumerate(cases, start=1):
+        if case["case_id"] in done:
+            continue
+        trace = await run_rag(hyu_suite.question_for(case, config), config, services, save_trace=False, history=hyu_suite.history_of(case))
+        rec = hyu_suite.trace_record(case, trace, lookup)
+        append(path, rec)
+        print(f"    {task.key}: {n}/{len(cases)} {case['case_id']} → {rec['behavior']} {rec['error'] or ''}", flush=True)
+    return {"queries": len(read_done(path)), "index_id": db.index_id, "config": config}
+
+
 # --------------------------------------------------------------------------------------------- dry run, manifest, main
 
 
@@ -421,6 +456,15 @@ def check_task(run: Run, task: Task, installed: set[str] | None) -> tuple[str, s
                 return "BLOCKED", f"dataset not downloaded (python -m evaluation.runner --download {task.dataset})"
             if aux and installed is not None and aux not in installed:
                 return "BLOCKED", f"auxiliary LLM '{aux}' is not installed (ollama pull {aux})"
+        if task.suite == "hyu":
+            if not (hyu_suite.LABELS_DIR / f"{task.dataset}.jsonl").is_file():
+                return "BLOCKED", f"labels not frozen yet ({task.dataset}.jsonl missing; run labeling.freeze at G4)"
+            index = run.hyu["index"] or run.settings.hyu_index_id
+            if run.db.for_index(index).get_manifest() is None:
+                return "BLOCKED", f"HYU index '{index}' does not exist (scripts/ingest_snapshot.py)"
+            model = run.hyu["generation"]["model"]
+            if installed is not None and model not in installed and "generation" in preset_config(task.preset):
+                return "BLOCKED", f"Ollama model '{model}' is not installed (ollama pull {model})"
         if task.suite == "generation" and installed is not None and task.options["model"] not in installed:
             return "BLOCKED", f"Ollama model '{task.options['model']}' is not installed (ollama pull {task.options['model']})"
         if (task.suite == "generation" or task.options.get("llm")) and installed is None:
@@ -462,7 +506,8 @@ async def write_manifest(run: Run, tasks: list[Task]) -> None:
         "python": sys.version.split()[0], "ollama_version": ollama_version,
         "packages": {p: version(p) for p in ("torch", "sentence-transformers", "transformers", "qdrant-client", "pymongo", "numpy", "pyyaml")},
         "split": run.split, "smoke": run.args.smoke, "max_queries": run.args.max_queries,
-        "configs": {"offline": run.offline, "online": run.online, "generation": run.generation},
+        "configs": {"offline": run.offline, "online": run.online, "generation": run.generation, "hyu": run.hyu},
+        "labels_sha256": (hyu_suite.LABELS_DIR / "FROZEN.sha256").read_text() if (hyu_suite.LABELS_DIR / "FROZEN.sha256").exists() else None,
         "datasets": {ds: json.loads((beir.dataset_dir(ds) / "SOURCE.json").read_text()) for ds in beir.DATASETS if beir.is_downloaded(ds)},
         "tasks": [t.key for t in tasks],
     }  # fmt: skip
@@ -475,7 +520,19 @@ async def write_manifest(run: Run, tasks: list[Task]) -> None:
 
 async def main_async(args) -> int:
     run = Run(args)
-    tasks = build_plan(args, run.offline, run.online, run.generation)
+    tasks = build_plan(args, run.offline, run.online, run.generation, run.hyu)
+    test_log = RESULTS_DIR / "TEST_RUNS.md"
+    if args.suite == "hyu" and not args.dry_run:
+        try:  # AGENTS.md: a test run needs a clean tree and --confirm-frozen; every run needs intact frozen labels
+            if run.split == "test" and args.smoke:
+                raise GuardError("no smoke runs on the test split (use dev)")
+            if run.split == "test" and not run.hyu.get("best_baseline"):
+                raise GuardError("set best_baseline in evaluation/configs/hyu.yaml from the dev results before a test run (G5)")
+            resumable = (str(test_log.relative_to(REPO_ROOT)), str(run.dir.relative_to(REPO_ROOT)) + "/") if args.resume else ()
+            check_run(run.split, args.confirm_frozen, hyu_suite.LABELS_DIR, REPO_ROOT, resumable)
+        except (GuardError, ValueError) as exc:
+            print(f"Refusing to run: {exc}")
+            return 2
     try:
         installed: set[str] | None = {m["name"] for m in await run.ollama.list_models()}
     except OllamaError:
@@ -494,10 +551,21 @@ async def main_async(args) -> int:
             limit = f" (first {t.query_limit} queries)" if t.query_limit else ""
             print(f"{t.key:70} {'READY' if t.status == 'PENDING' else t.status}{limit} {t.reason}")
         print(f"\n{len(tasks)} tasks; nothing was run (dry run).")
-        return 0
+        not_ready = [t for t in tasks if t.status in ("BLOCKED", "FAILED")]
+        return 1 if args.suite == "hyu" and not_ready else 0  # the hyu preflight of run_all.sh must stop on a blocked task
     if not (health["mongodb"]["ok"] and health["qdrant"]["ok"]):
         print("MongoDB and Qdrant must be running (docker compose up -d).")
         return 1
+    if args.suite == "hyu" and run.split == "test":
+        blocked = [t.key for t in tasks if t.status in ("BLOCKED", "FAILED")]
+        if blocked:
+            print(f"Refusing to start the test run: {len(blocked)} tasks are not ready ({blocked[0]} …)")
+            return 1
+        try:  # recorded before the first case runs, so a crash still counts
+            record_test_run(test_log, run.run_id, git_info()["commit"] or "?", [t.preset for t in tasks], args.reason or "test run", args.resume)
+        except GuardError as exc:
+            print(f"Refusing to run: {exc}")
+            return 2
     await write_manifest(run, tasks)
     for t in tasks:
         previous = run.status.get(t.key, {})
@@ -523,6 +591,8 @@ async def main_async(args) -> int:
                 info = await run_retrieval_task(run, t)
             elif t.suite == "fixture":
                 info = await run_fixture_task(run, t)
+            elif t.suite == "hyu":
+                info = await run_hyu_task(run, t)
             else:
                 info = await run_generation_task(run, t)
             run.status[t.key] = {"status": "COMPLETED", "seconds": round(time.perf_counter() - started, 1), **info}
@@ -534,12 +604,15 @@ async def main_async(args) -> int:
         print(f"  → {run.status[t.key]['status']} {run.status[t.key].get('reason', '')}", flush=True)
     write_reports(run.dir)
     print(f"\nReports: {run.dir / 'summary.md'}")
-    return 0
+    bad = [k for k, v in run.status.items() if v.get("status") in ("FAILED", "BLOCKED") and k in {t.key for t in tasks}]
+    if bad:
+        print(f"{len(bad)} tasks did not complete: {', '.join(bad)}")
+    return 1 if bad else 0
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="HYU Compass headless benchmark runner")
-    parser.add_argument("--suite", choices=["all", "offline", "retrieval", "generation"], default="all")
+    parser.add_argument("--suite", choices=["all", "offline", "retrieval", "generation", "hyu"], default="all")
     parser.add_argument("--dataset", help="comma-separated BEIR datasets (default: all in the config)")
     parser.add_argument("--experiment", help="comma-separated experiment IDs, e.g. B0_BASIC_DENSE_RAG,R2_HYBRID_RRF")
     parser.add_argument("--split", help="dataset split (default: the config's, i.e. test)")
@@ -548,6 +621,8 @@ def main() -> int:
     parser.add_argument("--resume", action="store_true", help="continue tasks of an existing run (skip finished queries)")
     parser.add_argument("--force", action="store_true", help="recompute tasks and rebuild their indexes")
     parser.add_argument("--run-id", help="folder name under Report/results/ (default: main, or smoke)")
+    parser.add_argument("--confirm-frozen", action="store_true", help="required for --suite hyu --split test (AGENTS.md)")
+    parser.add_argument("--reason", help="why this test run happens (recorded in Report/results/TEST_RUNS.md)")
     parser.add_argument("--max-queries", type=int, help="limit queries per task (recorded in the run manifest)")
     parser.add_argument("--download", help="download scifact,nfcorpus,arguana,scifact_original,conditionalqa into Sources/data/benchmarks/ and exit")
     args = parser.parse_args()

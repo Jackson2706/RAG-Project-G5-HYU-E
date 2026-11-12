@@ -439,7 +439,11 @@ def write_reports(run_dir: Path) -> None:
                "fixture_filters": filters, "fixture_gate": gates, "generation": generation,
                "failure_counts": Counter(f"{f['experiment']}: {f['category']}" for f in failures)}  # fmt: skip
     (run_dir / "results.json").write_text(json.dumps(results, indent=2, default=str))
-    (run_dir / "summary.md").write_text(summary_markdown(manifest, status, comparison, offline_rows, ann, filters, gates, generation, failures))
+    from evaluation.hyu_suite import write_hyu_reports  # local import: hyu_suite imports this module
+
+    hyu_section = write_hyu_reports(run_dir, manifest, write_csv)
+    (run_dir / "summary.md").write_text(summary_markdown(manifest, status, comparison, offline_rows, ann, filters, gates, generation, failures)
+                                        + ("\n" + hyu_section if hyu_section else ""))
 
 
 def main() -> None:

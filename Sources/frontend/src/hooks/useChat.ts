@@ -14,6 +14,11 @@ export interface ChatMessage {
   error?: string;
 }
 
+/** Earlier user turns of this chat, oldest first: AAES reads them as remembered profile facts. */
+export function historyOf(messages: ChatMessage[]): string[] {
+  return messages.filter((m) => m.role === "user").map((m) => m.content);
+}
+
 /** Live state of one request while it runs: stages arrive one by one. */
 export interface LiveTrace {
   requestId: string;
@@ -39,12 +44,15 @@ export function useChat() {
   const [selected, setSelected] = useState<string | null>(null); // request shown in the Execution tab
   const [busy, setBusy] = useState(false);
   const abort = useRef<AbortController | null>(null);
+  const latest = useRef<ChatMessage[]>([]);
+  latest.current = messages;
 
   const patch = (id: string, change: Partial<ChatMessage> | ((m: ChatMessage) => Partial<ChatMessage>)) =>
     setMessages((ms) => ms.map((m) => (m.id === id ? { ...m, ...(typeof change === "function" ? change(m) : change) } : m)));
 
   const send = useCallback(async (question: string, config: StageChoices, indexId = "default") => {
     const answerId = newId();
+    const history = historyOf(latest.current);
     setMessages((ms) => [...ms, { id: newId(), role: "user", content: question }, { id: answerId, role: "assistant", content: "", status: "streaming" }]);
     const controller = new AbortController();
     abort.current = controller;
@@ -65,7 +73,7 @@ export function useChat() {
           const ok = event.trace.status === "completed";
           patch(answerId, { content: event.trace.answer, trace: event.trace, status: ok ? "done" : "error", error: event.trace.error ?? undefined });
         }
-      }, controller.signal);
+      }, controller.signal, history);
     } catch (err) {
       const cancelled = controller.signal.aborted;
       patch(answerId, { status: cancelled ? "cancelled" : "error", error: cancelled ? undefined : (err as Error).message });

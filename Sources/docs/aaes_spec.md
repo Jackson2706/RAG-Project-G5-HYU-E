@@ -363,3 +363,40 @@ disagreement outcomes, frequent out-of-vocabulary conditions, audience counts, a
 counts. The report states that the automated reference is not human-validated and that Codex also
 wrote the tagging rules.
 
+
+## Metrics (P8)
+
+Code: `evaluation/metrics/aaes.py` (per-case functions) and `evaluation/metrics/stats.py` (paired tests).
+Every function has a hand-computed example in its docstring and a test in `evaluation/tests/test_aaes_metrics.py`.
+A rate whose denominator is 0 is undefined (`None`) and is left out of means.
+
+**Actions.** The system action maps to a label behaviour: ANSWER → `answer`, CONDITIONAL →
+`conditional_answer`, CLARIFY and CONFIRM → `clarify` (both ask the student), ABSTAIN → `abstain`.
+Methods without AAES actions: an answered outcome → `answer`, a gate abstention → `abstain`.
+
+| Metric | Definition |
+|---|---|
+| Action accuracy | predicted = `expected_behavior` |
+| Acceptable-action rate | predicted ∈ `acceptable_behaviors` |
+| 4×4 confusion, macro-F1 | rows expected, columns predicted; F1 per behaviour, averaged over behaviours that occur as expected or predicted |
+| Clarification P/R | positive = `clarify`, on expected vs predicted |
+| Unnecessary-clarification rate | of the cases where `clarify` is not acceptable, the share where the system clarified |
+| Gate 2×2 | proceed = answer/conditional; sufficient = expected answer/conditional (`metrics/gate.py`) |
+
+**Chunk classes.** A retrieved chunk (doc id + `source_spans`) is `gold` if it overlaps a `gold_evidence`
+span, else `inapplicable` if it overlaps an `inapplicable_evidence` span, else `outdated` if it overlaps an
+`outdated_evidence` span, else `other`. Overlap = same doc and a shared character.
+
+| Metric | Definition (per case) |
+|---|---|
+| Applicable-Recall@k | share of gold spans overlapped by at least one top-k chunk; `None` without gold spans |
+| Inapplicable-Intrusion@k | share of the top-k chunks that are `inapplicable`; `None` without inapplicable spans |
+| AER (applicability error) | answered cases with inapplicable spans: 1 if a **cited** chunk is `inapplicable`, else 0 |
+| Outdated-answer rate | answered cases with outdated spans: 1 if a cited chunk is `outdated`, else 0 |
+| Unknown-caveat rate | answered cases: 1 if the trace flag `unknown_condition_evidence` is true |
+
+Required-fact coverage and conditional completeness need an LLM judge; it is validated on 60 dev cases
+against human labels before use (Appendix F) and is not part of this module.
+
+**Statistics.** Paired bootstrap 95% CI of the mean difference (10,000 resamples, `stats.paired_compare`),
+paired sign-flip permutation p-value (10,000), Holm correction over the three pre-registered comparisons.

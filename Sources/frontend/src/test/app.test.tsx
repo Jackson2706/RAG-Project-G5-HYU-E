@@ -184,3 +184,14 @@ describe("resizable layout", () => {
     expect(screen.queryByText("chat")).toBeNull();
   });
 });
+
+describe("AAES in the chat", () => {
+  it("sends earlier user turns as history and shows the action badge", async () => {
+    const { historyOf } = await import("@/hooks/useChat");
+    const { ActionBadge } = await import("@/components/chat/MessageItem");
+    expect(historyOf([{ id: "1", role: "user", content: "I'm at ERICA." }, { id: "2", role: "assistant", content: "ok" },
+      { id: "3", role: "user", content: "I'm a master's student." }])).toEqual(["I'm at ERICA.", "I'm a master's student."]);
+    render(<ActionBadge action="CONDITIONAL" />);
+    expect(screen.getByTestId("action-badge")).toHaveTextContent("Conditional answer");
+  });
+});

@@ -6,6 +6,7 @@ import remarkGfm from "remark-gfm";
 import { Sources } from "@/components/chat/Sources";
 import { Badge, CopyButton, IconButton } from "@/components/ui/primitives";
 import type { ChatMessage } from "@/hooks/useChat";
+import type { AaesAction } from "@/types/api";
 
 /** Make "[E1]" in the answer a small link that opens the matching source card. */
 function linkSources(children: ReactNode): ReactNode {
@@ -29,6 +30,20 @@ function linkSources(children: ReactNode): ReactNode {
   );
 }
 
+const ACTIONS: Record<AaesAction, { tone: "success" | "info" | "warning" | "danger"; label: string; hint: string }> = {
+  ANSWER: { tone: "success", label: "Answer", hint: "The evidence applies to you." },
+  CONDITIONAL: { tone: "info", label: "Conditional answer", hint: "The answer depends on details you have not given; each case is listed." },
+  CLARIFY: { tone: "warning", label: "Clarifying question", hint: "One detail changes the answer, so the assistant asks for it." },
+  CONFIRM: { tone: "warning", label: "Please confirm", hint: "A remembered detail may be outdated and changes the answer." },
+  ABSTAIN: { tone: "danger", label: "Referred to the office", hint: "No applicable official evidence was found." },
+};
+
+/** The AAES decision for this answer (AGENTS.md: the chat shows the action as a badge). */
+export function ActionBadge({ action }: { action: AaesAction }) {
+  const a = ACTIONS[action];
+  return <span title={a.hint} data-testid="action-badge"><Badge tone={a.tone} className="mb-1.5">{a.label}</Badge></span>;
+}
+
 export function MessageItem({ message, onInspect }: { message: ChatMessage; onInspect: (requestId: string) => void }) {
   if (message.role === "user") {
     return (
@@ -45,7 +60,7 @@ export function MessageItem({ message, onInspect }: { message: ChatMessage; onIn
         <Compass className="h-4 w-4 text-primary" />
       </div>
       <div className="min-w-0 flex-1">
-        {trace?.outcome === "insufficient_context" && <Badge tone="warning" className="mb-1.5">Not enough evidence</Badge>}
+        {trace?.action ? <ActionBadge action={trace.action} /> : trace?.outcome === "insufficient_context" && <Badge tone="warning" className="mb-1.5">Not enough evidence</Badge>}
         {message.content ? (
           <div className="prose-answer text-[15px]">
             <ReactMarkdown remarkPlugins={[remarkGfm]} components={{
