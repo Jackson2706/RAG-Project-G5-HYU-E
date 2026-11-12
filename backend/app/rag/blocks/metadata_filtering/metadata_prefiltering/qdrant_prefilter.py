@@ -17,4 +17,5 @@ class QdrantMetadataPrefilter(BaseMetadataPrefilter):
     """
 
     async def build_filter(self, criteria: FilterCriteria) -> RetrievalFilter | None:
-        return criteria.to_filter(self.params["include_unknown"], "all" if self.params["include_campus_wide"] else None)
+        return criteria.to_filter(self.params["include_unknown"], "all" if self.params["include_campus_wide"] else None,
+                                       include_shared_scope=self.params.get("include_shared_scope", True))

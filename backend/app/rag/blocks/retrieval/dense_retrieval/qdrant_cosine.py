@@ -15,7 +15,8 @@ def to_qdrant_filter(prefilter: RetrievalFilter) -> models.Filter:
     must = []
     for field, allowed in prefilter.conditions.items():
         match = models.FieldCondition(key=field, match=models.MatchAny(any=allowed))
-        if prefilter.include_unknown:
+        # Offered-degree searches require a positive availability value, even in permissive mode.
+        if prefilter.include_unknown and field != "available_degree_levels":
             must.append(models.Filter(should=[match, models.IsEmptyCondition(is_empty=models.PayloadField(key=field))]))
         else:
             must.append(match)

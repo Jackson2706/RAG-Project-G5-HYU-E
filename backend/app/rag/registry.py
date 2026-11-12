@@ -201,6 +201,8 @@ def _filter_params() -> dict[str, Param]:
     return {
         "include_unknown": Param("boolean", True, "Keep documents with unknown values",
                                  "A document that does not state a field (e.g. no campus) stays eligible.", ui="toggle"),
+        "include_shared_scope": Param("boolean", True, "Include shared department/college rules",
+                                     "Allow explicit department: ALL and college: ALL. Missing fields still follow the unknown-values setting.", ui="toggle"),
         "include_campus_wide": Param("boolean", True, "Campus-wide documents count",
                                      "A document for ALL campuses is eligible for any campus.", ui="toggle"),
     }  # fmt: skip
@@ -263,11 +265,23 @@ PIPELINE: list[Stage] = [
           default_method=None, optional=True, methods=[
               Method("stated_criteria", "Stated criteria (manual)", StatedCriteria, True,
                      "The criteria the student states, set here. No LLM, no guessing.", parameters={
-                         field: Param("string", "", label, f"Only {hint} documents (empty = no condition).", ui="text")
-                         for field, label, hint in (("campus", "Campus", "this campus's (e.g. SEOUL, ERICA)"),
-                                                    ("audience", "Audience", "this audience's (e.g. international)"),
-                                                    ("academic_year", "Academic year", "this year's (e.g. 2026)"),
-                                                    ("document_type", "Document type", "this type of (e.g. handbook)"))
+                         field: Param("string", "", label, f"Filter by {hint}. Empty = no restriction; comma-separated values match any listed value.", ui="text")
+                         for field, label, hint in (
+                             ("campus", "Campus", "SEOUL or ERICA"),
+                             ("academic_level", "Academic level", "undergraduate or graduate"),
+                             ("student_category", "Student category", "international or domestic; language does not establish nationality"),
+                             ("department", "Department", "canonical key, e.g. architecture or computer-science"),
+                             ("college", "College", "canonical key, e.g. engineering or international-studies"),
+                             ("topic", "Topic", "e.g. scholarships, tuition, eligibility, courses or contacts"),
+                             ("academic_year", "Admission / academic year", "explicit cycle year, e.g. 2027; not source collection year"),
+                             ("term", "Term", "spring or fall"),
+                             ("document_type", "Document type", "major_guide, admission_guide or university_information"),
+                             ("degree_level", "Degree discussed", "masters, phd or combined; includes unavailable degree columns"),
+                             ("available_degree_levels", "Degree explicitly available", "masters, phd or combined; use only when seeking offered degrees"),
+                             ("admission_route", "Admission route", "e.g. international_admissions"),
+                             ("effective_date", "Effective date", "explicit date, e.g. 2026-03-01; not collection time"),
+                             ("audience", "Audience (legacy)", "legacy metadata; use Academic level and Student category for prepared data"),
+                         )
                      }),
               Method("llm_understanding", "LLM understanding", LLMQueryUnderstanding, False, "The LLM extracts intent and criteria."),
           ]),

@@ -98,26 +98,47 @@ class FilterCriteria(BaseModel):
     """
 
     campus: str | None = None  # e.g. "SEOUL", "ERICA"
-    audience: str | None = None  # e.g. "undergraduate", "international"
+    audience: str | None = None  # Legacy field; prepared data uses it as an academic-level alias.
     academic_year: str | None = None  # e.g. "2026"
     document_type: str | None = None  # e.g. "handbook", "notice"
     effective_date: str | None = None  # e.g. "2026-03-01"
+
+    academic_level: str | None = None
+    student_category: str | None = None
+    department: str | None = None
+    college: str | None = None
+    topic: str | None = None
+    term: str | None = None
+    degree_level: str | None = None
+    available_degree_levels: str | None = None
+    admission_route: str | None = None
 
     def conditions(self) -> dict[str, str]:
         """Only the conditions that are set."""
         return {k: v for k, v in self.model_dump().items() if v not in (None, "")}
 
-    def to_filter(self, include_unknown: bool = True, campus_wide_value: str | None = "all") -> RetrievalFilter | None:
+    def to_filter(self, include_unknown: bool = True, campus_wide_value: str | None = "all",
+                  include_shared_scope: bool = True) -> RetrievalFilter | None:
         """The eligibility predicate for these criteria, or None when no condition is set.
 
         Prefiltering and Postfiltering both use this, so a placement comparison uses the SAME predicate.
-        `campus_wide_value`: a document for every campus (campus: ALL) is also eligible for a campus.
+        `campus_wide_value`: campus: ALL also qualifies for a specific campus.
+        `include_shared_scope`: department/college: ALL also qualify for that scope.
+        Use canonical department/college keys from the data vocabulary. Empty values add no restriction.
         """
-        conditions = {field: [normalize_value(value)] for field, value in self.conditions().items()}
+        # OR within a comma-separated field; AND across different fields.
+        conditions = {field: metadata_values(value) for field, value in self.conditions().items()}
+        conditions = {field: values for field, values in conditions.items() if values}
         if not conditions:
             return None
         if "campus" in conditions and campus_wide_value:
-            conditions["campus"].append(campus_wide_value)
+            conditions["campus"].append(normalize_value(campus_wide_value))
+        if include_shared_scope:
+            # Only explicit ALL metadata qualifies. Missing department/college is unknown,
+            # never evidence that a rule applies to every department or college.
+            for field in ("department", "college"):
+                if field in conditions and "all" not in conditions[field]:
+                    conditions[field].append("all")
         return RetrievalFilter(conditions=conditions, include_unknown=include_unknown)
 
 
@@ -173,7 +194,7 @@ class RetrievalFilter(BaseModel):
         for field, allowed in self.conditions.items():
             values = metadata_values(metadata.get(field))
             if not values:
-                if not self.include_unknown:
+                if not self.include_unknown or field == "available_degree_levels":
                     return False
             elif not set(values) & set(allowed):
                 return False
@@ -183,8 +204,8 @@ class RetrievalFilter(BaseModel):
         """Why a document is NOT eligible (None if it is)."""
         for field, allowed in self.conditions.items():
             values = metadata_values(metadata.get(field))
-            if not values and not self.include_unknown:
-                return f"{field} is unknown"
+            if not values and (not self.include_unknown or field == "available_degree_levels"):
+                return f"{field} has no explicit available degree" if field == "available_degree_levels" else f"{field} is unknown"
             if values and not set(values) & set(allowed):
                 return f"{field}={'/'.join(values)} not in {allowed}"
         return None

@@ -7,12 +7,12 @@ from app.rag.schemas import FilterCriteria, QueryAnalysis
 
 
 class StatedCriteria(BaseQueryUnderstanding):
-    """Hyperparameters: campus, audience, academic_year, document_type (empty = no condition).
+    """Hyperparameters: the FilterCriteria fields (empty = no condition; comma-separated values = OR).
 
     No LLM and no guessing: the criteria are exactly what the user set, e.g. "I am an ERICA student".
     Metadata Prefiltering and Postfiltering both read these criteria, so they enforce the same predicate.
     """
 
     async def analyze(self, question: str) -> QueryAnalysis:
-        values = {field: self.params[field].strip() or None for field in ("campus", "audience", "academic_year", "document_type")}
+        values = {field: str(self.params.get(field, "")).strip() or None for field in FilterCriteria.model_fields}
         return QueryAnalysis(intent=None, criteria=FilterCriteria(**values))

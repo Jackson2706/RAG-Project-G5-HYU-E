@@ -123,9 +123,7 @@
     "audience",
     "academic_year",
     "document_type",
-    "effective_date"
-  ],
-  "future_FilterCriteria_fields": [
+    "effective_date",
     "academic_level",
     "student_category",
     "department",
@@ -133,8 +131,10 @@
     "topic",
     "term",
     "degree_level",
+    "available_degree_levels",
     "admission_route"
   ],
-  "backend_filtering_changed": false,
+  "future_FilterCriteria_fields": [],
+  "backend_filtering_changed": true,
   "parent_source_uri_semantics": "Historical logical source ID, not a live file path. parent_markdown_sha256 records the removed intermediate snapshot; raw PDFs and prepared units remain hash-verifiable."
 }

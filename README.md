@@ -92,3 +92,5 @@ Read them in order:
 5. [Add a new method](docs/05_ADD_NEW_METHOD.md): a hands-on tutorial (start here to contribute).
 6. [Benchmarks and evaluation](docs/06_BENCHMARK_AND_EVALUATION.md): BEIR, the baselines, metrics,
    one-command experiments and how to read the reports.
+
+Metadata prefiltering and postfiltering for the prepared corpus: [configuration and examples](docs/07_METADATA_FILTERING.md).
