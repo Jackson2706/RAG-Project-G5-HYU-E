@@ -16,7 +16,8 @@ class CandidateMetadataPostfilter(BaseMetadataPostfilter):
     """
 
     async def filter_candidates(self, candidates: list[Candidate], criteria: FilterCriteria) -> PostfilterResult:
-        predicate = criteria.to_filter(self.params["include_unknown"], "all" if self.params["include_campus_wide"] else None)
+        predicate = criteria.to_filter(self.params["include_unknown"], "all" if self.params["include_campus_wide"] else None,
+                                       include_shared_scope=self.params.get("include_shared_scope", True))
         if predicate is None:
             return PostfilterResult(kept=candidates, details={"received": len(candidates), "kept": len(candidates), "predicate": None})
         documents = self.services.db.get_documents(list({c.doc_id for c in candidates}))

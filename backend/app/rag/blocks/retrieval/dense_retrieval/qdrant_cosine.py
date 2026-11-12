@@ -15,7 +15,8 @@ def to_qdrant_filter(prefilter: RetrievalFilter) -> models.Filter:
     must = []
     for field, allowed in prefilter.conditions.items():
         match = models.FieldCondition(key=field, match=models.MatchAny(any=allowed))
-        if prefilter.include_unknown:
+        # Offered-degree searches require a positive availability value, even in permissive mode.
+        if prefilter.include_unknown and field != "available_degree_levels":
             must.append(models.Filter(should=[match, models.IsEmptyCondition(is_empty=models.PayloadField(key=field))]))
         else:
             must.append(match)
@@ -35,7 +36,7 @@ class QdrantDenseRetriever(BaseDenseRetriever):
         db, embedder = self.services.db, self.services.embedder
         stored = db.vector_size()
         if stored is None:
-            raise RuntimeError("No documents are indexed yet. Run: python scripts/ingest.py --path data/raw")
+            raise RuntimeError("No documents are indexed yet. Run: python scripts/ingest.py --path data/filter_ready")
         start = time.perf_counter()
         # HyDE: a hypothetical passage is embedded like a document (no query instruction).
         vector = embedder.embed_documents([embedding_text])[0] if embedding_text else embedder.embed_query(query)

@@ -1,0 +1,3 @@
+User-Agent: *
+Disallow:
+Sitemap: http://humanities.hanyang.ac.kr:80/sitemap.xml

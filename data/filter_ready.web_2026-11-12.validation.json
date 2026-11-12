@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "documents": 51,
+  "selected_source_urls": 20,
+  "raw_files_hash_checked": 244,
+  "downloaded_responses": 244,
+  "checks": [
+    "Raw archive SHA-256",
+    "Prepared file SHA-256",
+    "Current parser and metadata extractor",
+    "Campus filter inclusion and exclusion",
+    "Unknown year retained on undated web pages",
+    "Tuition reference period differs from admission cycle",
+    "College-wide pages omit department",
+    "Declared unit set equals active files"
+  ],
+  "index_changed": false
+}

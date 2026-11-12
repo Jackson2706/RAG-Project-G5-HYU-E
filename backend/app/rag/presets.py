@@ -82,7 +82,7 @@ PRESETS: list[dict[str, Any]] = [
     {"id": "R8_HYDE", "kind": "online", "name": "R8 — HyDE",
      "description": "Dense retrieval with a hypothetical passage's vector.", "stages": {"query_rewriting": {"method": "hyde"}}},
     {"id": "R9_PREFILTERING", "kind": "online", "name": "R9 — Metadata prefiltering",
-     "description": "Stated criteria applied inside retrieval (set campus/audience under Query Understanding).",
+     "description": "Stated criteria applied inside retrieval (set corpus metadata under Query Understanding).",
      "stages": {**CRITERIA, "metadata_prefiltering": {"method": "qdrant_prefilter"}}},
     {"id": "R10_POSTFILTERING", "kind": "online", "name": "R10 — Metadata postfiltering",
      "description": "The same criteria applied after retrieval (may starve).",

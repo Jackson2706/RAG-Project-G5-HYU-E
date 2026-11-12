@@ -15,7 +15,7 @@ like `[E1]` that point to the document text they came from.
 
 ## What the app does
 
-- **Ingests** English documents (PDF, TXT, Markdown, HTML) from `data/raw/`.
+- **Ingests** English documents (PDF, TXT, Markdown, HTML) from `data/filter_ready/`.
 - **Answers** questions with source references, and abstains honestly when the documents don't contain the answer.
 - **Shows the whole pipeline.** Choose a method and its settings for each block in the
   *Configuration* tab — or a whole **experiment preset** (B0 basic RAG, O0–O8 offline, R0–R14 online:
@@ -72,14 +72,14 @@ ollama pull qwen3:4b                                          # once, if you hav
 
 conda activate RAG
 python -m pip install -r backend/requirements.txt             # once
-python scripts/ingest.py --path data/samples                  # index the sample documents
+python scripts/ingest.py --path data/filter_ready             # index prepared Hanyang documents
 cd backend && python -m uvicorn app.main:app --reload         # backend (keep running)
 
 cd frontend && npm ci && npm run dev                          # in a second terminal → http://127.0.0.1:5173
 ```
 
 > The five files in `data/samples/` are **invented** practice documents, not real HYU policy.
-> Put real, approved documents in `data/raw/`.
+> Keep original sources in `data/raw/` and ingest prepared real documents from `data/filter_ready/`. See [data layout](data/README.md).
 
 ## Documentation
 
@@ -92,3 +92,5 @@ Read them in order:
 5. [Add a new method](docs/05_ADD_NEW_METHOD.md): a hands-on tutorial (start here to contribute).
 6. [Benchmarks and evaluation](docs/06_BENCHMARK_AND_EVALUATION.md): BEIR, the baselines, metrics,
    one-command experiments and how to read the reports.
+
+Metadata prefiltering and postfiltering for the prepared corpus: [configuration and examples](docs/07_METADATA_FILTERING.md).

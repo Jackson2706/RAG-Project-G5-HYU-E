@@ -1,0 +1,65 @@
+{
+  "campus": [
+    "ERICA",
+    "SEOUL"
+  ],
+  "academic_level": [
+    "graduate",
+    "undergraduate"
+  ],
+  "topic": [
+    "admission_rules",
+    "application_process",
+    "application_schedule",
+    "contacts",
+    "counseling",
+    "courses",
+    "eligibility",
+    "evaluation_process",
+    "international_programs",
+    "it_services",
+    "overview",
+    "scholarships",
+    "student_services",
+    "student_support",
+    "tuition"
+  ],
+  "college": [
+    "engineering",
+    "international-studies",
+    "software"
+  ],
+  "department": [
+    "architectural-engineering",
+    "architecture",
+    "automotive-engineering",
+    "bioengineering",
+    "chemical-engineering",
+    "civil-and-environmental-engineering",
+    "computer-science",
+    "data-science",
+    "earth-resources-and-environmental-engineering",
+    "electrical-and-biomedical-engineering",
+    "electronic-engineering",
+    "energy-engineering",
+    "industrial-engineering",
+    "information-system",
+    "materials-science-and-engineering",
+    "mechanical-engineering",
+    "nuclear-engineering",
+    "organic-and-nano-engineering",
+    "semi-conductor-engineering",
+    "urban-planning-and-engineering"
+  ],
+  "document_type": [
+    "admission_guide",
+    "university_information"
+  ],
+  "student_category": [
+    "international"
+  ],
+  "temporal_status": [
+    "explicit_admission_cycle",
+    "source_undated"
+  ]
+}

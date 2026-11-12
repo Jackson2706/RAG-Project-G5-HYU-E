@@ -1,0 +1,787 @@
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="ko">
+<!--<html color-theme="dark">-->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    
+    <title>한양대학교 교육과정</title>
+    
+	<script type="text/javascript" src="/js/jquery.mobile-1.4.5/jquery.min.js"></script>
+    
+    <style>
+        * {
+        	text-shadow: none;
+        }
+	    html {
+	    	font-size: 12px;
+        	text-shadow: none;
+	    }
+	    body {
+        	text-shadow: none;
+        	
+	    	background-color: #fff;
+	    	
+	    	position: relative;
+	    	min-width: 400px;
+	    	max-width: 1000px;
+	    	
+	    	padding: 0px;
+	    	
+	    	word-break: break-all; /* keep-all */
+	    	text-align: justify;
+	    	
+	    	font-family: 'Noto Sans KR', '.SFNSText-Regular','San Francisco','Segoe UI','Helvetica Neue','Lucida Grande',sans-serif;
+		    font-weight: 400;
+		    color: #333;
+		    /*background-color: #FAFAFF !important;*/
+		    letter-spacing: -0.025rem;
+		    -webkit-text-size-adjust: 100%;
+		    -ms-text-size-adjust: 100%;
+		    -webkit-font-smoothing: antialiased;
+	    }
+	    
+	    .contents {
+	    	
+	    }
+	    div {
+	    	display: block;
+	    }
+	    
+	    h3 {
+	    	margin: 0rem;
+	    }
+	    
+	    .tit {
+	    	margin: 1.5rem 0rem 0rem 0rem;
+	    	font-size: 2.7rem;
+	    	line-height: 2.2rem;
+	    	text-align: center;
+	    }
+	    
+	    ul, ol {
+	    	margin: 0;
+	    	padding: 0;
+	    	list-style: none;
+	    	display: flex;
+	    	width: 100%;
+	    }
+	    ul.jojik li {
+	    	width: 25%;
+	    	border: 1px solid #dbdbdb;
+	    	padding: 1.2rem 0;
+	    	text-align: center;
+	    	/* background-color: #f0f8ff; */
+	    	
+	    	max-height: 62px;
+	    	overflow: hidden;
+	    	white-space: nowrap;
+	        /*min-width: 122px;*/
+	        font-size: 1.2rem;
+	        line-height: 1.6rem;
+	    	color: #333;
+	    }
+	    .jojik-div .jojik li:hover {
+	    	background-color: #EEEDFD; /*#a6d2f9;*/
+	    }
+	    
+	    .on {
+	    	background-color: #d2e4f9; /*#a6d2f9; #EEEDFD #d2e4f9 */
+	    }
+	    .on1 {
+	    	background-color: #EEEDFD; /*#a6d2f9; #EEEDFD #d2e4f9 */
+	    }
+	    
+	    .table-div {
+	    	margin-top: 0rem;
+	    }
+	    .table-div table {
+	    	width: 100%;
+	    	table-layout: auto;
+	    	border-collapse: collapse;
+	    	border-top: 2px solid #1a72cd;
+	    	background-color: transparent;
+	    	border-spacing: 0;
+	        text-align: center;
+	    }
+	    .table-div table thead {
+	    	padding: 1rem;
+	    	background-color: #d2e4f9;
+	    	/*line-height: 2.7rem;*/
+	        font-weight: normal;
+	    }
+	    .table-div table thead th {
+	    	font-weight: normal;
+		    padding-left: 0.2rem;
+		    padding-right: 0.2rem;
+	    }
+	    .table-div table tbody tr {
+	        /*line-height: 1.4rem;*/
+	        padding: 1rem 0;
+	    }
+	    .table-div table tbody tr td {
+	        border: 1px solid #cecece;
+	        overflow: hidden;
+		    /*white-space: nowrap;*/
+		    padding: 1rem 0.6rem;
+	    }
+	    
+	    table.same-td5 td {
+	    	width: 20%;
+	        font-size: 1.0rem;
+	        
+	    }
+	    
+	    .table-list {
+	    	/*
+	    	overflow: scroll;
+	    	min-height: 6rem;
+	    	max-height: 18rem;
+	    	*/
+	    }
+	    .gwamok-list {
+	    	width: 100%;
+	    	word-break: break-all; /* keep-all break-all */
+	    }
+	    .cmt1 {
+	    	font-size: 1rem;
+		    line-height: 1rem;
+		    position: relative;
+		    top: -2px;
+		    left: -6px;
+		    float: left;
+		    text-align: left;
+		    line-height: 1.2rem;
+	    }
+	    
+	    .gwamok-geyo {
+	    	
+	    }
+	    .popup { /* 팝업이 열렸을 때, 팝업창 주변 전체를 어둡게 합니다 */
+		    display: none;
+		    position:fixed;
+		    width: 100%;
+		    height: 100%;
+		    top:0;
+		    left:0;
+		    background:rgba(0,0,0,0.5);
+		}
+		
+		.popup-inner {  /* 열렸을 때 팝업창 크기와 색상을 지정합니다. */
+		    position:absolute;
+		    width: 700px; /*70%;*/
+		    height: 500px; /*60%;*/
+		    top:50%;
+		    left:50%;
+		    transform:translate(-50%, -50%);
+		    padding : 10px;
+		    background:#fff;
+		    /*overflow: scroll;*/
+		}
+		
+		.popup-close{ /* 팝업창 내 닫기 버튼의 위치를 지정합니다. */
+		    position: absolute;
+		    display: block;
+		    top:10px;
+		    right: 10px;
+		    position: relative;
+		    float: right;
+		    top: 8px;
+		    left: -6px;
+		}
+		.popup-title {
+			font-size: 1.4rem;
+    		margin: 0 0 1rem 0;
+    		background-color: #dbe5f1;
+    	    padding: 0.8rem;
+		}
+		
+		.gwamok-geyo caption {
+		    font-size: 1.2rem;
+		    margin-bottom: 0.5rem;
+		    font-weight: 600;
+		    text-align: left;
+		    margin-left: 0.5rem;
+		}
+		.gwamok-geyo td {
+			text-align: left; 
+			padding: 1rem !important; 
+			line-height: 1.7rem;
+		    font-size: 1.2rem;
+		    line-height: 1.6rem;
+		}
+		
+    </style>
+</head>
+
+<body style=''> 
+    
+    <div class='contents'>
+        <!-- 1.제목 
+        <div class='tit'>
+            <h3 style='    margin: 3rem;'>한양대학교 교육과정</h3>
+        </div>
+        -->
+        <!-- 2.조직 -->
+        <div class='jojik-div' style='    margin-top: 2rem;'>
+            <ul class='jojik'>
+                <li campus_cd='H' jojik_gb='3'>서울 대학</li>
+                <li campus_cd='H' jojik_gb='2'>서울 대학원</li>
+                <li campus_cd='Y' jojik_gb='3'>ERICA 대학</li>
+                <li campus_cd='Y' jojik_gb='2'>ERICA 대학원</li>
+            </ul>
+        </div>
+        
+        <div class='daehak-div'>
+        	<!-- 3-1.제목 -->
+	        <div class='tit'>
+	            <h6 style='margin-top: 0; margin-bottom: 0.4rem;'>대학(원)</h6>
+	        </div>
+	        <!-- 3.대학 -->
+	        <div class='table-div table-list'>
+	            <table class="same-td5">
+					<tbody class='daehak-tbody'>
+					</tbody>
+				</table>
+	        </div>
+        </div>
+        
+        <div class='hakgwa-div'>
+	        <!-- 4-1.제목 -->
+	        <div class='tit'>
+	            <h6 style='margin-top: 0; margin-bottom: 0.4rem;'>학과 / 전공</h6>
+	        </div>
+	        <!-- 4.학과 -->
+	        <div class='table-div table-list' >
+	            <table class="same-td5">
+					<tbody class='hakgwa-tbody'>
+					</tbody>
+				</table>
+	        </div>
+        </div>
+        
+        <!-- 5-1.제목 -->
+        <div class='tit'>
+            <h6 style='margin-top: 0; margin-bottom: 0.4rem;'>적용 교육과정</h6>
+        </div>
+        <!-- 5.적용 교육과정 -->
+        <div class='table-div table-list' >
+            <table class="same-td5">
+				<tbody class='gygj-tbody'>
+				</tbody>
+			</table>
+        </div>
+        
+        <!-- 6-1.교육과정 개설과목 -->
+        <div class='tit'>
+            <h6 id='tit_gygj_nm' style='margin-top: 0; margin-bottom: 0.4rem; position: relative; top: 3px;'>개설과목</h6>
+            <div class='cmt1'>
+                    ㆍ 과목명을 클릭하면, 교과목 개요 확인 가능 <br>
+	                ㆍ 교과목 이수 계획 시 종료연도 및 학기로 <b style='color:chocolate'>교과목 종료 여부를 확인</b>하시기 바랍니다.   <br>
+	                ㆍ <b style='color:chocolate'>교과목은 지정된 이수학기에만 개설</b>됩니다. <br>
+	                ㆍ 학과 사정에 따라 리스트에는 있으나 개설되지 않을 수 있으니 <b style='color:chocolate'>수강편람을 반드시 확인</b>하시기 바랍니다. 
+            </div>
+        </div>
+        <!-- 6.교육과정 개설과목 -->
+        <div class='table-div table-list gwamok-list' >
+            <table class="">
+				<thead>
+				<tr style='height: 3.4rem;'>
+					<th scope="row">학수번호</th>
+					<th scope="row" style='width: 20%;'>과목명</th>
+				<!--<th scope="row">영문과목명</th>-->
+					<th scope="row" style='width: 8%;'>이수구분</th>
+					<th scope="row">이수단위</th>
+					<th scope="row">학점</th>
+					<th scope="row">강의</th>
+					<th scope="row">실습</th>
+					<th scope="row">이수학년</th>
+					<th scope="row">이수학기</th>
+					<th scope="row">개설연도</th>
+					<th scope="row">개설학기</th>
+					<th scope="row">종료연도</th>
+					<th scope="row">종료학기</th>
+				<!--<th scope="row">비고</th>-->
+				</tr>
+				</thead>
+				<tbody class='gwamok-tbody'>
+				</tbody>
+			</table>
+        </div>
+        
+        <!-- 7. 교과목 개요 -->
+        <div class="popup gwamok-geyo" data-popup="example" >
+	        <div class="popup-inner">
+	            <img class='popup-close' src='/resources/images/img/ic_close.svg' style='width:24px; height:24px;'>
+	            <div ><h6 class="popup-title">교과목 개요</h6></div>
+	            <div class="popup-contents" style='overflow: scroll; height:90%;'>
+			        <!-- 1.국문 -->
+			        <div class='table-div table-list'>
+			            <table >
+							<caption>국문</caption>
+							<tbody>
+								<tr>
+									<td id='gwamok-geyo-kor'></td>
+								</tr>
+							</tbody>
+						</table>
+			        </div>
+	            
+			        <!-- 2.영문 -->
+			        <div class='table-div table-list'>
+			            <table style='    margin-top: 1rem;'>
+			                <caption>영문</caption>
+							<tbody>
+								<tr>
+									<td id='gwamok-geyo-eng'></td>
+								</tr>
+							</tbody>
+						</table>
+			        </div>
+	            
+	            </div>
+	        </div>
+	    </div>
+	    
+    </div>
+    
+</body>
+</html>
+
+<script>
+	
+    $(document).ready( function() { 
+    	g_campus_cd = 'H';
+    	g_jojik_gb  = '3';
+    	
+    	if (g_campus_cd=='Y' && g_jojik_gb=='3') {
+    		$('ul.jojik li:eq(2)').trigger('click');
+    	}
+    	else if (g_campus_cd=='Y' && g_jojik_gb=='2') {
+    		$('ul.jojik li:eq(3)').trigger('click');
+    	}
+    	else if (g_campus_cd=='H' && g_jojik_gb=='2') {
+    		$('ul.jojik li:eq(1)').trigger('click');
+    	}
+    	else {
+    		$('ul.jojik li:eq(0)').trigger('click');
+    	}
+    	
+    	if ('H0002979'.length > 0) {
+    		$('.jojik-div' ).hide();
+    		$('.daehak-div').hide();
+    	}
+    	//--------------------------------
+    	// Y0001169 : ICT융합학부
+    	//--------------------------------
+    	// Y0001172 : 미디어테크놀로지전공(2016-2023) + 데이터인텔리전스전공(2025-2028)
+    	// Y0001171 : 컬처테크놀로지전공(2016-2023)
+    	// Y0001170 : 디자인테크놀로지전공(2016-2023) + 디자인컨버전스전공(2025-2028)
+    	//--------------------------------
+    	if (''!='Y0001172' && ''!='Y0001170' 
+    	    && ''.length > 0) {
+    		
+    		$('.hakgwa-div').hide();
+    	}
+    	
+    });
+    
+    var g_jojik_idx = -1;
+    $(document).on('click',".jojik-div .jojik li", function(){ 
+    	var idx = $(this).index('.jojik-div .jojik li');
+    	if (g_jojik_idx == idx) {
+    		return;
+    	}
+    	if (g_jojik_idx >= 0) {
+    		$('.jojik-div .jojik li:eq('+g_jojik_idx+')').removeClass('on');
+    	}
+    	$('.jojik-div .jojik li:eq('+idx+')').addClass('on');
+    	g_jojik_idx = idx;
+    	//----------------------------------------------------------------
+    	g_campus_cd = $('.jojik-div .jojik li:eq('+idx+')').attr('campus_cd');
+    	g_jojik_gb  = $('.jojik-div .jojik li:eq('+idx+')').attr('jojik_gb' );
+    	//----------------------------------------------------------------
+    	js_daehak_list();
+    });
+    
+    var g_campus_cd='', g_jojik_gb='';
+    function js_daehak_list() {
+    	var params = {};
+    	params.apiUrl    = (g_jojik_gb=='3' ? '/HYRC/A202200002.json' : '/HYRC/A202200003.json');
+    	params.campus_cd = g_campus_cd;
+    	params.jojik_gb  = g_jojik_gb;
+    	params.lang_gb  = 'ko';
+    	
+    	$('.daehak-tbody').empty(); g_daehak_cd = ''; g_daehak_nm ='';
+    	$('.hakgwa-tbody').empty(); g_hakgwa_cd = ''; g_hakgwa_nm ='';
+    	$('.gygj-tbody'  ).empty(); g_gygj_cd   = ''; g_gygj_cd_nm='';
+    	$('.gwamok-tbody').empty(); g_slg_sosok_cd = '';
+    	
+    	$.ajax({
+		    url: '/commonAjaxCall.json',
+		    target: 'TEMPORARY_FRAME',
+		    data: params,
+		    contentType: 'application/x-www-form-urlencoded',
+		    method: 'GET',
+		    dataType: 'json', // xml, html, script, json, jsonp, text
+		    success: function(data) {
+		        if(data.result.totalCount==0) {
+		            return;
+		        }
+		        
+		        var td_cnt=0, tr_html='<tr>', i=0, daehak_idx=0;
+		        for(i=0; i<data.result.list.length; ++i) {
+		            var json = data.result.list[i];
+		            //--------------------------------
+		            if ('H0002979'==json.DAEHAK_CD) {
+		            	daehak_idx = i;
+		            }
+		            //--------------------------------
+		            td_cnt++;
+		            if (i > 0) {
+			            if (td_cnt <= 5) {
+			            	//
+			            } else {
+			            	tr_html += '</tr>';
+			            	//-----------------------
+			            	td_cnt  = 1;
+			            	tr_html += '<tr>';
+			            }
+		            }
+		            tr_html += "<td cd='"+ json.DAEHAK_CD +"' nm='"+ json.DAEHAK_NM +"' class='daehak-td' style='cursor: pointer;'>"+ json.DAEHAK_NM +"</td>";
+		        }
+		        //---------------------
+		        // empty td append
+		        //---------------------
+		        if (i%5 > 0) {
+			        for (var j=i%5; j<5; ++j) {
+			        	tr_html += '<td></td>';
+			        }
+			    }
+		        tr_html += '</tr>';
+		        //---------------------
+		        $('.daehak-tbody').append(tr_html);
+		        //---------------------
+		        $(".daehak-td:eq("+ daehak_idx +")").trigger('click');
+		    },
+		    error: function(e) {
+		        //js_reset_statusbar();
+		    }
+		});
+    }
+    
+    var g_daehak_cd = '', g_daehak_nm = '';
+    $(document).on('click',".daehak-td", function() { 
+    	if (g_daehak_cd == $(this).attr('cd')) {
+    		return;
+    	}
+    	if (g_daehak_cd!=undefined) {
+    		$(".daehak-td[cd='"+ g_daehak_cd +"']").removeClass('on');
+    	}
+    	g_daehak_cd = $(this).attr('cd');
+    	g_daehak_nm = $(this).attr('nm');
+    	$(this).addClass('on');
+    	//----------------------------------------------------------------
+    	js_hakgwa_list();
+    });
+    
+    function js_hakgwa_list() {
+    	var params = {};
+    	//--------------------------------
+    	// Y0001169 : ICT융합학부
+    	//--------------------------------
+    	// Y0001172 : 미디어테크놀로지전공(2016-2023) + 데이터인텔리전스전공(2025-2028)
+    	// Y0001171 : 컬처테크놀로지전공(2016-2023)
+    	// Y0001170 : 디자인테크놀로지전공(2016-2023) + 디자인컨버전스전공(2025-2028)
+    	//--------------------------------
+    	if (''=='Y0001172' || ''=='Y0001171' || ''=='Y0001170') {
+    		params.apiUrl    = '/HYRC/A202200009.json';
+    	} else {
+    		params.apiUrl    = '/HYRC/A202200004.json';
+    	}
+    	params.campus_cd = g_campus_cd;
+    	params.jojik_gb  = g_jojik_gb;
+    	params.daehak_cd = g_daehak_cd;
+    	params.hakgwa_cd = '';
+    	params.lang_gb  = 'ko';
+    	
+    	$('.hakgwa-tbody').empty(); g_hakgwa_cd = ''; g_hakgwa_nm ='';
+    	$('.gygj-tbody'  ).empty(); g_gygj_cd   = ''; g_gygj_cd_nm='';
+    	$('.gwamok-tbody').empty(); g_slg_sosok_cd = '';              
+    	
+    	$.ajax({
+		    url: '/commonAjaxCall.json',
+		    target: 'TEMPORARY_FRAME',
+		    data: params,
+		    contentType: 'application/x-www-form-urlencoded',
+		    method: 'GET',
+		    dataType: 'json', // xml, html, script, json, jsonp, text
+		    success: function(data) {
+		        if (data.result.totalCount > 0) {
+			        var td_cnt=0, tr_html='<tr>', i=0, hakgwa_idx=0;
+			        for(i=0; i<data.result.list.length; ++i) {
+			            var json = data.result.list[i];
+			            //--------------------------------
+			            if (''==json.SOSOK_CD) {
+			            	hakgwa_idx = i;
+			            }
+			            //--------------------------------
+			            td_cnt++;
+			            if (i > 0) {
+				            if (td_cnt <= 5) {
+				            	//
+				            } else {
+				            	tr_html += '</tr>';
+				            	//-----------------------
+				            	td_cnt  = 1;
+				            	tr_html += '<tr>';
+				            }
+			            }
+			            tr_html += "<td cd='"+ json.SOSOK_CD +"' nm='"+ json.SOSOK_NM +"' class='hakgwa-td' style='cursor: pointer; line-height: 1.4rem;'>"+ json.SOSOK_NM +"</td>";
+			        }
+			        //---------------------
+			        // empty td append
+			        //---------------------
+			        if (i%5 > 0) {
+				        for (var j=i%5; j<5; ++j) {
+				        	tr_html += '<td></td>';
+				        }
+				    }
+			        tr_html += '</tr>';
+			        //---------------------
+			        $('.hakgwa-tbody').append(tr_html);
+			        //---------------------
+		        	$(".hakgwa-td:eq("+ hakgwa_idx +")").trigger('click');
+			    }
+			    else {
+			    	$('.hakgwa-tbody').html("<tr><td >교육과정 입력 된 학과 정보가 없습니다.</td></tr>");
+			    	$('#tit_gygj_nm').html(g_daehak_nm + ' 개설과목 '); 
+			    	$('.gygj-tbody').html("<tr><td >입력된 교육과정 정보가 없습니다.</td></tr>");
+			    	$('.gwamok-tbody').html("<tr><td colspan='13'>자료가 존재하지 않습니다.</td></tr>");
+			    }
+		    },
+		    error: function(e) {
+		        //js_reset_statusbar();
+		    }
+		});
+    }
+    
+    var g_hakgwa_cd = '', g_hakgwa_nm = '';
+    $(document).on('click',".hakgwa-td", function() { 
+    	if (g_hakgwa_cd == $(this).attr('cd')) {
+    		return;
+    	}
+    	if (g_hakgwa_cd!=undefined) {
+    		$(".hakgwa-td[cd='"+ g_hakgwa_cd +"']").removeClass('on');
+    	}
+    	g_hakgwa_cd = $(this).attr('cd');
+    	g_hakgwa_nm = $(this).attr('nm');
+    	$(this).addClass('on');
+    	//----------------------------------------------------------------
+    	js_gygj_list();
+    });
+    
+    var g_slg_sosok_cd='', g_slg_sosok_nm='';
+    function js_gygj_list() {
+    	g_slg_sosok_cd = (g_hakgwa_cd!=undefined && g_hakgwa_cd.length>0 ? g_hakgwa_cd : g_daehak_cd);
+    	g_slg_sosok_nm = (g_hakgwa_cd!=undefined && g_hakgwa_cd.length>0 ? g_hakgwa_nm : g_daehak_nm);
+    	
+    	var params = {};
+    	params.apiUrl   = '/HYRC/A202200005.json';
+    	params.sosok_cd = g_slg_sosok_cd;
+    	params.lang_gb  = 'ko';
+    	
+    	$('.gygj-tbody'  ).empty(); g_gygj_cd   = ''; g_gygj_cd_nm='';
+    	$('.gwamok-tbody').empty(); 
+    	
+    	$.ajax({
+		    url: '/commonAjaxCall.json',
+		    target: 'TEMPORARY_FRAME',
+		    data: params,
+		    contentType: 'application/x-www-form-urlencoded',
+		    method: 'GET',
+		    dataType: 'json', // xml, html, script, json, jsonp, text
+		    success: function(data) {
+		        if(data.result.totalCount==0) {
+		            return;
+		        }
+		        
+		        var td_cnt=0, tr_html='<tr>', i=0;
+		        for(i=0; i<data.result.list.length; ++i) {
+		            var json = data.result.list[i];
+		            //--------------------------------
+		            td_cnt++;
+		            if (i > 0) {
+			            if (td_cnt <= 5) {
+			            	//
+			            } else {
+			            	tr_html += '</tr>';
+			            	//-----------------------
+			            	td_cnt  = 1;
+			            	tr_html += '<tr>';
+			            }
+		            }
+		            tr_html += "<td cd='"+ json.GYGJ_CD +"' nm='"+ json.GYGJ_CD_NM +"' class='gygj-td' style='cursor: pointer; line-height: 1.4rem;'>"+ json.GYGJ_CD_NM +"</td>";
+		        }
+		        //---------------------
+		        // empty td append
+		        //---------------------
+		        if (i%5 > 0) {
+			        for (var j=i%5; j<5; ++j) {
+			        	tr_html += '<td></td>';
+			        }
+			    }
+		        tr_html += '</tr>';
+		        //---------------------
+		        $('.gygj-tbody').append(tr_html);
+		        //---------------------
+		        $(".gygj-td:eq(0)").trigger('click');
+		    },
+		    error: function(e) {
+		        //js_reset_statusbar();
+		    }
+		});
+    }
+    
+    var g_gygj_cd = '', g_gygj_cd_nm='';
+    $(document).on('click',".gygj-td", function() { 
+    	if (g_gygj_cd == $(this).attr('cd')) {
+    		return;
+    	}
+    	if (g_gygj_cd!=undefined) {
+    		$(".gygj-td[cd='"+ g_gygj_cd +"']").removeClass('on');
+    	}
+    	g_gygj_cd    = $(this).attr('cd');
+    	g_gygj_cd_nm = $(this).attr('nm');
+    	$(this).addClass('on');
+    	//----------------------------------------------------------------
+    	js_gwamok_list();
+    });
+    
+    function js_gwamok_list() {
+    	var params = {};
+    	params.apiUrl   = '/HYRC/A202200006.json';
+    	params.gygj_cd      = g_gygj_cd;
+    	params.slg_sosok_cd = g_slg_sosok_cd;
+    	params.lang_gb  = 'ko';
+    	
+
+    	$('#tit_gygj_nm').html(g_gygj_cd_nm +' '+ g_daehak_nm + ' ' + (g_hakgwa_nm==g_daehak_nm ? '' : g_hakgwa_nm) + ' 개설과목');
+
+
+      //$('.gwamok-tbody').empty();
+    	$('.gwamok-tbody').html("<tr><td colspan='13'>개설과목을 조회 중 입니다. 잠시만 기다려 주세요.</td></tr>");
+    	
+    	$.ajax({
+		    url: '/commonAjaxCall.json',
+		    target: 'TEMPORARY_FRAME',
+		    data: params,
+		    contentType: 'application/x-www-form-urlencoded',
+		    method: 'GET',
+		    dataType: 'json', // xml, html, script, json, jsonp, text
+		    success: function(data) {
+		        if(data.result.totalCount==0) {
+		            return;
+		        }
+		        
+		        var td_cnt=0, tr_html='', i=0;
+		        for(i=0; i<data.result.list.length; ++i) {
+		            var json = data.result.list[i];
+		            //--------------------------------
+		            tr_html += "<tr>";
+		            //--------------------------------
+		            tr_html += "<td>"+ (json.HAKSU_NO      !=null ? json.HAKSU_NO       : '') +"</td>";
+		            tr_html += "<td class='show-gwamok-geyo' style='text-align: left; padding-left: 0.4rem; color:#3e67df;cursor:pointer;' ";
+		            tr_html += "    gygj_cd='"+ g_gygj_cd +"' gnj_sosok_cd='"+ json.GNJ_SOSOK_CD +"' haksu_no='"+ json.HAKSU_NO +"'>"+ (json.GWAMOK_NM !=null ? json.GWAMOK_NM : '') +"</td>";
+		          //tr_html += "<td>"+ (json.GWAMOK_ENM    !=null ? json.GWAMOK_ENM     : '') +"</td>";
+		            tr_html += "<td>"+ (json.ISU_GB_NM     !=null ? json.ISU_GB_NM      : '') +"</td>";
+		            tr_html += "<td>"+ (json.ISU_UNIT_CD_NM!=null ? json.ISU_UNIT_CD_NM : '') +"</td>";
+		            tr_html += "<td>"+ (json.HAKJEOM       !=null ? json.HAKJEOM        : '') +"</td>";
+		            tr_html += "<td>"+ (json.IRON_SIGAN    !=null ? json.IRON_SIGAN     : '') +"</td>";
+		            tr_html += "<td>"+ (json.SILS_SIGAN    !=null ? json.SILS_SIGAN     : '') +"</td>";
+		            tr_html += "<td>"+ (json.ISU_GRADE     !=null ? json.ISU_GRADE      : '') +"</td>";
+		            tr_html += "<td>"+ (json.ISU_TERM      !=null ? json.ISU_TERM       : '') +"</td>";
+		            tr_html += "<td>"+ (json.START_YEAR    !=null ? json.START_YEAR     : '') +"</td>";
+		            tr_html += "<td>"+ (json.START_TERM    !=null ? json.START_TERM     : '') +"</td>";
+		            tr_html += "<td>"+ (json.END_YEAR      !=null ? json.END_YEAR       : '') +"</td>";
+		            tr_html += "<td>"+ (json.END_TERM      !=null ? json.END_TERM       : '') +"</td>";
+		          //tr_html += "<td>"+ (json.BIGO          !=null ? json.BIGO           : '') +"</td>";
+		            //--------------------------------
+		            tr_html += "</tr>";
+		        }
+		        //---------------------
+		        $('.gwamok-tbody').empty();
+		        $('.gwamok-tbody').append(tr_html); 
+		        //---------------------
+		        
+		    },
+		    error: function(e) {
+		        //js_reset_statusbar();
+		    }
+		});
+    }
+    //------------------------------
+    // 교과목 개요 팝업 열기
+    //------------------------------
+    $(document).on('click',".show-gwamok-geyo", function(e) { 
+        $('.gwamok-tbody tr').removeClass('on1');
+        var idx = $(this).index('.show-gwamok-geyo');
+    	$('.gwamok-tbody tr:eq('+ idx +')').addClass('on1');
+        //------------------------------
+        $('.gwamok-geyo').fadeIn(350);
+        e.preventDefault();
+        //------------------------------
+        $('#gwamok-geyo-kor').html('');
+        $('#gwamok-geyo-eng').html('');
+        //------------------------------
+    	var params = {};
+    	params.apiUrl   = '/HYRC/A202200007.json';
+    	params.gygj_cd         = $(this).attr('gygj_cd');
+    	params.gwamok_sosok_cd = $(this).attr('gnj_sosok_cd');
+    	params.haksu_no        = $(this).attr('haksu_no');
+    	params.lang_gb  = 'ko';
+    	
+    	$.ajax({
+		    url: '/commonAjaxCall.json',
+		    target: 'TEMPORARY_FRAME',
+		    data: params,
+		    contentType: 'application/x-www-form-urlencoded',
+		    method: 'GET',
+		    dataType: 'json', // xml, html, script, json, jsonp, text
+		    success: function(data) {
+		        if (data.result.totalCount > 0) {
+			        for(i=0; i<data.result.list.length; ++i) {
+			            var json = data.result.list[i];
+			            //------------------------------------
+				        $('#gwamok-geyo-kor').html((json.GWAMOK_GAEYO    !=null ? json.GWAMOK_GAEYO    .replace(/\r/g,'').replace(/\n/g, '<br>') : ''));
+				        $('#gwamok-geyo-eng').html((json.GWAMOK_GAEYO_ENG!=null ? json.GWAMOK_GAEYO_ENG.replace(/\r/g,'').replace(/\n/g, '<br>') : ''));
+			        }
+		        }
+		        else {
+		        	$('#gwamok-geyo-kor').html('자료가 존재하지 않습니다.');
+				    $('#gwamok-geyo-eng').html('No data found.');
+		        }
+		    },
+		    error: function(e) {
+		        //js_reset_statusbar();
+		    }
+		});
+    });
+    //------------------------------
+    // 교과목 개요 팝업 닫기
+    //------------------------------
+    $(document).on('click',".popup-close", function(e) { 
+        $('.gwamok-geyo').fadeOut(350);
+        e.preventDefault();
+    });
+    
+</script>

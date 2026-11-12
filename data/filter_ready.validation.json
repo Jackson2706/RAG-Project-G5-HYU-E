@@ -1,0 +1,58 @@
+{
+  "documents": 713,
+  "base_documents": 662,
+  "web_extensions": [
+    {
+      "status": "PASS",
+      "documents": 51,
+      "selected_source_urls": 20,
+      "raw_files_hash_checked": 244,
+      "downloaded_responses": 244,
+      "checks": [
+        "Raw archive SHA-256",
+        "Prepared file SHA-256",
+        "Current parser and metadata extractor",
+        "Campus filter inclusion and exclusion",
+        "Unknown year retained on undated web pages",
+        "Tuition reference period differs from admission cycle",
+        "College-wide pages omit department",
+        "Declared unit set equals active files"
+      ],
+      "index_changed": false
+    }
+  ],
+  "source_documents": 55,
+  "historical_source_sections": 663,
+  "base_topics": 26,
+  "topics": 31,
+  "metadata_extraction": "PASS with current BasicDocumentParser and BasicMetadataExtractor",
+  "source_validation": "PASS: current raw and prepared file hashes; historical section references and bounds. Original Markdown coverage was checked before removing intermediates.",
+  "filter_data_checks": [
+    "Seoul undergraduate architecture overview matches",
+    "ERICA excludes Seoul curriculum",
+    "Graduate excludes undergraduate curriculum",
+    "Topic courses excludes overview",
+    "Unknown guidebook year: strict excludes",
+    "Unknown guidebook year: permissive includes",
+    "Unknown student category: strict excludes",
+    "Unknown student category: permissive includes",
+    "Shared flow covers undergraduate",
+    "Shared flow covers graduate",
+    "Existing campus-wide predicate retains common application flow",
+    "Seoul scholarship excludes ERICA unit",
+    "ERICA scholarship excludes Seoul unit",
+    "Explicit shared department wildcard can retain general HISP",
+    "Graduate HISP is excluded for undergraduates",
+    "Unavailable combined degree row is still searchable",
+    "Availability outcome is distinct from discussed degree",
+    "PhD requirements match PhD",
+    "PhD-specific requirements exclude masters"
+  ],
+  "chunk_counts": {
+    "SectionTokenChunker": 1116,
+    "RecursiveChunker": 1117
+  },
+  "max_chunk_tokens": 256,
+  "backend_filters_changed": false,
+  "database_index_changed": false
+}

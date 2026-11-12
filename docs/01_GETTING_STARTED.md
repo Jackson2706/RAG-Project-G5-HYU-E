@@ -153,11 +153,10 @@ Done: 5 documents, 23 chunks, 384-dimensional vectors.
 
 The first run downloads the embedding model (~130 MB) and takes longer.
 
-**Your real documents:** copy PDF, TXT, Markdown or HTML files into `data/raw/` (sub-folders are
-fine), then run:
+**Your real documents:** retain original sources in `data/raw/` and use cleaned Markdown with metadata from `data/filter_ready/`. To index the prepared corpus, run:
 
 ```bash
-python scripts/ingest.py --path data/raw
+python scripts/ingest.py --path data/filter_ready
 ```
 
 Ingestion **replaces** the whole index with the folder you give it. You can also change the chunk

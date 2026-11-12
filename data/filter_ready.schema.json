@@ -1,0 +1,140 @@
+{
+  "metadata_schema_version": "1",
+  "encoding": "Flat Markdown front matter; scalar strings or simple lists of strings. No nested YAML is required by the parser.",
+  "required_fields": [
+    "metadata_schema_version",
+    "unit_id",
+    "title",
+    "source_pdf",
+    "source_sha256",
+    "parent_source_uri",
+    "parent_markdown_sha256",
+    "campus",
+    "academic_level",
+    "audience",
+    "document_type",
+    "topic",
+    "topics",
+    "scope",
+    "department_scope",
+    "college_scope",
+    "record_type",
+    "source_group",
+    "language"
+  ],
+  "allowed_values": {
+    "campus": [
+      "SEOUL",
+      "ERICA",
+      "ALL"
+    ],
+    "academic_level": [
+      "undergraduate",
+      "graduate"
+    ],
+    "student_category": [
+      "international",
+      "domestic"
+    ],
+    "document_type": [
+      "major_guide",
+      "admission_guide"
+    ],
+    "term": [
+      "spring",
+      "fall"
+    ],
+    "degree_level": [
+      "masters",
+      "phd",
+      "combined"
+    ],
+    "topic": [
+      "admission_rules",
+      "application_process",
+      "application_schedule",
+      "bank_balance",
+      "careers",
+      "contacts",
+      "courses",
+      "curriculum_structure",
+      "department_requirements",
+      "document_verification",
+      "eligibility",
+      "evaluation_process",
+      "gpa_certification",
+      "graduation_requirements",
+      "language_documents",
+      "language_requirements",
+      "overview",
+      "program_availability",
+      "program_features",
+      "program_information",
+      "refunds",
+      "required_documents",
+      "scholarships",
+      "source_scope",
+      "tuition",
+      "university_overview"
+    ],
+    "scope": [
+      "university",
+      "campus",
+      "college",
+      "department",
+      "discipline",
+      "tuition_category"
+    ]
+  },
+  "missing_values": "Unknown values are omitted, never encoded as unknown/null/empty strings or guessed from filenames. student_category_status explains unassigned student categories.",
+  "identifier_fields": [
+    "department",
+    "college",
+    "major",
+    "tuition_category"
+  ],
+  "identifier_format": "Lowercase ASCII hyphenated lexical keys, or an explicit ALL wildcard where documented. Display labels use separate *_name fields. Keys are not verified organization IDs and do not establish equivalence between different graduate/undergraduate units.",
+  "multi_value_fields": [
+    "campus",
+    "academic_level",
+    "audience",
+    "student_category",
+    "department",
+    "college",
+    "degree_level",
+    "available_degree_levels",
+    "eligible_nationality",
+    "source_pages",
+    "topics",
+    "discipline",
+    "department_aliases"
+  ],
+  "audience": "Compatibility alias of academic_level only. student_category is a separate dimension.",
+  "student_category": "Assigned only when the source explicitly identifies a student group. English language, nationality, or an international admission route alone is not used to infer exclusive domestic/international eligibility.",
+  "admission_route": "Admission records preserve international_admissions as source route context; this is distinct from student category. Type B explicitly permits Korean or foreign nationality.",
+  "year_semantics": "Admission academic_year=2027 and term=spring describe the admission cycle. Tuition basis=fall 2026 is stored separately. No guidebook academic_year or effective_date is inferred from conflicting cover/filename years.",
+  "wildcards": "campus=ALL is campus-wide. department=ALL and college=ALL are used only for genuinely unqualified all-department/all-college scope. They are not missing values. Future department/college filters must explicitly include applicable shared scope.",
+  "qualified_scope": "all_in_college/all_in_listed_colleges records apply only within their named college(s); tuition_category and specified_disciplines records are qualified by those fields. Do not treat every missing department as a university-wide rule.",
+  "topic_semantics": "One primary topic per unit. Topic is often better used as a ranking hint; for example GPA-certificate guidance can support a scholarship question even though its primary topic is gpa_certification.",
+  "availability_semantics": "degree_level on availability records denotes the degree columns discussed, including unavailable programs. available_degree_levels and availability store the explicit outcome. Do not discard unavailable rows when answering whether a degree is offered.",
+  "source_pages": "PDF page references are explicit metadata and remain in headings; the existing Markdown parser does not populate numeric chunk page_number from a heading.",
+  "current_FilterCriteria_fields": [
+    "campus",
+    "audience",
+    "academic_year",
+    "document_type",
+    "effective_date",
+    "academic_level",
+    "student_category",
+    "department",
+    "college",
+    "topic",
+    "term",
+    "degree_level",
+    "available_degree_levels",
+    "admission_route"
+  ],
+  "future_FilterCriteria_fields": [],
+  "backend_filtering_changed": true,
+  "parent_source_uri_semantics": "Historical logical source ID, not a live file path. parent_markdown_sha256 records the removed intermediate snapshot; raw PDFs and prepared units remain hash-verifiable."
+}

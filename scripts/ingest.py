@@ -4,7 +4,7 @@
 Run from the project root (the hyu-compass/ folder):
 
     conda activate RAG
-    python scripts/ingest.py --path data/raw
+    python scripts/ingest.py --path data/filter_ready
     python scripts/ingest.py --path data/samples --chunk-size 256 --chunk-overlap 32
 """
 
@@ -25,7 +25,7 @@ from app.rag.schemas import Services  # noqa: E402
 def main() -> None:
     chunking = default_config()["chunking"]
     parser = argparse.ArgumentParser(description="Ingest documents into HYU Compass")
-    parser.add_argument("--path", default="data/raw", help="folder with documents (default: data/raw)")
+    parser.add_argument("--path", default="data/filter_ready", help="folder with documents (default: data/filter_ready)")
     parser.add_argument("--chunk-size", type=int, default=chunking["params"]["chunk_size"])
     parser.add_argument("--chunk-overlap", type=int, default=chunking["params"]["chunk_overlap"])
     args = parser.parse_args()

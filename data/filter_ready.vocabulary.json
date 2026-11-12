@@ -1,0 +1,1599 @@
+{
+  "metadata_schema_version": "1",
+  "departments": [
+    {
+      "campus": "ERICA",
+      "academic_level": "graduate",
+      "department": "advertising-and-public-relations",
+      "name": "Advertising & Public Relations",
+      "college": "communication-and-culture",
+      "college_name": "Communication & Culture"
+    },
+    {
+      "campus": "ERICA",
+      "academic_level": "graduate",
+      "department": "applied-artificial-intelligence",
+      "name": "Applied Artificial Intelligence",
+      "college": "computing",
+      "college_name": "Computing"
+    },
+    {
+      "campus": "ERICA",
+      "academic_level": "graduate",
+      "department": "applied-chemistry",
+      "name": "Applied Chemistry",
+      "college": "engineering-science",
+      "college_name": "Engineering Science"
+    },
+    {
+      "campus": "ERICA",
+      "academic_level": "graduate",
+      "department": "applied-economics",
+      "name": "Applied Economics",
+      "college": "business-and-economics",
+      "college_name": "Business and Economics"
+    },
+    {
+      "campus": "ERICA",
+      "academic_level": "graduate",
+      "department": "applied-music",
+      "name": "Applied Music",
+      "college": "sports-and-arts",
+      "college_name": "Sports and Arts"
+    },
+    {
+      "campus": "ERICA",
+      "academic_level": "graduate",
+      "department": "applied-physics",
+      "name": "Applied Physics",
+      "college": "advanced-technology-and-convergence",
+      "college_name": "Advanced Technology and Convergence"
+    },
+    {
+      "campus": "ERICA",
+      "academic_level": "graduate",
+      "department": "architectural-design",
+      "name": "Architectural Design",
+      "college": "engineering-science",
+      "college_name": "Engineering Science"
+    },
+    {
+      "campus": "ERICA",
+      "academic_level": "graduate",
+      "department": "architectural-system-and-engineering",
+      "name": "Architectural System and Engineering",
+      "college": "engineering-science",
+      "college_name": "Engineering Science"
+    },
+    {
+      "campus": "ERICA",
+      "academic_level": "graduate",
+      "department": "bionanotechnology",
+      "name": "Bionanotechnology",
+      "college": "advanced-technology-and-convergence",
+      "college_name": "Advanced Technology and Convergence"
+    },
+    {
+      "campus": "ERICA",
+      "academic_level": "graduate",
+      "department": "chinese-commerce-and-area-studies",
+      "name": "Chinese Commerce & Area Studies",
+      "college": "global-culture-and-commerce",
+      "college_name": "Global Culture and Commerce"
+    },
+    {
+      "campus": "ERICA",
+      "academic_level": "graduate",
+      "department": "civil-and-environmental-systems-engineering",
+      "name": "Civil and Environmental Systems Engineering",
+      "college": "engineering-science",
+      "college_name": "Engineering Science"
+    },
+    {
+      "campus": "ERICA",
+      "academic_level": "graduate",
+      "department": "computer-science-and-engineering",
+      "name": "Computer Science and Engineering",
+      "college": "engineering-science",
+      "college_name": "Engineering Science"
+    },
+    {
+      "campus": "ERICA",
+      "academic_level": "graduate",
+      "department": "cultural-anthropology",
+      "name": "Cultural Anthropology",
+      "college": "communication-and-culture",
+      "college_name": "Communication & Culture"
+    },
+    {
+      "campus": "ERICA",
+      "academic_level": "graduate",
+      "department": "culture-contents",
+      "name": "Culture Contents",
+      "college": "communication-and-culture",
+      "college_name": "Communication & Culture"
+    },
+    {
+      "campus": "ERICA",
+      "academic_level": "graduate",
+      "department": "design",
+      "name": "Design",
+      "college": "design",
+      "college_name": "Design"
+    },
+    {
+      "campus": "ERICA",
+      "academic_level": "graduate",
+      "department": "electrical-and-electronic-engineering",
+      "name": "Electrical and Electronic Engineering",
+      "college": "engineering-science",
+      "college_name": "Engineering Science"
+    },
+    {
+      "campus": "ERICA",
+      "academic_level": "graduate",
+      "department": "energy-and-chemical-engineering",
+      "name": "Energy and Chemical Engineering",
+      "college": "engineering-science",
+      "college_name": "Engineering Science"
+    },
+    {
+      "campus": "ERICA",
+      "academic_level": "graduate",
+      "department": "genre-technology-and-subculture",
+      "name": "Genre Technology & Subculture",
+      "college": "global-culture-and-commerce",
+      "college_name": "Global Culture and Commerce"
+    },
+    {
+      "campus": "ERICA",
+      "academic_level": "graduate",
+      "department": "human-computer-interaction",
+      "name": "Human Computer Interaction",
+      "college": "computing",
+      "college_name": "Computing"
+    },
+    {
+      "campus": "ERICA",
+      "academic_level": "graduate",
+      "department": "hyu-kitech-joint-department",
+      "name": "HYU-KITECH Joint Department",
+      "college": "engineering-science",
+      "college_name": "Engineering Science"
+    },
+    {
+      "campus": "ERICA",
+      "academic_level": "graduate",
+      "department": "industrial-and-management-engineering",
+      "name": "Industrial and Management Engineering",
+      "college": "engineering-science",
+      "college_name": "Engineering Science"
+    },
+    {
+      "campus": "ERICA",
+      "academic_level": "graduate",
+      "department": "information-security",
+      "name": "Information Security",
+      "college": "computing",
+      "college_name": "Computing"
+    },
+    {
+      "campus": "ERICA",
+      "academic_level": "graduate",
+      "department": "insurance-and-finance",
+      "name": "Insurance & Finance",
+      "college": "business-and-economics",
+      "college_name": "Business and Economics"
+    },
+    {
+      "campus": "ERICA",
+      "academic_level": "graduate",
+      "department": "intelligent-system-engineering",
+      "name": "Intelligent System Engineering",
+      "college": "advanced-technology-and-convergence",
+      "college_name": "Advanced Technology and Convergence"
+    },
+    {
+      "campus": "ERICA",
+      "academic_level": "graduate",
+      "department": "japanese-language-and-culture",
+      "name": "Japanese Language & Culture",
+      "college": "global-culture-and-commerce",
+      "college_name": "Global Culture and Commerce"
+    },
+    {
+      "campus": "ERICA",
+      "academic_level": "graduate",
+      "department": "jazz-performance",
+      "name": "Jazz Performance",
+      "college": "industrial-convergence",
+      "college_name": "Industrial Convergence"
+    },
+    {
+      "campus": "ERICA",
+      "academic_level": "graduate",
+      "department": "management-consulting",
+      "name": "Management Consulting",
+      "college": "business-and-economics",
+      "college_name": "Business and Economics"
+    },
+    {
+      "campus": "ERICA",
+      "academic_level": "graduate",
+      "department": "marine-sciences-and-convergent-technology",
+      "name": "Marine Sciences and Convergent Technology",
+      "college": "engineering-science",
+      "college_name": "Engineering Science"
+    },
+    {
+      "campus": "ERICA",
+      "academic_level": "graduate",
+      "department": "materials-science-and-chemical-engineering",
+      "name": "Materials Science and Chemical Engineering",
+      "college": "engineering-science",
+      "college_name": "Engineering Science"
+    },
+    {
+      "campus": "ERICA",
+      "academic_level": "graduate",
+      "department": "mechanical-design-engineering",
+      "name": "Mechanical Design Engineering",
+      "college": "engineering-science",
+      "college_name": "Engineering Science"
+    },
+    {
+      "campus": "ERICA",
+      "academic_level": "graduate",
+      "department": "media",
+      "name": "Media",
+      "college": "communication-and-culture",
+      "college_name": "Communication & Culture"
+    },
+    {
+      "campus": "ERICA",
+      "academic_level": "graduate",
+      "department": "molecular-and-life-science",
+      "name": "Molecular & Life Science",
+      "college": "advanced-technology-and-convergence",
+      "college_name": "Advanced Technology and Convergence"
+    },
+    {
+      "campus": "ERICA",
+      "academic_level": "graduate",
+      "department": "performing-arts",
+      "name": "Performing Arts",
+      "college": "sports-and-arts",
+      "college_name": "Sports and Arts"
+    },
+    {
+      "campus": "ERICA",
+      "academic_level": "graduate",
+      "department": "pharmacy",
+      "name": "Pharmacy",
+      "college": "pharmacy",
+      "college_name": "Pharmacy"
+    },
+    {
+      "campus": "ERICA",
+      "academic_level": "graduate",
+      "department": "photonics-and-nanoelectronics",
+      "name": "Photonics and Nanoelectronics",
+      "college": "advanced-technology-and-convergence",
+      "college_name": "Advanced Technology and Convergence"
+    },
+    {
+      "campus": "ERICA",
+      "academic_level": "graduate",
+      "department": "quantitative-data-science",
+      "name": "Quantitative Data Science",
+      "college": "computing",
+      "college_name": "Computing"
+    },
+    {
+      "campus": "ERICA",
+      "academic_level": "graduate",
+      "department": "robotics",
+      "name": "Robotics",
+      "college": "engineering-science",
+      "college_name": "Engineering Science"
+    },
+    {
+      "campus": "ERICA",
+      "academic_level": "graduate",
+      "department": "smart-city-engineering",
+      "name": "Smart City Engineering",
+      "college": "engineering-science",
+      "college_name": "Engineering Science"
+    },
+    {
+      "campus": "ERICA",
+      "academic_level": "graduate",
+      "department": "space-engineering",
+      "name": "Space Engineering",
+      "college": "engineering-science",
+      "college_name": "Engineering Science"
+    },
+    {
+      "campus": "ERICA",
+      "academic_level": "graduate",
+      "department": "sport-science",
+      "name": "Sport Science",
+      "college": "sports-and-arts",
+      "college_name": "Sports and Arts"
+    },
+    {
+      "campus": "ERICA",
+      "academic_level": "graduate",
+      "department": "strategic-management",
+      "name": "Strategic Management",
+      "college": "business-and-economics",
+      "college_name": "Business and Economics"
+    },
+    {
+      "campus": "ERICA",
+      "academic_level": "graduate",
+      "department": "transportation-and-logistics-engineering",
+      "name": "Transportation and Logistics Engineering",
+      "college": "engineering-science",
+      "college_name": "Engineering Science"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "applied-art",
+      "name": "Applied Art",
+      "college": "education",
+      "college_name": "Education"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "applied-statistics",
+      "name": "Applied Statistics",
+      "college": "natural-science",
+      "college_name": "Natural Science"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "architecture",
+      "name": "Architecture",
+      "college": "engineering",
+      "college_name": "Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "architecture-engineering",
+      "name": "Architecture Engineering",
+      "college": "engineering",
+      "college_name": "Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "artificial-intelligence",
+      "name": "Artificial Intelligence",
+      "college": "engineering-software",
+      "college_name": "Engineering Software"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "artificial-intelligence-semiconductor-engineering",
+      "name": "Artificial Intelligence Semiconductor Engineering",
+      "college": "engineering",
+      "college_name": "Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "automotive-engineering",
+      "name": "Automotive Engineering",
+      "college": "engineering-software",
+      "college_name": "Engineering Software"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "battery-engineering",
+      "name": "Battery Engineering",
+      "college": "engineering",
+      "college_name": "Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "bioengineering",
+      "name": "Bioengineering",
+      "college": "engineering",
+      "college_name": "Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "biomedical-science",
+      "name": "Biomedical Science",
+      "college": "biomedical-science-and-engineering",
+      "college_name": "Biomedical Science and Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "bitcoin-monetary-philosophy",
+      "name": "Bitcoin Monetary Philosophy",
+      "college": "humanities",
+      "college_name": "Humanities"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "block-chain-convergence",
+      "name": "Block Chain Convergence",
+      "college": "engineering",
+      "college_name": "Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "business",
+      "name": "Business",
+      "college": "mba",
+      "college_name": "MBA"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "business-administration",
+      "name": "Business Administration",
+      "college": "business",
+      "college_name": "Business"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "business-infomatics",
+      "name": "Business Infomatics",
+      "college": "business",
+      "college_name": "Business"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "chemical-engineering",
+      "name": "Chemical Engineering",
+      "college": "engineering",
+      "college_name": "Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "chemistry",
+      "name": "Chemistry",
+      "college": "natural-science",
+      "college_name": "Natural Science"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "child-psychotherapy",
+      "name": "Child Psychotherapy",
+      "college": "medicine",
+      "college_name": "Medicine"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "chinese-language-and-literature",
+      "name": "Chinese Language and Literature",
+      "college": "humanities",
+      "college_name": "Humanities"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "civil-and-environmental-engineering",
+      "name": "Civil and Environmental Engineering",
+      "college": "engineering",
+      "college_name": "Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "civil-society",
+      "name": "Civil Society",
+      "college": "public-policy",
+      "college_name": "Public Policy (night course, 5 terms)"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "clothing-and-textiles",
+      "name": "Clothing & Textiles",
+      "college": "human-ecology",
+      "college_name": "Human Ecology"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "computer-science",
+      "name": "Computer Science",
+      "college": "engineering-software",
+      "college_name": "Engineering Software"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "computer-science-and-financial-engineering",
+      "name": "Computer Science and Financial Engineering",
+      "college": "engineering-software",
+      "college_name": "Engineering Software"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "convergence-defense",
+      "name": "Convergence Defense",
+      "college": "engineering",
+      "college_name": "Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "convergence-nanoscience",
+      "name": "Convergence Nanoscience",
+      "college": "natural-science",
+      "college_name": "Natural Science"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "convergent-art-and-performance",
+      "name": "Convergent Art & Performance",
+      "college": "art-and-physical-education",
+      "college_name": "Art and Physical Education"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "culture-and-entertainment-tourism",
+      "name": "Culture and Entertainment Tourism",
+      "college": "international-tourism",
+      "college_name": "International Tourism (night course, 5 terms)"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "dance",
+      "name": "Dance",
+      "college": "art-and-physical-education",
+      "college_name": "Art and Physical Education"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "data-science",
+      "name": "Data Science",
+      "college": "engineering-software",
+      "college_name": "Engineering Software"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "earth-resources-and-environmental-engineering",
+      "name": "Earth Resources and Environmental Engineering",
+      "college": "engineering",
+      "college_name": "Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "east-asian-studies",
+      "name": "East Asian Studies",
+      "college": "international-studies",
+      "college_name": "International Studies"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "economics-and-finance",
+      "name": "Economics and Finance",
+      "college": "economics-and-finance",
+      "college_name": "Economics and Finance"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "educational-technology",
+      "name": "Educational Technology",
+      "college": "education",
+      "college_name": "Education"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "electrical-engineering",
+      "name": "Electrical Engineering",
+      "college": "engineering",
+      "college_name": "Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "electronic-engineering",
+      "name": "Electronic Engineering",
+      "college": "engineering",
+      "college_name": "Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "energy-engineering",
+      "name": "Energy Engineering",
+      "college": "engineering",
+      "college_name": "Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "english-language-and-literature",
+      "name": "English Language and Literature",
+      "college": "humanities",
+      "college_name": "Humanities"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "entrepreneurship",
+      "name": "Entrepreneurship",
+      "college": "entrepreneurship",
+      "college_name": "Entrepreneurship (night course, 5 terms)"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "environmental-sciences",
+      "name": "Environmental Sciences",
+      "college": "natural-science",
+      "college_name": "Natural Science"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "food-and-nutrition",
+      "name": "Food & Nutrition",
+      "college": "human-ecology",
+      "college_name": "Human Ecology"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "german-language-and-literature",
+      "name": "German Language & Literature",
+      "college": "humanities",
+      "college_name": "Humanities"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "global-climate-environmental-studies",
+      "name": "Global Climate Environmental Studies",
+      "college": "international-studies",
+      "college_name": "International Studies"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "global-management-of-technology",
+      "name": "Global Management of Technology",
+      "college": "technology-innovation",
+      "college_name": "Technology Innovation"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "global-sport-industry",
+      "name": "Global Sport Industry",
+      "college": "art-and-physical-education",
+      "college_name": "Art and Physical Education"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "global-strategy-and-intelligence-studies",
+      "name": "Global Strategy and Intelligence Studies",
+      "college": "international-studies",
+      "college_name": "International Studies"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "health-science",
+      "name": "Health Science",
+      "college": "medicine",
+      "college_name": "Medicine"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "healthcare-digital-engineering",
+      "name": "Healthcare Digital Engineering",
+      "college": "engineering",
+      "college_name": "Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "history",
+      "name": "History",
+      "college": "humanities",
+      "college_name": "Humanities"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "humanities-and-social-science-field",
+      "name": "Humanities and Social Science Field",
+      "college": "journalism-and-mass-communication",
+      "college_name": "Journalism and Mass Communication (night course, 5 terms)"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "hy-kist-bio-convergence",
+      "name": "HY-KIST Bio-convergence",
+      "college": "medicine",
+      "college_name": "Medicine"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "industrial-data-engineering",
+      "name": "Industrial Data Engineering",
+      "college": "technology-innovation",
+      "college_name": "Technology Innovation"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "industrial-engineering",
+      "name": "Industrial Engineering",
+      "college": "engineering",
+      "college_name": "Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "information-security",
+      "name": "Information Security",
+      "college": "engineering-software",
+      "college_name": "Engineering Software"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "information-systems",
+      "name": "Information Systems",
+      "college": "engineering-software",
+      "college_name": "Engineering Software"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "interior-architecture-design",
+      "name": "Interior Architecture Design",
+      "college": "human-ecology",
+      "college_name": "Human Ecology"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "korean-language-and-literature",
+      "name": "Korean Language and Literature",
+      "college": "humanities",
+      "college_name": "Humanities"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "korean-language-education",
+      "name": "Korean Language Education",
+      "college": "education",
+      "college_name": "Education"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "korean-studies",
+      "name": "Korean Studies",
+      "college": "international-studies",
+      "college_name": "International Studies"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "korean-traditional-music",
+      "name": "Korean Traditional Music",
+      "college": "music",
+      "college_name": "Music"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "law",
+      "name": "Law",
+      "college": "law",
+      "college_name": "Law"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "learning-science",
+      "name": "Learning Science",
+      "college": "education",
+      "college_name": "Education"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "legal-affairs",
+      "name": "Legal Affairs",
+      "college": "public-policy",
+      "college_name": "Public Policy (night course, 5 terms)"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "life-science",
+      "name": "Life Science",
+      "college": "natural-science",
+      "college_name": "Natural Science"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "lifelong-learning",
+      "name": "Lifelong Learning",
+      "college": "education",
+      "college_name": "Education"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "local-autonomy",
+      "name": "Local Autonomy",
+      "college": "public-policy",
+      "college_name": "Public Policy (night course, 5 terms)"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "mass-media-and-scenario-contents",
+      "name": "Mass Media and Scenario Contents",
+      "college": "humanities",
+      "college_name": "Humanities"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "materials-science-and-engineering",
+      "name": "Materials Science and Engineering",
+      "college": "engineering",
+      "college_name": "Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "mathematics",
+      "name": "Mathematics",
+      "college": "natural-science",
+      "college_name": "Natural Science"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "mechanical-convergence-engineering",
+      "name": "Mechanical Convergence Engineering",
+      "college": "engineering",
+      "college_name": "Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "media-communication",
+      "name": "Media Communication",
+      "college": "social-science",
+      "college_name": "Social Science"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "medical-and-digital-engineering",
+      "name": "Medical and Digital Engineering",
+      "college": "engineering",
+      "college_name": "Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "medicine",
+      "name": "Medicine",
+      "college": "medicine",
+      "college_name": "Medicine"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "multicultural-education",
+      "name": "Multicultural Education",
+      "college": "education",
+      "college_name": "Education"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "museum-education",
+      "name": "Museum Education",
+      "college": "education",
+      "college_name": "Education"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "music",
+      "name": "Music",
+      "college": "music",
+      "college_name": "Music"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "musical-arts",
+      "name": "Musical Arts",
+      "college": "art-and-physical-education",
+      "college_name": "Art and Physical Education"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "nanoscale-semiconductor-engineering",
+      "name": "Nanoscale Semiconductor Engineering",
+      "college": "engineering",
+      "college_name": "Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "nuclear-engineering",
+      "name": "Nuclear Engineering",
+      "college": "engineering",
+      "college_name": "Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "nursing",
+      "name": "Nursing",
+      "college": "nursing",
+      "college_name": "Nursing"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "organic-and-nano-engineering",
+      "name": "Organic and Nano Engineering",
+      "college": "engineering",
+      "college_name": "Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "philosophy",
+      "name": "Philosophy",
+      "college": "humanities",
+      "college_name": "Humanities"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "physical-education",
+      "name": "Physical Education",
+      "college": "art-and-physical-education",
+      "college_name": "Art and Physical Education"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "physics",
+      "name": "Physics",
+      "college": "natural-science",
+      "college_name": "Natural Science"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "policy-studies",
+      "name": "Policy Studies",
+      "college": "policy-science",
+      "college_name": "Policy Science"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "political-science-and-international-studies",
+      "name": "Political Science and International Studies",
+      "college": "social-science",
+      "college_name": "Social Science"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "public-administration",
+      "name": "Public Administration",
+      "college": "public-policy",
+      "college_name": "Public Policy (night course, 5 terms)"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "science-and-technology-policy",
+      "name": "Science and Technology Policy",
+      "college": "policy-science",
+      "college_name": "Policy Science"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "semiconductor-engineering",
+      "name": "Semiconductor Engineering",
+      "college": "engineering",
+      "college_name": "Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "social-welfare",
+      "name": "Social Welfare",
+      "college": "public-policy",
+      "college_name": "Public Policy (night course, 5 terms)"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "sociology",
+      "name": "Sociology",
+      "college": "social-science",
+      "college_name": "Social Science"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "sustainable-economy",
+      "name": "Sustainable Economy",
+      "college": "international-studies",
+      "college_name": "International Studies"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "technology-management",
+      "name": "Technology Management",
+      "college": "technology-and-innovation-management",
+      "college_name": "Technology & Innovation Management"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "theater-and-film",
+      "name": "Theater and Film",
+      "college": "art-and-physical-education",
+      "college_name": "Art and Physical Education"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "tourism",
+      "name": "Tourism",
+      "college": "social-science",
+      "college_name": "Social Science"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "translational-medicine",
+      "name": "Translational Medicine",
+      "college": "biomedical-science-and-engineering",
+      "college_name": "Biomedical Science and Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "urban-and-regional-development",
+      "name": "Urban and Regional Development",
+      "college": "urban-studies",
+      "college_name": "Urban Studies"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "graduate",
+      "department": "urban-planning-and-engineering",
+      "name": "Urban Planning and Engineering",
+      "college": "engineering",
+      "college_name": "Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "architectural-engineering",
+      "name": "School of Architectural Engineering",
+      "college": "engineering",
+      "college_name": "College of Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "architecture",
+      "name": "School of Architecture",
+      "college": "engineering",
+      "college_name": "College of Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "automotive-engineering",
+      "name": "Department of Automotive Engineering",
+      "college": "engineering",
+      "college_name": "College of Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "bioengineering",
+      "name": "Department of Bioengineering",
+      "college": "engineering",
+      "college_name": "College of Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "biological-sciences",
+      "name": "Department of Biological Sciences",
+      "college": "natural-sciences",
+      "college_name": "College of Natural Sciences"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "business",
+      "name": "School of Business",
+      "college": "business",
+      "college_name": "College of Business"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "chemical-engineering",
+      "name": "Department of Chemical Engineering",
+      "college": "engineering",
+      "college_name": "College of Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "chemistry",
+      "name": "Department of Chemistry",
+      "college": "natural-sciences",
+      "college_name": "College of Natural Sciences"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "chinese-language-and-literature",
+      "name": "Department of Chinese Language & Literature",
+      "college": "humanities",
+      "college_name": "College of Humanities"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "civil-and-environmental-engineering",
+      "name": "Department of Civil and Environmental Engineering",
+      "college": "engineering",
+      "college_name": "College of Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "clothing-and-textiles",
+      "name": "Department of Clothing & Textiles",
+      "college": "human-ecology",
+      "college_name": "College of Human Ecology"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "composition",
+      "name": "Department of Composition",
+      "college": "music",
+      "college_name": "College of Music"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "computer-science",
+      "name": "School of Computer Science",
+      "college": "engineering",
+      "college_name": "College of Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "dance",
+      "name": "Department of Dance",
+      "college": "performing-arts-and-sport",
+      "college_name": "College of Performing Arts & Sport"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "data-science",
+      "name": "School of Data Science",
+      "college": "engineering",
+      "college_name": "College of Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "earth-resources-and-environmental-engineering",
+      "name": "Department of Earth Resources and Environmental Engineering",
+      "college": "engineering",
+      "college_name": "College of Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "economics-and-finance",
+      "name": "School of Economics and Finance",
+      "college": "economics-and-finance",
+      "college_name": "College of Economics and Finance"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "electrical-and-biomedical-engineering-biomedical-engineering",
+      "name": "School of Electrical and Biomedical Engineering (Biomedical Engineering)",
+      "college": "engineering",
+      "college_name": "College of Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "electrical-and-biomedical-engineering-electrical-engineering",
+      "name": "School of Electrical and Biomedical Engineering (Electrical Engineering)",
+      "college": "engineering",
+      "college_name": "College of Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "electronic-engineering",
+      "name": "School of Electronic Engineering",
+      "college": "engineering",
+      "college_name": "College of Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "energy-engineering",
+      "name": "Department of Energy Engineering",
+      "college": "engineering",
+      "college_name": "College of Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "english-language-and-literature",
+      "name": "Department of English Language & Literature",
+      "college": "humanities",
+      "college_name": "College of Humanities"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "film-and-theater",
+      "name": "Department of Film & Theater",
+      "college": "performing-arts-and-sport",
+      "college_name": "College of Performing Arts & Sport"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "finance",
+      "name": "Department of Finance",
+      "college": "business",
+      "college_name": "College of Business"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "food-and-nutrition",
+      "name": "Department of Food & Nutrition",
+      "college": "human-ecology",
+      "college_name": "College of Human Ecology"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "german-language-and-literature",
+      "name": "Department of German Language & Literature",
+      "college": "humanities",
+      "college_name": "College of Humanities"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "global-content-convergence",
+      "name": "Department of Global Content Convergence",
+      "college": "international-college",
+      "college_name": "International College"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "history",
+      "name": "Department of History",
+      "college": "humanities",
+      "college_name": "College of Humanities"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "industrial-engineering",
+      "name": "Department of Industrial Engineering",
+      "college": "engineering",
+      "college_name": "College of Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "information-system",
+      "name": "Department of Information System",
+      "college": "engineering",
+      "college_name": "College of Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "interior-architecture-design",
+      "name": "Department of Interior Architecture Design",
+      "college": "human-ecology",
+      "college_name": "College of Human Ecology"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "international-studies",
+      "name": "School of International Studies",
+      "college": "international-studies",
+      "college_name": "School of International Studies"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "korean-language-and-literature",
+      "name": "Department of Korean Language & Literature",
+      "college": "humanities",
+      "college_name": "College of Humanities"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "korean-traditional-music",
+      "name": "Department of Korean Traditional Music",
+      "college": "music",
+      "college_name": "College of Music"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "materials-science-and-engineering",
+      "name": "School of Materials Science & Engineering",
+      "college": "engineering",
+      "college_name": "College of Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "mathematics",
+      "name": "Department of Mathematics",
+      "college": "natural-sciences",
+      "college_name": "College of Natural Sciences"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "mechanical-engineering",
+      "name": "School of Mechanical Engineering",
+      "college": "engineering",
+      "college_name": "College of Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "media-communication",
+      "name": "Department of Media Communication",
+      "college": "social-sciences",
+      "college_name": "College of Social Sciences"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "nuclear-engineering",
+      "name": "Department of Nuclear Engineering",
+      "college": "engineering",
+      "college_name": "College of Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "orchestral-instruments",
+      "name": "Department of Orchestral Instruments",
+      "college": "music",
+      "college_name": "College of Music"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "organic-and-nano-engineering",
+      "name": "Department of Organic and Nano Engineering",
+      "college": "engineering",
+      "college_name": "College of Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "philosophy",
+      "name": "Department of Philosophy",
+      "college": "humanities",
+      "college_name": "College of Humanities"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "physics",
+      "name": "Department of Physics",
+      "college": "natural-sciences",
+      "college_name": "College of Natural Sciences"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "piano",
+      "name": "Department of Piano",
+      "college": "music",
+      "college_name": "College of Music"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "policy-studies",
+      "name": "Department of Policy Studies",
+      "college": "policy-science",
+      "college_name": "College of Policy Science"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "political-science-and-international-studies",
+      "name": "Department of Political Science & International Studies",
+      "college": "social-sciences",
+      "college_name": "College of Social Sciences"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "public-administration",
+      "name": "Department of Public Administration",
+      "college": "policy-science",
+      "college_name": "College of Policy Science"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "sociology",
+      "name": "Department of Sociology",
+      "college": "social-sciences",
+      "college_name": "College of Social Sciences"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "sport-industry-and-science-sports-sports-management",
+      "name": "School of Sport Industry and Science Sports (Sports Management)",
+      "college": "performing-arts-and-sport",
+      "college_name": "College of Performing Arts & Sport"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "sport-industry-and-science-sports-sports-science",
+      "name": "School of Sport Industry and Science Sports (Sports Science)",
+      "college": "performing-arts-and-sport",
+      "college_name": "College of Performing Arts & Sport"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "tourism",
+      "name": "Department of Tourism",
+      "college": "social-sciences",
+      "college_name": "College of Social Sciences"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "urban-planning-and-engineering",
+      "name": "Department of Urban Planning and Engineering",
+      "college": "engineering",
+      "college_name": "College of Engineering"
+    },
+    {
+      "campus": "SEOUL",
+      "academic_level": "undergraduate",
+      "department": "vocal-music",
+      "name": "Department of Vocal Music",
+      "college": "music",
+      "college_name": "College of Music"
+    }
+  ],
+  "topics": [
+    "admission_rules",
+    "application_process",
+    "application_schedule",
+    "bank_balance",
+    "careers",
+    "contacts",
+    "courses",
+    "curriculum_structure",
+    "department_requirements",
+    "document_verification",
+    "eligibility",
+    "evaluation_process",
+    "gpa_certification",
+    "graduation_requirements",
+    "language_documents",
+    "language_requirements",
+    "overview",
+    "program_availability",
+    "program_features",
+    "program_information",
+    "refunds",
+    "required_documents",
+    "scholarships",
+    "source_scope",
+    "tuition",
+    "university_overview"
+  ],
+  "academic_levels": [
+    "undergraduate",
+    "graduate"
+  ],
+  "student_categories": [
+    "international",
+    "domestic"
+  ],
+  "campuses": [
+    "SEOUL",
+    "ERICA",
+    "ALL"
+  ],
+  "terms": [
+    "spring",
+    "fall"
+  ],
+  "degree_levels": [
+    "masters",
+    "phd",
+    "combined"
+  ]
+}
