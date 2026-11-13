@@ -113,7 +113,23 @@ not computed.
 
 ## 8. Limitations
 
-See `Report/notes/limitations.md`; the final list is copied here after G6.
+- **The labels are LLM labels.** Every question was written by an agent, and every label was annotated,
+  adjudicated and verified by LLMs; nothing was checked by a human (A28, A33). Our numbers compare methods on
+  the same labels; they are not absolute accuracy figures. Batches 04-06, the adjudication and the verification
+  were all done by Claude models, so the independence is between contexts more than between vendors.
+- **Agreement before adjudication was moderate.** κ on answerability was 0.56 (Codex vs Opus) and 0.43 (Sonnet
+  vs Opus), 0.55 and 0.71 on the collapsed classes (`Report/results/labels/`).
+- **Twelve cases were excluded** after the split, mostly because the right label needed gold spans for a
+  campus branch the primary label lacked. At least one dev case (T14-203) counts a campus as stated that the
+  text never names; we did not inspect test for this.
+- **The tags were not human-audited.** The last tag audit (G2b, r4) failed on degree level, student type and
+  visa, and the r5 round was not re-audited. AAES depends on these tags.
+- **Comparison 2 (correctness) was not computed.** It needs an LLM judge validated against human labels, and
+  we have none.
+- **Small slices and one setup.** The test split has 121 cases; per-slice numbers rest on far fewer (counts in the slice table). One
+  generator (`qwen3.5:4b`) and one 16 GB machine were used.
+- **Not run (PLAYBOOK A29):** the memory methods (M1, M2, A7), the LLM-judge ablation A5, and the external
+  ConditionalQA benchmark.
 
 ## 9. Mapping to the course (Lessons 3-6)
 
