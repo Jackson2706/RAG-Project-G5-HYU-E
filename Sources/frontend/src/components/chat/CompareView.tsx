@@ -12,8 +12,10 @@ import type { Preset } from "@/types/api";
 
 export const MAX_COMPARE = 4;
 
-export function ComparePicker({ presets, chosen, onChange }: { presets: Preset[]; chosen: string[]; onChange: (ids: string[]) => void }) {
-  const runnable = presets.filter((p) => p.enabled && p.config);
+export function ComparePicker({ presets, chosen, onChange, hasDemo = false }: {
+  presets: Preset[]; chosen: string[]; onChange: (ids: string[]) => void; hasDemo?: boolean;
+}) {
+  const runnable = presets.filter((p) => p.enabled && p.config && (hasDemo || !p.needs_demo_case)); // G1/A2 only with a demo case
   const toggle = (id: string) => onChange(chosen.includes(id) ? chosen.filter((c) => c !== id) : [...chosen, id]);
   return (
     <fieldset className="border-b border-border px-3 py-2 text-sm" data-testid="compare-picker">

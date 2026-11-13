@@ -220,3 +220,26 @@ describe("compare mode", () => {
     expect(onInspect).toHaveBeenCalledWith("r1");
   });
 });
+
+describe("demo cases (P8D T37)", () => {
+  it("fills the question from a dev demo case and offers oracle presets only with one", async () => {
+    const { ChatPanel } = await import("@/components/chat/ChatPanel");
+    const { ComparePicker } = await import("@/components/chat/CompareView");
+    const demo = { case_id: "T14-001", slice: "conditional", question: "Which dorm can I apply for?", history: ["I'm at ERICA."],
+                   stated_profile: { campus: "erica" }, expected_behavior: "answer" };  // prettier-ignore
+    const onDemo = vi.fn();
+    Element.prototype.scrollTo = vi.fn(); // jsdom has no scrollTo
+    const chat = { messages: [], busy: false, reset: vi.fn(), cancel: vi.fn() } as unknown as ChatState;
+    render(<TooltipProvider><ChatPanel chat={chat} onSend={vi.fn()} blockedReason={null} onInspect={vi.fn()} presets={[]} compare={null}
+                                       onCompare={vi.fn()} demoCases={[demo]} demo={null} onDemo={onDemo} /></TooltipProvider>);  // prettier-ignore
+    fireEvent.change(screen.getByLabelText("Demo case"), { target: { value: "T14-001" } });
+    expect(onDemo).toHaveBeenCalledWith(demo);
+    expect(screen.getByLabelText("Ask a question")).toHaveValue("Which dorm can I apply for?");
+
+    const g1: Preset = { id: "G1", kind: "online", name: "G1", description: "", enabled: true, config: {}, errors: [], needs_demo_case: true };
+    const { rerender } = render(<ComparePicker presets={[g1]} chosen={[]} onChange={vi.fn()} />);
+    expect(screen.queryByLabelText("G1")).toBeNull();
+    rerender(<ComparePicker presets={[g1]} chosen={[]} onChange={vi.fn()} hasDemo />);
+    expect(screen.getByLabelText("G1")).toBeInTheDocument();
+  });
+});

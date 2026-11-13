@@ -424,15 +424,18 @@ async def run_hyu_task(run: Run, task: Task) -> dict:
     done = read_done(path)
     cases = hyu_suite.load_cases(task.dataset)[: task.query_limit]
     to_snapshot = hyu_suite.snapshot_doc_ids(cases[0]["snapshot_id"]) if cases else {}
+    documents = {r["doc_id"]: r for r in load_jsonl(hyu_suite.snapshot_dir(cases[0]["snapshot_id"]) / "documents.jsonl")} if cases else {}
 
-    def lookup(ids):  # chunk spans with the SNAPSHOT doc id, the one the label spans use
-        return {c["chunk_id"]: {"doc_id": to_snapshot.get(c["doc_id"], c["doc_id"]), "source_spans": c.get("source_spans", [])}
-                for c in db.chunks.find({"chunk_id": {"$in": sorted(ids)}}, {"_id": 0, "chunk_id": 1, "doc_id": 1, "source_spans": 1})}  # fmt: skip
+    def lookup(ids):  # chunk spans with the SNAPSHOT doc id, the one the label spans use; G1's gold:… ids parse directly
+        found = {c["chunk_id"]: {"doc_id": to_snapshot.get(c["doc_id"], c["doc_id"]), "source_spans": c.get("source_spans", [])}
+                 for c in db.chunks.find({"chunk_id": {"$in": sorted(ids)}}, {"_id": 0, "chunk_id": 1, "doc_id": 1, "source_spans": 1})}  # fmt: skip
+        return {**found, **{i: g for i in ids if (g := hyu_suite.gold_chunk(i))}}
 
     for n, case in enumerate(cases, start=1):
         if case["case_id"] in done:
             continue
-        trace = await run_rag(hyu_suite.question_for(case, config), config, services, save_trace=False, history=hyu_suite.history_of(case))
+        trace = await run_rag(hyu_suite.question_for(case, config), config, services, save_trace=False, history=hyu_suite.history_of(case),
+                              oracle=hyu_suite.oracle_for(case, documents))
         rec = hyu_suite.trace_record(case, trace, lookup)
         append(path, rec)
         print(f"    {task.key}: {n}/{len(cases)} {case['case_id']} → {rec['behavior']} {rec['error'] or ''}", flush=True)

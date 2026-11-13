@@ -133,6 +133,18 @@ export interface Preset {
   enabled: boolean;
   config: StageChoices | null; // complete validated configuration (null if disabled or invalid)
   errors: ConfigError[];
+  needs_demo_case?: boolean; // oracle presets (G1, A2) run only with a labeled demo case
+}
+
+/** A labeled dev case for the demo (GET /api/demo/cases); never a test case. */
+export interface DemoCase {
+  case_id: string;
+  slice: string;
+  question: string;
+  history: string[]; // earlier user turns, sent as the session history
+  stated_profile: Record<string, string>;
+  expected_behavior: string;
+  story?: string | null;
 }
 
 /** One index revision (GET /api/indexes): the app's index or a benchmark index. */

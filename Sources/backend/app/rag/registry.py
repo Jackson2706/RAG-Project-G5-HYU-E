@@ -42,6 +42,7 @@ from app.rag.blocks.ingestion.vector_indexing.qdrant_indexer import QdrantMongoI
 from app.rag.blocks.query_processing.query_understanding.base import BaseQueryUnderstanding
 from app.rag.blocks.query_processing.query_understanding.llm_understanding import LLMQueryUnderstanding
 from app.rag.blocks.query_processing.query_understanding.profile_understanding import ProfileUnderstanding
+from app.rag.blocks.query_processing.query_understanding.oracle_profile import OracleProfileUnderstanding
 from app.rag.blocks.query_processing.query_understanding.self_query import SelfQueryUnderstanding
 from app.rag.blocks.query_processing.query_understanding.stated_criteria import StatedCriteria
 from app.rag.blocks.query_processing.query_rewriting.base import BaseQueryRewriter
@@ -76,6 +77,7 @@ from app.rag.blocks.evidence.reranking.rankgpt import RankGPTReranker
 from app.rag.blocks.evidence.evidence_selection.base import BaseEvidenceSelector
 from app.rag.blocks.evidence.evidence_selection.token_budget_selector import TokenBudgetSelector
 from app.rag.blocks.evidence.evidence_selection.top_k_selector import TopKSelector
+from app.rag.blocks.evidence.evidence_selection.oracle_evidence import OracleEvidenceSelector
 from app.rag.blocks.evidence.evidence_sufficiency.applicability_sufficiency import ApplicabilitySufficiency
 from app.rag.blocks.evidence.evidence_sufficiency.base import BaseSufficiencyChecker
 from app.rag.blocks.evidence.evidence_sufficiency.sufficiency_checker import ScoreThresholdChecker
@@ -291,6 +293,8 @@ PIPELINE: list[Stage] = [
               Method("llm_understanding", "LLM understanding", LLMQueryUnderstanding, False, "The LLM extracts intent and criteria."),
               Method("profile_understanding", "Student profile (AAES step 1)", ProfileUnderstanding, True,
                      "Campus, degree, year, visa, TOPIK … from the question and earlier turns, each stated / remembered / missing."),
+              Method("oracle_profile", "Oracle profile (A2, labeled case)", OracleProfileUnderstanding, True,
+                     "The labeled case's stated profile instead of step 1's extraction. Needs a labeled case."),
               Method("self_query", "Self-query (LLM → profile)", SelfQueryUnderstanding, True,
                      "The LLM writes the student's stated attributes as JSON; values outside the vocabulary are dropped.",
                      parameters=_llm_params(128, 512)),
@@ -392,6 +396,8 @@ PIPELINE: list[Stage] = [
                   "top_k": Param("integer", 3, "Top K evidence", "How many of the best-ranked chunks go into the prompt.",
                                  min=1, max=20),
               }),
+              Method("oracle_evidence", "Oracle evidence (G1, labeled case)", OracleEvidenceSelector, True,
+                     "The labeled case's gold evidence spans instead of the retrieved chunks. Needs a labeled case."),
               Method("token_budget", "Token budget", TokenBudgetSelector, True, "Keep evidence in rank order within a token budget.", parameters={
                   "max_evidence_tokens": Param("integer", 2000, "Evidence token budget", "Maximum total tokens of evidence sent to the LLM.",
                                                min=200, max=8000, step=100),

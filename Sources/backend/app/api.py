@@ -13,6 +13,7 @@ from pydantic import BaseModel, Field
 
 from app.config import get_settings, resolve_ingest_folder
 from app.database import DEFAULT_INDEX, Database
+from app.demo import load_demo_cases, needs_oracle, oracle_for, public_view
 from app.ollama import OllamaError
 from app.rag.pipeline import run_ingestion, run_rag
 from app.rag.presets import presets_json
@@ -29,6 +30,7 @@ class ChatRequest(BaseModel):
     stages: StageChoices = Field(default_factory=dict, description="Methods and parameters per stage; missing stages use defaults")
     index_id: str = Field(default=DEFAULT_INDEX, description="Which index revision to search (GET /api/indexes)")
     history: list[str] = Field(default_factory=list, max_length=20, description="Earlier user turns of this session (AAES step 1)")
+    demo_case_id: str | None = Field(default=None, description="A dev demo case (GET /api/demo/cases); the oracle presets G1/A2 need one")
 
 
 class IngestRequest(BaseModel):
@@ -109,6 +111,29 @@ async def pipeline_registry():
     return registry_json()
 
 
+def demo_oracle(body: "ChatRequest", config: dict) -> dict | None:
+    """The oracle inputs of the selected demo case; HTTP 422 when an oracle preset has none (never fail silently)."""
+    if body.demo_case_id:
+        case = next((c for c in load_demo_cases() if c["case_id"] == body.demo_case_id), None)
+        if case is None:
+            raise HTTPException(422, {"message": f"Unknown demo case '{body.demo_case_id}'", "errors": []})
+        return oracle_for(case)
+    if needs_oracle(config):
+        raise HTTPException(422, {"message": "This configuration cannot run", "errors": [{"stage_id": None, "param": None,
+                            "message": "needs a labeled demo case: pick one in the demo-case list"}]})  # fmt: skip
+    return None
+
+
+@router.get("/demo/cases")
+async def demo_cases():
+    """Labeled dev cases for the demo (P8D T37). Empty with a reason before the labels are frozen."""
+    try:
+        cases = load_demo_cases()
+    except ValueError as exc:
+        raise HTTPException(500, str(exc)) from exc
+    return {"cases": [public_view(c) for c in cases], "reason": None if cases else "no demo cases yet (they come from the frozen dev split)"}
+
+
 @router.get("/pipeline/presets")
 async def pipeline_presets():
     """Named experiment configurations (B0, O0–O8, R0–R14), each validated with the registry — from app/rag/presets.py."""
@@ -174,7 +199,8 @@ async def chat(body: ChatRequest, request: Request):
     """Answer a question and return the complete trace (no streaming)."""
     config = checked(body.stages)
     await check_runnable(request, config, body.index_id)
-    return await run_rag(body.question.strip(), config, services(request, body.index_id), history=body.history)
+    oracle = demo_oracle(body, config)
+    return await run_rag(body.question.strip(), config, services(request, body.index_id), history=body.history, oracle=oracle)
 
 
 @router.post("/chat/stream")
@@ -182,12 +208,13 @@ async def chat_stream(body: ChatRequest, request: Request):
     """Answer a question as Server-Sent Events: started → stage … → answer_delta … → done."""
     config = checked(body.stages)  # invalid settings fail here, before anything runs
     await check_runnable(request, config, body.index_id)
+    oracle = demo_oracle(body, config)
     run_services = services(request, body.index_id)
     queue: asyncio.Queue = asyncio.Queue()
 
     async def run():
         try:
-            await run_rag(body.question.strip(), config, run_services, emit=queue.put_nowait, history=body.history)
+            await run_rag(body.question.strip(), config, run_services, emit=queue.put_nowait, history=body.history, oracle=oracle)
         finally:
             queue.put_nowait(None)  # tells the stream below that we are finished
 

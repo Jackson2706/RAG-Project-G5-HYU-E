@@ -17,7 +17,7 @@ def repo(tmp_path):
     """A clean git repo with frozen labels (2 dev, 2 test)."""
     labels = tmp_path / "labels"
     labels.mkdir()
-    rows = [{"case_id": f"C{i}", "slice": "unconditional", "gold_profile": {"campus": "seoul"}, "adjudicated_by": "human:XX"} for i in range(4)]
+    rows = [{"case_id": f"C{i}", "slice": "unconditional", "gold_profile": {"campus": "seoul"}, "adjudicated_by": "human:XX", "verified_by": "human:XX"} for i in range(4)]
     (tmp_path / "all.jsonl").write_text("".join(__import__("json").dumps(r) + "\n" for r in rows))
     freeze(tmp_path / "all.jsonl", labels, dev_size=2)
     git(tmp_path, "init", "-q")

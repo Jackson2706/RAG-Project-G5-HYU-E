@@ -17,6 +17,7 @@ from evaluation.metrics.stats import holm, mean, paired_compare
 from evaluation.reports import load_jsonl
 
 from app.config import DATA_DIR
+from app.demo import oracle_for  # noqa: F401  (the runner calls hyu_suite.oracle_for)
 from app.rag.schemas import make_doc_id
 from app.rag.snapshot import snapshot_dir
 
@@ -44,6 +45,18 @@ def question_for(case: dict, config: dict) -> str:
     if not history or (config.get("query_understanding") or {}).get("method") in ("profile_understanding", "self_query"):
         return case["question"]
     return " ".join(history) + "\n" + case["question"]
+
+
+GOLD = "gold:"  # chunk-id prefix of oracle evidence (G1), made by app.demo.oracle_for
+
+
+def gold_chunk(chunk_id: str) -> dict | None:
+    """gold:D1:100-200 -> {"doc_id": "D1", "source_spans": [[100, 200]]}; other ids -> None."""
+    if not chunk_id.startswith(GOLD):
+        return None
+    doc_id, _, span = chunk_id[len(GOLD):].rpartition(":")
+    start, end = span.split("-")
+    return {"doc_id": doc_id, "source_spans": [[int(start), int(end)]]}
 
 
 LLM_METHODS = {"query_rewriting": None, "generation": None, "query_understanding": "self_query"}  # None = any method calls the LLM

@@ -41,9 +41,8 @@ async def test_closed_book_has_no_evidence_and_r16_adds_the_conditional_rule(ser
     assert "If you are" in r16.messages[0]["content"]
 
 
-def test_p6_presets_validate_and_g1_is_disabled_with_a_reason():
+def test_p6_presets_validate_and_g1_needs_a_demo_case():
     for preset_id in ("G0_CLOSED_BOOK", "R9S_SCOPE_PREFILTER", "R15_SELF_QUERY", "R16_PROMPTED_CONDITIONAL"):
         assert preset_config(preset_id) and PRESETS_BY_ID[preset_id]["group"]
-    assert PRESETS_BY_ID["G1_ORACLE_CONTEXT"]["enabled"] is False and "runner" in PRESETS_BY_ID["G1_ORACLE_CONTEXT"]["description"]
-    g1 = next(p for p in presets_json() if p["id"] == "G1_ORACLE_CONTEXT")
-    assert g1["config"] is None and g1["errors"][0]["message"] == "needs a labeled demo case"
+    g1 = next(p for p in presets_json() if p["id"] == "G1_ORACLE_CONTEXT")  # P8D T37: runnable with a demo case
+    assert g1["config"] and g1["needs_demo_case"] and "demo" in g1["description"]

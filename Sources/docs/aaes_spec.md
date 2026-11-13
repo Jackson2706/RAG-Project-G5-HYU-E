@@ -239,6 +239,13 @@ question text and the profile does not fix; otherwise ANSWER. It computes no inf
 CONDITIONAL or CONFIRM, and ignores how the evidence splits. Pre-registered comparison 3 is A0 vs A4 on action
 macro-F1.
 
+Variant A2 (`query_understanding: oracle_profile`, A33) replaces step 1 with the labeled `stated_profile`
+(latest values, GUIDELINES 11.7) as "stated" facts plus the usual scope defaults; unstated attributes stay
+missing. It isolates profile-extraction errors: A0 vs A2 shows how much step 1 costs. Bracket G1
+(`evidence_selection: oracle_evidence`) gives the generator the gold spans instead of retrieved chunks. Both read
+a labeled case: the runner passes `oracle=app.demo.oracle_for(case)`; in the UI they need a dev demo case
+(`demo_case_id`), otherwise HTTP 422 "needs a labeled demo case".
+
 **Unknown caveat (A23).** When the action is ANSWER or CONDITIONAL and the support contains at least one
 `unknown` chunk, `unknown_condition_evidence = true` and `with_caveat(answer, decision)` appends: "This may
 depend on your situation; please confirm with the OIA office." Otherwise the flag is false and the answer is

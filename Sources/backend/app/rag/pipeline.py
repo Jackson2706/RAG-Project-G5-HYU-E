@@ -265,13 +265,16 @@ async def _retrieve(block: Any, queries: list[str], prefilter: RetrievalFilter |
 
 
 async def run_rag(question: str, config: dict, services: Services, emit: Callable[[dict], None] = lambda event: None, *,
-                  stop_after: str | None = None, save_trace: bool = True, history: list[str] | None = None) -> dict:
+                  stop_after: str | None = None, save_trace: bool = True, history: list[str] | None = None,
+                  oracle: dict | None = None) -> dict:
     """Answer one question with the validated `config`. Returns the full trace (also saved to MongoDB).
 
     stop_after: a stage id; later stages are skipped (the benchmark runner uses "evidence_sufficiency"
                 for retrieval-only runs, so no LLM answer is generated).
     save_trace: False = do not store the trace in MongoDB (the benchmark keeps its own results).
     history:    earlier user turns of the session (AAES step 1 reads them as "remembered" profile facts).
+    oracle:     a labeled case's {"profile": stated_profile, "evidence": [Evidence dicts]} for the oracle methods
+                (A2 oracle_profile, G1 oracle_evidence); a config using them without it fails with a clear error.
     """
     request_id = uuid.uuid4().hex
     tracer = Tracer(request_id, emit)
@@ -287,6 +290,11 @@ async def run_rag(question: str, config: dict, services: Services, emit: Callabl
         # One block object per online stage that has a selected method.
         blocks = {s.stage_id: create_block(s.stage_id, config[s.stage_id]["method"], config[s.stage_id]["params"], services)
                   for s in PIPELINE if s.phase == "online" and config[s.stage_id]["method"]}  # fmt: skip
+        for block in blocks.values():
+            if need := getattr(block, "needs_oracle", None):
+                if not oracle or need not in oracle:
+                    raise ValueError(f"{block.method_id} needs a labeled case (oracle {need}); select a demo case")
+                block.oracle = oracle
 
         stopped = False  # becomes True once the `stop_after` stage is reached
 

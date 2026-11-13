@@ -23,7 +23,6 @@ import csv
 import hashlib
 import json
 import random
-import re
 import sys
 from pathlib import Path
 

@@ -65,3 +65,12 @@ def test_index_doc_ids_map_to_snapshot_ids_and_baselines_get_the_history():
     ids = hyu_suite.snapshot_doc_ids("hyu-20261110-97dc1269")
     assert len(ids) == 362 and all(k != v for k, v in ids.items())
     assert hyu_suite.question_for(CASES[0], {}) == "I'm at ERICA.\n" + CASES[0]["question"] if "question" in CASES[0] else True
+
+
+def test_gold_chunk_ids_map_back_to_the_label_span():
+    from evaluation.hyu_suite import gold_chunk
+    from evaluation.metrics.aaes import chunk_class
+
+    chunk = gold_chunk("gold:5e9c0499-aaaa:100-200")
+    assert chunk == {"doc_id": "5e9c0499-aaaa", "source_spans": [[100, 200]]} and gold_chunk("c1") is None
+    assert chunk_class(chunk, {"gold_evidence": [{"doc_id": "5e9c0499-aaaa", "char_start": 150, "char_end": 160}]}) == "gold"

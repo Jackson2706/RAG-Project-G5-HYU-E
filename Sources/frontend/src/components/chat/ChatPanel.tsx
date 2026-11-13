@@ -5,7 +5,7 @@ import { ComparePicker } from "@/components/chat/CompareView";
 import { MessageItem } from "@/components/chat/MessageItem";
 import { Button } from "@/components/ui/primitives";
 import type { ChatState } from "@/hooks/useChat";
-import type { Preset } from "@/types/api";
+import type { DemoCase, Preset } from "@/types/api";
 
 const EXAMPLES = [
   "How many credits can a first-year student register for?",
@@ -14,9 +14,10 @@ const EXAMPLES = [
   "Where can I find orientation information?",
 ];
 
-export function ChatPanel({ chat, onSend, blockedReason, onInspect, presets, compare, onCompare }: {
+export function ChatPanel({ chat, onSend, blockedReason, onInspect, presets, compare, onCompare, demoCases = [], demo = null, onDemo = () => {} }: {
   chat: ChatState; onSend: (q: string) => void; blockedReason: string | null; onInspect: (requestId: string) => void;
   presets: Preset[]; compare: string[] | null; onCompare: (ids: string[] | null) => void; // null = compare mode off
+  demoCases?: DemoCase[]; demo?: DemoCase | null; onDemo?: (c: DemoCase | null) => void; // labeled dev cases (P8D T37)
 }) {
   const [text, setText] = useState("");
   const scroller = useRef<HTMLDivElement>(null);
@@ -49,7 +50,18 @@ export function ChatPanel({ chat, onSend, blockedReason, onInspect, presets, com
           </Button>
         </div>
       </div>
-      {compare && <ComparePicker presets={presets} chosen={compare} onChange={onCompare} />}
+      {compare && <ComparePicker presets={presets} chosen={compare} onChange={onCompare} hasDemo={!!demo} />}
+      {demoCases.length > 0 && (
+        <div className="flex items-center gap-2 border-b border-border px-3 py-2 text-sm">
+          <label htmlFor="demo-case" className="text-xs font-semibold text-muted-foreground">Demo case</label>
+          <select id="demo-case" className="min-w-0 flex-1 rounded-md border border-border bg-card px-2 py-1 text-sm" value={demo?.case_id ?? ""}
+                  onChange={(e) => { const c = demoCases.find((d) => d.case_id === e.target.value) ?? null; onDemo(c); if (c) setText(c.question); }}>
+            <option value="">None (free question)</option>
+            {demoCases.map((c) => <option key={c.case_id} value={c.case_id}>{c.case_id} · {c.slice} · {c.question.slice(0, 60)}</option>)}
+          </select>
+          {demo && demo.history.length > 0 && <span className="hidden text-[11px] text-muted-foreground sm:inline">+{demo.history.length} earlier turn(s)</span>}
+        </div>
+      )}
 
       <div ref={scroller} className="min-h-0 flex-1 overflow-y-auto" aria-live="polite">
         <div className={`mx-auto flex flex-col gap-6 px-4 py-6 ${compare ? "max-w-6xl" : "max-w-3xl"}`}>

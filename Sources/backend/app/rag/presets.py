@@ -14,6 +14,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from app.demo import needs_oracle
 from app.rag.registry import ConfigError, validate_config
 
 OFF = {"method": None}
@@ -105,8 +106,8 @@ PRESETS: list[dict[str, Any]] = [
      "description": "The model answers from memory, with no documents: the lower bracket.",
      "stages": {"context_construction": {"method": "closed_book"}}},
     {"id": "G1_ORACLE_CONTEXT", "kind": "online", "group": "Brackets", "name": "G1 — Oracle context",
-     "description": "The model gets the labeled gold evidence: the upper bracket. Runs only in the evaluation runner with a labeled case.",
-     "stages": {}, "enabled": False, "disabled_reason": "needs a labeled demo case"},  # P8D enables it
+     "description": "The model gets the labeled gold evidence instead of retrieved chunks: the upper bracket. Needs a labeled (demo) case.",
+     "stages": {"evidence_selection": {"method": "oracle_evidence"}}},
     {"id": "R9S_SCOPE_PREFILTER", "kind": "aaes", "group": "Advanced", "name": "R9-scope — Prefilter on the student's profile",
      "description": "Removes chunks whose tags do not fit what the student said (and applicant-only pages), before the search.",
      "stages": {**HYBRID, "query_understanding": {"method": "profile_understanding"}, "metadata_prefiltering": {"method": "applicability_prefilter"},
@@ -131,6 +132,9 @@ PRESETS: list[dict[str, Any]] = [
     {"id": "A4_QUESTION_ONLY_AMBIGUITY", "kind": "aaes", "group": "Ablations", "name": "A4 — Question-only ambiguity",
      "description": "A0, but it decides to ask from the question's wording alone, without checking whether the evidence differs.",
      "stages": {**AAES, "evidence_sufficiency": {"method": "applicability_sufficiency", "params": {"policy": "question_only"}}}},
+    {"id": "A2_AAES_ORACLE_PROFILE", "kind": "aaes", "group": "Ablations", "name": "A2 — AAES with the true profile",
+     "description": "A0, but it is given exactly what the student stated (from the label) instead of reading it. Needs a labeled (demo) case.",
+     "stages": {**AAES, "query_understanding": {"method": "oracle_profile"}}},
     {"id": "A6_AAES_NO_TEMPORAL", "kind": "aaes", "group": "Ablations", "name": "A6 — AAES without the temporal rule",
      "description": "A0, but old versions of a notice count as much as the newest one.",
      "stages": {**AAES, "evidence_sufficiency": {"method": "applicability_sufficiency", "params": {"temporal": False}}}},
@@ -165,7 +169,8 @@ def presets_json() -> list[dict[str, Any]]:
     result = []
     for p in PRESETS:
         entry = {k: p[k] for k in ("id", "kind", "name", "description")} | {"enabled": p.get("enabled", True), "stages": p["stages"],
-                                                                           "group": p.get("group")}
+                                                                           "group": p.get("group"),
+                                                                           "needs_demo_case": needs_oracle(p["stages"])}  # G1, A2
         try:
             entry["config"] = preset_config(p["id"]) if entry["enabled"] else None
             entry["errors"] = [] if entry["enabled"] else [{"stage_id": None, "param": None, "message": p.get("disabled_reason", "not available")}]

@@ -94,7 +94,7 @@ function ExperimentPanel({ config }: { config: PipelineConfigState }) {
         {kinds.map(([kind, label]) => (
           <optgroup key={kind} label={label}>
             {config.presets.filter((p) => p.kind === kind).map((p) => (
-              <option key={p.id} value={p.id} disabled={!p.config}>{p.name}{p.enabled ? "" : ` — not available (${p.errors[0]?.message ?? "disabled"})`}</option>
+              <option key={p.id} value={p.id} disabled={!p.config}>{p.name}{p.enabled ? (p.needs_demo_case ? " — needs a demo case" : "") : ` — not available (${p.errors[0]?.message ?? "disabled"})`}</option>
             ))}
           </optgroup>
         ))}
