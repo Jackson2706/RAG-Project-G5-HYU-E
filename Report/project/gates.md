@@ -39,3 +39,9 @@ Exactly one `test-final` run on a clean tree with `--confirm-frozen`, logged in 
 - One test run, `test-final` (`Report/results/test-final/`, `Report/results/TEST_RUNS.md`), on a clean tree at eaa8b55 with `--confirm-frozen`.
 - Infra failure: G1, A0, A1 failed on Qdrant/MongoDB timeouts while the Mac slept on battery (pmset 22:25-22:32, 2026-11-13). Re-run allowed by A33: `--resume` of the same run id at 1c64d7b (differs from eaa8b55 only in Report/ text), only the failed tasks; second TEST_RUNS.md row. Not re-run because of results.
 - Final: 13 presets x 121 cases, 0 errors.
+
+## G7 — 2026-11-14 — PASS (automatic)
+- `Report/report/draft.md` (sections 1-9) and `Report/slides/outline.md` exist; Humanizer pass done with `Report/voice_sample.md`.
+- `python3 Report/notes/check_report_numbers.py`: 101 values checked, 0 mismatches; comparison statistics and AER counts checked against `hyu_test_comparisons_paired.csv` and `hyu_test_per_case.csv`.
+- Limitations (section 8) state that labels are LLM-annotated, adjudicated and verified, with no human verification.
+- Open for the team: Lessons 3-4 mapping (slides not on this machine), compare-mode screenshots.

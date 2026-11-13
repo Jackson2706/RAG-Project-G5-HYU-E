@@ -9,7 +9,7 @@ New international students at Hanyang University ask questions whose correct ans
 asking: the campus (Seoul or ERICA), the degree level, the visa, the TOPIK level, the academic status, and
 the term. A standard RAG pipeline ranks passages by relevance. A passage can be relevant and still not apply
 to the student: the ERICA dormitory procedure is relevant to a Seoul student's dormitory question, but it is
-the wrong answer for that student. We call this the gap between relevance and eligibility.
+the wrong answer for that student. This is the gap between relevance and eligibility.
 
 Our contribution, AAES (Applicability-Aware Evidence Sufficiency), treats evidence as sufficient only when it
 answers the question and applies to the asking student. When it does not, the system gives a conditional
@@ -48,11 +48,11 @@ AAES adds four online steps to a hybrid retrieval pipeline (BM25 + dense, recipr
 cross-encoder reranking). Every step writes its typed input and output to the execution trace.
 
 1. **Profile.** Rules read the question and the earlier user turns. Each attribute is stated, remembered
-   (from an earlier turn), stale, a scope default (not an applicant unless said), or missing. Nothing is guessed.
+   (from an earlier turn), stale, a scope default (not an applicant unless said), or missing; no value is guessed.
 2. **Applicability labels and a soft penalty.** Each candidate chunk is labelled conflicting, unknown,
    unconditioned, compatible or open against the known profile. The reranker subtracts λ from the logit of a
-   conflicting chunk and μ from a superseded version. Nothing is removed: candidate retrieval stays the same,
-   and evidence selection changes.
+   conflicting chunk and μ from a superseded version. No chunk is removed, so candidate
+   retrieval stays the same and only evidence selection changes.
 3. **Branches and information gain.** For each unknown attribute, AAES checks whether its values change which
    relevant evidence applies. The information gain of an attribute is the entropy of those outcomes. An
    attribute with positive gain is a branch.
@@ -134,10 +134,10 @@ counts are in brackets (from `hyu_test_per_case.csv`).
 **Pre-registered comparisons** (`hyu_test_comparisons_paired.csv`; the best baseline, R15, was fixed on dev at G5):
 
 1. A0 vs R15 on AER (conditional + temporal): only 2 cases with inapplicable spans were answered by both
-   methods. Difference 0.000, p = 1.0. The test cannot tell the two apart.
+   methods, with a difference of 0.000 (p = 1.0), so the test cannot separate them.
 2. A0 vs R15 on correctness: not computed (no human-validated judge, A33).
-3. A0 vs A4 on action macro-F1: −0.066, 95% CI [−0.128, +0.000], p = 0.131, Holm-corrected p = 0.393. Not
-   significant; the point estimate favours A4.
+3. A0 vs A4 on action macro-F1: −0.066, 95% CI [−0.128, +0.000], p = 0.131, Holm-corrected p = 0.393; the
+   difference is not significant, and the point estimate favours A4.
 
 **By slice** (acceptable-action rate, `Report/tables/test-final_slices.md`, Figure 2): A0 reaches 0.333 on
 conditional (27 cases), 0.292 on negative (24), 0.217 on unconditional (46), 0.167 on temporal (12) and 0.167 on
@@ -150,61 +150,62 @@ campus (from the A0 answers in `raw/`).
 
 ## 7. Discussion
 
-**AAES did not work on this test set.** The question was whether separating relevance from eligibility makes
-the system's actions better. On our LLM-annotated labels it made them worse: A0 chose an acceptable action in
-24.8% of cases, against 73.6% for the plain dense baseline B0. The planned evidence for the method, a lower
-applicability error rate than the best baseline, could not be shown: A0 answered so rarely that only two cases
-were comparable.
+On this test set AAES did not improve the system's actions. We asked whether separating relevance from
+eligibility leads to better actions, and on our LLM-annotated labels it led to worse ones: A0 chose an
+acceptable action in 24.8% of cases, against 73.6% for the plain dense baseline B0. The evidence we planned for
+the method, a lower applicability error rate than the best baseline, could not be obtained, because A0 answered
+so rarely that only two cases were comparable.
 
-**The failure is in steps 3 and 4, not in step 1.** A2, which receives the labelled profile instead of
-extracting it, behaves almost exactly like A0 (acceptable 0.248, unnecessary clarification 0.415 vs 0.443). So
-profile extraction is not the bottleneck. The branch test is: most questions retrieve relevant pages from both
-campuses, campus is usually not stated, so campus always "splits" the evidence and AAES asks for it, in 35 of
-52 clarifications. In dev cases we inspected (for example T14-015, counselling in English), the two campus pages give
-the same answer, or the label expects an abstention because neither page answers. Our branch test checks *whether* the applicable evidence changes with
-the attribute, not whether the *answer* changes. That is the main design gap we see.
+Profile extraction (step 1) is not the cause. A2, which receives the labelled profile instead of extracting it,
+behaves almost exactly like A0 (acceptable 0.248; unnecessary clarification 0.415 against 0.443). The problem
+lies in the branch test and the policy (steps 3 and 4). Most questions retrieve relevant pages from both
+campuses while the campus is usually unstated, so the campus always splits the evidence and AAES asks for it;
+35 of its 52 clarifying questions are about the campus. In the dev cases we inspected (for example T14-015,
+counselling in English), the two campus pages give the same answer, or the label expects an abstention because
+neither page answers. The branch test checks whether the applicable evidence changes with an attribute; it does
+not check whether the answer changes, and we consider this the main design gap.
 
-**Asking instead of abstaining.** 27 of 46 cases that should end in a referral got a clarifying question
-instead. AAES computes branches before it checks that some evidence answers the question; when nothing
-answers, a question about the campus only delays the abstention.
+AAES also asks where it should abstain: 27 of the 46 cases that should end in a referral received a clarifying
+question. AAES computes branches before it checks that any evidence answers the question, so when nothing
+answers, a question about the campus only postpones the abstention.
 
-**The ablations mostly do not move.** A1 (hard filter instead of the penalty) and A6 (no temporal rule) are
-within one case of A0; A6 is identical, so the temporal rule never changed a decision on these cases. A3
-(always clarify) shows the cost of asking: 70.8% unnecessary clarifications. A4, which decides to ask from the
-question wording alone, asks less and does better than A0 (acceptable 0.496), though the macro-F1 difference is
-not significant.
+Most ablations stay close to A0. A1 (hard filter instead of the penalty) is within one case of A0, and A6 (no
+temporal rule) is identical, so the temporal rule never changed a decision on these cases. A3 (always clarify)
+shows the cost of asking, with 70.8% unnecessary clarifications. A4, which decides to ask from the question
+wording alone, asks less and does better than A0 (acceptable 0.496), although the macro-F1 difference is not
+significant.
 
-**The baselines are close to each other.** The four retrieval baselines are within 6.7 points of B0 in
-acceptable action, and B0 is the best. Prefiltering on the stated profile (R9-scope) and an LLM-written filter
-(R15) did not reduce AER on the few comparable cases. The gold-evidence bracket G1 reaches 0.818, so better
-evidence selection could still help; the closed-book bracket G0 at 0.661 shows how much of the label set a model
-can match without retrieval at all.
+The baselines are close to each other. The four retrieval baselines are within 6.7 points of B0 in acceptable
+action, and B0 is the best of them. Neither prefiltering on the stated profile (R9-scope) nor an LLM-written
+filter (R15) reduced AER on the few comparable cases. The gold-evidence bracket G1 reaches 0.818, so better
+evidence selection could still help, and the closed-book bracket G0 at 0.661 shows how much of the label set a
+model can match without any retrieval.
 
-**What this means.** Eligibility still matters for these questions: every retrieval baseline except B0 cited an
-inapplicable span in at least one answered case. But deciding *when to ask* from how evidence splits needs a test on the answers, not only on the
-evidence conditions. A next version would check that the branches lead to different answers before asking, and
-would test sufficiency before branching. These changes were not tried: after the configuration freeze no
-parameter or rule was changed (G5), and dev runs were used only to fix bugs.
+Eligibility still matters for these questions: every retrieval baseline except B0 cited an inapplicable span
+in at least one answered case. Deciding *when to ask* from how the evidence splits, however, needs a test on
+the answers as well as on the evidence conditions. A next version would check that the branches lead to
+different answers before asking, and would test sufficiency before branching. We did not try these changes,
+because no parameter or rule was changed after the configuration freeze (G5) and dev runs were used only to
+fix bugs.
 
 ## 8. Limitations
 
-- **The labels are LLM labels.** Every question was written by an agent, and every label was annotated,
-  adjudicated and verified by LLMs; nothing was checked by a human (A28, A33). Our numbers compare methods on
-  the same labels; they are not absolute accuracy figures. Batches 04-06, the adjudication and the verification
-  were all done by Claude models, so the independence is between contexts more than between vendors.
-- **Agreement before adjudication was moderate.** κ on answerability was 0.56 (Codex vs Opus) and 0.43 (Sonnet
-  vs Opus), 0.55 and 0.71 on the collapsed classes (`Report/results/labels/`).
-- **Twelve cases were excluded** after the split, mostly because the right label needed gold spans for a
-  campus branch the primary label lacked. At least one dev case (T14-203) counts a campus as stated that the
-  text never names; we did not inspect test for this.
-- **The tags were not human-audited.** The last tag audit (G2b, r4) failed on degree level, student type and
-  visa, and the r5 round was not re-audited. AAES depends on these tags.
-- **Comparison 2 (correctness) was not computed.** It needs an LLM judge validated against human labels, and
-  we have none.
-- **Small slices and one setup.** The test split has 121 cases; per-slice numbers rest on far fewer (counts in the slice table). One
-  generator (`qwen3.5:4b`) and one 16 GB machine were used.
-- **Not run (PLAYBOOK A29):** the memory methods (M1, M2, A7), the LLM-judge ablation A5, and the external
-  ConditionalQA benchmark.
+- Every question was written by an agent, and every label was annotated, adjudicated and verified by LLMs;
+  nothing was checked by a human (A28, A33). Our numbers therefore compare methods on the same labels and are
+  not absolute accuracy figures. Batches 04-06, the adjudication and the verification were all done by Claude
+  models, so the annotators are independent contexts more than independent vendors.
+- Agreement before adjudication was moderate: κ on answerability was 0.56 (Codex vs Opus) and 0.43 (Sonnet vs
+  Opus), and 0.55 and 0.71 on the collapsed classes (`Report/results/labels/`).
+- Twelve cases were excluded after the split, mostly because the right label needed gold spans for a campus
+  branch that the primary label lacked. At least one dev case (T14-203) counts a campus as stated although the
+  text never names it; we did not inspect the test split for this.
+- The applicability tags were not audited by a human. The last tag audit (G2b, r4) failed on degree level,
+  student type and visa, and the r5 round was not re-audited, although AAES depends on these tags.
+- Comparison 2 (correctness) was not computed, because it needs an LLM judge validated against human labels.
+- The test split has 121 cases, and the per-slice numbers rest on far fewer (counts in the slice table). We used
+  one generator (`qwen3.5:4b`) on one 16 GB machine.
+- The memory methods (M1, M2, A7), the LLM-judge ablation A5 and the external ConditionalQA benchmark were not
+  run (PLAYBOOK A29).
 
 ## 9. Mapping to the course (Lessons 3-6)
 
