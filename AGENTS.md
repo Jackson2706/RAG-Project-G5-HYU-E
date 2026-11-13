@@ -132,13 +132,18 @@ Use the Ponytail skill for all code. These project overrides win over Ponytail:
 - Independent annotation: an annotator never reads another annotator's label file before
   submitting its own.
 - Labeling agents never see system outputs or results.
-- Final labels are human-adjudicated. Every test item is human-verified.
+- Under amendment A33 (autonomous mode) labels are LLM-annotated, LLM-adjudicated and LLM-verified;
+  nothing is human-verified. Every adjudicator and verifier is a fresh subagent whose model is recorded,
+  and every report says the test set is LLM-annotated (claims are relative comparisons only).
 
 ## Network and long jobs
 
-Agents do not run crawls, dataset downloads, index builds, or full evaluation runs. They write the
-code and print the exact command, and a human runs it in a terminal (`conda activate RAG`).
-Agents may run unit tests and `--dry-run` / `--smoke` commands.
+Agents do not run crawls, dataset downloads, or index builds. They write the code and print the exact
+command, and a human runs it in a terminal (`conda activate RAG`). Agents may run unit tests and
+`--dry-run` / `--smoke` commands.
+
+Under A33, Claude Code runs the dev and test evaluation runs itself: as background processes under
+`caffeinate -i`, logs in `.run/`, polling the logs, never blocking on one long command.
 
 ## Definition of done (every task)
 

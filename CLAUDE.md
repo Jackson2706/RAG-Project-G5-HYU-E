@@ -26,7 +26,13 @@ usage on writing code, drafting labels, and drafting text.
 - Edits code directly only for changes under ~20 lines, or after two failed Codex attempts on the
   same task.
 - Acts as second annotator on the labeling subset and prepares adjudication sheets.
-- **Stops at every Gate in `Report/project/PLAYBOOK.md`** and asks the human before continuing.
+- Gates G1–G3 were passed by the human. Under amendment A33 (autonomous mode) gates G4–G7 are
+  automatic: Claude Code checks the criteria in `Report/project/gates.md`, logs the result there and in
+  `STATUS.md`, and continues. It stops only for the A33 stop conditions (test split < 110 cases, any
+  deletion of data outside the repo or of a database/volume, rewriting the frozen snapshot or labels, a
+  test run failing twice, files disappearing, usage nearly exhausted, a public-repo rule at risk).
+- Codex is unavailable until 2026-11-17. Claude Code implements, and independent passes (adjudication,
+  verification, code review) go to fresh subagents whose model is recorded.
 - Gate tables contain only results from commands Claude Code or the human ran, never numbers
   copied from Codex result notes.
 

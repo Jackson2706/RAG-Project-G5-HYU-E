@@ -20,17 +20,17 @@ and pass the gates. Each phase below has a **start prompt** to paste into Claude
 | P9 | Dev runs → tuning → config freeze → one test run | Human runs, Claude analyses | **G5**, **G6** |
 | P10 | Figures, tables, report, slides (Humanizer) | Codex drafts, Claude edits, human owns | **G7** |
 
-## Gates (Claude Code stops and asks the human)
+## Gates (G1–G3 human; G4–G7 automatic under A33, criteria in `Report/project/gates.md`)
 
 | Gate | Condition to pass |
 |---|---|
 | G1 | Reorg done; all Definition-of-done checks green; same Docker volumes; app starts; `docker volume ls` unchanged |
 | G2 | Crawl report reviewed (counts, English coverage, warnings); attribute vocabulary frozen (v1); 50-chunk tag audit: precision ≥ 0.8 and recall ≥ 0.7 per attribute with ≥ 5 occurrences (A5) — split by A20 into **G2a** (vocabulary v1, passed) and **G2b** (tag quality on a fresh sample, before P7/P9 dev runs) |
 | G3 | Labeling guideline approved by the team |
-| G4 | Labels adjudicated; every test item human-verified; dev/test split frozen with SHA |
-| G5 | Dev results reviewed; AAES and baseline configs frozen and tagged (`git tag config-freeze`) |
+| G4 | (A33) Labels LLM-adjudicated; deterministic checks run; every test-slice candidate and every check violation LLM-verified, unresolved → excluded; dev/test split frozen with SHA; test ≥ 110 cases |
+| G5 | (A33) A dev run completes with no errors and all pre-registered comparisons present (incl. A4); no tuning; tag `config-freeze` |
 | G6 | Exactly one test run (clean tree, `--confirm-frozen`), logged in `Report/results/TEST_RUNS.md` |
-| G7 | Report and slides reviewed; every number traced to `Report/results/`. Demo rehearsed: the scripted questions run in compare mode on the presentation laptop within the time slot; a backup screen recording exists |
+| G7 | (A33) Report and slides drafted; every number traced to `Report/results/` by a script check. Demo rehearsed: the scripted questions run in compare mode on the presentation laptop within the time slot; a backup screen recording exists |
 
 ## Schedule (target: end of this week)
 
@@ -1011,3 +1011,34 @@ until 2026-11-17.
 - Agreement report adds κ on collapsed answerability (answerable / partial / not answerable).
 - Verification sheet after the split: confirm-or-fix on 3 fields (answerability, expected_behavior, gold evidence supports the required facts), gold span highlighted; 3 files by slice with verifier initials per row; order conditional, temporal, negative, multi_session, then the 20% unconditional spot check; rows unverified at the deadline are listed as a limitation.
 - Before the test run: A4 implemented (comparison 3 must run); A2 and A5 if time; `Report/voice_sample.md` is gitignored (personal writing, public repo); the merge tool and freeze get a fresh-subagent review. Then P8D continues.
+
+**A33 Autonomous mode (decision from the planning chat, 2026-11-13).** Claude Code runs everything to the end
+and stops only for the stop conditions below. AGENTS.md and CLAUDE.md were updated to match.
+- Labels are LLM-annotated and LLM-adjudicated; nothing is human-verified. Every report and limitations note
+  says so, and claims are relative comparisons on an LLM-annotated test set.
+- Claude Code runs the dev and test runs itself (background, `caffeinate -i`, logs in `.run/`, polled).
+- G4–G7 are automatic; criteria and outcomes are logged in `Report/project/gates.md` and STATUS.md.
+- Codex is unavailable until 2026-11-17; independent passes go to fresh subagents, and the model of every
+  annotator, adjudicator and verifier is recorded.
+- G4: (a) a fresh subagent (strongest model, a context separate from the annotators) adjudicates the 47 sheet
+  rows, citing a v1.3 rule and quoting evidence; a proposal is accepted only with the same justification;
+  ungrounded → EXCLUDE. (b) merge with `--accept-rest`. (c) deterministic checks on all cases (behaviour vs
+  answerability, branch counts, unstated branching attributes in answer evidence, facts supported by spans,
+  profile consistency incl. `stale_update`, campus scope, term evidence); nothing is fixed silently.
+  (d) a fresh subagent on a model different from each case's primary annotator verifies every test-slice
+  candidate and every violation; unresolved → EXCLUDE. (e) freeze (dev 50, seed 13, stratified), exclusions in
+  `labels/excluded.jsonl`; STOP if test < 110. (f) delete the stray `Sources/Sources/data/HYU/labels/drafts`
+  folder and fix the command that created it.
+- Before runs: A2 (oracle profile); A5 only if everything else is done. New metric/guard code gets a
+  fresh-subagent review. No tuning: every config keeps the defaults fixed on 2026-11-13; dev runs are for bugs.
+- P8D: T37 demo cases (8–10, frozen dev only; G1/A2 enabled only with a demo case), T38 demo script; compare
+  mode tested with A0, B0, R16 on one demo case.
+- Runs: dev-01, dev-02, … (bug fixes only, reason in STATUS.md). G5 when a dev run completes with no errors and
+  all pre-registered comparisons. G6: exactly one test run `test-final`; only a crash or infra failure allows a
+  re-run, logged in TEST_RUNS.md.
+- P10: report assets, `Report/report/draft.md`, Humanizer, number re-check, `Report/slides/outline.md`,
+  `Report/ai_use_statement.md`.
+- Checkpoint after every major step: commit, push, one STATUS.md line.
+- Stop conditions: test split < 110 after exclusions; deleting data outside the repo, dropping a database or
+  volume, rewriting the frozen snapshot or labels; a test run failing twice; files disappearing again; usage
+  nearly exhausted (checkpoint first); anything breaking the public-repo rules.
