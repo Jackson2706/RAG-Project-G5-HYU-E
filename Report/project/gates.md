@@ -22,3 +22,10 @@ Exactly one `test-final` run on a clean tree with `--confirm-frozen`, logged in 
 
 ## Log
 - 2026-11-13: A33 recorded; G4 started.
+- 2026-11-13 **G4 PASS (automatic, A33).**
+  1. Adjudication: 47 sheet rows by a fresh `claude-code:claude-opus-5-5` subagent, rule + verbatim quote each (`Report/results/labels/adjudication_v12/decisions_a33.jsonl`); 16 proposals accepted; T14-026 EXCLUDE (the decision needs gold spans the sheet cannot add).
+  2. Merge: 180 cases, 0 pending; rows off the sheet accepted by `claude-code:claude-opus-5-5`.
+  3. `labeling.checks`: 123 violations on 99 cases (`Sources/data/HYU/labels/violations.jsonl`), all sent to verification.
+  4. Verification: 154 cases (every test case + every violating dev case) by fresh `claude-code:claude-opus-5-5` subagents (3 sheets + a 16-row re-check with session history that replaces sheet 3's verdicts for those rows); primary annotators were Codex (01-03) and Sonnet 5.5 (04-06). 0 unverified; 11 EXCLUDE.
+  5. Freeze: dev 47, test 121, excluded 12 (`labels/excluded.jsonl`), seed 13, dev size 50 before exclusions. FROZEN.sha256: dev 5557a010…, test a622b05e….
+  6. Test 121 ≥ 110.
