@@ -1,0 +1,4 @@
+comparison,metric,diff,ci_low,ci_high,p,cases,p_holm,status
+"A0_AAES vs R15_SELF_QUERY: AER (conditional + temporal, both answered; 2 of 6 cases with inapplicable spans answered by both)",aer,0.0,0.0,0.0,1.0,2,1.0,N/A
+"A0_AAES vs R15_SELF_QUERY: correctness, unconditional (non-inferiority 3 points)",correctness,N/A,N/A,N/A,N/A,N/A,N/A,NOT_COMPUTED: needs the validated LLM judge (Appendix F)
+A0_AAES vs A4_QUESTION_ONLY_AMBIGUITY: action macro-F1,macro_f1,-0.0661,-0.1276,0.0001,0.131,121,0.393,N/A

@@ -34,3 +34,8 @@ Exactly one `test-final` run on a clean tree with `--confirm-frozen`, logged in 
 - dev-02 (`Report/results/dev-02/`): all 15 tasks COMPLETED, 0 case errors; comparisons 1 and 3 computed, 2 NOT_COMPUTED (needs a human-validated judge, A33).
 - No parameter changed between dev-01 and dev-02 (two reporting bugs fixed in code only).
 - `best_baseline: R15_SELF_QUERY` (lowest dev AER among B0/R5/R15/R16). Tag `config-freeze`.
+
+## G6 — 2026-11-14 — PASS (automatic)
+- One test run, `test-final` (`Report/results/test-final/`, `Report/results/TEST_RUNS.md`), on a clean tree at eaa8b55 with `--confirm-frozen`.
+- Infra failure: G1, A0, A1 failed on Qdrant/MongoDB timeouts while the Mac slept on battery (pmset 22:25-22:32, 2026-11-13). Re-run allowed by A33: `--resume` of the same run id at 1c64d7b (differs from eaa8b55 only in Report/ text), only the failed tasks; second TEST_RUNS.md row. Not re-run because of results.
+- Final: 13 presets x 121 cases, 0 errors.
