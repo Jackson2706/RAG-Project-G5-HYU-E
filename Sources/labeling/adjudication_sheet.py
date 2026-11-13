@@ -6,9 +6,11 @@ Proposals (flagged 01-03 rows only) go in proposed_* columns; the human fills fi
 import csv, glob, json, sys
 from pathlib import Path
 
-L = Path("data/HYU/labels")
+from app.config import DATA_DIR
+
+L = DATA_DIR / "HYU" / "labels"
 DOCS = {}
-for line in open("data/HYU/snapshots/hyu-20261110-97dc1269/documents.jsonl"):
+for line in open(DATA_DIR / "HYU/snapshots/hyu-20261110-97dc1269/documents.jsonl"):
     d = json.loads(line)
     DOCS[d["doc_id"]] = d
 

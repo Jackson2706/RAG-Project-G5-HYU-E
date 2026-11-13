@@ -22,13 +22,15 @@ import re
 import sys
 from pathlib import Path
 
+from app.config import DATA_DIR
+
 from labeling._snapshot import DEFAULT_SNAPSHOT_ID, load_snapshot_rows
 from labeling.freeze import split
 from labeling.validate import validate_cases
 
 HUMAN = re.compile(r"^human:[A-Za-z][A-Za-z0-9_-]*$")
 
-LABELS = Path("data/HYU/labels")
+LABELS = DATA_DIR / "HYU" / "labels"  # not cwd-relative: a cwd-relative path made Sources/Sources/ (A33)
 PRIMARY = ("annot_codex/batch_0[1-3].jsonl", "annot_sonnet/batch_0[4-6].jsonl")
 FIELDS = ("answerability", "expected_behavior", "acceptable_behaviors", "branch_attributes")
 LISTS = ("acceptable_behaviors", "branch_attributes")

@@ -22,9 +22,11 @@ import json
 from collections import Counter
 from pathlib import Path
 
+from app.config import DATA_DIR
+
 from labeling.drafts import CAMPUSES, SLICES, validate_drafts
 
-LABELS = Path("data/HYU/labels")
+LABELS = DATA_DIR / "HYU" / "labels"
 DRAFTS = LABELS / "drafts"
 COLUMNS = ["id", "slice", "campus", "persona", "session_history", "question", "decision", "edited_question", "notes"]
 HINT_FIELDS = ("draft_id", "slice", "campus", "topic_doc_ids", "intended_attributes", "intended_answerability", "why")

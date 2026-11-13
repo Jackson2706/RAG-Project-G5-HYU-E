@@ -6,6 +6,8 @@ import argparse
 from collections import Counter
 import json
 from pathlib import Path
+
+from app.config import DATA_DIR
 from typing import Any
 
 
@@ -231,13 +233,13 @@ def main() -> int:
     check.add_argument(
         "--drafts",
         type=Path,
-        default=Path("data/HYU/labels/drafts/questions_codex.jsonl"),
+        default=DATA_DIR / "HYU/labels/drafts/questions_codex.jsonl",
     )
     check.add_argument(
-        "--topics", type=Path, default=Path("data/HYU/labels/topics.jsonl")
+        "--topics", type=Path, default=DATA_DIR / "HYU/labels/topics.jsonl"
     )
     check.add_argument(
-        "--personas", type=Path, default=Path("data/HYU/labels/personas.json")
+        "--personas", type=Path, default=DATA_DIR / "HYU/labels/personas.json"
     )
     args = parser.parse_args()
 
