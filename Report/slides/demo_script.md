@@ -20,7 +20,7 @@ on the slides, not from the demo. Labels are LLM-annotated and LLM-verified (A33
 | # | Time | Demo case | Columns | What to point at |
 |---|---|---|---|---|
 | 1 | 0:00-1:00 | T14-061 "What documents are needed for a part-time work permit?" | B0 · R16 · A0 | All three answer. AAES adds no friction when nothing branches. |
-| 2 | 1:00-2:30 | T14-134 "Can I keep doing paid research after changing to D-10?" | B0 · R16 · A0 | B0 answers and cites a passage that does not apply (relevant, not eligible). A0 abstains and refers the student to the OIA office. |
+| 2 | 1:00-2:30 | T14-134 "Can I keep doing paid research after changing to D-10?" | B0 · R16 · A0 | B0 answers from a passage that does not apply (relevant, not eligible; dev-01 scored it as an applicability error). A0's policy picks CONDITIONAL (badge), then the generator finds the applicable evidence insufficient and declines; the metrics count this as abstain. Live check: `Report/results/demo_check/compare_T14-134.json`. |
 | 3 | 2:30-4:00 | T14-132 "Which insurance rules apply to me?" | A4 · A0 | A4 decides from the wording alone and answers. A0 sees that the evidence splits and gives a conditional answer per case. Open the A0 column's Execution tab: profile → applicability labels → branches with information gain → decision. |
 | 4 | 4:00-5:00 | T14-209 (multi-session, applicant at Seoul) | A0 · A2 · R16 | A2 gets the labelled profile and gives the expected conditional answer; A0 abstains. The difference is profile extraction (step 1): this is the oracle-input test. |
 | 5 | 5:00-6:00 | T14-184 (a question the corpus cannot answer) | R16 · A0 | R16 answers anyway; A0 abstains. |
