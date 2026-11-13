@@ -29,3 +29,8 @@ Exactly one `test-final` run on a clean tree with `--confirm-frozen`, logged in 
   4. Verification: 154 cases (every test case + every violating dev case) by fresh `claude-code:claude-opus-5-5` subagents (3 sheets + a 16-row re-check with session history that replaces sheet 3's verdicts for those rows); primary annotators were Codex (01-03) and Sonnet 5.5 (04-06). 0 unverified; 11 EXCLUDE.
   5. Freeze: dev 47, test 121, excluded 12 (`labels/excluded.jsonl`), seed 13, dev size 50 before exclusions. FROZEN.sha256: dev 5557a010…, test a622b05e….
   6. Test 121 ≥ 110.
+
+## G5 — 2026-11-13 — PASS (automatic)
+- dev-02 (`Report/results/dev-02/`): all 15 tasks COMPLETED, 0 case errors; comparisons 1 and 3 computed, 2 NOT_COMPUTED (needs a human-validated judge, A33).
+- No parameter changed between dev-01 and dev-02 (two reporting bugs fixed in code only).
+- `best_baseline: R15_SELF_QUERY` (lowest dev AER among B0/R5/R15/R16). Tag `config-freeze`.

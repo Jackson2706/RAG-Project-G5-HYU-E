@@ -1,0 +1,1790 @@
+{
+  "hyu/dev/B0_BASIC_DENSE_RAG__-": {
+    "status": "COMPLETED",
+    "seconds": 407.2,
+    "queries": 47,
+    "index_id": "hyu_20261110_97dc1269_r5",
+    "config": {
+      "document_loading": {
+        "method": "local_folder",
+        "params": {}
+      },
+      "parsing": {
+        "method": "basic_parser",
+        "params": {}
+      },
+      "chunking": {
+        "method": "section_tokens",
+        "params": {
+          "chunk_size": 256,
+          "chunk_overlap": 32
+        }
+      },
+      "metadata_extraction": {
+        "method": "basic_metadata",
+        "params": {}
+      },
+      "embedding": {
+        "method": "bge_small_en",
+        "params": {}
+      },
+      "vector_indexing": {
+        "method": "qdrant_mongodb",
+        "params": {
+          "hnsw_m": 16,
+          "hnsw_ef_construct": 100,
+          "indexing_threshold_kb": 20000
+        }
+      },
+      "query_understanding": {
+        "method": null,
+        "params": {}
+      },
+      "query_rewriting": {
+        "method": null,
+        "params": {}
+      },
+      "metadata_prefiltering": {
+        "method": null,
+        "params": {}
+      },
+      "dense_retrieval": {
+        "method": "qdrant_cosine",
+        "params": {
+          "top_k": 5,
+          "search_mode": "exact",
+          "hnsw_ef": 100
+        }
+      },
+      "lexical_retrieval": {
+        "method": null,
+        "params": {}
+      },
+      "hybrid_fusion": {
+        "method": null,
+        "params": {}
+      },
+      "metadata_postfiltering": {
+        "method": null,
+        "params": {}
+      },
+      "metadata_enrichment": {
+        "method": "mongodb_lookup",
+        "params": {}
+      },
+      "reranking": {
+        "method": null,
+        "params": {}
+      },
+      "evidence_selection": {
+        "method": "top_k",
+        "params": {
+          "top_k": 3
+        }
+      },
+      "evidence_sufficiency": {
+        "method": null,
+        "params": {}
+      },
+      "context_construction": {
+        "method": "standard_context",
+        "params": {}
+      },
+      "generation": {
+        "method": "ollama_chat",
+        "params": {
+          "model": "qwen3.5:4b",
+          "temperature": 0.0,
+          "max_tokens": 1024,
+          "context_window": 4096,
+          "top_p": 0.9,
+          "top_k": 40,
+          "seed": 42,
+          "thinking": "off",
+          "timeout_s": 300
+        }
+      }
+    }
+  },
+  "hyu/dev/R5_HYBRID_CROSS_ENCODER__-": {
+    "status": "COMPLETED",
+    "seconds": 367.2,
+    "queries": 47,
+    "index_id": "hyu_20261110_97dc1269_r5",
+    "config": {
+      "document_loading": {
+        "method": "local_folder",
+        "params": {}
+      },
+      "parsing": {
+        "method": "basic_parser",
+        "params": {}
+      },
+      "chunking": {
+        "method": "section_tokens",
+        "params": {
+          "chunk_size": 256,
+          "chunk_overlap": 32
+        }
+      },
+      "metadata_extraction": {
+        "method": "basic_metadata",
+        "params": {}
+      },
+      "embedding": {
+        "method": "bge_small_en",
+        "params": {}
+      },
+      "vector_indexing": {
+        "method": "qdrant_mongodb",
+        "params": {
+          "hnsw_m": 16,
+          "hnsw_ef_construct": 100,
+          "indexing_threshold_kb": 20000
+        }
+      },
+      "query_understanding": {
+        "method": null,
+        "params": {}
+      },
+      "query_rewriting": {
+        "method": null,
+        "params": {}
+      },
+      "metadata_prefiltering": {
+        "method": null,
+        "params": {}
+      },
+      "dense_retrieval": {
+        "method": "qdrant_cosine",
+        "params": {
+          "top_k": 10,
+          "search_mode": "exact",
+          "hnsw_ef": 100
+        }
+      },
+      "lexical_retrieval": {
+        "method": "bm25",
+        "params": {
+          "top_k": 10,
+          "k1": 1.2,
+          "b": 0.75
+        }
+      },
+      "hybrid_fusion": {
+        "method": "rrf",
+        "params": {
+          "rrf_k": 60,
+          "top_k": 20
+        }
+      },
+      "metadata_postfiltering": {
+        "method": null,
+        "params": {}
+      },
+      "metadata_enrichment": {
+        "method": "mongodb_lookup",
+        "params": {}
+      },
+      "reranking": {
+        "method": "cross_encoder",
+        "params": {
+          "rerank_depth": 20,
+          "batch_size": 32,
+          "device": "auto"
+        }
+      },
+      "evidence_selection": {
+        "method": "top_k",
+        "params": {
+          "top_k": 3
+        }
+      },
+      "evidence_sufficiency": {
+        "method": null,
+        "params": {}
+      },
+      "context_construction": {
+        "method": "standard_context",
+        "params": {}
+      },
+      "generation": {
+        "method": "ollama_chat",
+        "params": {
+          "model": "qwen3.5:4b",
+          "temperature": 0.0,
+          "max_tokens": 1024,
+          "context_window": 4096,
+          "top_p": 0.9,
+          "top_k": 40,
+          "seed": 42,
+          "thinking": "off",
+          "timeout_s": 300
+        }
+      }
+    }
+  },
+  "hyu/dev/R9S_SCOPE_PREFILTER__-": {
+    "status": "COMPLETED",
+    "seconds": 261.5,
+    "queries": 47,
+    "index_id": "hyu_20261110_97dc1269_r5",
+    "config": {
+      "document_loading": {
+        "method": "local_folder",
+        "params": {}
+      },
+      "parsing": {
+        "method": "basic_parser",
+        "params": {}
+      },
+      "chunking": {
+        "method": "section_tokens",
+        "params": {
+          "chunk_size": 256,
+          "chunk_overlap": 32
+        }
+      },
+      "metadata_extraction": {
+        "method": "basic_metadata",
+        "params": {}
+      },
+      "embedding": {
+        "method": "bge_small_en",
+        "params": {}
+      },
+      "vector_indexing": {
+        "method": "qdrant_mongodb",
+        "params": {
+          "hnsw_m": 16,
+          "hnsw_ef_construct": 100,
+          "indexing_threshold_kb": 20000
+        }
+      },
+      "query_understanding": {
+        "method": "profile_understanding",
+        "params": {}
+      },
+      "query_rewriting": {
+        "method": null,
+        "params": {}
+      },
+      "metadata_prefiltering": {
+        "method": "applicability_prefilter",
+        "params": {}
+      },
+      "dense_retrieval": {
+        "method": "qdrant_cosine",
+        "params": {
+          "top_k": 10,
+          "search_mode": "exact",
+          "hnsw_ef": 100
+        }
+      },
+      "lexical_retrieval": {
+        "method": "bm25",
+        "params": {
+          "top_k": 10,
+          "k1": 1.2,
+          "b": 0.75
+        }
+      },
+      "hybrid_fusion": {
+        "method": "rrf",
+        "params": {
+          "rrf_k": 60,
+          "top_k": 20
+        }
+      },
+      "metadata_postfiltering": {
+        "method": null,
+        "params": {}
+      },
+      "metadata_enrichment": {
+        "method": "mongodb_lookup",
+        "params": {}
+      },
+      "reranking": {
+        "method": "cross_encoder",
+        "params": {
+          "rerank_depth": 20,
+          "batch_size": 32,
+          "device": "auto"
+        }
+      },
+      "evidence_selection": {
+        "method": "top_k",
+        "params": {
+          "top_k": 3
+        }
+      },
+      "evidence_sufficiency": {
+        "method": null,
+        "params": {}
+      },
+      "context_construction": {
+        "method": "standard_context",
+        "params": {}
+      },
+      "generation": {
+        "method": "ollama_chat",
+        "params": {
+          "model": "qwen3.5:4b",
+          "temperature": 0.0,
+          "max_tokens": 1024,
+          "context_window": 4096,
+          "top_p": 0.9,
+          "top_k": 40,
+          "seed": 42,
+          "thinking": "off",
+          "timeout_s": 300
+        }
+      }
+    }
+  },
+  "hyu/dev/R15_SELF_QUERY__-": {
+    "status": "COMPLETED",
+    "seconds": 470.1,
+    "queries": 47,
+    "index_id": "hyu_20261110_97dc1269_r5",
+    "config": {
+      "document_loading": {
+        "method": "local_folder",
+        "params": {}
+      },
+      "parsing": {
+        "method": "basic_parser",
+        "params": {}
+      },
+      "chunking": {
+        "method": "section_tokens",
+        "params": {
+          "chunk_size": 256,
+          "chunk_overlap": 32
+        }
+      },
+      "metadata_extraction": {
+        "method": "basic_metadata",
+        "params": {}
+      },
+      "embedding": {
+        "method": "bge_small_en",
+        "params": {}
+      },
+      "vector_indexing": {
+        "method": "qdrant_mongodb",
+        "params": {
+          "hnsw_m": 16,
+          "hnsw_ef_construct": 100,
+          "indexing_threshold_kb": 20000
+        }
+      },
+      "query_understanding": {
+        "method": "self_query",
+        "params": {
+          "model": "",
+          "temperature": 0.0,
+          "max_tokens": 128
+        }
+      },
+      "query_rewriting": {
+        "method": null,
+        "params": {}
+      },
+      "metadata_prefiltering": {
+        "method": "applicability_prefilter",
+        "params": {}
+      },
+      "dense_retrieval": {
+        "method": "qdrant_cosine",
+        "params": {
+          "top_k": 10,
+          "search_mode": "exact",
+          "hnsw_ef": 100
+        }
+      },
+      "lexical_retrieval": {
+        "method": "bm25",
+        "params": {
+          "top_k": 10,
+          "k1": 1.2,
+          "b": 0.75
+        }
+      },
+      "hybrid_fusion": {
+        "method": "rrf",
+        "params": {
+          "rrf_k": 60,
+          "top_k": 20
+        }
+      },
+      "metadata_postfiltering": {
+        "method": null,
+        "params": {}
+      },
+      "metadata_enrichment": {
+        "method": "mongodb_lookup",
+        "params": {}
+      },
+      "reranking": {
+        "method": "cross_encoder",
+        "params": {
+          "rerank_depth": 20,
+          "batch_size": 32,
+          "device": "auto"
+        }
+      },
+      "evidence_selection": {
+        "method": "top_k",
+        "params": {
+          "top_k": 3
+        }
+      },
+      "evidence_sufficiency": {
+        "method": null,
+        "params": {}
+      },
+      "context_construction": {
+        "method": "standard_context",
+        "params": {}
+      },
+      "generation": {
+        "method": "ollama_chat",
+        "params": {
+          "model": "qwen3.5:4b",
+          "temperature": 0.0,
+          "max_tokens": 1024,
+          "context_window": 4096,
+          "top_p": 0.9,
+          "top_k": 40,
+          "seed": 42,
+          "thinking": "off",
+          "timeout_s": 300
+        }
+      }
+    }
+  },
+  "hyu/dev/R16_PROMPTED_CONDITIONAL__-": {
+    "status": "COMPLETED",
+    "seconds": 398.7,
+    "queries": 47,
+    "index_id": "hyu_20261110_97dc1269_r5",
+    "config": {
+      "document_loading": {
+        "method": "local_folder",
+        "params": {}
+      },
+      "parsing": {
+        "method": "basic_parser",
+        "params": {}
+      },
+      "chunking": {
+        "method": "section_tokens",
+        "params": {
+          "chunk_size": 256,
+          "chunk_overlap": 32
+        }
+      },
+      "metadata_extraction": {
+        "method": "basic_metadata",
+        "params": {}
+      },
+      "embedding": {
+        "method": "bge_small_en",
+        "params": {}
+      },
+      "vector_indexing": {
+        "method": "qdrant_mongodb",
+        "params": {
+          "hnsw_m": 16,
+          "hnsw_ef_construct": 100,
+          "indexing_threshold_kb": 20000
+        }
+      },
+      "query_understanding": {
+        "method": null,
+        "params": {}
+      },
+      "query_rewriting": {
+        "method": null,
+        "params": {}
+      },
+      "metadata_prefiltering": {
+        "method": null,
+        "params": {}
+      },
+      "dense_retrieval": {
+        "method": "qdrant_cosine",
+        "params": {
+          "top_k": 10,
+          "search_mode": "exact",
+          "hnsw_ef": 100
+        }
+      },
+      "lexical_retrieval": {
+        "method": "bm25",
+        "params": {
+          "top_k": 10,
+          "k1": 1.2,
+          "b": 0.75
+        }
+      },
+      "hybrid_fusion": {
+        "method": "rrf",
+        "params": {
+          "rrf_k": 60,
+          "top_k": 20
+        }
+      },
+      "metadata_postfiltering": {
+        "method": null,
+        "params": {}
+      },
+      "metadata_enrichment": {
+        "method": "mongodb_lookup",
+        "params": {}
+      },
+      "reranking": {
+        "method": "cross_encoder",
+        "params": {
+          "rerank_depth": 20,
+          "batch_size": 32,
+          "device": "auto"
+        }
+      },
+      "evidence_selection": {
+        "method": "top_k",
+        "params": {
+          "top_k": 3
+        }
+      },
+      "evidence_sufficiency": {
+        "method": null,
+        "params": {}
+      },
+      "context_construction": {
+        "method": "conditional_prompt",
+        "params": {}
+      },
+      "generation": {
+        "method": "ollama_chat",
+        "params": {
+          "model": "qwen3.5:4b",
+          "temperature": 0.0,
+          "max_tokens": 1024,
+          "context_window": 4096,
+          "top_p": 0.9,
+          "top_k": 40,
+          "seed": 42,
+          "thinking": "off",
+          "timeout_s": 300
+        }
+      }
+    }
+  },
+  "hyu/dev/G0_CLOSED_BOOK__-": {
+    "status": "COMPLETED",
+    "seconds": 373.4,
+    "queries": 47,
+    "index_id": "hyu_20261110_97dc1269_r5",
+    "config": {
+      "document_loading": {
+        "method": "local_folder",
+        "params": {}
+      },
+      "parsing": {
+        "method": "basic_parser",
+        "params": {}
+      },
+      "chunking": {
+        "method": "section_tokens",
+        "params": {
+          "chunk_size": 256,
+          "chunk_overlap": 32
+        }
+      },
+      "metadata_extraction": {
+        "method": "basic_metadata",
+        "params": {}
+      },
+      "embedding": {
+        "method": "bge_small_en",
+        "params": {}
+      },
+      "vector_indexing": {
+        "method": "qdrant_mongodb",
+        "params": {
+          "hnsw_m": 16,
+          "hnsw_ef_construct": 100,
+          "indexing_threshold_kb": 20000
+        }
+      },
+      "query_understanding": {
+        "method": null,
+        "params": {}
+      },
+      "query_rewriting": {
+        "method": null,
+        "params": {}
+      },
+      "metadata_prefiltering": {
+        "method": null,
+        "params": {}
+      },
+      "dense_retrieval": {
+        "method": "qdrant_cosine",
+        "params": {
+          "top_k": 5,
+          "search_mode": "exact",
+          "hnsw_ef": 100
+        }
+      },
+      "lexical_retrieval": {
+        "method": null,
+        "params": {}
+      },
+      "hybrid_fusion": {
+        "method": null,
+        "params": {}
+      },
+      "metadata_postfiltering": {
+        "method": null,
+        "params": {}
+      },
+      "metadata_enrichment": {
+        "method": "mongodb_lookup",
+        "params": {}
+      },
+      "reranking": {
+        "method": null,
+        "params": {}
+      },
+      "evidence_selection": {
+        "method": "top_k",
+        "params": {
+          "top_k": 3
+        }
+      },
+      "evidence_sufficiency": {
+        "method": null,
+        "params": {}
+      },
+      "context_construction": {
+        "method": "closed_book",
+        "params": {}
+      },
+      "generation": {
+        "method": "ollama_chat",
+        "params": {
+          "model": "qwen3.5:4b",
+          "temperature": 0.0,
+          "max_tokens": 1024,
+          "context_window": 4096,
+          "top_p": 0.9,
+          "top_k": 40,
+          "seed": 42,
+          "thinking": "off",
+          "timeout_s": 300
+        }
+      }
+    }
+  },
+  "hyu/dev/G1_ORACLE_CONTEXT__-": {
+    "status": "COMPLETED",
+    "seconds": 184.8,
+    "queries": 47,
+    "index_id": "hyu_20261110_97dc1269_r5",
+    "config": {
+      "document_loading": {
+        "method": "local_folder",
+        "params": {}
+      },
+      "parsing": {
+        "method": "basic_parser",
+        "params": {}
+      },
+      "chunking": {
+        "method": "section_tokens",
+        "params": {
+          "chunk_size": 256,
+          "chunk_overlap": 32
+        }
+      },
+      "metadata_extraction": {
+        "method": "basic_metadata",
+        "params": {}
+      },
+      "embedding": {
+        "method": "bge_small_en",
+        "params": {}
+      },
+      "vector_indexing": {
+        "method": "qdrant_mongodb",
+        "params": {
+          "hnsw_m": 16,
+          "hnsw_ef_construct": 100,
+          "indexing_threshold_kb": 20000
+        }
+      },
+      "query_understanding": {
+        "method": null,
+        "params": {}
+      },
+      "query_rewriting": {
+        "method": null,
+        "params": {}
+      },
+      "metadata_prefiltering": {
+        "method": null,
+        "params": {}
+      },
+      "dense_retrieval": {
+        "method": "qdrant_cosine",
+        "params": {
+          "top_k": 5,
+          "search_mode": "exact",
+          "hnsw_ef": 100
+        }
+      },
+      "lexical_retrieval": {
+        "method": null,
+        "params": {}
+      },
+      "hybrid_fusion": {
+        "method": null,
+        "params": {}
+      },
+      "metadata_postfiltering": {
+        "method": null,
+        "params": {}
+      },
+      "metadata_enrichment": {
+        "method": "mongodb_lookup",
+        "params": {}
+      },
+      "reranking": {
+        "method": null,
+        "params": {}
+      },
+      "evidence_selection": {
+        "method": "oracle_evidence",
+        "params": {}
+      },
+      "evidence_sufficiency": {
+        "method": null,
+        "params": {}
+      },
+      "context_construction": {
+        "method": "standard_context",
+        "params": {}
+      },
+      "generation": {
+        "method": "ollama_chat",
+        "params": {
+          "model": "qwen3.5:4b",
+          "temperature": 0.0,
+          "max_tokens": 1024,
+          "context_window": 4096,
+          "top_p": 0.9,
+          "top_k": 40,
+          "seed": 42,
+          "thinking": "off",
+          "timeout_s": 300
+        }
+      }
+    }
+  },
+  "hyu/dev/A0_AAES__-": {
+    "status": "COMPLETED",
+    "seconds": 161.5,
+    "queries": 47,
+    "index_id": "hyu_20261110_97dc1269_r5",
+    "config": {
+      "document_loading": {
+        "method": "local_folder",
+        "params": {}
+      },
+      "parsing": {
+        "method": "basic_parser",
+        "params": {}
+      },
+      "chunking": {
+        "method": "section_tokens",
+        "params": {
+          "chunk_size": 256,
+          "chunk_overlap": 32
+        }
+      },
+      "metadata_extraction": {
+        "method": "basic_metadata",
+        "params": {}
+      },
+      "embedding": {
+        "method": "bge_small_en",
+        "params": {}
+      },
+      "vector_indexing": {
+        "method": "qdrant_mongodb",
+        "params": {
+          "hnsw_m": 16,
+          "hnsw_ef_construct": 100,
+          "indexing_threshold_kb": 20000
+        }
+      },
+      "query_understanding": {
+        "method": "profile_understanding",
+        "params": {}
+      },
+      "query_rewriting": {
+        "method": null,
+        "params": {}
+      },
+      "metadata_prefiltering": {
+        "method": null,
+        "params": {}
+      },
+      "dense_retrieval": {
+        "method": "qdrant_cosine",
+        "params": {
+          "top_k": 10,
+          "search_mode": "exact",
+          "hnsw_ef": 100
+        }
+      },
+      "lexical_retrieval": {
+        "method": "bm25",
+        "params": {
+          "top_k": 10,
+          "k1": 1.2,
+          "b": 0.75
+        }
+      },
+      "hybrid_fusion": {
+        "method": "rrf",
+        "params": {
+          "rrf_k": 60,
+          "top_k": 20
+        }
+      },
+      "metadata_postfiltering": {
+        "method": null,
+        "params": {}
+      },
+      "metadata_enrichment": {
+        "method": "mongodb_lookup",
+        "params": {}
+      },
+      "reranking": {
+        "method": "applicability_reranker",
+        "params": {
+          "rerank_depth": 20,
+          "batch_size": 32,
+          "device": "auto",
+          "lam": 4.0,
+          "mu": 2.0,
+          "hard_filter": false
+        }
+      },
+      "evidence_selection": {
+        "method": "top_k",
+        "params": {
+          "top_k": 3
+        }
+      },
+      "evidence_sufficiency": {
+        "method": "applicability_sufficiency",
+        "params": {
+          "relevance_threshold": 0.3,
+          "max_branches": 3,
+          "temporal": true,
+          "policy": "aaes"
+        }
+      },
+      "context_construction": {
+        "method": "standard_context",
+        "params": {}
+      },
+      "generation": {
+        "method": "ollama_chat",
+        "params": {
+          "model": "qwen3.5:4b",
+          "temperature": 0.0,
+          "max_tokens": 1024,
+          "context_window": 4096,
+          "top_p": 0.9,
+          "top_k": 40,
+          "seed": 42,
+          "thinking": "off",
+          "timeout_s": 300
+        }
+      }
+    }
+  },
+  "hyu/dev/A1_AAES_HARD_FILTER__-": {
+    "status": "COMPLETED",
+    "seconds": 118.4,
+    "queries": 47,
+    "index_id": "hyu_20261110_97dc1269_r5",
+    "config": {
+      "document_loading": {
+        "method": "local_folder",
+        "params": {}
+      },
+      "parsing": {
+        "method": "basic_parser",
+        "params": {}
+      },
+      "chunking": {
+        "method": "section_tokens",
+        "params": {
+          "chunk_size": 256,
+          "chunk_overlap": 32
+        }
+      },
+      "metadata_extraction": {
+        "method": "basic_metadata",
+        "params": {}
+      },
+      "embedding": {
+        "method": "bge_small_en",
+        "params": {}
+      },
+      "vector_indexing": {
+        "method": "qdrant_mongodb",
+        "params": {
+          "hnsw_m": 16,
+          "hnsw_ef_construct": 100,
+          "indexing_threshold_kb": 20000
+        }
+      },
+      "query_understanding": {
+        "method": "profile_understanding",
+        "params": {}
+      },
+      "query_rewriting": {
+        "method": null,
+        "params": {}
+      },
+      "metadata_prefiltering": {
+        "method": null,
+        "params": {}
+      },
+      "dense_retrieval": {
+        "method": "qdrant_cosine",
+        "params": {
+          "top_k": 10,
+          "search_mode": "exact",
+          "hnsw_ef": 100
+        }
+      },
+      "lexical_retrieval": {
+        "method": "bm25",
+        "params": {
+          "top_k": 10,
+          "k1": 1.2,
+          "b": 0.75
+        }
+      },
+      "hybrid_fusion": {
+        "method": "rrf",
+        "params": {
+          "rrf_k": 60,
+          "top_k": 20
+        }
+      },
+      "metadata_postfiltering": {
+        "method": null,
+        "params": {}
+      },
+      "metadata_enrichment": {
+        "method": "mongodb_lookup",
+        "params": {}
+      },
+      "reranking": {
+        "method": "applicability_reranker",
+        "params": {
+          "rerank_depth": 20,
+          "batch_size": 32,
+          "device": "auto",
+          "lam": 4.0,
+          "mu": 2.0,
+          "hard_filter": true
+        }
+      },
+      "evidence_selection": {
+        "method": "top_k",
+        "params": {
+          "top_k": 3
+        }
+      },
+      "evidence_sufficiency": {
+        "method": "applicability_sufficiency",
+        "params": {
+          "relevance_threshold": 0.3,
+          "max_branches": 3,
+          "temporal": true,
+          "policy": "aaes"
+        }
+      },
+      "context_construction": {
+        "method": "standard_context",
+        "params": {}
+      },
+      "generation": {
+        "method": "ollama_chat",
+        "params": {
+          "model": "qwen3.5:4b",
+          "temperature": 0.0,
+          "max_tokens": 1024,
+          "context_window": 4096,
+          "top_p": 0.9,
+          "top_k": 40,
+          "seed": 42,
+          "thinking": "off",
+          "timeout_s": 300
+        }
+      }
+    }
+  },
+  "hyu/dev/A2_AAES_ORACLE_PROFILE__-": {
+    "status": "COMPLETED",
+    "seconds": 161.4,
+    "queries": 47,
+    "index_id": "hyu_20261110_97dc1269_r5",
+    "config": {
+      "document_loading": {
+        "method": "local_folder",
+        "params": {}
+      },
+      "parsing": {
+        "method": "basic_parser",
+        "params": {}
+      },
+      "chunking": {
+        "method": "section_tokens",
+        "params": {
+          "chunk_size": 256,
+          "chunk_overlap": 32
+        }
+      },
+      "metadata_extraction": {
+        "method": "basic_metadata",
+        "params": {}
+      },
+      "embedding": {
+        "method": "bge_small_en",
+        "params": {}
+      },
+      "vector_indexing": {
+        "method": "qdrant_mongodb",
+        "params": {
+          "hnsw_m": 16,
+          "hnsw_ef_construct": 100,
+          "indexing_threshold_kb": 20000
+        }
+      },
+      "query_understanding": {
+        "method": "oracle_profile",
+        "params": {}
+      },
+      "query_rewriting": {
+        "method": null,
+        "params": {}
+      },
+      "metadata_prefiltering": {
+        "method": null,
+        "params": {}
+      },
+      "dense_retrieval": {
+        "method": "qdrant_cosine",
+        "params": {
+          "top_k": 10,
+          "search_mode": "exact",
+          "hnsw_ef": 100
+        }
+      },
+      "lexical_retrieval": {
+        "method": "bm25",
+        "params": {
+          "top_k": 10,
+          "k1": 1.2,
+          "b": 0.75
+        }
+      },
+      "hybrid_fusion": {
+        "method": "rrf",
+        "params": {
+          "rrf_k": 60,
+          "top_k": 20
+        }
+      },
+      "metadata_postfiltering": {
+        "method": null,
+        "params": {}
+      },
+      "metadata_enrichment": {
+        "method": "mongodb_lookup",
+        "params": {}
+      },
+      "reranking": {
+        "method": "applicability_reranker",
+        "params": {
+          "rerank_depth": 20,
+          "batch_size": 32,
+          "device": "auto",
+          "lam": 4.0,
+          "mu": 2.0,
+          "hard_filter": false
+        }
+      },
+      "evidence_selection": {
+        "method": "top_k",
+        "params": {
+          "top_k": 3
+        }
+      },
+      "evidence_sufficiency": {
+        "method": "applicability_sufficiency",
+        "params": {
+          "relevance_threshold": 0.3,
+          "max_branches": 3,
+          "temporal": true,
+          "policy": "aaes"
+        }
+      },
+      "context_construction": {
+        "method": "standard_context",
+        "params": {}
+      },
+      "generation": {
+        "method": "ollama_chat",
+        "params": {
+          "model": "qwen3.5:4b",
+          "temperature": 0.0,
+          "max_tokens": 1024,
+          "context_window": 4096,
+          "top_p": 0.9,
+          "top_k": 40,
+          "seed": 42,
+          "thinking": "off",
+          "timeout_s": 300
+        }
+      }
+    }
+  },
+  "hyu/dev/A3_AAES_ALWAYS_CLARIFY__-": {
+    "status": "COMPLETED",
+    "seconds": 36.1,
+    "queries": 47,
+    "index_id": "hyu_20261110_97dc1269_r5",
+    "config": {
+      "document_loading": {
+        "method": "local_folder",
+        "params": {}
+      },
+      "parsing": {
+        "method": "basic_parser",
+        "params": {}
+      },
+      "chunking": {
+        "method": "section_tokens",
+        "params": {
+          "chunk_size": 256,
+          "chunk_overlap": 32
+        }
+      },
+      "metadata_extraction": {
+        "method": "basic_metadata",
+        "params": {}
+      },
+      "embedding": {
+        "method": "bge_small_en",
+        "params": {}
+      },
+      "vector_indexing": {
+        "method": "qdrant_mongodb",
+        "params": {
+          "hnsw_m": 16,
+          "hnsw_ef_construct": 100,
+          "indexing_threshold_kb": 20000
+        }
+      },
+      "query_understanding": {
+        "method": "profile_understanding",
+        "params": {}
+      },
+      "query_rewriting": {
+        "method": null,
+        "params": {}
+      },
+      "metadata_prefiltering": {
+        "method": null,
+        "params": {}
+      },
+      "dense_retrieval": {
+        "method": "qdrant_cosine",
+        "params": {
+          "top_k": 10,
+          "search_mode": "exact",
+          "hnsw_ef": 100
+        }
+      },
+      "lexical_retrieval": {
+        "method": "bm25",
+        "params": {
+          "top_k": 10,
+          "k1": 1.2,
+          "b": 0.75
+        }
+      },
+      "hybrid_fusion": {
+        "method": "rrf",
+        "params": {
+          "rrf_k": 60,
+          "top_k": 20
+        }
+      },
+      "metadata_postfiltering": {
+        "method": null,
+        "params": {}
+      },
+      "metadata_enrichment": {
+        "method": "mongodb_lookup",
+        "params": {}
+      },
+      "reranking": {
+        "method": "applicability_reranker",
+        "params": {
+          "rerank_depth": 20,
+          "batch_size": 32,
+          "device": "auto",
+          "lam": 4.0,
+          "mu": 2.0,
+          "hard_filter": false
+        }
+      },
+      "evidence_selection": {
+        "method": "top_k",
+        "params": {
+          "top_k": 3
+        }
+      },
+      "evidence_sufficiency": {
+        "method": "applicability_sufficiency",
+        "params": {
+          "relevance_threshold": 0.3,
+          "max_branches": 3,
+          "temporal": true,
+          "policy": "always_clarify"
+        }
+      },
+      "context_construction": {
+        "method": "standard_context",
+        "params": {}
+      },
+      "generation": {
+        "method": "ollama_chat",
+        "params": {
+          "model": "qwen3.5:4b",
+          "temperature": 0.0,
+          "max_tokens": 1024,
+          "context_window": 4096,
+          "top_p": 0.9,
+          "top_k": 40,
+          "seed": 42,
+          "thinking": "off",
+          "timeout_s": 300
+        }
+      }
+    }
+  },
+  "hyu/dev/A4_QUESTION_ONLY_AMBIGUITY__-": {
+    "status": "COMPLETED",
+    "seconds": 185.8,
+    "queries": 47,
+    "index_id": "hyu_20261110_97dc1269_r5",
+    "config": {
+      "document_loading": {
+        "method": "local_folder",
+        "params": {}
+      },
+      "parsing": {
+        "method": "basic_parser",
+        "params": {}
+      },
+      "chunking": {
+        "method": "section_tokens",
+        "params": {
+          "chunk_size": 256,
+          "chunk_overlap": 32
+        }
+      },
+      "metadata_extraction": {
+        "method": "basic_metadata",
+        "params": {}
+      },
+      "embedding": {
+        "method": "bge_small_en",
+        "params": {}
+      },
+      "vector_indexing": {
+        "method": "qdrant_mongodb",
+        "params": {
+          "hnsw_m": 16,
+          "hnsw_ef_construct": 100,
+          "indexing_threshold_kb": 20000
+        }
+      },
+      "query_understanding": {
+        "method": "profile_understanding",
+        "params": {}
+      },
+      "query_rewriting": {
+        "method": null,
+        "params": {}
+      },
+      "metadata_prefiltering": {
+        "method": null,
+        "params": {}
+      },
+      "dense_retrieval": {
+        "method": "qdrant_cosine",
+        "params": {
+          "top_k": 10,
+          "search_mode": "exact",
+          "hnsw_ef": 100
+        }
+      },
+      "lexical_retrieval": {
+        "method": "bm25",
+        "params": {
+          "top_k": 10,
+          "k1": 1.2,
+          "b": 0.75
+        }
+      },
+      "hybrid_fusion": {
+        "method": "rrf",
+        "params": {
+          "rrf_k": 60,
+          "top_k": 20
+        }
+      },
+      "metadata_postfiltering": {
+        "method": null,
+        "params": {}
+      },
+      "metadata_enrichment": {
+        "method": "mongodb_lookup",
+        "params": {}
+      },
+      "reranking": {
+        "method": "applicability_reranker",
+        "params": {
+          "rerank_depth": 20,
+          "batch_size": 32,
+          "device": "auto",
+          "lam": 4.0,
+          "mu": 2.0,
+          "hard_filter": false
+        }
+      },
+      "evidence_selection": {
+        "method": "top_k",
+        "params": {
+          "top_k": 3
+        }
+      },
+      "evidence_sufficiency": {
+        "method": "applicability_sufficiency",
+        "params": {
+          "relevance_threshold": 0.3,
+          "max_branches": 3,
+          "temporal": true,
+          "policy": "question_only"
+        }
+      },
+      "context_construction": {
+        "method": "standard_context",
+        "params": {}
+      },
+      "generation": {
+        "method": "ollama_chat",
+        "params": {
+          "model": "qwen3.5:4b",
+          "temperature": 0.0,
+          "max_tokens": 1024,
+          "context_window": 4096,
+          "top_p": 0.9,
+          "top_k": 40,
+          "seed": 42,
+          "thinking": "off",
+          "timeout_s": 300
+        }
+      }
+    }
+  },
+  "hyu/dev/A6_AAES_NO_TEMPORAL__-": {
+    "status": "COMPLETED",
+    "seconds": 106.0,
+    "queries": 47,
+    "index_id": "hyu_20261110_97dc1269_r5",
+    "config": {
+      "document_loading": {
+        "method": "local_folder",
+        "params": {}
+      },
+      "parsing": {
+        "method": "basic_parser",
+        "params": {}
+      },
+      "chunking": {
+        "method": "section_tokens",
+        "params": {
+          "chunk_size": 256,
+          "chunk_overlap": 32
+        }
+      },
+      "metadata_extraction": {
+        "method": "basic_metadata",
+        "params": {}
+      },
+      "embedding": {
+        "method": "bge_small_en",
+        "params": {}
+      },
+      "vector_indexing": {
+        "method": "qdrant_mongodb",
+        "params": {
+          "hnsw_m": 16,
+          "hnsw_ef_construct": 100,
+          "indexing_threshold_kb": 20000
+        }
+      },
+      "query_understanding": {
+        "method": "profile_understanding",
+        "params": {}
+      },
+      "query_rewriting": {
+        "method": null,
+        "params": {}
+      },
+      "metadata_prefiltering": {
+        "method": null,
+        "params": {}
+      },
+      "dense_retrieval": {
+        "method": "qdrant_cosine",
+        "params": {
+          "top_k": 10,
+          "search_mode": "exact",
+          "hnsw_ef": 100
+        }
+      },
+      "lexical_retrieval": {
+        "method": "bm25",
+        "params": {
+          "top_k": 10,
+          "k1": 1.2,
+          "b": 0.75
+        }
+      },
+      "hybrid_fusion": {
+        "method": "rrf",
+        "params": {
+          "rrf_k": 60,
+          "top_k": 20
+        }
+      },
+      "metadata_postfiltering": {
+        "method": null,
+        "params": {}
+      },
+      "metadata_enrichment": {
+        "method": "mongodb_lookup",
+        "params": {}
+      },
+      "reranking": {
+        "method": "applicability_reranker",
+        "params": {
+          "rerank_depth": 20,
+          "batch_size": 32,
+          "device": "auto",
+          "lam": 4.0,
+          "mu": 2.0,
+          "hard_filter": false
+        }
+      },
+      "evidence_selection": {
+        "method": "top_k",
+        "params": {
+          "top_k": 3
+        }
+      },
+      "evidence_sufficiency": {
+        "method": "applicability_sufficiency",
+        "params": {
+          "relevance_threshold": 0.3,
+          "max_branches": 3,
+          "temporal": false,
+          "policy": "aaes"
+        }
+      },
+      "context_construction": {
+        "method": "standard_context",
+        "params": {}
+      },
+      "generation": {
+        "method": "ollama_chat",
+        "params": {
+          "model": "qwen3.5:4b",
+          "temperature": 0.0,
+          "max_tokens": 1024,
+          "context_window": 4096,
+          "top_p": 0.9,
+          "top_k": 40,
+          "seed": 42,
+          "thinking": "off",
+          "timeout_s": 300
+        }
+      }
+    }
+  },
+  "generation/cases/GEN_llama2:7b__-": {
+    "status": "COMPLETED",
+    "seconds": 851.8,
+    "queries": 44,
+    "model_identity": {
+      "name": "llama2:7b",
+      "digest": "78e26419b4469263f75331927a00a0284ef6544c1975b826b15abdaef17bb962",
+      "parameter_size": "7B",
+      "quantization": "Q4_0",
+      "capabilities": [
+        "completion"
+      ],
+      "family": "llama",
+      "context_length": 4096
+    },
+    "config": {
+      "document_loading": {
+        "method": "local_folder",
+        "params": {}
+      },
+      "parsing": {
+        "method": "basic_parser",
+        "params": {}
+      },
+      "chunking": {
+        "method": "section_tokens",
+        "params": {
+          "chunk_size": 256,
+          "chunk_overlap": 32
+        }
+      },
+      "metadata_extraction": {
+        "method": "basic_metadata",
+        "params": {}
+      },
+      "embedding": {
+        "method": "bge_small_en",
+        "params": {}
+      },
+      "vector_indexing": {
+        "method": "qdrant_mongodb",
+        "params": {
+          "hnsw_m": 16,
+          "hnsw_ef_construct": 100,
+          "indexing_threshold_kb": 20000
+        }
+      },
+      "query_understanding": {
+        "method": null,
+        "params": {}
+      },
+      "query_rewriting": {
+        "method": null,
+        "params": {}
+      },
+      "metadata_prefiltering": {
+        "method": null,
+        "params": {}
+      },
+      "dense_retrieval": {
+        "method": "qdrant_cosine",
+        "params": {
+          "top_k": 5,
+          "search_mode": "exact",
+          "hnsw_ef": 100
+        }
+      },
+      "lexical_retrieval": {
+        "method": null,
+        "params": {}
+      },
+      "hybrid_fusion": {
+        "method": null,
+        "params": {}
+      },
+      "metadata_postfiltering": {
+        "method": null,
+        "params": {}
+      },
+      "metadata_enrichment": {
+        "method": "mongodb_lookup",
+        "params": {}
+      },
+      "reranking": {
+        "method": null,
+        "params": {}
+      },
+      "evidence_selection": {
+        "method": "top_k",
+        "params": {
+          "top_k": 3
+        }
+      },
+      "evidence_sufficiency": {
+        "method": null,
+        "params": {}
+      },
+      "context_construction": {
+        "method": "standard_context",
+        "params": {}
+      },
+      "generation": {
+        "method": "ollama_chat",
+        "params": {
+          "model": "llama2:7b",
+          "temperature": 0.0,
+          "max_tokens": 512,
+          "context_window": 4096,
+          "top_p": 0.9,
+          "top_k": 40,
+          "seed": 42,
+          "thinking": "off",
+          "timeout_s": 600
+        }
+      }
+    }
+  },
+  "generation/cases/GEN_qwen3.5:4b__-": {
+    "status": "COMPLETED",
+    "seconds": 401.4,
+    "queries": 44,
+    "model_identity": {
+      "name": "qwen3.5:4b",
+      "digest": "7f3251fa6878a78a606bcb3c074283306e5ad2ea411a7774a9dd98a4bc7f2d13",
+      "parameter_size": "",
+      "quantization": "nvfp4",
+      "capabilities": [
+        "completion",
+        "vision",
+        "thinking",
+        "tools"
+      ],
+      "family": "qwen3_5",
+      "context_length": 262144
+    },
+    "config": {
+      "document_loading": {
+        "method": "local_folder",
+        "params": {}
+      },
+      "parsing": {
+        "method": "basic_parser",
+        "params": {}
+      },
+      "chunking": {
+        "method": "section_tokens",
+        "params": {
+          "chunk_size": 256,
+          "chunk_overlap": 32
+        }
+      },
+      "metadata_extraction": {
+        "method": "basic_metadata",
+        "params": {}
+      },
+      "embedding": {
+        "method": "bge_small_en",
+        "params": {}
+      },
+      "vector_indexing": {
+        "method": "qdrant_mongodb",
+        "params": {
+          "hnsw_m": 16,
+          "hnsw_ef_construct": 100,
+          "indexing_threshold_kb": 20000
+        }
+      },
+      "query_understanding": {
+        "method": null,
+        "params": {}
+      },
+      "query_rewriting": {
+        "method": null,
+        "params": {}
+      },
+      "metadata_prefiltering": {
+        "method": null,
+        "params": {}
+      },
+      "dense_retrieval": {
+        "method": "qdrant_cosine",
+        "params": {
+          "top_k": 5,
+          "search_mode": "exact",
+          "hnsw_ef": 100
+        }
+      },
+      "lexical_retrieval": {
+        "method": null,
+        "params": {}
+      },
+      "hybrid_fusion": {
+        "method": null,
+        "params": {}
+      },
+      "metadata_postfiltering": {
+        "method": null,
+        "params": {}
+      },
+      "metadata_enrichment": {
+        "method": "mongodb_lookup",
+        "params": {}
+      },
+      "reranking": {
+        "method": null,
+        "params": {}
+      },
+      "evidence_selection": {
+        "method": "top_k",
+        "params": {
+          "top_k": 3
+        }
+      },
+      "evidence_sufficiency": {
+        "method": null,
+        "params": {}
+      },
+      "context_construction": {
+        "method": "standard_context",
+        "params": {}
+      },
+      "generation": {
+        "method": "ollama_chat",
+        "params": {
+          "model": "qwen3.5:4b",
+          "temperature": 0.0,
+          "max_tokens": 512,
+          "context_window": 4096,
+          "top_p": 0.9,
+          "top_k": 40,
+          "seed": 42,
+          "thinking": "off",
+          "timeout_s": 600
+        }
+      }
+    }
+  }
+}

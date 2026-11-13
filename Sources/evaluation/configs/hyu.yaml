@@ -7,7 +7,7 @@ presets: [B0_BASIC_DENSE_RAG, R5_HYBRID_CROSS_ENCODER, R9S_SCOPE_PREFILTER, R15_
 # Pre-registered comparisons (Holm-corrected).
 ours: A0_AAES
 baselines: [B0_BASIC_DENSE_RAG, R5_HYBRID_CROSS_ENCODER, R15_SELF_QUERY, R16_PROMPTED_CONDITIONAL]
-best_baseline: null          # set from the dev results before the test run (G5); null = lowest AER in this run
+best_baseline: R15_SELF_QUERY  # G5: lowest dev AER among {B0, R5, R15, R16} in dev-02 (0.000)
 ablation: A4_QUESTION_ONLY_AMBIGUITY   # comparison 3: A0 vs A4 on action macro-F1
 bootstrap_resamples: 10000
 smoke_cases: 5
