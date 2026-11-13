@@ -43,9 +43,9 @@ DEV_SIZE, SEED = 50, 13  # must match the labeling.freeze call in the docstring;
 SHEETS = {"1_conditional.csv": ("conditional",), "2_temporal_negative.csv": ("temporal", "negative"),
           "3_multi_session_spot.csv": ("multi_session", "unconditional")}  # fmt: skip
 SPOT_SHARE = 1.0  # A33: every test case is verified (A31 had a 0.2 spot check of unconditional cases)
-VERIFY_COLS = ("case_id", "split", "slice", "question", "stated_profile", "answerability", "expected_behavior",
+VERIFY_COLS = ("case_id", "split", "slice", "session_history", "question", "stated_profile", "answerability", "expected_behavior",
                "acceptable_behaviors", "branch_attributes", "required_facts", "gold_evidence", "evidence_supports_facts",
-               "fix_answerability", "fix_expected_behavior", "fix_acceptable_behaviors", "fix_branch_attributes", "fix_note",
+               "fix_answerability", "fix_expected_behavior", "fix_acceptable_behaviors", "fix_branch_attributes", "fix_stale_update", "fix_note",
                "check_violations", "verifier")  # fmt: skip
 
 
@@ -187,6 +187,7 @@ def verification_rows(cases: list[dict], documents: dict[str, dict], extra: dict
         name = next(n for n, slices in SHEETS.items() if case["slice"] in slices)
         sheets[name].append({
             "case_id": case["case_id"], "split": "test" if case["case_id"] in test_ids else "dev", "slice": case["slice"],
+            "session_history": "\n".join(f"{t.get('role', 'user')}: {t['text']}" for t in case.get("session_history") or []),
             "question": case["question"], "check_violations": "\n".join(extra.get(case["case_id"], [])),
             "stated_profile": json.dumps(case["stated_profile"]), "answerability": case["answerability"],
             "expected_behavior": case["expected_behavior"], "acceptable_behaviors": json.dumps(case["acceptable_behaviors"]),
@@ -236,6 +237,9 @@ def apply_verification(cases: list[dict], sheet_rows: list[dict], extra: dict[st
             cell = row.get(f"fix_{field}", "").strip()
             if cell and _value(field, cell) != case[field]:
                 case[field], case["origin"] = _value(field, cell), edited
+        stale = _choice(row, "fix_stale_update")  # GUIDELINES 11.7: a later turn updated a profile value
+        if stale:
+            case["stale_update"] = stale == "yes"
         supports = _choice(row, "evidence_supports_facts")
         if supports:
             case["evidence_supports_facts"] = supports == "yes"

@@ -150,11 +150,12 @@ def test_violations_are_verified_in_dev_too_and_unresolved_cases_are_excluded():
     flagged = next(r for r in rows if r["case_id"] == dev[0]["case_id"])
     assert flagged["split"] == "dev" and "campus" in flagged["check_violations"]
     rows[0].update(verifier=AGENT, fix_answerability="EXCLUDE", fix_note="evidence is for 2025")
-    rows[1].update(verifier=AGENT, fix_expected_behavior="abstain")
+    rows[1].update(verifier=AGENT, fix_expected_behavior="abstain", fix_stale_update="yes")
     out, unverified = apply_verification(cases, rows, extra, exclude_unverified=True)
     by = {c["case_id"]: c for c in out}
     assert by[rows[0]["case_id"]]["exclude"] == "verification: evidence is for 2025"
     assert by[rows[1]["case_id"]]["origin"] == "agent_edited" and by[rows[1]["case_id"]]["verified_by"] == AGENT
+    assert by[rows[1]["case_id"]]["stale_update"] is True and "session_history" in rows[1]
     assert len(unverified) == len(rows) - 2 and all("unresolved" in by[c]["exclude"] for c in unverified)
 
 
