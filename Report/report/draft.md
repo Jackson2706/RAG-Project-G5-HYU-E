@@ -1,7 +1,7 @@
 # HYU Compass: applicability-aware evidence sufficiency for new-student questions
 
 Draft. Every number in this file comes from a file under `Report/results/` or `Sources/data/`; the source is
-named next to it. Results sections are filled after the single test run (G6).
+named next to it.
 
 ## 1. Problem
 
@@ -105,11 +105,86 @@ not computed.
 
 ## 6. Results
 
-(After G6. Source: `Report/results/test-final/`.)
+One test run on the 121 frozen test cases (`Report/results/test-final/`, `Report/results/TEST_RUNS.md`).
+While the run was going, the Mac went to sleep on battery and three presets (G1, A0, A1) failed on database
+timeouts. We resumed only those three, on the same run id and the same code. Table 1 is
+`Report/tables/test-final_main.md`, Figure 1 is `Report/figures/test-final_actions.png`.
+
+**Table 1. Test split, all slices (121 cases).**
+
+| Method | Answered | Action acc. | Acceptable | Macro-F1 | Unnecessary clarify | AppRecall@5 | AER |
+|---|---|---|---|---|---|---|---|
+| B0 basic dense | 0.835 | 0.587 | 0.736 | 0.288 | 0.000 | 0.469 | 0.000 (0/11) |
+| R5 hybrid + CE | 0.818 | 0.521 | 0.669 | 0.249 | 0.000 | 0.428 | 0.091 (1/11) |
+| R9-scope prefilter | 0.835 | 0.521 | 0.686 | 0.245 | 0.000 | 0.463 | 0.300 (3/10) |
+| R15 self-query | 0.835 | 0.545 | 0.711 | 0.263 | 0.000 | 0.411 | 0.250 (3/12) |
+| R16 prompted conditional | 0.860 | 0.545 | 0.694 | 0.255 | 0.000 | 0.428 | 0.167 (2/12) |
+| G0 closed book | 1.000 | 0.496 | 0.661 | 0.166 | 0.000 | n/a | 0.000 (0/13) |
+| G1 gold evidence | 0.727 | 0.669 | 0.818 | 0.350 | 0.000 | n/a | 0.000 (0/6) |
+| **A0 AAES** | 0.347 | 0.174 | 0.248 | 0.160 | 0.443 | 0.459 | 0.286 (2/7) |
+| A1 hard filter | 0.355 | 0.165 | 0.240 | 0.155 | 0.462 | 0.461 | 0.286 (2/7) |
+| A2 oracle profile | 0.355 | 0.165 | 0.248 | 0.156 | 0.415 | 0.467 | 0.286 (2/7) |
+| A3 always clarify | 0.083 | 0.182 | 0.248 | 0.148 | 0.708 | 0.459 | 0.000 (0/1) |
+| A4 question-only | 0.521 | 0.388 | 0.496 | 0.226 | 0.236 | 0.459 | 0.125 (1/8) |
+| A6 no temporal rule | 0.347 | 0.174 | 0.248 | 0.160 | 0.443 | 0.459 | 0.286 (2/7) |
+
+AER is a share of answered cases whose labels mark an inapplicable span, so its denominators are small; the
+counts are in brackets (from `hyu_test_per_case.csv`).
+
+**Pre-registered comparisons** (`hyu_test_comparisons_paired.csv`; the best baseline, R15, was fixed on dev at G5):
+
+1. A0 vs R15 on AER (conditional + temporal): only 2 cases with inapplicable spans were answered by both
+   methods. Difference 0.000, p = 1.0. The test cannot tell the two apart.
+2. A0 vs R15 on correctness: not computed (no human-validated judge, A33).
+3. A0 vs A4 on action macro-F1: −0.066, 95% CI [−0.128, +0.000], p = 0.131, Holm-corrected p = 0.393. Not
+   significant; the point estimate favours A4.
+
+**By slice** (acceptable-action rate, `Report/tables/test-final_slices.md`, Figure 2): A0 reaches 0.333 on
+conditional (27 cases), 0.292 on negative (24), 0.217 on unconditional (46), 0.167 on temporal (12) and 0.167 on
+multi-session (12). B0 reaches 0.704, 0.708, 0.717, 0.750 and 0.917 on the same slices.
+
+**Where A0's actions go** (`hyu_test_actions_confusion.csv`, Figure 3). Of 60 cases labelled *answer*, A0
+answered 7, gave a conditional answer to 19, asked a question on 20 and abstained on 14. Of 46 cases labelled
+*abstain*, it abstained on 10 and asked a question on 27. Of its 52 clarifying questions, 35 asked for the
+campus (from the A0 answers in `raw/`).
 
 ## 7. Discussion
 
-(After G6.)
+**AAES did not work on this test set.** The question was whether separating relevance from eligibility makes
+the system's actions better. On our LLM-annotated labels it made them worse: A0 chose an acceptable action in
+24.8% of cases, against 73.6% for the plain dense baseline B0. The planned evidence for the method, a lower
+applicability error rate than the best baseline, could not be shown: A0 answered so rarely that only two cases
+were comparable.
+
+**The failure is in steps 3 and 4, not in step 1.** A2, which receives the labelled profile instead of
+extracting it, behaves almost exactly like A0 (acceptable 0.248, unnecessary clarification 0.415 vs 0.443). So
+profile extraction is not the bottleneck. The branch test is: most questions retrieve relevant pages from both
+campuses, campus is usually not stated, so campus always "splits" the evidence and AAES asks for it, in 35 of
+52 clarifications. In dev cases we inspected (for example T14-015, counselling in English), the two campus pages give
+the same answer, or the label expects an abstention because neither page answers. Our branch test checks *whether* the applicable evidence changes with
+the attribute, not whether the *answer* changes. That is the main design gap we see.
+
+**Asking instead of abstaining.** 27 of 46 cases that should end in a referral got a clarifying question
+instead. AAES computes branches before it checks that some evidence answers the question; when nothing
+answers, a question about the campus only delays the abstention.
+
+**The ablations mostly do not move.** A1 (hard filter instead of the penalty) and A6 (no temporal rule) are
+within one case of A0; A6 is identical, so the temporal rule never changed a decision on these cases. A3
+(always clarify) shows the cost of asking: 70.8% unnecessary clarifications. A4, which decides to ask from the
+question wording alone, asks less and does better than A0 (acceptable 0.496), though the macro-F1 difference is
+not significant.
+
+**The baselines are close to each other.** The four retrieval baselines are within 6.7 points of B0 in
+acceptable action, and B0 is the best. Prefiltering on the stated profile (R9-scope) and an LLM-written filter
+(R15) did not reduce AER on the few comparable cases. The gold-evidence bracket G1 reaches 0.818, so better
+evidence selection could still help; the closed-book bracket G0 at 0.661 shows how much of the label set a model
+can match without retrieval at all.
+
+**What this means.** Eligibility still matters for these questions: every retrieval baseline except B0 cited an
+inapplicable span in at least one answered case. But deciding *when to ask* from how evidence splits needs a test on the answers, not only on the
+evidence conditions. A next version would check that the branches lead to different answers before asking, and
+would test sufficiency before branching. These changes were not tried: after the configuration freeze no
+parameter or rule was changed (G5), and dev runs were used only to fix bugs.
 
 ## 8. Limitations
 
