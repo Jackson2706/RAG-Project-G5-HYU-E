@@ -117,4 +117,13 @@ See `Report/notes/limitations.md`; the final list is copied here after G6.
 
 ## 9. Mapping to the course (Lessons 3-6)
 
-(After G6.)
+| Course idea | Where it is in HYU Compass |
+|---|---|
+| Relevance vs eligibility | The core of AAES: a chunk can be relevant and still not apply to the student (applicability labels, step 2). |
+| Candidate retrieval vs evidence selection | AAES leaves candidate retrieval unchanged and changes evidence selection only (soft penalty λ, μ). |
+| Prefiltering vs postfiltering | R9-scope and R15 prefilter on profile tags before retrieval; A1 removes conflicting chunks after it; A0 penalises instead of removing. |
+| Evidence sufficiency and abstention (Lesson 5) | The relevance threshold is Lesson 5's query-term coverage (0.30); AAES extends sufficiency with applicability and abstains with a referral. |
+| Evaluation (Lesson 6) | Dev/test separation with a frozen test split and one test run; the gate convention "actual positive = sufficient, predicted positive = proceed"; grounding and citation-precision code checked on the Lesson 6 slide examples. |
+
+TODO (team): Lessons 3 and 4 are not cited anywhere in the repository and the slides are not on this machine.
+Map the modular pipeline (one block per stage, presets, execution trace) to the right lesson before submission.
