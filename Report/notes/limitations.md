@@ -32,3 +32,8 @@
   acceptable), and contradictory ERICA HIEA eligibility text (caveat).
 - G2b (tag quality on a fresh sample) last failed on degree_level, student_type and visa (r4 audit); the r5
   tagger round was not re-audited by a human. AAES results depend on these tags.
+
+- **Stated profile not always in the text (dev-01).** At least one dev case (T14-203) has `campus` in its
+  `stated_profile` although neither the question nor the history names a campus. The system sees only the text,
+  so such a case counts against every profile-aware method. Labels are frozen; this was found on dev and the
+  test split was not inspected for it.

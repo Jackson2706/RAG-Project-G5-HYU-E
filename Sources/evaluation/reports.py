@@ -339,6 +339,14 @@ def generation_tables(run_dir: Path, status: dict, annotations_path: Path | None
 # --------------------------------------------------------------------------------------------- summary
 
 
+def _splits(manifest: dict) -> str:
+    """Each suite run into this run id has its own split (run_all.sh: hyu on dev/test, then generation on BEIR test)."""
+    sessions = [s for s in manifest.get("sessions", []) if s.get("split")]
+    if not sessions:
+        return f"`{manifest.get('split')}`"
+    return ", ".join(f"`{(s['tasks'] or ['?'])[0].split('/')[0]}: {s['split']}`" for s in sessions)
+
+
 def summary_markdown(manifest: dict, status: dict, comparison: list, offline_rows: list, ann: list, filters: list, gates: list,
                      generation: list, failures: list) -> str:
     def table(rows: list[dict], cols: list[str]) -> str:
@@ -352,7 +360,7 @@ def summary_markdown(manifest: dict, status: dict, comparison: list, offline_row
     counts = Counter(v.get("status") for v in status.values())
     lines = [f"# Benchmark summary — run `{manifest.get('run_id')}`", "",
              f"Git `{(manifest.get('git') or {}).get('commit', '')[:10]}`{' (uncommitted changes)' if (manifest.get('git') or {}).get('dirty') else ''} · "
-             f"split `{manifest.get('split')}` · smoke: {manifest.get('smoke')} · machine: {manifest.get('machine', {}).get('machine')}, "
+             f"split {_splits(manifest)} · smoke: {manifest.get('smoke')} · machine: {manifest.get('machine', {}).get('machine')}, "
              f"{round((manifest.get('machine', {}).get('memory_bytes') or 0) / 2**30)} GB · Ollama {manifest.get('ollama_version')}", "",
              "Task status: " + ", ".join(f"{k}: {v}" for k, v in sorted(counts.items())), "",
              "All numbers below were computed from the saved per-query results. N/A = not measurable (missing labels, not run, or undefined).", ""]  # fmt: skip

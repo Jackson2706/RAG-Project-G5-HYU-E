@@ -35,6 +35,18 @@ def test_history_and_trace_record():
     assert [c["chunk_id"] for c in rec["ranked"]] == ["bad", "good"] and rec["cited"][0]["source_spans"] == [[10, 20]]
 
 
+
+def test_brackets_get_no_evidence_selection_metric():
+    """G0 and G1 run the retrieval stages but never give them to the generator (dev-01 showed B0's recall for them)."""
+    lookup = lambda ids: {i: SPANS[i] for i in ids}  # noqa: E731
+    for stage, method in (("context_construction", "closed_book"), ("evidence_selection", "oracle_evidence")):
+        t = trace("ANSWER", ["good"])
+        t["config"][stage] = {"method": method}
+        rec = hyu_suite.trace_record(CASES[1], t, lookup)
+        scores = hyu_suite.case_scores(CASES[1], rec)
+        assert rec["ranked"] is None and scores["applicable_recall@5"] is None and scores["intrusion@5"] is None
+        assert scores["aer"] == 0  # AER is still scored on what the answer cites
+
 def test_tables_and_comparisons(tmp_path):
     labels = tmp_path / "labels"
     labels.mkdir()

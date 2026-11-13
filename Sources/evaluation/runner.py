@@ -517,7 +517,8 @@ async def write_manifest(run: Run, tasks: list[Task]) -> None:
     run.dir.mkdir(parents=True, exist_ok=True)
     path = run.dir / "run_manifest.json"
     previous = json.loads(path.read_text()) if path.exists() else {}
-    manifest["sessions"] = previous.get("sessions", []) + [{"started_at": manifest["started_at"], "argv": manifest["argv"], "git": manifest["git"]}]
+    manifest["sessions"] = previous.get("sessions", []) + [{"started_at": manifest["started_at"], "argv": manifest["argv"], "git": manifest["git"],
+                                                       "split": run.split, "tasks": manifest["tasks"]}]  # one entry per suite run into this run id
     path.write_text(json.dumps(manifest, indent=2, default=str))
 
 

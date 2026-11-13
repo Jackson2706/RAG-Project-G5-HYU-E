@@ -1,0 +1,4 @@
+comparison,metric,status,diff,ci_low,ci_high,p,cases,p_holm
+A0_AAES vs B0_BASIC_DENSE_RAG: AER,aer,NOT_RUN: 0 of 0 cases with inapplicable spans answered by both,N/A,N/A,N/A,N/A,N/A,N/A
+"A0_AAES vs B0_BASIC_DENSE_RAG: correctness, unconditional (non-inferiority 3 points)",correctness,NOT_COMPUTED: needs the validated LLM judge (Appendix F),N/A,N/A,N/A,N/A,N/A,N/A
+A0_AAES vs A4_QUESTION_ONLY_AMBIGUITY: action macro-F1,macro_f1,N/A,-0.1905,-0.4444,0.0,0.3811,5,1.0

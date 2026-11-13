@@ -82,6 +82,11 @@ def trace_record(case: dict, trace: dict, lookup) -> dict:
         cited_ids = [s["chunk_id"] for s in sources]
     spans = lookup(set(ranked_ids) | set(cited_ids))
 
+    config = trace.get("config") or {}
+    # G0 and G1 still run the retrieval stages, but the generator never sees them: no evidence-selection metric.
+    retrieval_used = ((config.get("context_construction") or {}).get("method") != "closed_book"
+                      and (config.get("evidence_selection") or {}).get("method") != "oracle_evidence")
+
     def chunk(chunk_id):
         return {"chunk_id": chunk_id, **spans.get(chunk_id, {"doc_id": None, "source_spans": []})}
 
@@ -90,7 +95,7 @@ def trace_record(case: dict, trace: dict, lookup) -> dict:
             "behavior": label_action(trace.get("action"), trace.get("outcome")),
             "unknown_condition_evidence": bool(trace.get("unknown_condition_evidence")),
             "answer": trace.get("answer", ""), "total_ms": trace.get("total_ms"), "usage": trace.get("usage"), "llm_calls": llm_calls(trace),
-            "ranked": [chunk(c) for c in ranked_ids], "cited": [chunk(c) for c in cited_ids], "uncited": uncited}  # fmt: skip
+            "ranked": [chunk(c) for c in ranked_ids] if retrieval_used else None, "cited": [chunk(c) for c in cited_ids], "uncited": uncited}  # fmt: skip
 
 
 def case_scores(case: dict, rec: dict) -> dict:
@@ -98,9 +103,9 @@ def case_scores(case: dict, rec: dict) -> dict:
     behavior = rec["behavior"]
     return {"qid": case["case_id"], "slice": case.get("slice"), "expected": case["expected_behavior"], "predicted": behavior,
             "acceptable": behavior in case["acceptable_behaviors"], "correct_action": behavior == case["expected_behavior"],
-            "applicable_recall@5": applicable_recall_at(rec["ranked"], case, 5),
-            "applicable_recall@10": applicable_recall_at(rec["ranked"], case, 10),
-            "intrusion@5": inapplicable_intrusion_at(rec["ranked"], case, 5),
+            "applicable_recall@5": applicable_recall_at(rec["ranked"], case, 5) if rec["ranked"] is not None else None,
+            "applicable_recall@10": applicable_recall_at(rec["ranked"], case, 10) if rec["ranked"] is not None else None,
+            "intrusion@5": inapplicable_intrusion_at(rec["ranked"], case, 5) if rec["ranked"] is not None else None,
             "aer": cited_error(rec["cited"], case, behavior, "inapplicable"),
             "outdated": cited_error(rec["cited"], case, behavior, "outdated"),
             "unknown_caveat": rec["unknown_condition_evidence"] if behavior in ANSWERED else None,
