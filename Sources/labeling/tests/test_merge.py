@@ -46,7 +46,7 @@ def _cases(n=60):
     return [label(f"T{i:03d}", slice=s) for i, s in enumerate(slices[:n])]
 
 
-def test_verification_rows_cover_every_hard_test_case_and_a_fifth_of_unconditional():
+def test_verification_rows_cover_every_test_case_under_a33():
     docs = {"d": {"text": "0123456789", "campus": "seoul"}}
     sheets = verification_rows(_cases(), docs)
     rows = [r for rs in sheets.values() for r in rs]
@@ -55,7 +55,7 @@ def test_verification_rows_cover_every_hard_test_case_and_a_fifth_of_uncondition
     from labeling.freeze import split
     _, test = split(_cases(), 50, 13)
     assert len(hard) == sum(c["slice"] != "unconditional" for c in test)
-    assert len(spot) == round(0.2 * sum(c["slice"] == "unconditional" for c in test))
+    assert len(spot) == sum(c["slice"] == "unconditional" for c in test)  # A33: SPOT_SHARE = 1.0
     assert [r["slice"] for r in sheets["1_conditional.csv"]] == ["conditional"] * len(sheets["1_conditional.csv"])
     assert "⟦2345⟧" in rows[0]["gold_evidence"]
 
@@ -105,7 +105,7 @@ def test_read_csv_handles_an_excel_bom_padding_and_blank_rows(tmp_path):
 def test_verified_ids_are_test_ids_of_the_real_freeze(tmp_path):
     from labeling.freeze import freeze
 
-    cases = [{**c, "adjudicated_by": "human:JD"} for c in _cases()]
+    cases = [{**c, "adjudicated_by": "human:JD", "verified_by": "human:JD"} for c in _cases()]
     selected = {r["case_id"] for rs in verification_rows(cases, {"d": {"text": "0123456789"}}).values() for r in rs}
     labels = tmp_path / "all.jsonl"
     labels.write_text("".join(__import__("json").dumps(c) + "\n" for c in cases))
@@ -124,3 +124,44 @@ def test_sheets_refuses_pending_adjudication_and_never_overwrites(tmp_path, monk
     assert main(["sheets", str(merged), "--out", str(tmp_path / "v")]) == 0
     with pytest.raises(FileExistsError):
         main(["sheets", str(merged), "--out", str(tmp_path / "v")])
+
+
+AGENT = "claude-code:claude-opus-5-5"
+
+
+def test_agent_adjudicator_exclude_and_origin_a33():
+    sheet = [{"case_id": "a", "final_expected_behavior": "abstain", "adjudicator": AGENT},
+             {"case_id": "b", "final_answerability": "EXCLUDE", "final_evidence_note": "no span supports fact 1", "adjudicator": AGENT}]
+    cases, pending = merge([label("a"), label("b"), label("c")], QUOTA, sheet, accept_rest=AGENT)
+    a, b, c = cases
+    assert a["adjudicated_by"] == AGENT and a["origin"] == "agent_edited" and a["expected_behavior"] == "abstain"
+    assert b["exclude"] == "adjudication: no span supports fact 1" and b["answerability"] == "answerable"
+    assert c["adjudicated_by"] == AGENT and pending == []
+    with pytest.raises(ValueError, match="not a human"):
+        merge([label("a")], QUOTA, [{"case_id": "a", "adjudicator": "claude-code:gpt"}])
+
+
+def test_violations_are_verified_in_dev_too_and_unresolved_cases_are_excluded():
+    cases = _cases()
+    from labeling.freeze import split
+    dev, _ = split(cases, 50, 13)
+    extra = {dev[0]["case_id"]: ["answer_unstated_branch: campus"]}
+    rows = [r for rs in verification_rows(cases, {"d": {"text": "0123456789"}}, extra).values() for r in rs]
+    flagged = next(r for r in rows if r["case_id"] == dev[0]["case_id"])
+    assert flagged["split"] == "dev" and "campus" in flagged["check_violations"]
+    rows[0].update(verifier=AGENT, fix_answerability="EXCLUDE", fix_note="evidence is for 2025")
+    rows[1].update(verifier=AGENT, fix_expected_behavior="abstain")
+    out, unverified = apply_verification(cases, rows, extra, exclude_unverified=True)
+    by = {c["case_id"]: c for c in out}
+    assert by[rows[0]["case_id"]]["exclude"] == "verification: evidence is for 2025"
+    assert by[rows[1]["case_id"]]["origin"] == "agent_edited" and by[rows[1]["case_id"]]["verified_by"] == AGENT
+    assert len(unverified) == len(rows) - 2 and all("unresolved" in by[c]["exclude"] for c in unverified)
+
+
+def test_no_self_review_and_no_agent_names_as_initials():
+    sonnet = "claude-code:claude-sonnet-5-5"
+    with pytest.raises(ValueError, match="primary annotator"):
+        merge([label("a", annotator=sonnet)], QUOTA, [], accept_rest=sonnet)
+    for bad in ("claude-opus-5-5", "opus-5-5", "gpt5", "sonnetX", "claude-code:", "claude-code:gpt"):
+        with pytest.raises(ValueError, match="not a human"):
+            _human(bad) if not bad.startswith("claude-code") else merge([label("a")], QUOTA, [], accept_rest=bad)

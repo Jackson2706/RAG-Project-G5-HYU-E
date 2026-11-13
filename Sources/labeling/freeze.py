@@ -9,6 +9,8 @@ import random
 from collections import defaultdict
 from pathlib import Path
 
+from labeling.validate import reviewer_ok
+
 FROZEN_FILES = ("dev.jsonl", "test.jsonl")
 
 
@@ -58,12 +60,20 @@ def freeze(labels_path: str | Path, out_dir: str | Path, dev_size: int, seed: in
         raise FileExistsError(f"refusing to re-freeze labels in {out_dir}")
     with labels_path.open(encoding="utf-8") as handle:
         cases = [json.loads(line) for line in handle if line.strip()]
-    for case in cases:
-        if not isinstance(case.get("adjudicated_by"), str) or not case["adjudicated_by"].startswith("human:"):
-            raise ValueError(f"{case.get('case_id', '<unknown>')} is not human-adjudicated")
+    for case in cases:  # A33: an agent adjudicator (claude-code:<model>) is allowed; the case's own annotator is not
+        if not reviewer_ok(case.get("adjudicated_by"), case.get("annotator")):
+            raise ValueError(f"{case.get('case_id', '<unknown>')} is not adjudicated")
 
+    # Split over all cases, then drop the excluded ones: an exclusion never moves another case between dev and test.
     dev, test = split(cases, dev_size, seed)
+    excluded = [c for c in cases if "exclude" in c]
+    dev, test = [c for c in dev if "exclude" not in c], [c for c in test if "exclude" not in c]
+    unverified = [c["case_id"] for c in test if not reviewer_ok(c.get("verified_by"), c.get("annotator"))]
+    if unverified:  # A33: every test item is verified (or excluded) before the freeze
+        raise ValueError(f"{len(unverified)} test cases are not verified (e.g. {unverified[:5]}); run labeling.merge verify")
     out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / "excluded.jsonl").write_text("".join(json.dumps(
+        {"case_id": c["case_id"], "slice": c["slice"], "reason": c["exclude"]}, ensure_ascii=False) + "\n" for c in excluded), encoding="utf-8")
     _write_jsonl(out_dir / "dev.jsonl", dev, "dev")
     _write_jsonl(out_dir / "test.jsonl", test, "test")
     hashes = {name: _sha256(out_dir / name) for name in FROZEN_FILES}
@@ -71,7 +81,7 @@ def freeze(labels_path: str | Path, out_dir: str | Path, dev_size: int, seed: in
         "".join(f"{hashes[name]}  {name}\n" for name in FROZEN_FILES), encoding="utf-8"
     )
     (out_dir / "test.jsonl").chmod(0o444)
-    return {"dev": len(dev), "test": len(test), "seed": seed}
+    return {"dev": len(dev), "test": len(test), "excluded": len(excluded), "seed": seed}
 
 
 def verify(out_dir: str | Path) -> bool:

@@ -27,7 +27,7 @@ def make_cases(n_per_slice=SLICES):
         for i in range(count):
             campus = "erica" if i % 3 == 0 else "seoul"
             cases.append({"case_id": f"hyu-{k:04d}", "slice": slice_name, "gold_profile": {"campus": campus},
-                          "adjudicated_by": "human:JK", "question": f"q{k}"})  # fmt: skip
+                          "adjudicated_by": "human:JK", "verified_by": "human:JK", "question": f"q{k}"})  # fmt: skip
             k += 1
     return cases
 
@@ -90,3 +90,36 @@ def test_freeze_refuses_cases_without_human_adjudication(tmp_path):
     with pytest.raises(ValueError, match=cases[5]["case_id"]):
         freeze.freeze(labels, tmp_path / "frozen", dev_size=28)
     assert not (tmp_path / "frozen" / "FROZEN.sha256").exists()
+
+
+def test_freeze_splits_before_dropping_exclusions_and_lists_them(tmp_path):
+    cases = make_cases()
+    dev0, test0 = freeze.split(cases, 28, 13)
+    gone = {test0[0]["case_id"], dev0[0]["case_id"]}
+    for c in cases:
+        c["adjudicated_by"] = "claude-code:claude-opus-5-5"  # A33: agent adjudicator allowed
+        if c["case_id"] in gone:
+            c["exclude"] = "verification: unresolved"
+    labels = tmp_path / "labels.jsonl"
+    labels.write_text("\n".join(json.dumps(c) for c in cases) + "\n")
+    out = freeze.freeze(labels, tmp_path / "frozen", dev_size=28)
+    assert out["dev"] == 27 and out["test"] == len(test0) - 1 and out["excluded"] == 2
+    test_ids = {json.loads(l)["case_id"] for l in (tmp_path / "frozen" / "test.jsonl").read_text().splitlines()}
+    assert test_ids == {c["case_id"] for c in test0} - gone  # no case moved between the splits
+    excluded = [json.loads(l) for l in (tmp_path / "frozen" / "excluded.jsonl").read_text().splitlines()]
+    assert {e["case_id"] for e in excluded} == gone and excluded[0]["reason"] == "verification: unresolved"
+
+
+def test_freeze_refuses_unverified_test_cases_and_self_review(tmp_path):
+    cases = make_cases()
+    _, test = freeze.split(cases, 28, 13)
+    target = next(c for c in cases if c["case_id"] == test[0]["case_id"])
+    del target["verified_by"]
+    labels = tmp_path / "labels.jsonl"
+    labels.write_text("\n".join(json.dumps(c) for c in cases) + "\n")
+    with pytest.raises(ValueError, match="not verified"):
+        freeze.freeze(labels, tmp_path / "frozen", dev_size=28)
+    target["verified_by"] = target["annotator"] = "claude-code:claude-sonnet-5-5"  # verifier == primary annotator
+    labels.write_text("\n".join(json.dumps(c) for c in cases) + "\n")
+    with pytest.raises(ValueError, match="not verified"):
+        freeze.freeze(labels, tmp_path / "frozen", dev_size=28)

@@ -24,6 +24,19 @@ SLICES = ("unconditional", "conditional", "temporal", "negative", "multi_session
 ORIGINS = ("human", "agent_draft_human_edited", "agent_edited", "agent_draft")  # agent_edited: A27
 SCOPES = ("national", "campus")
 ANNOTATOR = re.compile(r"^(?:codex:[^\s]+|claude-code:[^\s]+|human:[A-Za-z][A-Za-z0-9_-]*)$")
+# Who may adjudicate or verify (A33): a human's initials (short, not a model name) or an agent with its model id.
+HUMAN_ID = re.compile(r"^human:[A-Za-z][A-Za-z0-9_-]{0,7}$")
+AGENT_ID = re.compile(r"^claude-code:claude-[a-z]+-\d+(?:-\d+)*$")
+MODEL_WORDS = re.compile(r"claude|codex|gpt|sonnet|opus|haiku|fable|gemini|llama|qwen", re.I)
+
+
+def reviewer_ok(name: object, annotator: object = None) -> bool:
+    """A valid adjudicator/verifier id that is not the case's own primary annotator (A33)."""
+    if not isinstance(name, str) or name == annotator:
+        return False
+    return bool(AGENT_ID.fullmatch(name) or (HUMAN_ID.fullmatch(name) and not MODEL_WORDS.search(name)))
+
+
 UPDATE_WORD = re.compile(r"\b(?:now|actually|changed?|updated?|instead|no longer|transferred?|switched?|moved?)\b", re.I)
 
 REQUIRED_TYPES: dict[str, type] = {
@@ -164,10 +177,9 @@ def validate_cases(cases: list[dict], rows: list[dict], snapshot_id: str, annota
             errors.append(_message(case_id, "origin", f"must be one of {sorted(ORIGINS)}"))
         if not isinstance(case.get("annotator"), str) or not ANNOTATOR.fullmatch(case["annotator"]):
             errors.append(_message(case_id, "annotator", "must match codex:<model>, claude-code:<model>, or human:<initials>"))
-        if "adjudicated_by" in case and (
-            not isinstance(case["adjudicated_by"], str) or not case["adjudicated_by"].startswith("human:")
-        ):
-            errors.append(_message(case_id, "adjudicated_by", "must match human:<initials>"))
+        for field in ("adjudicated_by", "verified_by"):
+            if field in case and not reviewer_ok(case[field], case.get("annotator")):
+                errors.append(_message(case_id, field, "must be human:<initials> or claude-code:<model>, not the primary annotator (A33)"))
 
         history = case.get("session_history")
         if isinstance(history, list):
