@@ -25,7 +25,9 @@ question. A revised method built afterwards on dev only, a guard that keeps the 
 evidence clearly gives different answers, fired once in 47 dev cases, wrongly. It failed its pre-set dev check
 (0.617 against 0.702 acceptable), so the fresh test set we built for it (75 cases) was not used. A post-hoc LLM judge
 of answer quality (evaluator v3) finds that AAES covers fewer required facts than the baselines (0.119 against 0.300
-for B0) but refers students to the right office much more often (0.724 against 0.340).
+for B0), so the pre-registered non-inferiority comparison on content fails. Its branching advantage shrinks to 4 of
+15 cases with correct conditions or a relevant question (p = 0.12, not confirmed). On content, retrieval clearly
+helps (closed book 0.079, gold evidence 0.463), and the 4B generator is the largest loss in every system.
 
 ## 1. Problem
 
@@ -224,32 +226,44 @@ for asking about a branch attribute, and referrals for naming the right office o
 sentence supported", and 1.0 on the 15 questions and 10 conditional answers. The human check of 20 dev replies is
 not filled in yet.
 
-| Test-1 | Fact coverage | Wrong-fact rate | Wrong group | Citation support | Correct conditions (15 branching) | Useful question | Right referral |
-|---|---|---|---|---|---|---|---|
-| B0 | 0.300 | 0.117 | 0.265 | 0.573 | 0.000 | n/a | 0.340 |
-| R15 | 0.269 | 0.133 | 0.194 | 0.561 | 0.000 | n/a | 0.333 |
-| R16 | 0.258 | 0.133 | 0.224 | 0.520 | 0.000 | n/a | 0.267 |
-| **A0** | 0.119 | 0.067 | 0.125 | 0.506 | 0.267 | 0.096 | 0.724 |
-| G0 | 0.079 | 0.383 | 0.200 | n/a | 0.000 | n/a | 0.742 |
-| G1 | 0.463 | 0.033 | 0.076 | 0.880 | 0.000 | n/a | 0.491 |
+| Test-1 | Fact coverage | Wrong-fact rate | Wrong group (answered replies) | Citation support | Correct conditions (15 branching) | Useful question | Right referral, per abstain case (46) | Right referral, among own referrals |
+|---|---|---|---|---|---|---|---|---|
+| B0 | 0.300 | 0.117 | 0.265 (68) | 0.573 | 0.000 | n/a | 0.283 | 0.340 |
+| R15 | 0.269 | 0.133 | 0.194 (67) | 0.561 | 0.000 | n/a | 0.217 | 0.333 |
+| R16 | 0.258 | 0.133 | 0.224 (76) | 0.520 | 0.000 | n/a | 0.174 | 0.267 |
+| **A0** | 0.119 | 0.067 | 0.125 (40) | 0.506 | 0.267 | 0.096 | 0.174 | 0.724 |
+| G0 | 0.079 | 0.383 | 0.200 (90) | n/a | 0.000 | n/a | 0.283 | 0.742 |
+| G1 | 0.463 | 0.033 | 0.076 (66) | 0.880 | 0.000 | n/a | 0.435 | 0.491 |
 
 Fact coverage and the wrong-fact rate are over the 60 answer-expected cases; a reply that does not answer scores 0
-coverage. Wrong group and citation support are over answered replies, the useful-question and referral rates over
-that preset's questions and referrals. Paired bootstrap, post hoc and not Holm-corrected
+coverage. Wrong group and citation support are over each preset's answered replies (their number in brackets). A0
+answers fewer cases and different ones, so its wrong-group rate is not a like-for-like comparison. The useful-question
+rate is over each preset's own questions. Referrals are shown two ways. Per abstain case, the rate counts the 46 cases
+labelled abstain whose reply refers the student to the right office or next step, and it is comparable across presets.
+Among own referrals, the rate divides by each preset's own referrals and is not comparable. A0's referral is a fixed
+template ("Please contact the OIA office of your campus"), and the closed-book bracket G0, which retrieves nothing,
+scores 0.742 on the second measure. Paired bootstrap, post hoc and not Holm-corrected
 (`quality_v3/comparisons.csv`):
 - A0 covers fewer required facts than B0 (−0.181 [−0.281, −0.085], p = 0.0008) and R16 (−0.139 [−0.227, −0.057],
   p = 0.0028). It answers fewer of these cases (0.417 of them, against 0.633 for B0) and its answers cover fewer
   facts (0.287 against 0.474 among answered replies).
-- A0 refers to the right office far more often: +0.385 [+0.174, +0.586] against B0 (p = 0.0006) and +0.457
-  [+0.244, +0.657] against R16 (p = 0.0002).
+- Per abstain case, A0 refers correctly no more often than the baselines: 0.174, against 0.283 for B0 (−0.109
+  [−0.250, +0.025], p = 0.23) and 0.174 for R16 (difference 0). Among its own referrals, A0's rate (0.724) is high
+  because its fixed template names the campus office. That measure is not comparable across presets, and G0, which
+  has no evidence, scores 0.742 on it.
 - A0's answers apply a rule to the wrong group less often (0.125 against 0.265 for B0; −0.140 [−0.280, +0.001],
-  p = 0.062) and contain a wrong fact less often (−0.050 [−0.138, +0.034]); neither difference is significant.
+  p = 0.062). The rate is computed among answered replies, and A0 answers fewer and different cases (40 against 68
+  for B0). Its answers also contain a wrong fact less often (−0.050 [−0.138, +0.034]). Neither difference is
+  significant.
 - On the 15 branching cases, A0's conditions or question are right in 0.267 of cases (4 of 15), against none for B0
   and R16 (+0.267 [+0.059, +0.500]; the permutation p of 0.121 does not confirm it).
 - Only 0.096 of A0's 52 questions ask about an attribute the answer depends on. The rest are the unnecessary campus
   questions of section 7.
 - Pre-registered comparison 2 (A0 vs R15, unconditional slice, 46 cases): fact coverage −0.185 [−0.312, −0.065], so
   A0 is not non-inferior within the 3-point margin.
+
+On content, then, the pre-registered non-inferiority comparison fails, and AAES's branching advantage shrinks to 4 of
+15 cases with correct conditions or a relevant question (p = 0.12, not confirmed).
 
 **Exploratory analyses** (not pre-registered; `Report/results/test-final/posthoc.md`).
 - *Few cases need branching.* 15 of 121 test cases (12%) are labelled conditional answer (9) or clarify (6). The
@@ -311,6 +325,12 @@ v2) is far below the baselines (0.628 to 0.661). We checked the cause against th
    before anything checks that the evidence answers the question. When nothing answers, a campus question only
    postpones the referral: 27 of the 46 test cases labelled abstain got a question. On dev, 20 of the 25 campus
    branches had no applicable relevant chunk on one side.
+
+The answer-quality judge (evaluator v3) also shows what the action metric hid about the generator. Without
+retrieval, G0 covers 0.079 of the required facts and 0.383 of its answers state a wrong fact. With retrieval, B0
+reaches 0.300 and 0.117, and with the gold evidence G1 reaches 0.463 and 0.033. Retrieval clearly helps content,
+although G0 matched B0 on the acceptable-action rate. Even with gold evidence, the 4B generator states under half of
+the required facts, so generation is the largest loss in every system we ran.
 
 A2 receives the labelled `stated_profile` instead of running step 1.
 It therefore measures only extraction errors on what the student said; it cannot show what the unstated gold

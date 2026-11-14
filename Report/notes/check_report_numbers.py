@@ -171,6 +171,11 @@ for (c, m), (d, lo, hi) in {("A0 vs B0", "fact coverage"): (-0.181, -0.281, -0.0
                             ("A0 vs B0", "wrong-group rate"): (-0.140, -0.280, 0.001), ("PREREG 2:", "fact coverage"): (-0.185, -0.312, -0.065)}.items():
     r = next(x for x in cmp3 if x["metric"] == m and (x["comparison"] == c or (c.startswith("PREREG") and x["comparison"].startswith("PREREG"))))
     check(all(abs(float(r[k]) - v) < 6e-4 for k, v in (("diff", d), ("ci_low", lo), ("ci_high", hi))), "v3 comparison", c, m)
+for preset, ref, base in (("B0", "0.283", 68), ("R15", "0.217", 67), ("R16", "0.174", 76), ("A0", "0.174", 40), ("G0", "0.283", 90), ("G1", "0.435", 66)):
+    check(close(ref, q3[preset]["right referral (per abstain case)"]) and float(q3[preset]["answered replies (wrong-group base)"]) == base, "v3 per-case referral", preset)
+r = next(x for x in cmp3 if x["comparison"] == "A0 vs B0" and x["metric"] == "right referral (per abstain case)")
+check(abs(float(r["diff"]) + 0.109) < 6e-4 and abs(float(r["ci_low"]) + 0.250) < 6e-4 and abs(float(r["ci_high"]) - 0.025) < 6e-4, "v3 referral A0 vs B0")
+check(close("0.669", v2[("G0", "all")]["acceptable_rate"]) and close("0.661", v2[("B0", "all")]["acceptable_rate"]), "G0 matched B0 on action")
 v3val = json.load(open(R + "quality_v3/validation.json"))["kappa"]
 for f, v in (("facts (per fact)", 0.859), ("wrong_group", 0.854), ("right_referral", 0.791), ("all cited sentences supported", 0.656)):
     check(abs(v3val[f]["kappa"] - v) < 6e-4, "v3 kappa", f)

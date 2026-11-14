@@ -19,8 +19,14 @@ Every number comes from `Report/results/` (test-1: `test-final/summary.md`, `sum
    0.669: the action metric mostly measures answer vs referral.
    **Answer quality (evaluator v3, post-hoc LLM judge; second judge κ 0.66 to 1.0; human check pending).** Fact
    coverage on answer cases: B0 0.300, R16 0.258, A0 0.119 (A0 answers 42% of them; covers 0.287 when it answers,
-   B0 0.474). Right referral: A0 0.724, B0 0.340, R16 0.267. Wrong group: A0 0.125, B0 0.265 (n.s.). Pre-registered
-   comparison 2 (A0 vs R15, unconditional): −0.185 [−0.312, −0.065], non-inferiority not met.
+   B0 0.474). Pre-registered comparison 2 (A0 vs R15, unconditional): −0.185 [−0.312, −0.065], non-inferiority not
+   met. Branching advantage on content: 4 of 15 correct (p = 0.12, not confirmed). Right referral per abstain case:
+   A0 0.174 = R16, B0 0.283, G1 0.435 (A0's fixed template looks good only among its own referrals, where G0 with no
+   retrieval scores 0.742). Wrong group among answered replies: A0 0.125 (40 replies) vs B0 0.265 (68), n.s. and
+   not like-for-like.
+   **Generator finding.** Coverage / wrong facts: G0 0.079 / 0.383, B0 0.300 / 0.117, G1 0.463 / 0.033. Retrieval
+   clearly helps content, which the action metric hid; even with gold evidence the 4B generator states under half
+   the facts, so generation is the largest loss in every system.
 5. **Where AAES helps.** On the 15 cases where the answer depends on the student: A0 right and B0 wrong 10, the
    reverse 0. Cards: T14-088 (part-time hours: B0 gives the Seoul figures to everyone), T14-051 (insurance sign-up:
    B0 gives ERICA's procedure to everyone), T14-155 (B0 calls a 2021 dorm notice current). Branch recall A0 10/15

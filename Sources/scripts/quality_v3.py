@@ -96,10 +96,22 @@ def right_referral(rows):
     return ratio(sum(r["j"]["right_referral"] is True for r in pool), len(pool))
 
 
+def answered_replies(rows):
+    """The base of the wrong-group rate: how many answered replies a preset has (a count, not a rate)."""
+    return float(sum(r["type"] in ANSWERED and r["j"]["wrong_group"] is not None for r in rows))
+
+
+def referral_per_case(rows):
+    """Cases labelled abstain whose reply is a referral to the right office or next step / all cases labelled abstain."""
+    pool = [r for r in rows if r["expected"] == "abstain"]
+    return ratio(sum(r["type"] == "abstain" and r["j"]["right_referral"] is True for r in pool), len(pool))
+
+
 METRICS = {"fact coverage": fact_coverage, "answered (answer cases)": answered_share, "coverage when answered": coverage_when_answered,
-           "wrong-fact rate": wrong_fact, "wrong-group rate": wrong_group,
+           "wrong-fact rate": wrong_fact, "wrong-group rate": wrong_group, "answered replies (wrong-group base)": answered_replies,
            "citation support": citation_support, "correct conditions (branching)": correct_conditions,
-           "useful question": useful_question, "right referral": right_referral}  # fmt: skip
+           "useful question": useful_question, "right referral": right_referral,
+           "right referral (per abstain case)": referral_per_case}  # fmt: skip
 
 
 def kappa(pairs: list[tuple]) -> float | None:
@@ -160,6 +172,8 @@ def main() -> int:
             for other in ("B0_BASIC_DENSE_RAG", "R16_PROMPTED_CONDITIONAL"):
                 qids = sorted(set(per["A0_AAES"]) & set(per[other]))
                 for m, f in METRICS.items():
+                    if f is answered_replies:
+                        continue
                     a, b = [per["A0_AAES"][q] for q in qids], [per[other][q] for q in qids]
                     if f(a) is None or f(b) is None:
                         continue
