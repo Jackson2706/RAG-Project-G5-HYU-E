@@ -86,3 +86,13 @@ def test_gold_chunk_ids_map_back_to_the_label_span():
     chunk = gold_chunk("gold:5e9c0499-aaaa:100-200")
     assert chunk == {"doc_id": "5e9c0499-aaaa", "source_spans": [[100, 200]]} and gold_chunk("c1") is None
     assert chunk_class(chunk, {"gold_evidence": [{"doc_id": "5e9c0499-aaaa", "char_start": 150, "char_end": 160}]}) == "gold"
+
+
+def test_llm_calls_counts_methods_given_as_a_tuple():
+    from evaluation.hyu_suite import llm_calls
+
+    trace = {"config": {"evidence_sufficiency": {"method": "applicability_guard"}, "query_understanding": {"method": "profile_understanding"}},
+             "stages": [{"stage_id": s, "status": "completed"} for s in ("query_understanding", "evidence_sufficiency", "generation")]}
+    assert llm_calls(trace) == 2  # the guard and generation; rule-based profile understanding calls no LLM
+    trace["config"]["evidence_sufficiency"]["method"] = "applicability_sufficiency"
+    assert llm_calls(trace) == 1

@@ -64,11 +64,15 @@ LLM_METHODS = {"query_rewriting": None, "generation": None, "query_understanding
 
 
 def llm_calls(trace: dict) -> int:
-    """Completed stages that called the LLM (generation, query rewriting, the self-query parser)."""
+    """Completed stages that called the LLM (generation, query rewriting, the self-query parser, A0b/AG's checks)."""
     config = trace.get("config") or {}
-    return sum(1 for s in trace["stages"] if s["status"] == "completed" and s["stage_id"] in LLM_METHODS
-               and (LLM_METHODS[s["stage_id"]] is None or (config.get(s["stage_id"]) or {}).get("method") in
-                    ((m := LLM_METHODS[s["stage_id"]]) if isinstance(m, tuple) else (m,))))  # fmt: skip
+
+    def calls_llm(stage_id: str) -> bool:
+        wanted = LLM_METHODS[stage_id]
+        method = (config.get(stage_id) or {}).get("method")
+        return wanted is None or method in (wanted if isinstance(wanted, tuple) else (wanted,))
+
+    return sum(1 for s in trace["stages"] if s["status"] == "completed" and s["stage_id"] in LLM_METHODS and calls_llm(s["stage_id"]))
 
 
 def trace_record(case: dict, trace: dict, lookup) -> dict:
