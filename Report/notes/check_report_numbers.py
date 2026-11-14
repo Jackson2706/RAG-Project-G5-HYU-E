@@ -102,4 +102,10 @@ check(close("0.362", dev_v1["A0"]["acceptable_rate"]) and close("0.574", dev_v1[
 tags = json.load(open(R + "index_reports/r5_campus_tags.json"))
 check(tags["seoul_site_default"] + tags["erica_site_default"] == 1775 and tags["both_campuses_national_rule"] == 92, "campus tags")
 check(v2[("G0", "all")]["acceptable_rate"].startswith("0.669"), "G0 v2 base rate")
+d3 = {r["preset"].split("_")[0]: r for r in csv.DictReader(open(R + "dev-03/hyu_dev_v2_slices.csv")) if r["slice"] == "all"}
+for preset, value in [("A0b", "0.596"), ("A0", "0.362"), ("B0", "0.638"), ("R16", "0.681")]:
+    check(close(value, d3[preset]["acceptable_rate"]), "dev-03", preset)
+check(close("0.000", d3["A0b"]["unnecessary_clarification_rate"]) and close("0.425", d3["A0"]["unnecessary_clarification_rate"]), "dev-03 unnecessary")
+b3 = {r["preset"].split("_")[0]: r for r in csv.DictReader(open(R + "dev-03/posthoc_branch_detection.csv")) if r["evaluator"] == "v2"}
+check((b3["A0b"]["tp"], b3["A0"]["tp"], b3["A0"]["expected_branching"]) == ("0", "5", "7"), "dev-03 branch recall")
 print("checked", n, "mismatches", bad)

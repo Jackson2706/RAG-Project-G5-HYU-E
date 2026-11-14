@@ -45,6 +45,9 @@ LLM-annotated, so every result is a relative comparison between methods on these
 - This step necessarily shows system outputs to a labelling agent. It labels reply form, not the cases, and the case
   labels were not changed.
 
+- Claude Code wrote the optional A0b preset ("AAES spec-fixed") and ran it on dev only (dev-03); a fresh
+  `claude-code:claude-sonnet-5-5` subagent reviewed evaluator v2 and A0b, and its one A0b bug was fixed before A0b ran.
+
 ## Runs
 
 Claude Code ran the dev runs and the single test run itself (A33), in the background under `caffeinate`, with

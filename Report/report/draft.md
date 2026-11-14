@@ -273,8 +273,13 @@ run. We list this as a process limitation.
 
 A next version would follow the design. It would branch only on distinct non-empty answer values, keep the campus
 as a candidate only when there are campus-scoped chunks for both campuses, and run one yes/no sufficiency check
-before any question. We did not evaluate these changes on test. A dev-only check would be exploratory, and
-confirming it needs a fresh test set.
+before any question. We implemented this as preset A0b and ran it on dev only, so the result is exploratory
+and confirming it needs a fresh test set (`Report/results/dev-03/summary_v2.md`, evaluator v2, 47 dev cases). A0b
+reaches 0.596 acceptable action against 0.362 for A0, 0.638 for B0 and 0.681 for R16, and it asks no unnecessary
+question (0.000 against 0.425 for A0). It also finds none of the 7 dev cases that need branching, where A0 found 5
+(`Report/results/dev-03/posthoc.md`). The three changes remove the over-triggering and, on these cases, the
+branching with it. The lexical comparison of extracted answers and the 4B extractor are the likely weak points; we
+did not tune them. A0b never ran on test (the runner plans it for dev only).
 
 ## 8. Limitations
 

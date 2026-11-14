@@ -36,8 +36,10 @@ dev cases only and is never used for a claim.
 14. **Ablations read correctly.** A2 gets the stated profile, so it only tests extraction of stated facts
     (0.273 vs 0.256). A6 = A0 on every action: only 3 superseded documents. Dev already showed the gap
     (A0 0.362 vs B0 0.574); our automatic gate checked completion, not design conformance.
-15. **What we would change.** Branch on distinct answer values; campus only when both campuses have scoped
-    chunks; one yes/no sufficiency check before any question. Needs a fresh test set to confirm.
+15. **What we would change, tried on dev only (A0b, exploratory).** Branch on distinct answer values; campus only
+    when both campuses have scoped chunks; one yes/no check before any question. Dev, v2: acceptable 0.596 vs A0
+    0.362 (B0 0.638, R16 0.681), unnecessary clarification 0.000, but branch recall 0/7 (A0 5/7). Needs a fresh
+    test set.
 16. **Limitations.** LLM labels, unaudited tags (G2b failed on three attributes), evaluator v2 designed after
     seeing v1 test results (frozen on dev), 15 branching cases, one generator.
 17. **Course mapping.** Relevance vs eligibility, candidate retrieval vs evidence selection, prefiltering vs
