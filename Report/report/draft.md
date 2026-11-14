@@ -290,8 +290,11 @@ before any question. We implemented this as preset A0b and ran it on dev only, s
 and confirming it needs a fresh test set (`Report/results/dev-03/summary_v2.md`, evaluator v2, 47 dev cases). A0b
 reaches 0.596 acceptable action against 0.362 for A0, 0.638 for B0 and 0.681 for R16, and it asks no unnecessary
 question (0.000 against 0.425 for A0). It also finds none of the 7 dev cases that need branching, where A0 found 5
-(`Report/results/dev-03/posthoc.md`). On those 7 cases A0b abstains on 3 and answers 4. The saved records keep
-the action and the reply but not the step details, so we can only partly say why. T14-209's abstention is the
+(`Report/results/dev-03/posthoc.md`). Under v2, A0b abstains on 4 of those 7 cases and answers 3. T14-044 is
+the difference from its own actions: A0b decided ANSWER and the reply gives the contact route to the
+question "How can I reach the international office?", so v1 counts it as an answer, while the v2 model labelled
+it an abstention, apparently because the reply names the office. We count this as a v2 error. The saved records
+keep the action and the reply but not the step details, so we can only partly say why A0b acted as it did. T14-209's abstention is the
 "do not apply" template, which comes from the first ABSTAIN rule that A0 shares, not from the new yes/no check.
 T14-032 and T14-120 get the "could not find" reply, which both new paths produce (the yes/no check said no, or
 every extraction returned NONE); on A0's dev replay these cases had 7 and 5 branch rows, more than

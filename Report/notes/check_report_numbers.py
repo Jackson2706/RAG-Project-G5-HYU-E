@@ -7,6 +7,7 @@ import csv
 import json
 
 R = "Report/results/"
+BRANCH_EXP = ("conditional_answer", "clarify")
 draft = open("Report/report/draft.md").read()
 ROWS = {"B0 basic": "B0", "R5 hybrid": "R5", "R9-scope prefilter": "R9S", "R15 self": "R15", "R16 prompted": "R16", "G0 closed": "G0",
         "G1 gold": "G1", "**A0 AAES**": "A0", "A1 hard": "A1", "A2 oracle": "A2", "A3 always": "A3", "A4 question": "A4", "A6 no": "A6"}
@@ -116,4 +117,8 @@ a0b = open(R + "dev-03/posthoc.md").read().split("## A0b on")[1]
 check(a0b.count("| ABSTAIN |") == 3 and a0b.count("| ANSWER |") == 4, "A0b 3 abstain / 4 answer")
 for q, rows in (("T14-032", 7), ("T14-120", 5)):
     check(next(d for d in dev if d["qid"] == q)["branches"] == rows, "A0 replay rows", q)
+a0b_v2 = {r["qid"]: r for r in csv.DictReader(open(R + "dev-03/hyu_dev_v2_per_case.csv")) if r["preset"].startswith("A0b") and r["expected"] in BRANCH_EXP}
+check(sum(r["predicted"] == "abstain" for r in a0b_v2.values()) == 4 and sum(r["predicted"] == "answer" for r in a0b_v2.values()) == 3, "A0b v2 4/3")
+a0b_v1 = {r["qid"]: r for r in csv.DictReader(open(R + "dev-03/hyu_dev_per_case.csv")) if r["preset"].startswith("A0b")}
+check(a0b_v1["T14-044"]["predicted"] == "answer" and a0b_v2["T14-044"]["predicted"] == "abstain", "T14-044 v1 answer, v2 abstain")
 print("checked", n, "mismatches", bad)

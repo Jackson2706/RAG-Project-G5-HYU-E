@@ -42,8 +42,8 @@ dev cases only and is never used for a claim.
     design reached `aaes_spec.md` only as a one-line summary that no gate compared with the label guideline.
 15. **What we would change, tried on dev only (A0b, exploratory).** Branch on distinct answer values; campus only
     when both campuses have scoped chunks; one yes/no check before any question. Dev, v2: acceptable 0.596 vs A0
-    0.362 (B0 0.638, R16 0.681), unnecessary clarification 0.000, but branch recall 0/7 (A0 5/7): 3 abstain,
-    4 answer. Records keep no step details; the answer-value comparison merges "up to 20 hours per week" with
+    0.362 (B0 0.638, R16 0.681), unnecessary clarification 0.000, but branch recall 0/7 (A0 5/7): under v2 4 abstain,
+    3 answer (T14-044 is a v1 answer that the v2 model reads as abstain). Records keep no step details; the answer-value comparison merges "up to 20 hours per week" with
     "up to 10 hours per week" (Jaccard 0.6). Not fixed, not re-run. Needs a fresh test set.
 16. **Limitations.** LLM labels, unaudited tags (G2b failed on three attributes), evaluator v2 designed after
     seeing v1 test results (frozen on dev), 15 branching cases, one generator.
