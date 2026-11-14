@@ -123,7 +123,8 @@ def build_plan(args, offline: dict, online: dict, generation: dict, hyu: dict | 
                 tasks.append(Task("generation", f"GEN_{backbone}", "cases", "-", generation["retrieval_preset"], options={"model": backbone}))
     if "hyu" in suites:
         split = args.split or "dev"
-        for preset in hyu["presets"]:
+        dev_only = hyu.get("dev_only_presets", []) if split == "dev" else []  # A34: A0b never runs on test
+        for preset in hyu["presets"] + dev_only:
             if keep(f"hyu_{split}", preset) or keep(split, preset):
                 limit = hyu["smoke_cases"] if args.smoke else None
                 if args.max_queries:

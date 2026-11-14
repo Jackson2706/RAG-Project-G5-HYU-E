@@ -105,3 +105,12 @@ def test_every_configured_preset_exists_and_validates(name):
             preset_config(e["preset"])
     if "retrieval_preset" in config:
         preset_config(config["retrieval_preset"])
+
+
+def test_dev_only_presets_never_run_on_test():
+    """A34: A0b is planned for dev and never for test."""
+    hyu = load_yaml("hyu.yaml")
+    plan = {split: {t.experiment for t in build_plan(Namespace(suite="hyu", dataset=None, experiment=None, split=split, smoke=False,
+                                                                      max_queries=None), {}, {}, {}, hyu)}
+            for split in ("dev", "test")}  # fmt: skip
+    assert "A0b_AAES_SPEC_FIXED" in plan["dev"] and "A0b_AAES_SPEC_FIXED" not in plan["test"]
