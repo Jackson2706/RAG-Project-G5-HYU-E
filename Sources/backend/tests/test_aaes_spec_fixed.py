@@ -22,3 +22,9 @@ def test_exclude_removes_an_attribute_from_the_branches():
     profile = extract_profile("How much is the dormitory fee?")
     assert decide(chunks, profile)["action"] == "CLARIFY"  # A0: two documents -> different_procedures
     assert decide(chunks, profile, exclude=frozenset({"campus"}))["action"] == "ANSWER"
+
+
+def test_yes_no_and_negation_are_different_answers():
+    assert distinct_answers([answer_key("Yes"), answer_key("No")]) == [0, 1]
+    assert distinct_answers([answer_key("Required"), answer_key("Not required")]) == [0, 1]
+    assert answer_key("None required") is not None and answer_key("NONE.") is None

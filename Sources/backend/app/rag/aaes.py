@@ -265,15 +265,21 @@ def both_campuses_scoped(chunks: list[dict]) -> bool:
     return {"seoul", "erica"} <= single
 
 
-_STOP = {"the", "and", "for", "you", "your", "are", "can", "with", "from", "this", "that", "will", "must", "have", "has", "not", "all"}
+_STOP = {"the", "and", "for", "you", "your", "are", "can", "with", "from", "this", "that", "will", "must", "have", "has", "all"}
 
 
 def answer_key(value: str | None) -> frozenset[str] | None:
-    """An extracted answer as a set of content words; None / "NONE" / "" -> None. "Fee: 30,000 won." -> {"fee", "30000", "won"}."""
-    if not value or value.strip().upper().startswith("NONE"):
+    """An extracted answer as a set of content words; "NONE" / "" -> None. "Fee: 30,000 won." -> {"fee", "30000", "won"}.
+
+    "no" and "not" are kept, so "Yes" vs "No" and "Required" vs "Not required" stay different answers.
+    """
+    if not value or re.sub(r"[^A-Za-z]", "", value).upper() == "NONE":
         return None
     words = re.findall(r"[a-z0-9]+", value.lower().replace(",", ""))
-    return frozenset(w for w in words if w not in _STOP and (len(w) > 2 or w.isdigit())) or None
+    return frozenset(w for w in words if w not in _STOP and (len(w) > 2 or w.isdigit() or w == "no")) or None
+
+
+_NEG = frozenset({"no", "not"})  # answers that differ in negation are never the same
 
 
 def distinct_answers(keys: list[frozenset[str] | None]) -> list[int]:
@@ -288,7 +294,7 @@ def distinct_answers(keys: list[frozenset[str] | None]) -> list[int]:
         if key is None:
             out.append(-1)
             continue
-        match = next((i for i, g in enumerate(groups) if len(key & g) / len(key | g) >= 0.5), None)
+        match = next((i for i, g in enumerate(groups) if len(key & g) / len(key | g) >= 0.5 and key & _NEG == g & _NEG), None)
         if match is None:
             groups.append(key)
             match = len(groups) - 1
