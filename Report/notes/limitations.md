@@ -47,3 +47,12 @@
 - The automatic G5 gate checked completion, not whether the code matched the design (branch = distinct answer
   values), so the mismatch reached the test run although dev already showed A0 below B0.
 - The planning chat's `section9_course_mapping.md` never reached this session; draft section 9 has a TODO.
+
+## A35 (2026-11-14)
+
+- AG stopped at its dev check (NO-GO: one override in 47 dev cases, wrong). The evaluator prepends session history to
+  the question only for presets without profile understanding, which hurt AG on multi-session dev cases; logged,
+  not fixed by re-running, because it cannot change the decision.
+- Generation is not reproducible word for word (R16: 25/47 dev replies differ in wording between two runs, 1
+  acceptability change), so single-case comparisons between runs carry noise.
+- test-2 (75 cases) is LLM-labelled like test-1, frozen and unused.

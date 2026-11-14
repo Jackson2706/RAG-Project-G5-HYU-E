@@ -48,6 +48,17 @@ LLM-annotated, so every result is a relative comparison between methods on these
 - Claude Code wrote the optional A0b preset ("AAES spec-fixed") and ran it on dev only (dev-03); a fresh
   `claude-code:claude-sonnet-5-5` subagent reviewed evaluator v2 and A0b, and its one A0b bug was fixed before A0b ran.
 
+## Amendment A35 (2026-11-14)
+
+- Claude Code (Opus 5.5) wrote the case cards (`Report/slides/case_examples.md`, from saved replies only), the AG
+  preset and its tests, the dev gate script and the test-2 merge, analysis and guard code.
+- Test-2 labels, all by fresh subagents: questions drafted by `claude-code:claude-sonnet-5-5` (titles, personas
+  and guidelines only); selection by `claude-code:claude-sonnet-5-5`; blind annotation by
+  `claude-code:claude-opus-5-5` (A) and `claude-code:claude-sonnet-5-5` (B); adjudication by
+  `claude-code:claude-opus-5-5` (rows built from B) and `claude-code:claude-haiku-5-5` (rows built from A);
+  verification of flagged cases by `claude-code:claude-sonnet-5-5` and `claude-code:claude-opus-5-5`, never the
+  case's primary annotator's model.
+
 ## Runs
 
 Claude Code ran the dev runs and the single test run itself (A33), in the background under `caffeinate`, with

@@ -19,7 +19,9 @@ ask. AAES also branches on 81 of 121 cases, so
 its precision is 0.123, and its acceptable-action rate is 0.256 against 0.661 for basic dense RAG. We trace the
 over-triggering to three rules in the code: branches are defined by which chunks apply, not by what they say;
 the campus is always a candidate attribute; and the policy asks before it checks that any evidence answers the
-question.
+question. A revised method built afterwards on dev only, a guard that keeps the best baseline's reply unless the
+evidence clearly gives different answers, fired once in 47 dev cases, wrongly. It failed its pre-set dev check
+(0.617 against 0.702 acceptable), so the fresh test set we built for it (75 cases) was not used.
 
 ## 1. Problem
 
@@ -308,7 +310,56 @@ week" as the same answer (word-set Jaccard 3/5 = 0.6 ≥ 0.5), so branches that 
 did not fix or re-run A0b. The three changes remove the over-triggering and, on these cases, the branching with
 it. A0b never ran on test (the runner plans it for dev only).
 
-## 8. Limitations
+## 8. Revised method: dev result
+
+**History.** After the test-1 run, and using dev only, we built two revisions. A0b (section 7, exploratory) fixed
+the three code-level causes. A second revision, AG ("AAES guard", PLAYBOOK A35), takes the best dev baseline as its
+base and changes its reply only when the evidence clearly gives different answers for different students. The plan
+was to evaluate AG once on a fresh held-out set (test-2) if it passed a dev check fixed in advance.
+
+**AG.** The base is R16. Under evaluator v2 on dev-02, R15 and R16 tie at 0.681 acceptable, and R16 has the higher
+macro-F1 (0.374 against 0.356). AG returns R16's reply unchanged unless five checks all hold:
+1. an unstated vocabulary attribute splits the selected evidence into at least two non-empty branches;
+2. campus counts only when both campuses have campus-scoped evidence;
+3. each branch is confirmed separately by one yes/no call;
+4. the kept branches have different extracted answers, with numbers, amounts, dates, levels and yes/no compared
+   exactly;
+5. one call quotes the differing text of two branches, and both quotes must be found in their evidence.
+
+When the guard fires, AG gives a conditional answer (at most 2 branches) or asks one question. Every check is
+written to the trace. No threshold was tuned (`Sources/backend/app/rag/blocks/evidence/evidence_sufficiency/aaes_guard.py`).
+
+**Dev check** (`Report/results/dev-04/ag_gate.json`, evaluator v2, 47 dev cases; the gate was fixed before the run:
+GO only if AG is at least as good as R16 and at least 40% of its overrides are acceptable). The guard fired on 1 of
+47 cases, T14-015 ("Can international researchers get counseling in English?"), and that override was wrong: it split
+the answer by campus and degree level where the label expects one answer. Override precision was 0.0. AG's
+acceptable-action rate was 0.617 against 0.702 for R16 (A0: 0.362); neither AG nor R16 asked an unnecessary question.
+The result is **NO-GO**, so AG was not run on test-2 and is reported here as a dev result only.
+
+Of AG's 4 breaks against R16, only T14-015 comes from the guard. T14-208 and T14-214 come from a bug in our
+evaluator: it prepends a session's earlier turns to the question only for presets without profile understanding,
+so AG's generator answered multi-session cases without the history R16 sees. T14-152 is run-to-run variation:
+between dev-03 and dev-04, R16's own replies differ in wording on 25 of the 47 dev cases, with one acceptability
+change. Neither changes the decision, because the precision condition fails on the single fire. We logged the bug
+and did not re-run.
+
+**Test-2.** The fresh set was built in parallel and frozen before any system ran on it (`Sources/data/HYU/labels/test2/NOTES.md`):
+- 121 questions drafted blind from document titles, personas and the guidelines; 4 near-duplicates of earlier
+  drafts dropped; 80 selected in test-1's slice and campus proportions;
+- two blind annotators (Opus 5.5 and Sonnet 5.5), with agreement before adjudication of κ = 0.773 on
+  answerability and κ = 0.708 on expected behaviour;
+- adjudication by a third model where the first adjudicator shared a model with annotator A, then verification
+  of every flagged case;
+- 75 cases kept (`FROZEN_test2.sha256`).
+
+After NO-GO it stays unused, available for a future method.
+
+**What this shows.** The guard is conservative enough to leave R16's replies alone, but on dev it almost never
+finds a case worth overriding, and its one override was wrong. A selective version of AAES that keeps the base
+system's behaviour on ordinary questions removes the over-triggering, as A0b did, but we have no evidence yet that it
+keeps the branching benefit seen on test-1.
+
+## 9. Limitations
 
 - Every question was written by an agent, and every label was annotated, adjudicated and verified by LLMs;
   nothing was checked by a human (A28, A33). Our numbers therefore compare methods on the same labels and are
@@ -333,6 +384,13 @@ it. A0b never ran on test (the runner plans it for dev only).
   text never names it; we did not inspect the test split for this.
 - The applicability tags were not audited by a human. The last tag audit (G2b, r4) failed on degree level,
   student type and visa, and the r5 round was not re-audited, although AAES depends on these tags.
+- The revised method AG was checked on dev only and stopped there (NO-GO). Its dev run exposed an evaluator bug:
+  earlier turns are prepended to the question only for presets without profile understanding, so AG answered
+  multi-session cases without the history its base sees. Generation is also not reproducible word for word:
+  R16's replies differ in wording on 25 of 47 dev cases between two runs, although only one acceptability label
+  changes.
+- The fresh test-2 set (75 cases) was annotated and adjudicated only by LLMs, like test-1, and it was frozen but
+  never run.
 - Comparison 2 (correctness) was not computed, because it needs an LLM judge validated against human labels.
 - The test split has 121 cases and only 15 of them need branching, so the branching results rest on few cases.
   The per-slice numbers also rest on far fewer cases (counts in the slice table). We used one generator
@@ -340,7 +398,7 @@ it. A0b never ran on test (the runner plans it for dev only).
 - The memory methods (M1, M2, A7), the LLM-judge ablation A5 and the external ConditionalQA benchmark were not
   run (PLAYBOOK A29).
 
-## 9. Mapping to the course (Lessons 3–6)
+## 10. Mapping to the course (Lessons 3–6)
 
 Slide numbers refer to the lesson PDFs. "Status" says whether the idea is implemented and measured
 (done), implemented but not measured or only measured on BEIR (partial), or deliberately left out (not done).

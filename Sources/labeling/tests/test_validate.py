@@ -78,7 +78,7 @@ def test_valid_case_has_no_violations(valid_case, rows):
         (("set", "acceptable_behaviors", ["clarify"]), "acceptable_behaviors: must include expected_behavior"),
         (("set", "acceptable_behaviors", ["answer", "guess"]), "acceptable_behaviors: contains invalid values"),
         (("set", "slice", "other"), "slice: must be one of"),
-        (("set", "split", "train"), "split: must be dev or test"),
+        (("set", "split", "train"), "split: must be dev, test or test2"),
         (("set", "origin", "machine"), "origin: must be one of"),
         (("set", "annotator", "bot"), "annotator: must match"),
         (("set", "condition_scope", "global"), "condition_scope: must be national or campus"),

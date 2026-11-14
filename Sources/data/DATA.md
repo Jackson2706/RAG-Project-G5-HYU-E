@@ -150,6 +150,16 @@ All five revisions use 1,867 chunks from 362 documents: max 344 embedded tokens,
     User-Agent) returned the identical sha256 `a800a6ab…61ace` (70,192,404 bytes). It was moved
     back into `raw/a8/`, and the crawler dry run now shows no missing raw files.
 
+## 6b. Held-out set test-2 (A35, `labels/test2/`, frozen in `labels/FROZEN_test2.sha256`)
+
+- 121 questions drafted blind by a fresh subagent that saw only `topics.jsonl`, `personas.json` and `GUIDELINES.md`;
+  4 near-duplicates of the 230 earlier drafts dropped (content-word Jaccard >= 0.6); 80 selected in test-1's slice x
+  campus proportions.
+- Annotated blind by two subagents (Opus 5.5, Sonnet 5.5), adjudicated, deterministic checks, flagged cases verified;
+  75 cases in `labels/test2.jsonl` (5 excluded, `test2/excluded_test2.jsonl`). Details: `labels/test2/NOTES.md`.
+- Only the runner opens `test2.jsonl` (`--split test2 --confirm-frozen`, clean tree). Not used so far: the method it
+  was built for (AG) did not pass its dev check.
+
 ## 7. Benchmarks (`benchmarks/<dataset>/`, downloaded, only `SOURCE.md` committed)
 
 | Dataset | Source | Licence | Checksum | Downloaded |

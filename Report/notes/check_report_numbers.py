@@ -136,4 +136,21 @@ check(close("0.736", v1[("B0", "all")]["acceptable_rate"]) and close("0.661", v2
 b1 = {r["preset"].split("_")[0]: r for r in csv.DictReader(open(R + "test-final/posthoc_branch_detection.csv")) if r["evaluator"] == "v1"}
 check(b1["R16"]["tp"] == "0" and branch["R16"]["tp"] == "2", "slide 43 R16 0 -> 2")
 check(len(json.load(open(R + "index_reports/hyu_20261110_97dc1269_r5.json"))["checks"]) == 15, "VERIFY 15 checks")
+# Section 8 (revised method, dev) and test-2.
+gate = json.load(open(R + "dev-04/ag_gate.json"))
+check(gate["fired"] == 1 and gate["fired_cases"] == ["T14-015"] and gate["override_precision"] == 0.0 and gate["go"] is False, "AG gate")
+check(close("0.617", gate["acceptable_AG_AAES_GUARD"]) and close("0.702", gate["acceptable_R16_PROMPTED_CONDITIONAL"])
+      and close("0.362", gate["acceptable_A0_AAES"]) and len(gate["breaks"]) == 4, "AG acceptable")
+d2 = {r["preset"].split("_")[0]: r for r in csv.DictReader(open(R + "dev-02/hyu_dev_v2_slices.csv")) if r["slice"] == "all"}
+check(close("0.681", d2["R15"]["acceptable_rate"]) and close("0.681", d2["R16"]["acceptable_rate"])
+      and close("0.374", d2["R16"]["macro_f1"]) and close("0.356", d2["R15"]["macro_f1"]), "AG base choice")
+def replies(path):
+    return {r["qid"]: r["answer"] for r in map(json.loads, open(path)) if r["status"] == "completed"}
+r3, r4 = (replies(R + f"{x}/raw/hyu/dev/R16_PROMPTED_CONDITIONAL__-.jsonl") for x in ("dev-03", "dev-04"))
+check(sum(r3[q] != r4[q] for q in r3) == 25 and len(r3) == 47, "R16 run-to-run wording 25/47")
+L = "Sources/data/HYU/labels/"
+check(sum(1 for _ in open(L + "test2/drafts.jsonl")) == 121 and sum(1 for _ in open(L + "test2/selected.jsonl")) == 80
+      and 80 - sum(1 for _ in open(L + "test2/excluded_test2.jsonl")) == 75, "test-2 sizes")  # test2.jsonl itself is never opened
+t2 = open(L + "test2/agreement/agreement.md").read()
+check("| answerability | Cohen's kappa | 0.773291" in t2 and "| expected_behavior | Cohen's kappa | 0.707674" in t2, "test-2 kappa")
 print("checked", n, "mismatches", bad)
