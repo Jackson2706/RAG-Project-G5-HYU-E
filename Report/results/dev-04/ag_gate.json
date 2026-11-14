@@ -1,0 +1,23 @@
+{
+ "run": "dev-04",
+ "cases": 47,
+ "fired": 1,
+ "fired_cases": [
+  "T14-015"
+ ],
+ "fixes": [],
+ "breaks": [
+  "T14-015",
+  "T14-152",
+  "T14-208",
+  "T14-214"
+ ],
+ "override_precision": 0.0,
+ "acceptable_R16_PROMPTED_CONDITIONAL": 0.7021,
+ "acceptable_A0_AAES": 0.3617,
+ "acceptable_AG_AAES_GUARD": 0.617,
+ "unnecessary_question_R16_PROMPTED_CONDITIONAL": "0.0",
+ "unnecessary_question_A0_AAES": "0.425",
+ "unnecessary_question_AG_AAES_GUARD": "0.0",
+ "go": false
+}

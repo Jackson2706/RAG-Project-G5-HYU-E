@@ -45,3 +45,15 @@ Exactly one `test-final` run on a clean tree with `--confirm-frozen`, logged in 
 - `python3 Report/notes/check_report_numbers.py`: 101 values checked, 0 mismatches; comparison statistics and AER counts checked against `hyu_test_comparisons_paired.csv` and `hyu_test_per_case.csv`.
 - Limitations (section 8) state that labels are LLM-annotated, adjudicated and verified, with no human verification.
 - Open for the team: Lessons 3-4 mapping (slides not on this machine), compare-mode screenshots.
+
+## A35 Step 4: AG dev GO / NO-GO (automatic), 2026-11-14
+
+Run dev-04 (R16 base, A0, AG; 47 dev cases), evaluator v2, `Report/results/dev-04/ag_gate.json` (definitions fixed in
+`Sources/scripts/ag_gate.py` before the run). AG fired on 1 case (T14-015) and was wrong there: override precision
+0.0 < 0.4. Acceptable: AG 0.617, R16 0.702, A0 0.362; unnecessary questions AG 0.0, R16 0.0, A0 0.425. Fixes 0,
+breaks 4. **NO-GO.** Of the 3 breaks where the guard did not fire, T14-208 and T14-214 come from a bug (the
+evaluator prepends earlier turns to the question only for presets without profile understanding, so AG's
+generator lost the history R16 sees) and T14-152 from run-to-run variation (R16's own replies differ in text on
+25/47 dev cases between dev-03 and dev-04, with 1 acceptability flip). The bug does not change the decision (the
+precision condition fails on the single fire, not a multi-session case), so no re-run. Steps 5-6 skipped: the
+frozen test-2 (75 cases) stays unused, kept for future work.
