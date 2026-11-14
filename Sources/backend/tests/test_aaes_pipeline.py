@@ -10,7 +10,7 @@ from app.rag.applicability import ChunkCondition
 from app.rag.aaes import UNKNOWN_CAVEAT
 from app.rag.presets import PRESETS_BY_ID
 
-AAES_PRESETS = ("A0_AAES", "A0b_AAES_SPEC_FIXED", "A1_AAES_HARD_FILTER", "A3_AAES_ALWAYS_CLARIFY", "A4_QUESTION_ONLY_AMBIGUITY", "A6_AAES_NO_TEMPORAL")
+AAES_PRESETS = ("A0_AAES", "A0b_AAES_SPEC_FIXED", "AG_AAES_GUARD", "A1_AAES_HARD_FILTER", "A3_AAES_ALWAYS_CLARIFY", "A4_QUESTION_ONLY_AMBIGUITY", "A6_AAES_NO_TEMPORAL")
 
 
 class FakeCrossEncoder:
@@ -96,3 +96,15 @@ def test_a0b_drops_the_campus_branch_when_only_one_campus_has_scoped_evidence(ap
     assert trace["action"] == "ANSWER"
     a0 = api.post("/api/chat", json={**body, "stages": PRESETS_BY_ID["A0_AAES"]["stages"]}).json()
     assert a0["action"] in ("CONDITIONAL", "CLARIFY")
+
+
+def test_ag_returns_the_base_reply_when_the_guard_does_not_fire(api, corpus, db, fake_ollama):
+    api.post("/api/ingest", json={"folder": "raw"})
+    _tag_everything(db, "seoul", "unconditioned")  # one campus only: nothing can split, so AG must equal R16
+    question = "What documents does the need-based scholarship require?"
+    ag = api.post("/api/chat", json={"question": question, "stages": PRESETS_BY_ID["AG_AAES_GUARD"]["stages"]}).json()
+    r16 = api.post("/api/chat", json={"question": question, "stages": PRESETS_BY_ID["R16_PROMPTED_CONDITIONAL"]["stages"]}).json()
+    assert ag["status"] == "completed", ag["error"]
+    stage = {s["stage_id"]: s for s in ag["stages"]}["evidence_sufficiency"]
+    assert stage["output"]["signals"]["guard"]["fired"] is False and ag.get("action") is None
+    assert ag["answer"] == r16["answer"]

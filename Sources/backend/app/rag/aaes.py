@@ -302,6 +302,36 @@ def distinct_answers(keys: list[frozenset[str] | None]) -> list[int]:
     return out
 
 
+# --------------------------------------------------------------------------- AG "AAES guard" helpers (amendment A35)
+
+_MONTHS = "january february march april may june july august september october november december".split()
+HARD = re.compile(r"\d+(?:[.,]\d+)*|\b(?:yes|no|not|none|free)\b|\b(?:" + "|".join(_MONTHS) + r")\b", re.IGNORECASE)
+
+
+def answer_parts(value: str | None) -> tuple[frozenset[str], frozenset[str]] | None:
+    """(hard tokens, content words) of an extracted answer; "NONE" / "" -> None.
+
+    Hard tokens are numbers (amounts, dates, hours, levels; commas dropped), yes/no/not/none/free and month names.
+    "up to 10 hours per week" -> ({"10"}, {"up", "hours", "per", "week"}).
+    """
+    if not value or re.sub(r"[^A-Za-z]", "", value).upper() == "NONE":
+        return None
+    hard = frozenset(t.lower().replace(",", "") for t in HARD.findall(value))
+    words = frozenset(w for w in re.findall(r"[a-z]+", value.lower()) if w not in _STOP and len(w) > 2 and w not in hard)
+    return hard, words
+
+
+def same_answer(a: tuple[frozenset[str], frozenset[str]] | None, b: tuple[frozenset[str], frozenset[str]] | None) -> bool:
+    """Hard tokens must match exactly when either answer has any; otherwise word sets overlap >= 0.5 (Jaccard,
+    the value A0b uses). "10 hours" vs "20 hours" -> False; "KRW 25,000" vs "25,000 won" -> True."""
+    if a is None or b is None:
+        return a is b
+    if a[0] or b[0]:
+        return a[0] == b[0]
+    union = a[1] | b[1]
+    return bool(union) and len(a[1] & b[1]) / len(union) >= 0.5
+
+
 # --------------------------------------------------------------------------- templates (no LLM)
 
 NAMES = {"campus": "campus", "degree_level": "degree level", "year": "year of study", "student_type": "student type",

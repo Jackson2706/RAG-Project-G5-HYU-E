@@ -80,6 +80,7 @@ from app.rag.blocks.evidence.evidence_selection.top_k_selector import TopKSelect
 from app.rag.blocks.evidence.evidence_selection.oracle_evidence import OracleEvidenceSelector
 from app.rag.blocks.evidence.evidence_sufficiency.applicability_sufficiency import ApplicabilitySufficiency
 from app.rag.blocks.evidence.evidence_sufficiency.spec_fixed_sufficiency import SpecFixedApplicabilitySufficiency
+from app.rag.blocks.evidence.evidence_sufficiency.aaes_guard import AAESGuard
 from app.rag.blocks.evidence.evidence_sufficiency.base import BaseSufficiencyChecker
 from app.rag.blocks.evidence.evidence_sufficiency.sufficiency_checker import ScoreThresholdChecker
 
@@ -427,6 +428,9 @@ PIPELINE: list[Stage] = [
                                          "(A4: ask about what the question mentions, ignoring the evidence).",
                                          ui="select", options=("aaes", "always_clarify", "question_only")),
                      }),
+              Method("applicability_guard", "AAES guard (AG)", AAESGuard, True,
+                     "Keeps the base pipeline's reply unless the evidence truly gives different answers for different students "
+                     "(five checks, each logged); then a conditional answer or one question.", parameters=_llm_params(64, 256)),
               Method("applicability_sufficiency_spec", "Applicability sufficiency, spec-fixed (A0b)", SpecFixedApplicabilitySufficiency, True,
                      "A0's steps 3-4, but branches only on distinct answer values (short LLM extraction), campus only when both campuses "
                      "have scoped evidence, and a yes/no sufficiency check before asking.", parameters={

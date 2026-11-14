@@ -25,6 +25,7 @@ WIDE_DENSE = {"dense_retrieval": {"method": "qdrant_cosine", "params": {"top_k":
 GATE = {"evidence_sufficiency": {"method": "score_threshold", "params": {"signal": "query_coverage", "threshold": 0.30}}}
 CRITERIA = {"query_understanding": {"method": "stated_criteria"}}  # the user fills in campus, audience, …
 # AAES: fixed retrieval (hybrid + cross-encoder, Appendix E) with the three AAES steps
+PRESETS_R16_STAGES = {**HYBRID, "reranking": {"method": "cross_encoder"}, "context_construction": {"method": "conditional_prompt"}}  # AG's base (A35)
 AAES = {**HYBRID, "query_understanding": {"method": "profile_understanding"}, "reranking": {"method": "applicability_reranker"},
         "evidence_sufficiency": {"method": "applicability_sufficiency"}}
 
@@ -118,11 +119,15 @@ PRESETS: list[dict[str, Any]] = [
                 "reranking": {"method": "cross_encoder"}}},
     {"id": "R16_PROMPTED_CONDITIONAL", "kind": "online", "group": "Advanced", "name": "R16 — Prompted conditional answering",
      "description": "R5's retrieval; the prompt tells the model to state conditions per case or ask one question.",
-     "stages": {**HYBRID, "reranking": {"method": "cross_encoder"}, "context_construction": {"method": "conditional_prompt"}}},
+     "stages": PRESETS_R16_STAGES},
     # ---------------------------------------------------------------- AAES (need the tagged HYU index)
     {"id": "A0_AAES", "kind": "aaes", "group": "Ours (AAES)", "name": "A0 — AAES full",
      "description": "Reads the student's profile, demotes evidence that does not apply, then answers, answers per case, asks, or refers.",
      "stages": AAES},
+    {"id": "AG_AAES_GUARD", "kind": "aaes", "group": "Ours (AAES)", "name": "AG — AAES guard",
+     "description": "R16's answer, unless the official pages give different answers for different students: then it answers per case or asks.",
+     "stages": {**PRESETS_R16_STAGES, "query_understanding": {"method": "profile_understanding"},
+                "evidence_sufficiency": {"method": "applicability_guard"}}},
     {"id": "A0b_AAES_SPEC_FIXED", "kind": "aaes", "group": "Ours (AAES)", "name": "A0b — AAES spec-fixed (exploratory)",
      "description": "A0, but it asks or splits only when the evidence gives different answers, and checks that the evidence answers first.",
      "stages": {**AAES, "evidence_sufficiency": {"method": "applicability_sufficiency_spec"}}},

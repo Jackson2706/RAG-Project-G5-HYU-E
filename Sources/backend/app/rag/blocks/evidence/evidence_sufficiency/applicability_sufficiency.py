@@ -40,6 +40,6 @@ class ApplicabilitySufficiency(BaseSufficiencyChecker):
         support = [e.chunk_id for e in evidence if e.chunk_id in set(d["support"])]
         proceed = action in ("ANSWER", "CONDITIONAL")
         return SufficiencyDecision(sufficient=proceed, reason=f"{action}: {d['reason']}", action=action,
-                                   signals={**d, "coverage": coverage, "relevance_threshold": self.params["relevance_threshold"]},
+                                   signals={**d, "coverage": coverage, "relevance_threshold": self.params.get("relevance_threshold")},
                                    evidence_ids=support if proceed else None, message=None if proceed else render_action(d, profile),
                                    prompt_note=branch_note(d, support) if action == "CONDITIONAL" else None)  # fmt: skip

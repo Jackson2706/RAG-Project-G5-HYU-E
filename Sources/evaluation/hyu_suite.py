@@ -60,14 +60,15 @@ def gold_chunk(chunk_id: str) -> dict | None:
 
 
 LLM_METHODS = {"query_rewriting": None, "generation": None, "query_understanding": "self_query",
-               "evidence_sufficiency": "applicability_sufficiency_spec"}  # None = any method calls the LLM
+               "evidence_sufficiency": ("applicability_sufficiency_spec", "applicability_guard")}  # None = any method calls the LLM
 
 
 def llm_calls(trace: dict) -> int:
     """Completed stages that called the LLM (generation, query rewriting, the self-query parser)."""
     config = trace.get("config") or {}
     return sum(1 for s in trace["stages"] if s["status"] == "completed" and s["stage_id"] in LLM_METHODS
-               and LLM_METHODS[s["stage_id"]] in (None, (config.get(s["stage_id"]) or {}).get("method")))  # fmt: skip
+               and (LLM_METHODS[s["stage_id"]] is None or (config.get(s["stage_id"]) or {}).get("method") in
+                    ((m := LLM_METHODS[s["stage_id"]]) if isinstance(m, tuple) else (m,))))  # fmt: skip
 
 
 def trace_record(case: dict, trace: dict, lookup) -> dict:
