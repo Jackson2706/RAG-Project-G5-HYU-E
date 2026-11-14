@@ -263,7 +263,7 @@ def test_key_value_table_rows_read_as_label_and_value():
 def test_broken_and_run_on_emails_are_masked():
     from crawler.extract import mask_email
 
-    text = "Mail coreaembajada@mofa.go.k\nr or gsisapply@sogang.ac.kr51, hykoica@hanyang.ac.kr. Follow @gksmentors"
+    text = "Mail coreaembajada@mofa.go.k\nr or gsisapply@sogang.ac.kr51, office@example.ac.kr. Follow @gksmentors"
     assert mask_email(text) == "Mail [email]\nr or [email], [email]. Follow @gksmentors"
 
 
@@ -278,7 +278,7 @@ def test_attachment_type_ignores_gnuboard_size_suffix_and_falls_back_to_content_
 
 def test_email_only_page_is_not_a_document():
     html = b"""<html><head><title>Contact</title></head><body><div id="content">
-        <div class="content_inner"><p>international.office.contact@hanyang.ac.kr</p></div></div></body></html>"""
+        <div class="content_inner"><p>office@example.ac.kr</p></div></div></body></html>"""
     assert extract_document(html, "https://oia.hanyang.ac.kr/contact", "seoul") is None
 
 

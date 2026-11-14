@@ -13,8 +13,8 @@
   "url": "https://oia.hanyang.ac.kr/summer",
   "site": "seoul",
   "fetched_at": "2026-11-10T01:39:05Z",
-  "bytes": 31969,
-  "sha256": "dd96aca863e41c2228d3fe42ed4a8fed94d2d0de79214aff75c06ac11cddb580",
+  "bytes": 31964,
+  "sha256": "20817a0083945c1772dc4807bc99dbe161fe7611f765d27e704eb64f0aea2515",
   "tests": "Static English page; main = #content .rhymix_content.xe_content; popup widget .bh_widget_content (Korean) must be dropped."
  },
  {
@@ -40,8 +40,8 @@
   "url": "https://oia.hanyang.ac.kr/notice/1813514",
   "site": "seoul",
   "fetched_at": "2026-11-10T01:43:28Z",
-  "bytes": 66410,
-  "sha256": "2b7e103b7257637b634d587241ddc19342524027b2867cc28546f73b83854c25",
+  "bytes": 66406,
+  "sha256": "50ac6d42fcca38badebd809715fba1c95569600859c8f84cfb66e31bf5757c3c",
   "tests": "Korean body; English only in attachments (file_srl 1813518 = English PDF). English text of the body is ~0, so document text comes from attachments; lang_coverage low."
  },
  {
@@ -76,8 +76,8 @@
   "url": "https://global.hanyang.ac.kr/eng/",
   "site": "erica",
   "fetched_at": "2026-11-10T01:43:35Z",
-  "bytes": 64269,
-  "sha256": "174fe348cee2fc4f740080ef72d05d695fabc634f0d227cde25280341e1c4b33",
+  "bytes": 64251,
+  "sha256": "1c0141e5a8c343a34c83ca56b248c64ddc7c54fbab18f88a6e5f609142134829",
   "tests": "ERICA English home: source of the menu (/eng/s1-s3/*.php) and board links; .main-board widgets contain Korean/Chinese titles (not content). REDACTED: personal e-mail addresses replaced with *.redacted@example.org (sha256 is of the redacted file)."
  },
  {
@@ -85,8 +85,8 @@
   "url": "https://global.hanyang.ac.kr/eng/s3/s3_1.php",
   "site": "erica",
   "fetched_at": "2026-11-10T01:43:32Z",
-  "bytes": 71803,
-  "sha256": "baf8e06563fc8966f5b04f7f839aa75b2193ca12c2ec720ad2068e8ec5b14df9",
+  "bytes": 71785,
+  "sha256": "423996d6a703a75c9494e0950d94eb9e032259a5032b05da73e9de94af391a2d",
   "tests": "Visa page; main = .sub-cnt > section; 6 tables, the last one (part-time work hours) has rowspan/colspan merged cells and a 2-row header. REDACTED: personal e-mail addresses replaced with *.redacted@example.org (sha256 is of the redacted file)."
  },
  {
@@ -94,8 +94,8 @@
   "url": "https://global.hanyang.ac.kr/bbs/board.php?bo_table=s4_1_eng",
   "site": "erica",
   "fetched_at": "2026-11-10T01:44:16Z",
-  "bytes": 44454,
-  "sha256": "b9c5775593b9513359833a127a294baf5b65675701965e80f49f7bf7dbcae419",
+  "bytes": 44436,
+  "sha256": "683623ac41a430444cd069b4cf26bfdd035d65ad105be3a5ea94fee1cd92b8ad",
   "tests": "English notice board list: #fboardlist tbody tr; pinned rows (공지) repeat posts; dates are MM-DD only; pagination ./board.php?bo_table=s4_1_eng&page=N (page must be dropped from canonical URI). REDACTED: personal e-mail addresses replaced with *.redacted@example.org (sha256 is of the redacted file)."
  },
  {
@@ -103,8 +103,8 @@
   "url": "https://global.hanyang.ac.kr/bbs/board.php?bo_table=s4_1_eng&wr_id=86",
   "site": "erica",
   "fetched_at": "2026-11-10T01:44:19Z",
-  "bytes": 43611,
-  "sha256": "f605eec60c11bdf5439b28a08a82a283b0bc23c80860332f916e0aa382a5093a",
+  "bytes": 43593,
+  "sha256": "f2c701881b55a513884661dc9a5c0cd8122f00fbc6c34d8970d6cdea2545b190",
   "tests": "English board post: title in #bo_v header, date in #bo_v_info ('Date : 2026-11-03'), body #bo_v_con; canonical keeps bo_table+wr_id only. REDACTED: personal e-mail addresses replaced with *.redacted@example.org (sha256 is of the redacted file)."
  },
  {
@@ -112,8 +112,8 @@
   "url": "https://global.hanyang.ac.kr/eng/s3/s3_3_1.php",
   "site": "erica",
   "fetched_at": "2026-11-10T01:44:22Z",
-  "bytes": 44866,
-  "sha256": "b15eb5d0f6bfa99c8bb4a8fd6f800e37cd07cfc9919169abc96be855916ab956",
+  "bytes": 44846,
+  "sha256": "c90c8a4f8c0a72441325643af699a2f2e5cbd11eb2639311cbbe4d6a64ddf19d",
   "tests": "Scholarships page (HIEA); main = .sub-cnt > section; 3 tables, two with merged cells; amounts/percentages for near-duplicate/version tests. REDACTED: personal e-mail addresses replaced with *.redacted@example.org (sha256 is of the redacted file)."
  }
 ]
