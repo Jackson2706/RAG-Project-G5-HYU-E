@@ -15,20 +15,36 @@ from labeling.freeze import verify
 HEADER = "# Test runs\n\nOne row per run on the frozen test split (AGENTS.md).\n\n| Date | Run id | Git SHA | Configs | Reason |\n|---|---|---|---|---|\n"
 
 
+TEST_SPLITS = ("test", "test2")  # test2: the fresh held-out set of A35 Step 5, frozen in FROZEN_test2.sha256
+
+
 class GuardError(RuntimeError):
     pass
+
+
+def verify_test2(labels_dir: Path) -> bool:
+    """FROZEN_test2.sha256 holds one line "<sha256>  test2.jsonl" that matches the file."""
+    import hashlib
+
+    path, labels = Path(labels_dir) / "FROZEN_test2.sha256", Path(labels_dir) / "test2.jsonl"
+    if not (path.is_file() and labels.is_file()):
+        return False
+    digest, _, name = path.read_text(encoding="utf-8").strip().partition("  ")
+    return name == "test2.jsonl" and digest == hashlib.sha256(labels.read_bytes()).hexdigest()
 
 
 def check_run(split: str, confirm_frozen: bool, labels_dir: Path, repo_root: Path, may_be_dirty: tuple[str, ...] = ()) -> None:
     """Raise GuardError unless this run may start. may_be_dirty: repo-relative path prefixes a --resume may leave
     uncommitted (TEST_RUNS.md and the run's own results folder)."""
-    if split not in ("dev", "test"):
+    if split not in ("dev", *TEST_SPLITS):
         raise GuardError(f"unknown split {split!r}")
-    if split == "test" and not confirm_frozen:
+    if split in TEST_SPLITS and not confirm_frozen:
         raise GuardError("a test run needs --confirm-frozen")
     if not verify(labels_dir):
         raise GuardError(f"labels in {labels_dir} do not match FROZEN.sha256 (or are not frozen yet)")
-    if split == "test":
+    if split == "test2" and not verify_test2(labels_dir):
+        raise GuardError(f"test2.jsonl in {labels_dir} does not match FROZEN_test2.sha256 (or is not frozen yet)")
+    if split in TEST_SPLITS:
         status = subprocess.run(["git", "-C", str(repo_root), "status", "--porcelain"], capture_output=True, text=True, check=True)
         dirty = [line[3:] for line in status.stdout.splitlines() if line.strip()]
         if [p for p in dirty if not p.strip('"').startswith(may_be_dirty)] if may_be_dirty else dirty:

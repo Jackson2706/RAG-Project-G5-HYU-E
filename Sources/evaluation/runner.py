@@ -31,7 +31,7 @@ from typing import Any
 import yaml
 
 from evaluation import ROOT, beir, hyu_suite
-from evaluation.guard import GuardError, check_run, record_test_run
+from evaluation.guard import TEST_SPLITS, GuardError, check_run, record_test_run
 from evaluation.indexes import ensure_folder_index, ensure_index, index_id
 from evaluation.reports import load_jsonl, write_reports
 
@@ -124,7 +124,8 @@ def build_plan(args, offline: dict, online: dict, generation: dict, hyu: dict | 
     if "hyu" in suites:
         split = args.split or "dev"
         dev_only = hyu.get("dev_only_presets", []) if split == "dev" else []  # A34: A0b never runs on test
-        for preset in hyu["presets"] + dev_only:
+        presets = hyu.get("test2_presets", []) if split == "test2" else hyu["presets"] + dev_only  # A35: test-2 has its own list
+        for preset in presets:
             if keep(f"hyu_{split}", preset) or keep(split, preset):
                 limit = hyu["smoke_cases"] if args.smoke else None
                 if args.max_queries:
@@ -529,9 +530,9 @@ async def main_async(args) -> int:
     test_log = RESULTS_DIR / "TEST_RUNS.md"
     if args.suite == "hyu" and not args.dry_run:
         try:  # AGENTS.md: a test run needs a clean tree and --confirm-frozen; every run needs intact frozen labels
-            if run.split == "test" and args.smoke:
+            if run.split in TEST_SPLITS and args.smoke:
                 raise GuardError("no smoke runs on the test split (use dev)")
-            if run.split == "test" and not run.hyu.get("best_baseline"):
+            if run.split in TEST_SPLITS and not run.hyu.get("best_baseline"):
                 raise GuardError("set best_baseline in evaluation/configs/hyu.yaml from the dev results before a test run (G5)")
             resumable = (str(test_log.relative_to(REPO_ROOT)), str(run.dir.relative_to(REPO_ROOT)) + "/") if args.resume else ()
             check_run(run.split, args.confirm_frozen, hyu_suite.LABELS_DIR, REPO_ROOT, resumable)
@@ -561,7 +562,7 @@ async def main_async(args) -> int:
     if not (health["mongodb"]["ok"] and health["qdrant"]["ok"]):
         print("MongoDB and Qdrant must be running (docker compose up -d).")
         return 1
-    if args.suite == "hyu" and run.split == "test":
+    if args.suite == "hyu" and run.split in TEST_SPLITS:
         blocked = [t.key for t in tasks if t.status in ("BLOCKED", "FAILED")]
         if blocked:
             print(f"Refusing to start the test run: {len(blocked)} tasks are not ready ({blocked[0]} …)")

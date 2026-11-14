@@ -58,3 +58,23 @@ def test_clean_confirmed_test_run_passes_and_is_recorded_once(repo):
     assert text.startswith("# Test runs") and "| test-final | abc123 | A0_AAES, B0 | G6 |" in text
     with pytest.raises(GuardError, match="already recorded"):
         record_test_run(log, run_id="test-final", git_sha="abc123", presets=["A0_AAES"], reason="again")
+
+
+def test_test2_needs_its_own_frozen_checksum(tmp_path):
+    """A35: a test2 run is refused until test2.jsonl matches FROZEN_test2.sha256."""
+    import hashlib
+
+    import pytest
+
+    from evaluation.guard import GuardError, verify_test2
+
+    assert not verify_test2(tmp_path)
+    (tmp_path / "test2.jsonl").write_text('{"case_id": "T2-001"}\n')
+    (tmp_path / "FROZEN_test2.sha256").write_text("0" * 64 + "  test2.jsonl\n")
+    assert not verify_test2(tmp_path)
+    (tmp_path / "FROZEN_test2.sha256").write_text(hashlib.sha256((tmp_path / "test2.jsonl").read_bytes()).hexdigest() + "  test2.jsonl\n")
+    assert verify_test2(tmp_path)
+    with pytest.raises(GuardError, match="confirm-frozen"):
+        from evaluation.guard import check_run
+
+        check_run("test2", False, tmp_path, tmp_path)
