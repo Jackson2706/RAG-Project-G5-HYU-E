@@ -20,7 +20,9 @@ Every number comes from `Report/results/` (test-1: `test-final/summary.md`, `sum
 5. **Where AAES helps.** On the 15 cases where the answer depends on the student: A0 right and B0 wrong 10, the
    reverse 0. Cards: T14-088 (part-time hours: B0 gives the Seoul figures to everyone), T14-051 (insurance sign-up:
    B0 gives ERICA's procedure to everyone), T14-155 (B0 calls a 2021 dorm notice current). Branch recall A0 10/15
-   vs R16 2/15 (exact McNemar p = 0.0215, post hoc). But A3 (always ask) hits the same 10 plus one: the recall
+   vs R16 2/15 (exact McNemar p = 0.0215, post hoc). Content check: these counts compare reply types; of five A0
+   wins checked by hand, two had wrong or incomplete conditions (T14-121, T14-114) and T14-155 had the right action
+   for the wrong reason. But A3 (always ask) hits the same 10 plus one: the recall
    comes from being willing to ask.
 6. **Where it hurts.** On the 46 cases the sources do not answer: A0 right and B0 wrong 1, the reverse 30. A0
    branches on 81 of 121 cases (precision 0.123); 35 of its 52 questions ask for the campus. Counter-example card
@@ -36,5 +38,6 @@ Every number comes from `Report/results/` (test-1: `test-final/summary.md`, `sum
 9. **Lessons and limitations.** Separate "when to ask" from "willing to ask" (compare with always-ask); check the
    spec against the labels before the test run; version the evaluator. Limitations: LLM labels, unaudited tags, 15
    branching cases, one 4B generator that is not reproducible word for word, an evaluator history bug found on
-   dev, memory methods and ConditionalQA not run.
+   dev (on test-1 it affected multi-session replies of A0, A1, A3, A4, A6, R9S and R15; step 1 still got the
+   history), memory methods and ConditionalQA not run.
 10. **Demo** (switch to the app; index r5 first; `demo_script.md`).

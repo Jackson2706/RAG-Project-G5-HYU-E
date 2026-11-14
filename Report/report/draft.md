@@ -12,7 +12,9 @@ cases with LLM-annotated labels. The first evaluator (v1) could not score a base
 question, so we re-scored the saved replies with a reply-text classifier (v2). v2 agrees with a blind annotator at
 κ = 0.899 on dev, and we did not re-run any system on test. Under v2, AAES is the only method that branches on
 the cases that need it: it gives a conditional answer or a question on 10 of the 15 such cases, against 2 for
-the prompted conditional baseline R16 and 0 for the other baselines. Its own ablation A3, which asks whenever a
+the prompted conditional baseline R16 and 0 for the other baselines. This counts reply types, not content: of
+five A0 wins checked by hand, two had wrong or incomplete conditions and one the right action for the wrong reason.
+Its own ablation A3, which asks whenever a
 student detail is missing, finds the same 10 cases plus one more with the same precision, so on this test set
 choosing when to ask from the evidence added nothing to branch recall. The recall comes from being willing to
 ask. AAES also branches on 81 of 121 cases, so
@@ -228,7 +230,7 @@ multi-session (12). B0 reaches 0.704, 0.708, 0.717, 0.750 and 0.917 on the same 
 - *A0 vs A3 and R16 on the 15 cases that need branching (v2, post hoc).* A0's 10 branch hits are a subset of
   A3's 11 (A3 adds T14-224), at almost the same precision (10/81 = 0.123 against 11/86 = 0.128). Against R16, 9
   cases are hit by A0 only and 1 by R16 only; an exact McNemar test gives p = 0.0215. This test is post hoc,
-  exploratory and not Holm-corrected.
+  exploratory and not Holm-corrected. This count compares reply types, not their content: of the five test-1 A0 wins checked by hand for the case cards, two had wrong or incomplete conditions (T14-121, T14-114) and one took the right action for the wrong reason (T14-155) (`Report/slides/case_examples.md`).
 - *Why A0 asks (dev only).* The saved test records do not keep the AAES trace, and A34 forbids re-running a system
   on test, so we replayed A0's decision step on the 47 dev cases (`Sources/scripts/aaes_dev_diagnostics.py`,
   stopping before generation). All 47 actions matched the dev-02 run. Of the 21 dev questions, 16 had the reason
@@ -239,7 +241,7 @@ multi-session (12). B0 reaches 0.704, 0.708, 0.717, 0.750 and 0.917 on the same 
 ## 7. Discussion
 
 AAES branches on the cases that need it and on many that do not. Under v2 it is the only method with branching behaviour where branching is expected: 10 of the 15 such test cases get a
-conditional answer or a question, against 2 for R16 and none for the other retrieval baselines. Prompting a
+conditional answer or a question, against 2 for R16 and none for the other retrieval baselines. This count compares reply types, not their content: of the five test-1 A0 wins checked by hand for the case cards, two had wrong or incomplete conditions (T14-121, T14-114) and one took the right action for the wrong reason (T14-155) (`Report/slides/case_examples.md`). Prompting a
 model to give per-case answers, as R16 does, rarely produces them. Against its own ablation, however, AAES
 gains nothing: A3, which asks whenever a student detail is missing, hits the same 10 cases and one more, at the
 same precision. The branching recall comes from being willing to ask, not from choosing when to ask from the
@@ -389,6 +391,10 @@ keeps the branching benefit seen on test-1.
   multi-session cases without the history its base sees. Generation is also not reproducible word for word:
   R16's replies differ in wording on 25 of 47 dev cases between two runs, although only one acceptability label
   changes.
+- On test-1, the presets whose step 1 is profile understanding or self-query (A0, A1, A3, A4, A6, R9S, R15)
+  generated their multi-session replies without the earlier turns in the question; step 1 still received them.
+  Of the 12 multi-session cases, the affected generated replies are A0 9, A1 8, A3 2, A4 8, A6 9, R9S 12 and R15 12
+  (`Report/results/test-final/history_bug.json`); template replies (questions, referrals) are not affected.
 - The fresh test-2 set (75 cases) was annotated and adjudicated only by LLMs, like test-1, and it was frozen but
   never run.
 - Comparison 2 (correctness) was not computed, because it needs an LLM judge validated against human labels.

@@ -153,4 +153,7 @@ check(sum(1 for _ in open(L + "test2/drafts.jsonl")) == 121 and sum(1 for _ in o
       and 80 - sum(1 for _ in open(L + "test2/excluded_test2.jsonl")) == 75, "test-2 sizes")  # test2.jsonl itself is never opened
 t2 = open(L + "test2/agreement/agreement.md").read()
 check("| answerability | Cohen's kappa | 0.773291" in t2 and "| expected_behavior | Cohen's kappa | 0.707674" in t2, "test-2 kappa")
+hb = json.load(open(R + "test-final/history_bug.json"))["presets"]
+check({k.split("_")[0]: v["generated_without_history"] for k, v in hb.items()} == {"A0": 9, "A1": 8, "A3": 2, "A4": 8, "A6": 9, "R9S": 12, "R15": 12}
+      and all(v["multi_session"] == 12 for v in hb.values()), "history bug counts")
 print("checked", n, "mismatches", bad)

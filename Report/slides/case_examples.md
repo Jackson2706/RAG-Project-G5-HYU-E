@@ -12,6 +12,10 @@ reader; nothing was re-run). Labels are LLM-annotated (A33). Action labels are e
 | The answer depends on the student (15 cases labelled conditional answer or clarify) | 10 | 0 |
 | The sources do not answer (46 cases labelled abstain) | 1 | 30 |
 
+These counts compare reply types, not correctness. Of the five test-1 A0 wins checked by hand for these cards, two
+had wrong or incomplete conditions (T14-121, T14-114, dropped below) and T14-155 took the right action with the
+wrong reason.
+
 ## Where AAES helps (test-1)
 
 ### T14-088 "How many hours can an international student work part time?"
