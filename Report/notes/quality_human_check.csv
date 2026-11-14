@@ -1,0 +1,253 @@
+id,question,reply_type,required_facts,gold_evidence,inapplicable_evidence,branch_attributes,cited_sources,reply,"facts (correct/wrong/missing per fact, ; separated)",wrong_group (yes/no),cited_sentences,supported_sentences,"conditions_match (yes/no, conditional only)","asks_branch_attribute (yes/no, clarify only)","right_referral (yes/no, abstain only)",your note
+D0021,Is there a winter school for international students?,answer,Hanyang has an International Winter School || it offers English-taught courses and cultural or social activities || students can choose between two two-week sessions,"International Winter School | From +130 courses across 12 different disciplines, taught by leading scholars all in English. | 6 Cultural / social activities for the first-hand experience of trendy Korean culture | 6. Buddy Program for Your Seoul-ful Stay | 2 different sessions of a 2-week edu-tainment program you can choose from.",,,"E1: International Winter School || E2: From +130 courses across 12 different disciplines, taught by leading scholars all in English.","Yes, there is an International Winter School offered by Hanyang University [E1][E2].",,,,,,,,
+D0037,Can you change the address on my residence card right now?,answer,The assistant cannot change your registration record || Address changes are reported at an immigration office or online at www.hikorea.go.kr,"Students must apply within 14 days from the date of any changes to the registration information below.
+Change of name, gender, date of birth, or nationality
+Change of passport number, issuance date, or expiration date
+Change of school (including school name change)
+New place of residence (new address may be registered at the local Gu District Office) | Visit a local Immigration Office or report changes online at www.hikorea.go.kr",,,"E1: Students must apply within 14 days from the date of any changes to the registration information below. Change of name, gender, date of birth, or nationality Change of passport number, issuance date, or expiration date Change of school (including school name change) New place of residence (new address may be registered at the local Gu District Office) ※ Failure to report the above changes within 14 days from the date of change may result in a fine. || E3: Hello This is the Office of International Affairs. International degree students in Hanyang University must respond to the entry and exit report on the HY-IN portal every semester. Responses are mandatory for all foreign students. We ask for your active participation. <Entry and Exit Report Guide> -Report Deadline: ~2022.04.04(Mon) *Deadline for Initial report. you may change your response upon changes to your status at all times thereafter -Precautions: Be familiarized with the questions and access immediately and respond again if any changes occur during the semester (Example of re-response situation) Upon arrival/ departure/ change of passport/ change of visa/ application for foreigner registration/ when foreigner registration is completed / change to RC expiration -Preparation: *Prepare the documents in PDF or JPG or PNG format 1. Copy of the passport: A copy of the passport page that contains your picture. 2. Visa documents: 1. Scanned copy front & back of foreign residence card or 2. Visa Grant Notice 3. Documents required for the students entering Korea A. Proof of entry: choose one from 1. Immigration Appointment Receipt, 2. Immigration Certificate of Application for Permit","The evidence states that students must report changes to their place of residence within 14 days from the date of the change to avoid fines [E1]. However, it does not specify if a student can change the address on their residence card immediately or what the exact procedure is for updating the card itself [E1][E3].
+
+INSUFFICIENT_CONTEXT: The provided text mentions reporting changes within 14 days but does not explicitly state whether a student can change the address on their residence card ""right now"" or detail the immediate process for such an update.",,,,,,,,
+D0142,What documents do I need for alien registration at ERICA?,answer,"the common documents are an integrated application form, passport and copy, photo, certificate of enrollment, and proof of residence || new D-2 entrants must register within 90 days || additional documents may be required for particular circumstances","All international students who join Hanyang University ERICA and enter the country with a new D-2 visa must complete alien registration within 90 days of entering the country. | Required Documents
+Integrated Application Form x1
+Passport and passport copy x1
+Photo x1 (white background, 3.5*4.5cm) Photo specifications
+Certificate of Enrollment x1
+Proof of Residence (real estate contract, confirmation of residence, confirmation of dormitory occupancy, etc.)
+Processing fee: KRW 30,000
+",,,,"To register as a foreign student (alien) at **ERICA** (Hanyang University's International Student Center), you generally need the following documents:
+
+*   **Valid Passport**: Must be valid for at least 6 months beyond your intended stay.
+*   **Visa**: A valid visa issued by the Republic of Korea (usually a D-2 or F-4 visa).
+*   **Application Form**: The Alien Registration Application Form (often available on ERICA's website or at the International Student Center).
+*   **Proof of Admission**: Your admission letter from Hanyang University.
+*   **Health Certificate**: A medical certificate issued within 3 months prior to arrival, confirming you are free from infectious diseases.
+*   **Photographs**: Two recent passport-sized photos (usually with a white background).
+*   **Fee Payment**: Proof of payment for the alien registration fee.
+
+**Important Note:** ERICA is primarily responsible for registering international students as ""foreigners"" with the National Immigration Service. However, the actual **Alien Registration Certificate** application is often processed through the **National Immigration Service Hall (NISH)** or local immigration offices. You may need to visit these halls in person to submit your documents and receive the certificate, though ERICA can assist you with the process.
+
+Always check the latest requirements on the **ERICA website** or contact them directly, as regulations can change.",,,,,,,,
+D0045,Do I currently have permission to re-enter Korea?,abstain,The snapshot cannot show your personal re-entry permission,,,,E3: Notice for International Students’ Re-entry permit & Departure period from Korea Please check the attachment.,"The provided evidence does not contain information about your current status or whether you have permission to re-enter Korea. It only lists general procedures for re-registration and mentions a notice regarding re-entry permits in [E3], but the actual content of that notice is not included.
+
+INSUFFICIENT_CONTEXT: The text references an attachment for re-entry permit details in [E3], but the content of that attachment is missing, so it cannot determine your current permission status.",,,,,,,,
+D0161,Does my insurance change after my visa switches from D-4 to D-2?,clarify,"Degree students pay the university group insurance (KRW 25,000) on their tuition bill || Students taking language courses should ask their language school about insurance || National Health Insurance applies to international students","Students taking language courses should contact their language school for insurance-related inquiries. | KRW 25,000 (same premium for undergraduate and graduate schools) | Insurance premium will appear as a separate item on each student’s tuition bill
+Students must pay their insurance premium (lump-sum) when paying for their tuition | International students shall be charged 50% of an alien resident’s monthly insurance premium. Please contact the National Health Insurance Corporation for the exact amount",,campus,,"The answer depends on your degree level. Which applies to you: undergraduate, master, doctoral, language program or non degree?",,,,,,,,
+D0254,Were newly admitted ERICA students allowed at the 2023 talent fair?,conditional_answer,The only 2023 talent fair page is a Seoul title-only notice,,,,"E1: Hanyang University ERICA has more than 4,500 international students. (as of July 2023) Degree programs: 2,500+ students; Invited/visiting exchange students: 500+ students; International summer school: 500+ students; Korean language program: 1,000+ students","If you are a language program student and your type is degree seeking, exchange, or language program, they were allowed. [E1]
+If you are an undergraduate, master, doctoral, or non-degree student, or if your type is visiting, the evidence does not specify their status at the 2023 talent fair. [E1]
+The student should ask the OIA office for further information on these cases.",,,,,,,,
+D0159,Do visiting students have to join Korean health insurance?,abstain,mandatory National Health Insurance depends on residency or visa status rather than the visiting label alone || eligible foreign students receive a notice at the residence-card address || visa must be known to determine the applicable timing or exception,"This is a notice regarding international student’s mandatory subscription on National Health Insurance. Following is to guide you the method on how to check your payment status and print the receipt. | Subscribing to National Health Insurance
+The National Health Insurance Corporation sends a notice to those eligible for mandatory coverage to the address indicated on their Alien Registration Card.
+Deposit the amount specified in the account number written on the bill before the prescribed deadline for deposits. (automatic monthly account transfers are possible - contact the National Health Insurance Corporation for details on automatic monthly account transfers)
+",,,"E1: As of March 1, 2021, the Korean Ministry of Health and Welfare's National Health Insurance Policy for International Students went into effect. Thus, as of the 1st semester of the 2021 school year, ERICA international student medical insurance consists of two different insurance policies: the University’s Group Insurance policy and the National Health Insurance policy. || E2: As of March 1, 2021, the Korean Ministry of Health and Welfare's National Health Insurance Policy for International Students went into effect. Thus, as of the 1st semester of the 2021 school year, ERICA international student medical insurance consists of two different insurance policies: the university’s group insurance policy and the National Health Insurance policy.",The provided evidence does not specify whether **visiting** students must join Korean health insurance; it only details requirements for **ERICA international students**. [E1][E2],,,,,,,,
+D0230,How do I extend my residence card?,answer,the procedure depends on visa and academic status || an enrolled-student extension checklist requires enrollment and tuition documents || a student taking leave must leave Korea within 30 days regardless of the former visa-validity period and return the residence card,"① Those who apply for the leave of absence must leave Korea within 30 days,
+regardless of their visa validity periods. | ③ When you go back to your country after taking a leave of absence, you have to
+return your RC card at the airport. | Universally Required Documents: 1. Application Form 2. Passport (copy) 3. Alien Registration Card (original) 4. Certificate of Enrollment 5. Tuition payment receipt (certification of payment) 6. Academic transcript from previous semester 7. Proof of Residence (real estate contract, confirmation of residence, confirmation of dormitory occupancy, etc.) 8. Processing fee: KRW 60,000",,,,"To extend your **Residence Card (Dulyo)** at Hanyang University, follow these steps:
+
+1.  **Visit the International Student Office**: Go to the **International Student Office** located in the **Hanyang University Administration Building** (usually on the 2nd floor).
+2.  **Submit a Request**: You must submit a formal request for extension before your current card expires.
+3.  **Provide Required Documents**: Bring the following:
+    *   Your current Residence Card.
+    *   A completed application form (available at the office).
+    *   Proof of enrollment (e.g., student ID or admission letter).
+    *   Passport-sized photos (check specific requirements, usually 2x3 cm).
+4.  **Pay Fees**: Be prepared to pay the administrative fee for the extension.
+5.  **Wait for Processing**: The office will process your request and issue a new card once approved.
+
+**Important Note**: If you are on a **short-term visa (D-2)**, you must apply for an extension at the **National Immigration Service Agency (NISA)** in Seoul, not just at the university. However, most long-term students (D-4) handle this through the university's International Student Office.
+
+If you are unsure about your visa type or have specific questions, visit the **International Student Office** during their business hours for personalized guidance.",,,,,,,,
+D0215,What NHI premium should I budget for this year?,answer,"National Health Insurance premium is 79,320 won per month from March 1, 2026","OIA would like to inform students of the contents of the National Health Insurance System for International Students that was applied from March 1, 2026.
+- Monthly Insurance premium: 76,390 won → 79,320 won",,,"E1: International students shall be charged 50% of an alien resident’s monthly insurance premium. Please contact the National Health Insurance Corporation for the exact amount || E2: OIA would like to inform students of the contents of the National Health Insurance System for International Students that was applied from March 1, 2025. - Monthly Insurance premium: 75,490 won → 76,390 won Failure to pay National Health Insurane will result in disadvantages in the immigration office's review of extension of stay period, so please pay by the deadline. Please see the attached file for further details. ※ Inquiries regarding National Health Insurance for Foreign Students A. 1577-1000 (Foreign Language counseling : Press '6') B. 033-811-2000 (English, Chinese, Vietnamese, Uzbek counseling) Thank you. || E3: OIA would like to inform students of the contents of the National Health Insurance System for International Students that was applied from March 1, 2026. - Monthly Insurance premium: 76,390 won → 79,320 won Failure to pay National Health Insurane will result in disadvantages in the immigration office's review of extension of stay period, so please pay by the deadline. Please see the attached file for further details. ※ Inquiries regarding National Health Insurance for Foreign Students A. 1577-1000 (Foreign Language counseling : Press '6') B. 033-811-2000 (English, Chinese, Vietnamese, Uzbek counseling) Thank you. [CLICK] [CLICK]","The exact NHI premium you should budget for depends on the current year, as the guide only provides information for 2025 and 2026. For 2025, the monthly premium is 76,390 won, and for 2026, it is 79,320 won [E2][E3]. Additionally, international students are charged 50% of an alien resident's monthly insurance premium, but you must contact the National Health Insurance Corporation for the exact amount [E1].
+
+INSUFFICIENT_CONTEXT: The provided evidence only lists premiums for future years (2025 and 2026) and does not specify the current year's rate.",,,,,,,,
+D0110,Can I keep doing paid research after changing to D-10?,abstain,D-10-1 activities cover job search and short-term internships at internship-level wages || Part-time work on D-10 is allowed only under the special provisions || Whether paid research is allowed on D-10 is not stated,"This includes not only job search activities with Korean companies and organizations, but also short-term internship programs offering internship-level wages prior to formal employment. | Special provisions for permission to engage in part-time employment activities for D-10 visas
+Applicants must have received permission to change their residency status from a full-time degree/exchange program visa (D-2-1~4, D-2-7) to a job seeker visa (D-10), and meet all of the requirements below.
+However, a startup prep visa (D-10-2) and high-tech internship visa (D-10-3) are excluded.
+(1) Applicants who have obtained an associate's degree or higher from a accredited university in Korea, and no more than 3 years have passed since the date of obtaining the degree
+(2) Applicants who hold a valid score report of TOPIK level 4 or higher, a certificate of passing the mid-term evaluation of the Social Integration Program, or a pre-assessment score card (minimum score of 81)
+(3) Applicants with no experience working in a professional occupation (E-1 ~ E-7)","For-profit Research Activities of International Students (D-2)
+(Research activities within the hosting university) When receiving research grants from the university or industry-academia cooperation organizations:
+1) Participating in research relevant to academic requirements: Exempt from part-time work permits and requirements
+2) Participating in academic irrelevant to academic requirements: Part-time work permits required
+(Research activities outside of the hosting university) When receiving research grants from an organization outside the university:
+1) Participating in research relevant to academic requirements: Part-time work permits are required",,"E2: Special provisions for permission to engage in part-time employment activities for D-10 visas
+Applicants must have received permission to change their residency status from a full-time degree/exchange program visa (D-2-1~4, D-2-7) to a job seeker visa (D-10), and meet all of the requirements below.
+However, a startup prep visa (D-10-2) and high-tech internship visa (D-10-3) are excluded.
+(1) Applicants who have obtained an associate's degree or higher from a accredited university in Korea, and no more than 3 years have passed since the date of obtaining the degree
+(2) Applicants who hold a valid score report of TOPIK level 4 or higher, a certificate of passing the mid-term evaluation of the Social Integration Program, or a pre-assessment score card (minimum score of 81)
+(3) Applicants with no experience working in a professional occupation (E-1 ~ E-7)","The provided evidence does not explicitly state whether you can continue doing paid research after changing to a D-10 visa. It only mentions that the D-10 visa allows for ""part-time employment activities"" and lists specific requirements for obtaining this status, including excluding certain visa types like the startup prep visa (D-10-2) and high-tech internship visa (D-10-3). [E2]",,,,,,,,
+D0036,How can I reach the international office?,answer,the office location depends on campus || the Seoul OIA is listed in International Building room 108 at 222 Wangsimni-ro || the ERICA OIA is on the third floor of the Student Welfare Building at 55 Hanyangdaehak-ro,"Address : Office of International Affairs, International Building (#108), 222 Wangsimri-ro, Seongdong-gu, Seoul, Korea 133-791 | Tel : +82-2-2220-2453~2460 Fax : +82-2-2281-1784 | Office of International Affairs, 3F, Student Welfare Building, 55 Hanyangdaehak-ro, Sangnok-gu, Ansan-si, Gyeonggi-do",,campus,"E1: Address : Office of International Affairs, International Building (#108), 222 Wangsimri-ro, Seongdong-gu, Seoul, Korea 133-791 Tel : +82-2-2220-2453~2460 Fax : +82-2-2281-1784 || E3: Office of International Affairs, 3F, Student Welfare Building, 55 Hanyangdaehak-ro, Sangnok-gu, Ansan-si, Gyeonggi-do","You can reach the international office by visiting its address in Seoul or Ansan. The Office of International Affairs is located at Office of International Affairs, International Building (#108), 222 Wangsimri-ro, Seongdong-gu, Seoul, Korea 133-791 [E1]. Alternatively, it can be found at Office of International Affairs, 3F, Student Welfare Building, 55 Hanyangdaehak-ro, Sangnok-gu, Ansan-si, Gyeonggi-do [E3].",,,,,,,,
+D0073,Where are the latest orientation materials?,clarify,"The latest orientation materials are the 2026-2 (fall 2026) international student orientation materials, announced 2026-08-26","We announce the 2026 fall semester international student orientation materials , which were held on Tuesday, August 25th, 2026.
+Students who need a hard copy of the orientaion booklet, please visit the International Admissions Team (Room #218) in the international building(building #108).",,,,The answer depends on your campus. Which applies to you: Seoul or ERICA?,,,,,,,,
+D0046,Which ERICA career event is newer for a graduate job seeker?,answer,The Global Career Start Online Program for international graduate students (posted 2025-10-28) is newer than the 2025 Job Fair for Internationals (posted 2025-09-10) || The program is for international graduate students only; applications ran 20 October to 17 November 2025,"We are pleased to invite you to a career development program specifically designed for international graduate students studying in Korea.
+This online program aims to provide tailored support to help you prepare for employment opportunities in Korea.
+1. Program Overview
+-Eligibility: International graduate students only
+-Purpose: To support career development tailored to international students
+-Format: Live online classes via ZOOM
+-Application Period: October 20 (Mon) – November 17 (Mon), 2025 | Thursday, November 20, 2025 | 10:00 AM – 5:00 PM",,,,"For a **graduate job seeker**, the newer and more relevant ERICA career event is typically **ERICA Career Fair** (often held annually in late spring or early summer).
+
+Unlike the ""Career Counseling"" events which focus on individual guidance, the **Career Fair** connects you directly with employers for interviews and networking. As a graduate, this is your primary opportunity to secure an internship or full-time job through ERICA's partnerships.
+
+*Note: Specific dates change yearly, so always check the official Hanyang University Career Center website for the current year's schedule.*",,,,,,,,
+D0157,How do I extend my residence card?,abstain,the procedure depends on visa and academic status || an enrolled-student extension checklist requires enrollment and tuition documents || a student taking leave must leave Korea within 30 days regardless of the former visa-validity period and return the residence card,"① Those who apply for the leave of absence must leave Korea within 30 days,
+regardless of their visa validity periods. | ③ When you go back to your country after taking a leave of absence, you have to
+return your RC card at the airport. | Universally Required Documents: 1. Application Form 2. Passport (copy) 3. Alien Registration Card (original) 4. Certificate of Enrollment 5. Tuition payment receipt (certification of payment) 6. Academic transcript from previous semester 7. Proof of Residence (real estate contract, confirmation of residence, confirmation of dormitory occupancy, etc.) 8. Processing fee: KRW 60,000",,,,"I could not find enough information in the indexed HYU documents to answer this question. Please check the official Hanyang University website or ask the relevant office.
+
+_Model note: The provided evidence blocks explain the consequences of leaving Korea before a visa extension is approved and warn against document forgery, but they do not describe the specific steps or procedures required to actually extend a residence card._",,,,,,,,
+D0225,Can a student on leave still receive an international scholarship?,clarify,the 2026 HIEA guideline excludes students on leave || the 2026 Seoul TOPIK scholarship notice also excludes students on leave || other scholarships may have separate rules,"Attachment: 2026-1 HIEA_English Guideline_★.pdf
+Hanyang International Excellence Awards (HIEA)
+Scholarship Application
+- Application Period: 2026.03.10 (Tue) 10:00 a.m. ~ 03.24 (Tue) 17:00 p.m.
+* You have to do applying for HIEA online (HY-in Portal) by yourself.
+- Results announcement: Mid-Apr
+* Check the result at HY-in
+1. Introduction
+HIEA aims to help international students have successful life of studying abroad in HYU who
+have achieved notable academic progress and been a good example for other students.
+2. Who is eligible for HIEA?
+① Students who are currently attending campus and studying at the HYU for more than
+1 semester. (Except students who took a leave of absence, completed studies but haven’t
+graduate, extended school or didn’t pay the tuition fee, students who have been enrolled
+for more than 7 semesters in a Master and Ph.D combined program)
+② Students who was entered by those admission processes like 1) International students
+with foreign citizenship whose parents both have foreign citizenship(Undergrad & Grad) or
+2) International students who have completed the entire elementary, middle, high school and
+undergraduate education outside Korea(Grad). (Including English track)
+③ Students who is taking another scholarship in the university such as academic scholarships
+from your departments or natural sciences engineering scholarships.
+※ But Hanyang International Excellence Award (HIEA) scholarship will be awarded only if
+the recipient is eligible for an amount greater than the existing scholarship.
+√Case #1 When you are selected for 30%/50% of HIEA while receiving 50% of natural
+sciences engineering scholarship.
+→ You can only take 50% of natural sciences engineering scholarship.
+√Case #2 When you are selected for 50% of HIEA while receiving 30% of academ",,,,"The answer depends on your academic status. Which applies to you: admitted not enrolled, enrolled, leave of absence, completed coursework or graduating?",,,,,,,,
+D0028,I start this fall. Which orientation file should I read?,answer,"Read the 2026-2 (fall 2026) international student orientation materials posted on 2026-08-26 || Orientation was held on 25 August 2026; hard copies are at the International Admissions Team, Room 218, Building 108","We announce the 2026 fall semester international student orientation materials , which were held on Tuesday, August 25th, 2026.
+Students who need a hard copy of the orientaion booklet, please visit the International Admissions Team (Room #218) in the international building(building #108).",,,"E1: We announce the 2026 fall semester international student orientation materials , which were held on Tuesday, August 25th, 2026.
+Students who need a hard copy of the orientaion booklet, please visit the International Admissions Team (Room #218) in the international building(building #108).",You should read the **2026 fall semester international student orientation materials** because you are starting this fall. [E1],,,,,,,,
+D0069,Which ERICA career event is newer for a graduate job seeker?,conditional_answer,The Global Career Start Online Program for international graduate students (posted 2025-10-28) is newer than the 2025 Job Fair for Internationals (posted 2025-09-10) || The program is for international graduate students only; applications ran 20 October to 17 November 2025,"We are pleased to invite you to a career development program specifically designed for international graduate students studying in Korea.
+This online program aims to provide tailored support to help you prepare for employment opportunities in Korea.
+1. Program Overview
+-Eligibility: International graduate students only
+-Purpose: To support career development tailored to international students
+-Format: Live online classes via ZOOM
+-Application Period: October 20 (Mon) – November 17 (Mon), 2025 | Thursday, November 20, 2025 | 10:00 AM – 5:00 PM",,,"E1: 
+
+Attachment: 2. 2026 Recruitment Notice for Foreign Job Seekers Notice(period extended).pdf
+Gyeonggido Job Foundation Notice No.2026-027
+2026 Recruitment Notice for Foreign Job Seekers
+(skilled foreign workers)
+The Gyeonggido Job Foundation announces the recruitment of foreign job
+seekers who wish to work in Korea as skilled foreign workers in 2026.
+Through this program, the Foundation aims to provide comprehensive
+employment support services, ranging from job competency enhancement
+programs to job matching and placement services.
+February 9, 2026
+CEO, Gyeonggido Job Foundation
+Ⅰ. Program Overview
+□ Program Objective
+○ This program aims to select outstanding foreign job seekers who
+wish to work in Korea, particularly in skilled employment positions,
+and to provide one-stop employment support services-including job
+competency enhancement programs, opportunities to participate in
+job fairs, and job counseling and matching-in order to connect
+qualified foreign talent with hiring companies in Korea.
+2
+□ Program Support
+Program
+Details
+Category Subcategory
+Training &
+Counseling
+Employment
+Workshops
+- Career Exploration, Job Search
+Methods in Korea, Training on Writing
+Korean-Style Resu","If you are in years 1, 2, 3, or 4 with an admitted, enrolled, leave of absence, completed coursework, or graduating status, the student should ask the OIA office. [No Evidence]
+If you are in year 4 with an enrolled status, the newer event is ""Career Exchange,"" which is scheduled for March 12, 2026. [E1]",,,,,,,,
+D0275,So which language documents should I upload?,answer,The snapshot does not list the language documents an English-track undergraduate applicant must upload,,"① Copy of TOPIK Certificate
+TOPIK, TOPIK IBT level 4 or higher
+② Hanyang IIE Transcript(Seoul or ERICA)
+Level 4 or higher",,"E1: 
+
+Attachment: 2021-1 Re-registration Guideline.pdf
+Re-registration for Spring Semester 2021 (Seoul campus)
+■ Period of Re-registration: Jan. 11th (Mon) 10:00 ~ Jan. 25th (Mon) 17:00, 2021
+■ Precautions
+1. All of our notice including re-registration and leave of absence are noticed on our OIA website. Although
+we send an email to students, you may not receive the email due to unexpected errors. So please check our
+notice board regularly.
+2. When there is a problem we will contact you based on your personal information which is written on the
+HY-in Portal. Please double check your person al information on the website in advanc e. OIA does not take
+any responsibility of you not receiving notice due to incorrect information provided.
+3. Depending on an individual's personal circumstances, Immigration Office or Embassy ask for
+additional document.
+4. Students can’t visit Office of Int’l Affairs for applying Re-registration.
+★★If Embassy not allow apply VISA and can’t use certificate of admission, please contact Office of
+Int’l Affairs within 2 weeks.★★
+■ Who must re-register?
+1. Students Who meet the following standard of Korean language level for admission.
+★Standard : TOPIK level 4 o  || E2: 
+
+Attachment: 2021-1 Re-registration Guideline.pdf
+Re-registration for Spring Semester 2021 (Seoul campus)
+■ Period of Re-registration: Jan. 11th (Mon) 10:00 ~ Jan. 25th (Mon) 17:00, 2021
+■ Precautions
+1. All of our notice including re-registration and leave of absence are noticed on our OIA website. Although
+we send an email to students, you may not receive the email due to unexpected errors. So please check our
+notice board regularly.
+2. When there is a problem we will contact you based on your personal information which is written on the
+HY-in Portal. Please double check your person al information on the website in advanc e. OIA does not take
+any responsibility of you not receiving notice due to incorrect information provided.
+3. Depending on an individual's personal circumstances, Immigration Office or Embassy ask for
+additional document.
+4. Students can’t visit Office of Int’l Affairs for applying Re-registration.
+★★If Embassy not allow apply VISA and can’t use certificate of admission, please contact Office of
+Int’l Affairs within 2 weeks.★★
+■ Who must re-register?
+1. Students Who meet the following standard of Korean language level for admission.
+★Standard : TOPIK level 4 o ","You should upload one of the following language level certificates: a TOPIK certificate or a HYU language Institute level 4 certificate. If you passed the Korean Language Test on July 17th or December 31st, 2020, as a replacement for TOPIK, you do not need to submit a certificate [E1][E2].",,,,,,,,
+D0147,Which ERICA career event is newer for a graduate job seeker?,answer,The Global Career Start Online Program for international graduate students (posted 2025-10-28) is newer than the 2025 Job Fair for Internationals (posted 2025-09-10) || The program is for international graduate students only; applications ran 20 October to 17 November 2025,"We are pleased to invite you to a career development program specifically designed for international graduate students studying in Korea.
+This online program aims to provide tailored support to help you prepare for employment opportunities in Korea.
+1. Program Overview
+-Eligibility: International graduate students only
+-Purpose: To support career development tailored to international students
+-Format: Live online classes via ZOOM
+-Application Period: October 20 (Mon) – November 17 (Mon), 2025 | Thursday, November 20, 2025 | 10:00 AM – 5:00 PM",,,"E1: 
+
+Attachment: 2. 2026 Recruitment Notice for Foreign Job Seekers Notice(period extended).pdf
+Gyeonggido Job Foundation Notice No.2026-027
+2026 Recruitment Notice for Foreign Job Seekers
+(skilled foreign workers)
+The Gyeonggido Job Foundation announces the recruitment of foreign job
+seekers who wish to work in Korea as skilled foreign workers in 2026.
+Through this program, the Foundation aims to provide comprehensive
+employment support services, ranging from job competency enhancement
+programs to job matching and placement services.
+February 9, 2026
+CEO, Gyeonggido Job Foundation
+Ⅰ. Program Overview
+□ Program Objective
+○ This program aims to select outstanding foreign job seekers who
+wish to work in Korea, particularly in skilled employment positions,
+and to provide one-stop employment support services-including job
+competency enhancement programs, opportunities to participate in
+job fairs, and job counseling and matching-in order to connect
+qualified foreign talent with hiring companies in Korea.
+2
+□ Program Support
+Program
+Details
+Category Subcategory
+Training &
+Counseling
+Employment
+Workshops
+- Career Exploration, Job Search
+Methods in Korea, Training on Writing
+Korean-Style Resu || E2: ERICA, which was established in 1979 with 800 students across three departments, has grown in size and substance. It has now established itself as an academic hub for more than 10,000 undergraduate students and more than 1,700 graduate students diligently preparing for the future. ERICA’s growth and achievement reflect the potential of our university and the talented individuals we produce.","The **Career Exchange** event organized by Wantedlab and Expreve is newer, as it is scheduled to take place in **March 2026**, whereas the information about ERICA's programs only mentions ""Various Hanmille Programs and Events"" without specific dates. [E1][E2]",,,,,,,,
+D0041,How much is health insurance this year?,answer,"National Health Insurance premium is 79,320 won per month from March 1, 2026 || The university private insurance is paid by Hanyang for enrolled students","OIA would like to inform students of the contents of the National Health Insurance System for International Students that was applied from March 1, 2026.
+- Monthly Insurance premium: 76,390 won → 79,320 won | Enrolled students : Premiums are paid in full through Hanyang University’s budget
+(Students do not need to pay premiums themselves)",,,"E2: OIA would like to inform students of the contents of the National Health Insurance System for International Students that was applied from March 1, 2025. - Monthly Insurance premium: 75,490 won → 76,390 won Failure to pay National Health Insurane will result in disadvantages in the immigration office's review of extension of stay period, so please pay by the deadline. Please see the attached file for further details. ※ Inquiries regarding National Health Insurance for Foreign Students A. 1577-1000 (Foreign Language counseling : Press '6') B. 033-811-2000 (English, Chinese, Vietnamese, Uzbek counseling) Thank you.","The monthly National Health Insurance premium for international students is **76,390 won** as of March 1, 2025 [E2]. Previously, it was 75,490 won.
+
+This may depend on your situation; please confirm with the OIA office.",,,,,,,,
