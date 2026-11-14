@@ -1,0 +1,11 @@
+# Notes, part 2 (annotator B, claude-sonnet-5-5)
+- T2-061/063/065/071/111/113/115: campus unstated and answers differ, so campus branch (11.6); conditional_answer, clarify acceptable.
+- T2-066: campus and academic_status both unstated, 4 distinct answers, so clarify.
+- T2-099/107: only ERICA has current-term dates, Seoul lacks them; partial, clarify on campus, abstain acceptable.
+- T2-098/104/106/109: time-specific dates only for older terms; abstain (T2-109 partial, annual window known).
+- T2-079: KOICA NEXT lists Vietnam but is an ERICA master's program; answer, persona ineligible (9.6).
+- T2-090: Hanyangbot app is the corpus referral for bus timetables, so external_only; T2-088 inter-campus shuttle is unanswerable.
+- T2-069: group applications exist on both campuses with the same answer, so no branch; attachment-only guide not needed.
+- T2-067/112: only one campus has evidence while campus is unstated; treated as answer (10.4.1 open).
+- T2-119: "Am I allowed to apply?" has no referent; abstain, not clarify (no vocabulary attribute).
+- T2-083: ERICA page states national immigration fee, used for Seoul student; "renew" read as extension.
