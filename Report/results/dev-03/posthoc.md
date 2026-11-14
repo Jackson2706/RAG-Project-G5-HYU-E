@@ -41,3 +41,19 @@ Not pre-registered. From the per-case tables of evaluator v1 and v2 and A0's sav
 | cases labelled abstain | 19 |
 | cases that need branching (labelled conditional_answer or clarify) | 7 |
 | cases | 47 |
+
+## A0 vs R16 branch hits, exact McNemar (post hoc, exploratory, not Holm-corrected)
+
+7 cases; discordant: A0 only 4, R16 only 0; two-sided exact p = 0.1250.
+
+## A0b on the cases that need branching
+
+| case | expected | A0b action | A0b reply starts |
+|---|---|---|---|
+| T14-017 | conditional_answer | ANSWER | To book the International Students Counseling Month program, |
+| T14-032 | conditional_answer | ABSTAIN | I could not find this in the official English HYU pages. Ple |
+| T14-044 | conditional_answer | ANSWER | You can contact the Office of International Affairs (OIA) by |
+| T14-120 | conditional_answer | ABSTAIN | I could not find this in the official English HYU pages. Ple |
+| T14-130 | clarify | ANSWER | Yes, you can work part-time at Hanyang University under spec |
+| T14-132 | clarify | ANSWER | International students must register for group insurance due |
+| T14-209 | conditional_answer | ABSTAIN | The official pages I found do not apply to you (they are for |

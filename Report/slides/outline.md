@@ -22,8 +22,11 @@ dev cases only and is never used for a claim.
    saved test replies. No system re-run.
 9. **Main result, both evaluators.** Acceptable action, v1 → v2: B0 0.736 → 0.661, R16 0.694 → 0.628,
    G1 0.818 → 0.719, A0 0.248 → 0.256. AAES stays far behind on the ordinary cases.
-10. **What AAES gets right** (v2, exploratory). Branch recall on the 15 cases that need it: A0 10/15, R16 2/15,
-    the other baselines 0/15. On the 6 clarify cases A0 is acceptable on 0.833; every baseline on 0.000.
+10. **What AAES gets right, and what it does not** (v2, exploratory). Branch recall on the 15 cases that need it:
+    A0 10/15, R16 2/15, the other baselines 0/15 (A0 vs R16 exact McNemar p = 0.0215, post hoc, not
+    Holm-corrected). On the 6 clarify cases A0 is acceptable on 0.833; every baseline on 0.000. But A3 (always
+    ask) hits the same 10 plus one, at the same precision (0.128 vs 0.123): the recall comes from being willing
+    to ask. "Evidence-conditioned clarification beats always asking" is not supported.
 11. **What it gets wrong.** A0 branches on 81 of 121 cases (precision 0.123). 52 questions, 35 of them about the
     campus; 27 of the 46 abstain cases get a question. G0 closed book reaches 0.669 under v2: the action metric
     mostly measures answer vs referral on ordinary questions.
@@ -35,11 +38,13 @@ dev cases only and is never used for a claim.
     Macro-F1 vs A4: −0.066 under both (Holm 0.393 / 0.463), not significant. Correctness: not computed.
 14. **Ablations read correctly.** A2 gets the stated profile, so it only tests extraction of stated facts
     (0.273 vs 0.256). A6 = A0 on every action: only 3 superseded documents. Dev already showed the gap
-    (A0 0.362 vs B0 0.574); our automatic gate checked completion, not design conformance.
+    (A0 0.362 vs B0 0.574); our automatic gate checked completion, not design conformance, and the step-3
+    design reached `aaes_spec.md` only as a one-line summary that no gate compared with the label guideline.
 15. **What we would change, tried on dev only (A0b, exploratory).** Branch on distinct answer values; campus only
     when both campuses have scoped chunks; one yes/no check before any question. Dev, v2: acceptable 0.596 vs A0
-    0.362 (B0 0.638, R16 0.681), unnecessary clarification 0.000, but branch recall 0/7 (A0 5/7). Needs a fresh
-    test set.
+    0.362 (B0 0.638, R16 0.681), unnecessary clarification 0.000, but branch recall 0/7 (A0 5/7): 3 abstain,
+    4 answer. Records keep no step details; the answer-value comparison merges "up to 20 hours per week" with
+    "up to 10 hours per week" (Jaccard 0.6). Not fixed, not re-run. Needs a fresh test set.
 16. **Limitations.** LLM labels, unaudited tags (G2b failed on three attributes), evaluator v2 designed after
     seeing v1 test results (frozen on dev), 15 branching cases, one generator.
 17. **Course mapping.** Relevance vs eligibility, candidate retrieval vs evidence selection, prefiltering vs

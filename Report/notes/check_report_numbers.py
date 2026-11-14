@@ -108,4 +108,12 @@ for preset, value in [("A0b", "0.596"), ("A0", "0.362"), ("B0", "0.638"), ("R16"
 check(close("0.000", d3["A0b"]["unnecessary_clarification_rate"]) and close("0.425", d3["A0"]["unnecessary_clarification_rate"]), "dev-03 unnecessary")
 b3 = {r["preset"].split("_")[0]: r for r in csv.DictReader(open(R + "dev-03/posthoc_branch_detection.csv")) if r["evaluator"] == "v2"}
 check((b3["A0b"]["tp"], b3["A0"]["tp"], b3["A0"]["expected_branching"]) == ("0", "5", "7"), "dev-03 branch recall")
+post = open(R + "test-final/posthoc.md").read()
+check("A0 10, A3 11, both 10, A0 only 0, A3 only 1 (A3 only: T14-224)" in post, "A0 subset of A3")
+check("discordant: A0 only 9, R16 only 1; two-sided exact p = 0.0215" in post and "p = 0.0215" in draft, "McNemar")
+check(branch["A3"]["tp"] == "11" and branch["A3"]["predicted_branching"] == "86", "A3 11/86")
+a0b = open(R + "dev-03/posthoc.md").read().split("## A0b on")[1]
+check(a0b.count("| ABSTAIN |") == 3 and a0b.count("| ANSWER |") == 4, "A0b 3 abstain / 4 answer")
+for q, rows in (("T14-032", 7), ("T14-120", 5)):
+    check(next(d for d in dev if d["qid"] == q)["branches"] == rows, "A0 replay rows", q)
 print("checked", n, "mismatches", bad)

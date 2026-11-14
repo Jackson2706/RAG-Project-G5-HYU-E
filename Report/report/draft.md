@@ -12,7 +12,10 @@ cases with LLM-annotated labels. The first evaluator (v1) could not score a base
 question, so we re-scored the saved replies with a reply-text classifier (v2). v2 agrees with a blind annotator at
 κ = 0.899 on dev, and we did not re-run any system on test. Under v2, AAES is the only method that branches on
 the cases that need it: it gives a conditional answer or a question on 10 of the 15 such cases, against 2 for
-the prompted conditional baseline R16 and 0 for the other baselines. It also branches on 81 of 121 cases, so
+the prompted conditional baseline R16 and 0 for the other baselines. Its own ablation A3, which asks whenever a
+student detail is missing, finds the same 10 cases plus one more with the same precision, so on this test set
+choosing when to ask from the evidence added nothing to branch recall. The recall comes from being willing to
+ask. AAES also branches on 81 of 121 cases, so
 its precision is 0.123, and its acceptable-action rate is 0.256 against 0.661 for basic dense RAG. We trace the
 over-triggering to three rules in the code: branches are defined by which chunks apply, not by what they say;
 the campus is always a candidate attribute; and the policy asks before it checks that any evidence answers the
@@ -220,6 +223,10 @@ multi-session (12). B0 reaches 0.704, 0.708, 0.717, 0.750 and 0.917 on the same 
   on 15. Of the 46 cases labelled abstain, it abstains on 11 and asks on 27. Of its 52 questions, 35 ask for the
   campus, 7 for the degree level, 5 for the academic status, 3 for the student type and 2 for the TOPIK level
   (`posthoc_a0.csv`, from the CLARIFY templates in `raw/`).
+- *A0 vs A3 and R16 on the 15 cases that need branching (v2, post hoc).* A0's 10 branch hits are a subset of
+  A3's 11 (A3 adds T14-224), at almost the same precision (10/81 = 0.123 against 11/86 = 0.128). Against R16, 9
+  cases are hit by A0 only and 1 by R16 only; an exact McNemar test gives p = 0.0215. This test is post hoc,
+  exploratory and not Holm-corrected.
 - *Why A0 asks (dev only).* The saved test records do not keep the AAES trace, and A34 forbids re-running a system
   on test, so we replayed A0's decision step on the 47 dev cases (`Sources/scripts/aaes_dev_diagnostics.py`,
   stopping before generation). All 47 actions matched the dev-02 run. Of the 21 dev questions, 16 had the reason
@@ -231,7 +238,11 @@ multi-session (12). B0 reaches 0.704, 0.708, 0.717, 0.750 and 0.917 on the same 
 
 AAES branches on the cases that need it and on many that do not. Under v2 it is the only method with branching behaviour where branching is expected: 10 of the 15 such test cases get a
 conditional answer or a question, against 2 for R16 and none for the other retrieval baselines. Prompting a
-model to give per-case answers, as R16 does, rarely produces them. A0, however, branches on 81 of the 121 cases, and most
+model to give per-case answers, as R16 does, rarely produces them. Against its own ablation, however, AAES
+gains nothing: A3, which asks whenever a student detail is missing, hits the same 10 cases and one more, at the
+same precision. The branching recall comes from being willing to ask, not from choosing when to ask from the
+evidence, so our research question (evidence-conditioned clarification beats always asking) is not supported on
+this test set. A0, however, branches on 81 of the 121 cases, and most
 of the 106 ordinary cases need a plain answer or a referral. That is why its acceptable-action rate (0.256 under
 v2) is far below the baselines (0.628 to 0.661). We checked the cause against the code in
 `Sources/backend/app/rag/aaes.py`.
@@ -269,7 +280,9 @@ The problem was visible before the test run. On dev, A0 already scored 0.362 acc
 under v1 (`Report/results/dev-02/summary.md`). Our automatic G5 gate (A33) checked that the dev run completed and
 that the comparisons were present. It did not check that the implementation matched the design and the labels, so
 the gap between "distinct answer values" and `information_gain` reached the test
-run. We list this as a process limitation.
+run. The step-3 design (compare answer values; a branch without evidence is not a different answer) reached
+`aaes_spec.md` only as a one-line summary, and no gate compared the spec with the label guideline. We list this
+as a process limitation.
 
 A next version would follow the design. It would branch only on distinct non-empty answer values, keep the campus
 as a candidate only when there are campus-scoped chunks for both campuses, and run one yes/no sufficiency check
@@ -277,9 +290,20 @@ before any question. We implemented this as preset A0b and ran it on dev only, s
 and confirming it needs a fresh test set (`Report/results/dev-03/summary_v2.md`, evaluator v2, 47 dev cases). A0b
 reaches 0.596 acceptable action against 0.362 for A0, 0.638 for B0 and 0.681 for R16, and it asks no unnecessary
 question (0.000 against 0.425 for A0). It also finds none of the 7 dev cases that need branching, where A0 found 5
-(`Report/results/dev-03/posthoc.md`). The three changes remove the over-triggering and, on these cases, the
-branching with it. The lexical comparison of extracted answers and the 4B extractor are the likely weak points; we
-did not tune them. A0b never ran on test (the runner plans it for dev only).
+(`Report/results/dev-03/posthoc.md`). On those 7 cases A0b abstains on 3 and answers 4. The saved records keep
+the action and the reply but not the step details, so we can only partly say why. T14-209's abstention is the
+"do not apply" template, which comes from the first ABSTAIN rule that A0 shares, not from the new yes/no check.
+T14-032 and T14-120 get the "could not find" reply, which both new paths produce (the yes/no check said no, or
+every extraction returned NONE); on A0's dev replay these cases had 7 and 5 branch rows, more than
+`max_branches` = 3, which points to the yes/no check, but the record does not confirm it. Of the 4 answers,
+T14-130 already had no branch in A0. T14-044 branched in A0 only on the campus, with no applicable chunk on
+one side, so A0b answers through the campus rule or the empty branch, not through a merge. T14-017 and T14-132
+branched in A0 on more than one attribute and answer in A0b through the campus rule, an empty branch or merged
+answer values; the record does not say which. The merge is a real
+risk in the code: `answer_key` and `distinct_answers` treat "up to 20 hours per week" and "up to 10 hours per
+week" as the same answer (word-set Jaccard 3/5 = 0.6 ≥ 0.5), so branches that differ only in a number merge. We
+did not fix or re-run A0b. The three changes remove the over-triggering and, on these cases, the branching with
+it. A0b never ran on test (the runner plans it for dev only).
 
 ## 8. Limitations
 
@@ -297,7 +321,8 @@ did not tune them. A0b never ran on test (the runner plans it for dev only).
   dev, not from test.
 - Process: the automatic G5 gate checked completion, not conformance to the design, so the gap between the
   labels' definition of a branch (distinct answer values) and the code's (applicable chunk sets) reached the test
-  run, although dev already showed A0 below B0.
+  run, although dev already showed A0 below B0. The step-3 design reached `aaes_spec.md` only as a one-line
+  summary, and no gate compared the spec with the label guideline.
 - Twelve cases were excluded after the split, mostly because the right label needed gold spans for a campus
   branch that the primary label lacked. At least one dev case (T14-203) counts a campus as stated although the
   text never names it; we did not inspect the test split for this.

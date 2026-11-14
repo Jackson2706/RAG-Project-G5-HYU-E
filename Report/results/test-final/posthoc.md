@@ -78,3 +78,11 @@ Not pre-registered. From the per-case tables of evaluator v1 and v2 and A0's sav
 | cases labelled abstain | 46 |
 | cases that need branching (labelled conditional_answer or clarify) | 15 |
 | cases | 121 |
+
+## A0 vs A3 branch hits (v2, cases that need branching)
+
+A0 10, A3 11, both 10, A0 only 0, A3 only 1 (A3 only: T14-224), of 15 cases.
+
+## A0 vs R16 branch hits, exact McNemar (post hoc, exploratory, not Holm-corrected)
+
+15 cases; discordant: A0 only 9, R16 only 1; two-sided exact p = 0.0215.
