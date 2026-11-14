@@ -10,7 +10,7 @@ from app.rag.applicability import ChunkCondition
 from app.rag.aaes import UNKNOWN_CAVEAT
 from app.rag.presets import PRESETS_BY_ID
 
-AAES_PRESETS = ("A0_AAES", "A1_AAES_HARD_FILTER", "A3_AAES_ALWAYS_CLARIFY", "A4_QUESTION_ONLY_AMBIGUITY", "A6_AAES_NO_TEMPORAL")
+AAES_PRESETS = ("A0_AAES", "A0b_AAES_SPEC_FIXED", "A1_AAES_HARD_FILTER", "A3_AAES_ALWAYS_CLARIFY", "A4_QUESTION_ONLY_AMBIGUITY", "A6_AAES_NO_TEMPORAL")
 
 
 class FakeCrossEncoder:
@@ -83,3 +83,16 @@ def test_a4_asks_about_a_word_in_the_question_without_the_llm(api, corpus, db, f
     stages = {s["stage_id"]: s for s in trace["stages"]}
     assert stages["evidence_sufficiency"]["output"]["signals"]["clarify_attribute"] == "visa"
     assert len(fake_ollama.requests) == before
+
+
+def test_a0b_drops_the_campus_branch_when_only_one_campus_has_scoped_evidence(api, corpus, db, fake_ollama):
+    api.post("/api/ingest", json={"folder": "raw"})
+    _tag_everything(db, "seoul", "unconditioned")  # every chunk is Seoul-only: A0 still branches on the campus
+    body = {"question": "What documents does the need-based scholarship require?", "stages": PRESETS_BY_ID["A0b_AAES_SPEC_FIXED"]["stages"]}
+    trace = api.post("/api/chat", json=body).json()
+    assert trace["status"] == "completed", trace["error"]
+    stage = {s["stage_id"]: s for s in trace["stages"]}["evidence_sufficiency"]
+    assert stage["details"]["campus_candidate"] is False
+    assert trace["action"] == "ANSWER"
+    a0 = api.post("/api/chat", json={**body, "stages": PRESETS_BY_ID["A0_AAES"]["stages"]}).json()
+    assert a0["action"] in ("CONDITIONAL", "CLARIFY")

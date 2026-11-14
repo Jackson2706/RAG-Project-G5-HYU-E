@@ -79,6 +79,7 @@ from app.rag.blocks.evidence.evidence_selection.token_budget_selector import Tok
 from app.rag.blocks.evidence.evidence_selection.top_k_selector import TopKSelector
 from app.rag.blocks.evidence.evidence_selection.oracle_evidence import OracleEvidenceSelector
 from app.rag.blocks.evidence.evidence_sufficiency.applicability_sufficiency import ApplicabilitySufficiency
+from app.rag.blocks.evidence.evidence_sufficiency.spec_fixed_sufficiency import SpecFixedApplicabilitySufficiency
 from app.rag.blocks.evidence.evidence_sufficiency.base import BaseSufficiencyChecker
 from app.rag.blocks.evidence.evidence_sufficiency.sufficiency_checker import ScoreThresholdChecker
 
@@ -425,6 +426,16 @@ PIPELINE: list[Stage] = [
                          "policy": Param("enum", "aaes", "Policy", "aaes, always_clarify (A3: ask whenever an attribute is missing), or question_only "
                                          "(A4: ask about what the question mentions, ignoring the evidence).",
                                          ui="select", options=("aaes", "always_clarify", "question_only")),
+                     }),
+              Method("applicability_sufficiency_spec", "Applicability sufficiency, spec-fixed (A0b)", SpecFixedApplicabilitySufficiency, True,
+                     "A0's steps 3-4, but branches only on distinct answer values (short LLM extraction), campus only when both campuses "
+                     "have scoped evidence, and a yes/no sufficiency check before asking.", parameters={
+                         "relevance_threshold": Param("float", 0.30, "Relevance threshold", "Query coverage a chunk needs to count as relevant.",
+                                                      min=0, max=1, step=0.01),
+                         "max_branches": Param("integer", 3, "Max branches", "More distinct evidence sets than this → sufficiency check, then ask.",
+                                               ui="number", min=1, max=10),
+                         "temporal": Param("boolean", True, "Temporal rule", "Prefer the newest version.", ui="toggle"),
+                         **_llm_params(48, 256),
                      }),
           ]),
     Stage("context_construction", "Context Construction", "online", BaseContextBuilder,

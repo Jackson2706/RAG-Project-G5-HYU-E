@@ -189,8 +189,11 @@ def question_cues(question: str, profile: dict[str, dict]) -> list[str]:
 
 
 def decide(chunks: list[dict], profile: dict[str, dict], max_branches: int = 3, temporal: bool = True, policy: str = "aaes",
-           question: str = "") -> dict:
-    """Step 4 over the RELEVANT selected chunks: ABSTAIN → CONFIRM → ANSWER → CONDITIONAL → CLARIFY (spec order)."""
+           question: str = "", exclude: frozenset[str] = frozenset()) -> dict:
+    """Step 4 over the RELEVANT selected chunks: ABSTAIN → CONFIRM → ANSWER → CONDITIONAL → CLARIFY (spec order).
+
+    exclude: attributes that may not branch (A0b drops the campus unless both campuses have campus-scoped support).
+    """
     known = known_values(profile)
     labels = {c["id"]: label_chunk(c["condition"], c.get("status"), known) for c in chunks}
     support = [c for c in chunks if labels[c["id"]] != FIT_CONFLICTING]
@@ -216,7 +219,7 @@ def decide(chunks: list[dict], profile: dict[str, dict], max_branches: int = 3, 
             if information_gain(attribute, [c for c in chunks if c["id"] in applying], unsure)[0] > 0:
                 return {**out, "action": "CONFIRM", "reason": "stale_value", "confirm_attribute": attribute}
 
-    unknown_attrs = [a for a in sorted(_condition_attributes(support), key=order.index) if a not in known]
+    unknown_attrs = [a for a in sorted(_condition_attributes(support), key=order.index) if a not in known and a not in exclude]
     if policy == "always_clarify":  # A3: no information gain, any unknown condition attribute triggers a question
         constrained = [a for a in unknown_attrs if a != "campus" or any(len(c["condition"]["campus"]) == 1 for c in support)]
         if constrained:
@@ -247,6 +250,50 @@ def decide(chunks: list[dict], profile: dict[str, dict], max_branches: int = 3, 
     if len(docs) > 1:
         return {**out, "action": "CLARIFY", "reason": "different_procedures", "clarify_attribute": best}
     return {**out, "action": "CONDITIONAL", "reason": "few_branches"}
+
+
+# --------------------------------------------------------------------------- A0b "spec-fixed" helpers (amendment A34, dev only)
+
+
+def both_campuses_scoped(chunks: list[dict]) -> bool:
+    """Campus may branch only if some chunk is scoped to Seoul alone and another to ERICA alone.
+
+    >>> both_campuses_scoped([{"condition": {"campus": ["seoul"]}}, {"condition": {"campus": ["erica"]}}])
+    True
+    """
+    single = {c["condition"]["campus"][0] for c in chunks if len(c["condition"].get("campus") or []) == 1}
+    return {"seoul", "erica"} <= single
+
+
+_STOP = {"the", "and", "for", "you", "your", "are", "can", "with", "from", "this", "that", "will", "must", "have", "has", "not", "all"}
+
+
+def answer_key(value: str | None) -> frozenset[str] | None:
+    """An extracted answer as a set of content words; None / "NONE" / "" -> None. "Fee: 30,000 won." -> {"fee", "30000", "won"}."""
+    if not value or value.strip().upper().startswith("NONE"):
+        return None
+    words = re.findall(r"[a-z0-9]+", value.lower().replace(",", ""))
+    return frozenset(w for w in words if w not in _STOP and (len(w) > 2 or w.isdigit())) or None
+
+
+def distinct_answers(keys: list[frozenset[str] | None]) -> list[int]:
+    """Group label per answer (-1 = no answer); two answers are the same when their word sets overlap >= 0.5 (Jaccard).
+
+    shortcut: lexical sameness, so paraphrases with different words count as different; upgrade to an LLM comparison
+    if dev shows that. [{"30000","won"}, {"30000","won","fee"}, {"free"}, None] -> [0, 0, 1, -1].
+    """
+    groups: list[frozenset[str]] = []
+    out = []
+    for key in keys:
+        if key is None:
+            out.append(-1)
+            continue
+        match = next((i for i, g in enumerate(groups) if len(key & g) / len(key | g) >= 0.5), None)
+        if match is None:
+            groups.append(key)
+            match = len(groups) - 1
+        out.append(match)
+    return out
 
 
 # --------------------------------------------------------------------------- templates (no LLM)

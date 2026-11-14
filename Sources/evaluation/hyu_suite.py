@@ -59,7 +59,8 @@ def gold_chunk(chunk_id: str) -> dict | None:
     return {"doc_id": doc_id, "source_spans": [[int(start), int(end)]]}
 
 
-LLM_METHODS = {"query_rewriting": None, "generation": None, "query_understanding": "self_query"}  # None = any method calls the LLM
+LLM_METHODS = {"query_rewriting": None, "generation": None, "query_understanding": "self_query",
+               "evidence_sufficiency": "applicability_sufficiency_spec"}  # None = any method calls the LLM
 
 
 def llm_calls(trace: dict) -> int:

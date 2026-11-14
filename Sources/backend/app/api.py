@@ -62,7 +62,7 @@ async def check_runnable(request: Request, config: dict, index_id: str) -> None:
     if built_with and built_with != config["embedding"]["method"]:
         errors.append({"stage_id": "embedding", "param": None, "message": f"Index '{index_id}' was built with the '{built_with}' embedding; "
                        f"select it (vectors of different models cannot be compared)"})  # fmt: skip
-    tagged = [s.stage_id for s in PIPELINE if config[s.stage_id]["method"] in ("applicability_reranker", "applicability_sufficiency")]
+    tagged = [s.stage_id for s in PIPELINE if config[s.stage_id]["method"] in ("applicability_reranker", "applicability_sufficiency", "applicability_sufficiency_spec")]
     if tagged and not (manifest or {}).get("applicability"):
         errors.append({"stage_id": tagged[0], "param": None, "message": f"Index '{index_id}' has no applicability tags. AAES needs the "
                        f"tagged HYU index ('{get_settings().hyu_index_id}')."})  # fmt: skip

@@ -21,13 +21,21 @@ class ApplicabilitySufficiency(BaseSufficiencyChecker):
 
     async def check(self, question: str, evidence: list[Evidence], profile: dict | None = None) -> SufficiencyDecision:
         profile = profile or extract_profile(question)
+        coverage, chunks = self.relevant_chunks(question, evidence)
+        d = decide(chunks, profile, max_branches=self.params["max_branches"], temporal=self.params["temporal"], policy=self.params["policy"],
+                     question=question)
+        return self.result(d, evidence, profile, coverage)
+
+    def relevant_chunks(self, question: str, evidence: list[Evidence]) -> tuple[dict[str, float], list[dict]]:
+        """(query coverage per chunk, the relevant chunks in the form decide() reads)."""
         coverage = {e.chunk_id: round(query_coverage(question, e.text), 4) for e in evidence}
         relevant = [e for e in evidence if coverage[e.chunk_id] >= self.params["relevance_threshold"]]
         chunks = [{"id": e.chunk_id, "doc_id": e.doc_id, "condition": e.applicability.get("condition") or UNTAGGED,
                    "status": e.applicability.get("condition_status") or "unknown", "superseded": e.applicability.get("superseded", False)}
                   for e in relevant]  # fmt: skip
-        d = decide(chunks, profile, max_branches=self.params["max_branches"], temporal=self.params["temporal"], policy=self.params["policy"],
-                     question=question)
+        return coverage, chunks
+
+    def result(self, d: dict, evidence: list[Evidence], profile: dict, coverage: dict[str, float]) -> SufficiencyDecision:
         action = d["action"]
         support = [e.chunk_id for e in evidence if e.chunk_id in set(d["support"])]
         proceed = action in ("ANSWER", "CONDITIONAL")
