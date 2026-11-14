@@ -1072,3 +1072,14 @@ plan was given (14:44 KST Sat); Step 8 starts 3 hours before it once known, else
   blind annotators + adjudicator, deterministic checks, kappa, frozen sha256 before any system run. Step 6
   PREREG_test2.md before one run (primary AG vs base acceptable rate, v2). Step 7 report and slides. Step 8
   finalize.
+
+**A36 Evaluator v3: answer quality on saved replies (decision from the planning chat, 2026-11-14).** No system
+re-run. It computes the pre-registered "correctness" comparison that was NOT_COMPUTED, as a post-hoc evaluator (v3)
+with an LLM judge, reported as such. Presets B0, R15, R16, A0, G0, G1 on test-1 (121) and on dev (47, validation).
+Per reply, against the label and the cited chunk texts: facts correct/wrong/missing, wrong-group, cited-sentence
+support, conditions match (conditional answers), branch-attribute question (clarify), right referral (abstain).
+Judge: fresh subagents on the strongest model, blind to preset names, items shuffled; prompt
+`Sources/evaluation/judge_v3_prompt.md` written on dev replies and frozen (hash recorded) before any test reply is
+judged. Validation: a second fresh subagent on a different model judges 100 dev replies (kappa per field); 20 dev
+replies for the human in `Report/notes/quality_human_check.csv`. Report per preset with paired bootstrap CIs for A0
+vs B0 and A0 vs R16.
