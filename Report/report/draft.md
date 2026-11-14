@@ -23,7 +23,9 @@ over-triggering to three rules in the code: branches are defined by which chunks
 the campus is always a candidate attribute; and the policy asks before it checks that any evidence answers the
 question. A revised method built afterwards on dev only, a guard that keeps the best baseline's reply unless the
 evidence clearly gives different answers, fired once in 47 dev cases, wrongly. It failed its pre-set dev check
-(0.617 against 0.702 acceptable), so the fresh test set we built for it (75 cases) was not used.
+(0.617 against 0.702 acceptable), so the fresh test set we built for it (75 cases) was not used. A post-hoc LLM judge
+of answer quality (evaluator v3) finds that AAES covers fewer required facts than the baselines (0.119 against 0.300
+for B0) but refers students to the right office much more often (0.724 against 0.340).
 
 ## 1. Problem
 
@@ -123,8 +125,9 @@ Pre-registered comparisons, Holm-corrected, with paired bootstrap 95% intervals 
 2. A0 vs the same baseline on correctness (unconditional slice, non-inferiority margin 3 points);
 3. A0 vs A4 on action macro-F1.
 
-Comparison 2 needs an LLM judge validated against human labels. Without human labels (A33) it is reported as
-not computed.
+Comparison 2 needs a judge of answer correctness. None was validated before the test run, so it was reported as not
+computed then. It is now computed post hoc on the saved replies with evaluator v3, an LLM judge (PLAYBOOK A36; section
+6). v3 is validated against a second LLM judge, not against humans.
 
 **Two evaluator versions (PLAYBOOK A34).** The action metrics need the action each method took.
 - *Evaluator v1* (`evaluation/metrics/aaes.py`, `label_action`) takes the AAES action where there is one. For
@@ -201,7 +204,7 @@ both versions, so the counts are in brackets.
 | Comparison | v1 | v2 |
 |---|---|---|
 | 1. A0 vs R15, AER (conditional + temporal, both answered) | n = 2, diff 0.000, p = 1.0 | n = 2, diff 0.000, p = 1.0 |
-| 2. A0 vs R15, correctness | not computed (no human-validated judge, A33) | not computed |
+| 2. A0 vs R15, correctness | not computed at the run | v3, post hoc (unconditional slice, fact coverage): −0.185 [−0.312, −0.065], p = 0.0065; non-inferiority (−0.03) not met |
 | 3. A0 vs A4, action macro-F1 | −0.066 [−0.128, +0.000], p = 0.131, Holm 0.393 | −0.066 [−0.132, +0.005], p = 0.154, Holm 0.463 |
 
 Neither version separates A0 from R15 on AER, because only two cases are comparable. Neither shows a significant
@@ -210,6 +213,43 @@ macro-F1 difference between A0 and A4, and both point estimates favour A4.
 **By slice** (v1, acceptable-action rate, `Report/tables/test-final_slices.md`, Figure 2): A0 reaches 0.333 on
 conditional (27 cases), 0.292 on negative (24), 0.217 on unconditional (46), 0.167 on temporal (12) and 0.167 on
 multi-session (12). B0 reaches 0.704, 0.708, 0.717, 0.750 and 0.917 on the same slices.
+
+**Answer quality (evaluator v3, post hoc, LLM judge; `Report/results/quality_v3/summary.md`).** Fresh Opus 5.5
+subagents judged every saved reply of B0, R15, R16, A0, G0 and G1, blind to preset names and in shuffled order, with
+a prompt frozen before any test reply was judged (`Sources/evaluation/judge_v3_prompt.md`, sha256 prefix
+3541b5db8960). Each answer is checked fact by fact against the label (correct, wrong or missing), for rules applied
+to the wrong student group, and for whether each cited sentence is supported by its source. Questions are checked
+for asking about a branch attribute, and referrals for naming the right office or next step. A second judge (Sonnet
+5.5) re-judged 100 dev replies: κ = 0.859 on facts, 0.854 on wrong group, 0.791 on referral, 0.656 on "every cited
+sentence supported", and 1.0 on the 15 questions and 10 conditional answers. The human check of 20 dev replies is
+not filled in yet.
+
+| Test-1 | Fact coverage | Wrong-fact rate | Wrong group | Citation support | Correct conditions (15 branching) | Useful question | Right referral |
+|---|---|---|---|---|---|---|---|
+| B0 | 0.300 | 0.117 | 0.265 | 0.573 | 0.000 | n/a | 0.340 |
+| R15 | 0.269 | 0.133 | 0.194 | 0.561 | 0.000 | n/a | 0.333 |
+| R16 | 0.258 | 0.133 | 0.224 | 0.520 | 0.000 | n/a | 0.267 |
+| **A0** | 0.119 | 0.067 | 0.125 | 0.506 | 0.267 | 0.096 | 0.724 |
+| G0 | 0.079 | 0.383 | 0.200 | n/a | 0.000 | n/a | 0.742 |
+| G1 | 0.463 | 0.033 | 0.076 | 0.880 | 0.000 | n/a | 0.491 |
+
+Fact coverage and the wrong-fact rate are over the 60 answer-expected cases; a reply that does not answer scores 0
+coverage. Wrong group and citation support are over answered replies, the useful-question and referral rates over
+that preset's questions and referrals. Paired bootstrap, post hoc and not Holm-corrected
+(`quality_v3/comparisons.csv`):
+- A0 covers fewer required facts than B0 (−0.181 [−0.281, −0.085], p = 0.0008) and R16 (−0.139 [−0.227, −0.057],
+  p = 0.0028). It answers fewer of these cases (0.417 of them, against 0.633 for B0) and its answers cover fewer
+  facts (0.287 against 0.474 among answered replies).
+- A0 refers to the right office far more often: +0.385 [+0.174, +0.586] against B0 (p = 0.0006) and +0.457
+  [+0.244, +0.657] against R16 (p = 0.0002).
+- A0's answers apply a rule to the wrong group less often (0.125 against 0.265 for B0; −0.140 [−0.280, +0.001],
+  p = 0.062) and contain a wrong fact less often (−0.050 [−0.138, +0.034]); neither difference is significant.
+- On the 15 branching cases, A0's conditions or question are right in 0.267 of cases (4 of 15), against none for B0
+  and R16 (+0.267 [+0.059, +0.500]; the permutation p of 0.121 does not confirm it).
+- Only 0.096 of A0's 52 questions ask about an attribute the answer depends on. The rest are the unnecessary campus
+  questions of section 7.
+- Pre-registered comparison 2 (A0 vs R15, unconditional slice, 46 cases): fact coverage −0.185 [−0.312, −0.065], so
+  A0 is not non-inferior within the 3-point margin.
 
 **Exploratory analyses** (not pre-registered; `Report/results/test-final/posthoc.md`).
 - *Few cases need branching.* 15 of 121 test cases (12%) are labelled conditional answer (9) or clarify (6). The
@@ -397,7 +437,10 @@ keeps the branching benefit seen on test-1.
   (`Report/results/test-final/history_bug.json`); template replies (questions, referrals) are not affected.
 - The fresh test-2 set (75 cases) was annotated and adjudicated only by LLMs, like test-1, and it was frozen but
   never run.
-- Comparison 2 (correctness) was not computed, because it needs an LLM judge validated against human labels.
+- Comparison 2 (correctness) was computed post hoc with an LLM judge (evaluator v3), after the test run. The judge was
+  validated against a second LLM judge (κ 0.66 to 1.0 per field), not against humans; the 20-reply human check is
+  pending. The cited [E#] markers could be matched to their chunks only when the counts agree (388 of 436 test
+  replies with citations); otherwise all cited chunks count as the source.
 - The test split has 121 cases and only 15 of them need branching, so the branching results rest on few cases.
   The per-slice numbers also rest on far fewer cases (counts in the slice table). We used one generator
   (`qwen3.5:4b`) on one 16 GB machine.
@@ -464,12 +507,12 @@ Slide numbers refer to the lesson PDFs. "Status" says whether the idea is implem
 
 | Slide(s) | Course idea | Where it is in HYU Compass | Status |
 |---|---|---|---|
-| 5 | Separate targets: retrieval, answer, attribution, gate | Separate tables for retrieval, actions (gate) and AER; correctness and attribution not scored | partial |
+| 5 | Separate targets: retrieval, answer, attribution, gate | Separate tables for retrieval, actions (gate) and AER; answer facts and citation support scored post hoc by evaluator v3 (LLM judge) | done (post hoc) |
 | 6–7 | An inspectable record; case, system and evaluator versions | Run manifests store the label-file sha256 (case version), the git commit, configs and package versions (system version); the evaluator is versioned by its commit, and evaluator v2 records its classifier prompt hash (`summary_v2.md`) | done |
 | 8–11 | What belongs in a case; coverage vs representativeness | Five slices sampled on purpose (conditional, temporal, negative, multi-session, unconditional), so averages are diagnostic, not representative | done |
 | 12 | Relevance labels need a unit and a rubric | `GUIDELINES.md` v1.3: span-level gold, inapplicable and outdated evidence, expected behaviour | done |
 | 14–19 | Recall, precision, reciprocal rank, nDCG | BEIR suite; Applicable-Recall@k on HYU | done |
-| 20–22 | Answer quality; citation metrics need a counting unit | Defined in the metric code; not scored on HYU (no human-validated judge) | not done |
+| 20–22 | Answer quality; citation metrics need a counting unit | Evaluator v3: units are required facts and cited sentences; LLM judge validated against a second LLM judge, not humans | partial (post hoc, LLM judge) |
 | 23–25 | A diagnostic tree locates the earliest defect | Failure categories by earliest stage; the A0 trace analysis in §6–7 | done |
 | 26, 28, 30 | Dev vs test; threshold selection on dev; repeated test inspection changes what the test means | One test run (`TEST_RUNS.md`); no tuning of any method; post-hoc fixes evaluated on dev only | done |
 | 27 | A gate confusion matrix evaluates a decision | Collapsed 2×2 (proceed vs withhold) plus the 4×4 action matrix | done |

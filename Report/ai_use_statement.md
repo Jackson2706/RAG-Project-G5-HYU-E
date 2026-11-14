@@ -59,6 +59,14 @@ LLM-annotated, so every result is a relative comparison between methods on these
   verification of flagged cases by `claude-code:claude-sonnet-5-5` and `claude-code:claude-opus-5-5`, never the
   case's primary annotator's model.
 
+## Evaluator v3 (amendment A36, 2026-11-14)
+
+- Claude Code wrote the judge prompt (`Sources/evaluation/judge_v3_prompt.md`), the item export and the aggregation
+  (`Sources/scripts/export_judge_items.py`, `quality_v3.py`).
+- Fresh `claude-code:claude-opus-5-5` subagents judged all 1,008 saved replies (6 presets; dev and test-1), blind to
+  preset names; a fresh `claude-code:claude-sonnet-5-5` subagent re-judged 100 dev replies for agreement. The judges
+  saw the labels and the replies; nothing was re-run.
+
 ## Runs
 
 Claude Code ran the dev runs and the single test run itself (A33), in the background under `caffeinate`, with

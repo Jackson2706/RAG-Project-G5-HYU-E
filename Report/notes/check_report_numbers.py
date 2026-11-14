@@ -156,4 +156,22 @@ check("| answerability | Cohen's kappa | 0.773291" in t2 and "| expected_behavio
 hb = json.load(open(R + "test-final/history_bug.json"))["presets"]
 check({k.split("_")[0]: v["generated_without_history"] for k, v in hb.items()} == {"A0": 9, "A1": 8, "A3": 2, "A4": 8, "A6": 9, "R9S": 12, "R15": 12}
       and all(v["multi_session"] == 12 for v in hb.values()), "history bug counts")
+# Evaluator v3 (A36).
+q3 = {r["preset"].split("_")[0]: r for r in csv.DictReader(open(R + "quality_v3/metrics_test.csv"))}
+for preset, vals in {"B0": ("0.300", "0.117", "0.265", "0.573", "0.000", None, "0.340"), "R15": ("0.269", "0.133", "0.194", "0.561", "0.000", None, "0.333"),
+                     "R16": ("0.258", "0.133", "0.224", "0.520", "0.000", None, "0.267"), "A0": ("0.119", "0.067", "0.125", "0.506", "0.267", "0.096", "0.724"),
+                     "G0": ("0.079", "0.383", "0.200", None, "0.000", None, "0.742"), "G1": ("0.463", "0.033", "0.076", "0.880", "0.000", None, "0.491")}.items():
+    for col, v in zip(("fact coverage", "wrong-fact rate", "wrong-group rate", "citation support", "correct conditions (branching)", "useful question", "right referral"), vals):
+        check((q3[preset][col] in ("", "None")) if v is None else close(v, q3[preset][col]), "v3", preset, col)
+check(close("0.417", q3["A0"]["answered (answer cases)"]) and close("0.633", q3["B0"]["answered (answer cases)"])
+      and close("0.287", q3["A0"]["coverage when answered"]) and close("0.474", q3["B0"]["coverage when answered"]), "v3 answered")
+cmp3 = list(csv.DictReader(open(R + "quality_v3/comparisons.csv")))
+for (c, m), (d, lo, hi) in {("A0 vs B0", "fact coverage"): (-0.181, -0.281, -0.085), ("A0 vs R16", "fact coverage"): (-0.139, -0.227, -0.057),
+                            ("A0 vs B0", "right referral"): (0.385, 0.174, 0.586), ("A0 vs R16", "right referral"): (0.457, 0.244, 0.657),
+                            ("A0 vs B0", "wrong-group rate"): (-0.140, -0.280, 0.001), ("PREREG 2:", "fact coverage"): (-0.185, -0.312, -0.065)}.items():
+    r = next(x for x in cmp3 if x["metric"] == m and (x["comparison"] == c or (c.startswith("PREREG") and x["comparison"].startswith("PREREG"))))
+    check(all(abs(float(r[k]) - v) < 6e-4 for k, v in (("diff", d), ("ci_low", lo), ("ci_high", hi))), "v3 comparison", c, m)
+v3val = json.load(open(R + "quality_v3/validation.json"))["kappa"]
+for f, v in (("facts (per fact)", 0.859), ("wrong_group", 0.854), ("right_referral", 0.791), ("all cited sentences supported", 0.656)):
+    check(abs(v3val[f]["kappa"] - v) < 6e-4, "v3 kappa", f)
 print("checked", n, "mismatches", bad)

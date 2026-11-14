@@ -17,6 +17,10 @@ Every number comes from `Report/results/` (test-1: `test-final/summary.md`, `sum
 4. **Test-1 results (pre-registered, one run).** Acceptable action, v2: B0 0.661, R15 0.661, R16 0.628, G1 0.719,
    A0 0.256. AER vs R15: 2 comparable cases. Macro-F1 vs A4: −0.066, Holm 0.463, not significant. G0 closed book
    0.669: the action metric mostly measures answer vs referral.
+   **Answer quality (evaluator v3, post-hoc LLM judge; second judge κ 0.66 to 1.0; human check pending).** Fact
+   coverage on answer cases: B0 0.300, R16 0.258, A0 0.119 (A0 answers 42% of them; covers 0.287 when it answers,
+   B0 0.474). Right referral: A0 0.724, B0 0.340, R16 0.267. Wrong group: A0 0.125, B0 0.265 (n.s.). Pre-registered
+   comparison 2 (A0 vs R15, unconditional): −0.185 [−0.312, −0.065], non-inferiority not met.
 5. **Where AAES helps.** On the 15 cases where the answer depends on the student: A0 right and B0 wrong 10, the
    reverse 0. Cards: T14-088 (part-time hours: B0 gives the Seoul figures to everyone), T14-051 (insurance sign-up:
    B0 gives ERICA's procedure to everyone), T14-155 (B0 calls a 2021 dorm notice current). Branch recall A0 10/15

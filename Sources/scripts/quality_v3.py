@@ -53,6 +53,17 @@ def fact_coverage(rows):
     return ratio(sum(vals), len(vals))
 
 
+def answered_share(rows):
+    pool = [r for r in rows if r["expected"] == "answer"]
+    return ratio(sum(r["type"] in ANSWERED and bool(r["j"]["facts"]) for r in pool), len(pool))
+
+
+def coverage_when_answered(rows):
+    vals = [sum(f == "correct" for f in r["j"]["facts"]) / len(r["j"]["facts"]) for r in rows
+            if r["expected"] == "answer" and r["type"] in ANSWERED and r["j"]["facts"]]  # fmt: skip
+    return ratio(sum(vals), len(vals))
+
+
 def wrong_fact(rows):
     pool = [r for r in rows if r["expected"] == "answer"]
     return ratio(sum(r["type"] in ANSWERED and "wrong" in (r["j"]["facts"] or []) for r in pool), len(pool))
@@ -85,7 +96,8 @@ def right_referral(rows):
     return ratio(sum(r["j"]["right_referral"] is True for r in pool), len(pool))
 
 
-METRICS = {"fact coverage": fact_coverage, "wrong-fact rate": wrong_fact, "wrong-group rate": wrong_group,
+METRICS = {"fact coverage": fact_coverage, "answered (answer cases)": answered_share, "coverage when answered": coverage_when_answered,
+           "wrong-fact rate": wrong_fact, "wrong-group rate": wrong_group,
            "citation support": citation_support, "correct conditions (branching)": correct_conditions,
            "useful question": useful_question, "right referral": right_referral}  # fmt: skip
 
@@ -153,6 +165,12 @@ def main() -> int:
                         continue
                     res = paired_compare(a, b, lambda rows, f=f: f(rows) or 0.0)
                     comparisons.append({"comparison": f"A0 vs {other.split('_')[0]}", "metric": m, **res})
+            # Pre-registered comparison 2 (PLAYBOOK): A0 vs the best baseline R15 on correctness, unconditional slice,
+            # non-inferiority margin 3 points. Correctness here = v3 fact coverage; non-inferior iff the CI's lower bound > -0.03.
+            uncond = sorted(q for q in set(per["A0_AAES"]) & set(per["R15_SELF_QUERY"]) if cases[q].get("slice") == "unconditional")
+            res = paired_compare([per["A0_AAES"][q] for q in uncond], [per["R15_SELF_QUERY"][q] for q in uncond], lambda rows: fact_coverage(rows) or 0.0)
+            comparisons.append({"comparison": "PREREG 2: A0 vs R15, unconditional (non-inferiority -0.03: " +
+                                ("met" if res["ci_low"] > -0.03 else "not met") + ")", "metric": "fact coverage", **res})  # fmt: skip
     with (OUT / "comparisons.csv").open("w", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=["comparison", "metric", "diff", "ci_low", "ci_high", "p", "cases"])
         writer.writeheader()
