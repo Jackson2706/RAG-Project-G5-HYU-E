@@ -1,0 +1,5 @@
+{"case_id": "T2-065", "reason": "Campus unstated; only ERICA has leave-application steps, Seoul gives a period only. Open question 10.4.1, not decided by v1.3.", "rule": "10.4"}
+{"case_id": "T2-077", "reason": "Campus unstated; explicit no-refund rule is ERICA-only, Seoul text only implies carry-over. Open question 10.4.1; not decided by v1.3.", "rule": "10.4"}
+{"case_id": "T2-099", "reason": "Campus unstated; ERICA has 2026 fall dates, Seoul only an outdated 2026-1 period. Open question 10.4.1, not decided by v1.3.", "rule": "10.4"}
+{"case_id": "T2-107", "reason": "Campus unstated; ERICA has 2026 fall return dates, Seoul only an outdated 2026-1 notice. Open question 10.4.1, not decided by v1.3.", "rule": "10.4"}
+{"case_id": "T2-109", "reason": "Campus unstated; dorm evidence is ERICA-only and exact 2027 dates are unpublished. Open question 10.4.1 and 9.7; not decided by v1.3.", "rule": "10.4"}

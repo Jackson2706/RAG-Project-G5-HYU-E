@@ -167,8 +167,8 @@ def validate_cases(cases: list[dict], rows: list[dict], snapshot_id: str, annota
             if case_id in seen:
                 errors.append(_message(case_id, "case_id", "must be unique"))
             seen.add(case_id)
-        if "split" in case and case["split"] not in ("dev", "test"):
-            errors.append(_message(case_id, "split", "must be dev or test"))
+        if "split" in case and case["split"] not in ("dev", "test", "test2"):
+            errors.append(_message(case_id, "split", "must be dev, test or test2"))
         if case.get("snapshot_id") != snapshot_id:
             errors.append(_message(case_id, "snapshot_id", f"must equal {snapshot_id}"))
         if not annotation and case.get("slice") not in SLICES:

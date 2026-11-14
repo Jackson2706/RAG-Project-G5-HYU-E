@@ -28,13 +28,15 @@ def write(path: Path, rows: list[dict]) -> None:
 def merge() -> tuple[list[dict], list[dict]]:
     a = {r["case_id"]: r for r in load(T2 / "annot_A" / "all.jsonl")}
     selected = {r["draft_id"]: r for r in load(T2 / "selected.jsonl")}
-    decisions = {d["case_id"]: d for d in load(T2 / "adjudication.jsonl")}
+    decisions = {d["case_id"]: d for d in load(T2 / "adjudication_final.jsonl")}  # Opus on B-based rows, Haiku on A-based
     disputed = set(json.loads((T2 / "disputed_ids.json").read_text()))
     assert disputed == set(decisions), "every disputed case needs exactly one adjudication decision"
     extra = {d["case_id"]: d for d in load(T2 / "verification.jsonl")} if (T2 / "verification.jsonl").exists() else {}
     merged, excluded = [], []
     for cid in sorted(a):
-        decision = extra.get(cid) or decisions.get(cid)
+        decision = decisions.get(cid)
+        if cid in extra and extra[cid]["decision"] != "keep":  # verification of a flagged case: keep, edited or EXCLUDE
+            decision = extra[cid]
         if decision and decision["decision"] == "EXCLUDE":
             excluded.append({"case_id": cid, "reason": decision.get("reason", ""), "rule": decision.get("rule", "")})
             continue
