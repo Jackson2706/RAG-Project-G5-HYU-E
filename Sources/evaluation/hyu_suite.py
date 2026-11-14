@@ -189,8 +189,12 @@ def comparisons(scores: dict[str, dict[str, dict]], cases: list[dict], spec: dic
     return rows
 
 
-def hyu_tables(run_dir: Path, split: str, spec: dict, labels_dir: Path = LABELS_DIR, resamples: int = 10_000) -> tuple[list, list, list, list]:
-    """(summary rows per preset x slice, per-case rows, confusion rows, comparison rows) from raw/hyu/<split>/."""
+def hyu_tables(run_dir: Path, split: str, spec: dict, labels_dir: Path = LABELS_DIR, resamples: int = 10_000,
+               behaviors: dict[tuple[str, str], str] | None = None) -> tuple[list, list, list, list]:
+    """(summary rows per preset x slice, per-case rows, confusion rows, comparison rows) from raw/hyu/<split>/.
+
+    behaviors: {(preset, qid): behaviour} from evaluator v2 (evaluation/reply_action.py); None = v1 (label_action).
+    """
     folder = Path(run_dir) / "raw" / "hyu" / split
     if not folder.is_dir():
         return [], [], [], []
@@ -200,6 +204,8 @@ def hyu_tables(run_dir: Path, split: str, spec: dict, labels_dir: Path = LABELS_
     for path in sorted(folder.glob("*__-.jsonl")):
         preset = path.name.removesuffix("__-.jsonl")
         latest = {r["qid"]: r for r in load_jsonl(path) if r.get("status") == "completed"}  # the newer line wins
+        if behaviors is not None:
+            latest = {q: {**r, "behavior": behaviors[(preset, q)]} for q, r in latest.items()}
         scores[preset] = {q: case_scores(by_id[q], r) for q, r in latest.items() if q in by_id}
     summary, per_case, confusion = [], [], []
     for preset, per in scores.items():
@@ -220,22 +226,26 @@ SUMMARY_COLS = ["preset", "slice", "cases", "answered_rate", "action_accuracy", 
                 "applicable_recall@5", "intrusion@5", "aer", "uncited_answer_rate", "outdated", "unknown_caveat_rate", "p50_ms", "llm_calls"]
 
 
-def write_hyu_reports(run_dir: Path, manifest: dict, write_csv) -> str:
-    """Write the hyu_*.csv tables of every split in raw/hyu/ and return the summary.md section ("" if none)."""
+def write_hyu_reports(run_dir: Path, manifest: dict, write_csv, behaviors: dict | None = None, tag: str = "") -> str:
+    """Write the hyu_*.csv tables of every split in raw/hyu/ and return the summary.md section ("" if none).
+
+    Evaluator v2 (evaluation/rescore.py): behaviors {split: {(preset, qid): behaviour}}, tag "_v2" -> hyu_<split>_v2_*.csv.
+    """
     spec = (manifest.get("configs") or {}).get("hyu") or {}
     section = []
     for split_dir in sorted((Path(run_dir) / "raw" / "hyu").glob("*")):
         split = split_dir.name
-        summary, per_case, confusion, compared = hyu_tables(run_dir, split, spec, resamples=spec.get("bootstrap_resamples", 10_000))
-        write_csv(run_dir / f"hyu_{split}_slices.csv", summary)
-        write_csv(run_dir / f"hyu_{split}_per_case.csv", per_case)
-        write_csv(run_dir / f"hyu_{split}_actions_confusion.csv", confusion)
-        write_csv(run_dir / f"hyu_{split}_comparisons_paired.csv", compared)
-        section += [f"## HYU suite — {split}", "", "| " + " | ".join(SUMMARY_COLS) + " |", "|" + "---|" * len(SUMMARY_COLS)]
+        summary, per_case, confusion, compared = hyu_tables(run_dir, split, spec, resamples=spec.get("bootstrap_resamples", 10_000),
+                                                            behaviors=None if behaviors is None else behaviors[split])
+        write_csv(run_dir / f"hyu_{split}{tag}_slices.csv", summary)
+        write_csv(run_dir / f"hyu_{split}{tag}_per_case.csv", per_case)
+        write_csv(run_dir / f"hyu_{split}{tag}_actions_confusion.csv", confusion)
+        write_csv(run_dir / f"hyu_{split}{tag}_comparisons_paired.csv", compared)
+        section += [f"## HYU suite — {split}" + (f" (evaluator {tag[1:]})" if tag else ""), "", "| " + " | ".join(SUMMARY_COLS) + " |", "|" + "---|" * len(SUMMARY_COLS)]
         for r in summary:
             if r["slice"] == "all":
                 section.append("| " + " | ".join("N/A" if r.get(c) is None else f"{r[c]:.3f}" if isinstance(r[c], float) else str(r[c]) for c in SUMMARY_COLS) + " |")
-        section += ["", "Per-slice rows: `hyu_%s_slices.csv`. Pre-registered comparisons (paired bootstrap 95%% CI, permutation p, Holm):" % split, ""]
+        section += ["", "Per-slice rows: `hyu_%s%s_slices.csv`. Pre-registered comparisons (paired bootstrap 95%% CI, permutation p, Holm):" % (split, tag), ""]
         for c in compared:
             if "p" in c:
                 section.append(f"- {c['comparison']}: diff {c['diff']:+.3f} [{c['ci_low']:+.3f}, {c['ci_high']:+.3f}], p {c['p']:.4f}, Holm {c['p_holm']:.4f} (n={c['cases']})")

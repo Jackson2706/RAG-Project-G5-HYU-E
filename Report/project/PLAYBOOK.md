@@ -1042,3 +1042,19 @@ and stops only for the stop conditions below. AGENTS.md and CLAUDE.md were updat
 - Stop conditions: test split < 110 after exclusions; deleting data outside the repo, dropping a database or
   volume, rewriting the frozen snapshot or labels; a test run failing twice; files disappearing again; usage
   nearly exhausted (checkpoint first); anything breaking the public-repo rules.
+
+**A34 Evaluator v2 and post-hoc analyses (findings from the planning chat, 2026-11-14).** No system re-run on the
+test split. Re-scoring saved outputs with a new, versioned evaluator is allowed (Lesson 6: evaluator versioning).
+- Evaluator v1 defect: `label_action` maps every preset without an AAES action to answer/abstain from the
+  generation outcome, so no baseline can be scored conditional_answer or clarify (R16 is prompted to produce both).
+- Evaluator v2 (`Sources/evaluation/reply_action.py`, `python -m evaluation.rescore`) classifies the final reply of
+  every preset: conditional_answer (>= 2 cases conditioned on student attributes), clarify (asks, no final answer),
+  abstain (no answer from the sources, refers elsewhere), else answer. Rules for clear cases, then qwen3.5:4b
+  (temperature 0, fixed prompt, hash recorded). Rules and prompt designed and frozen on DEV outputs only, then
+  validated on a stratified 100-reply dev sample labelled by a fresh subagent blind to preset names (kappa < 0.7 →
+  v2 indicative only), then applied unchanged to test outputs. v1 and v2 are reported side by side, the
+  pre-registered comparisons under both.
+- Post-hoc analyses from saved outputs are labelled exploratory: acceptable rate per expected behaviour, branch
+  detection precision/recall, G0 as the base rate, the share of test cases that need branching, A0 counts.
+- Report, slides and demo script are rewritten to this story; root causes are checked against `app/rag/aaes.py`.
+- Optional A0b "AAES spec-fixed" only if all of the above is pushed by 14:00 KST; dev only, never on test.
