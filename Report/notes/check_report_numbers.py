@@ -5,6 +5,7 @@ the comparisons table (both evaluators), the slice rates and the exploratory num
 Run from the repo root: python3 Report/notes/check_report_numbers.py  (prints 'mismatches 0')."""
 import csv
 import json
+from collections import Counter
 
 R = "Report/results/"
 BRANCH_EXP = ("conditional_answer", "clarify")
@@ -121,4 +122,18 @@ a0b_v2 = {r["qid"]: r for r in csv.DictReader(open(R + "dev-03/hyu_dev_v2_per_ca
 check(sum(r["predicted"] == "abstain" for r in a0b_v2.values()) == 4 and sum(r["predicted"] == "answer" for r in a0b_v2.values()) == 3, "A0b v2 4/3")
 a0b_v1 = {r["qid"]: r for r in csv.DictReader(open(R + "dev-03/hyu_dev_per_case.csv")) if r["preset"].startswith("A0b")}
 check(a0b_v1["T14-044"]["predicted"] == "answer" and a0b_v2["T14-044"]["predicted"] == "abstain", "T14-044 v1 answer, v2 abstain")
+# Section 9 (course mapping) numbers.
+beir = {(r["dataset"], r["experiment"].split("_")[0]): r for r in csv.DictReader(open(R + "2026-11-01_main/retrieval_comparison.csv")) if r["protocol"] == "B"}
+for ds, r1, b0 in (("scifact", .651, .716), ("nfcorpus", .300, .346), ("arguana", .452, .598)):
+    check(abs(float(beir[(ds, "R1")]["nDCG@10"]) - r1) < 6e-4 and abs(float(beir[(ds, "B0")]["nDCG@10"]) - b0) < 6e-4, "BEIR nDCG", ds)
+drop = Counter(r["dataset"] for r in csv.DictReader(open(R + "2026-11-01_main/failure_analysis.csv"))
+               if r["experiment"] == "B0_BASIC_DENSE_RAG" and r["protocol"] == "B" and r["primary"] == "dropped_by_selection")
+for ds, queries, pct in (("scifact", 300, 13), ("nfcorpus", 323, 14), ("arguana", 1406, 35)):
+    check(round(100 * drop[ds] / queries) == pct, "dropped by selection", ds)
+ann = [r for r in csv.DictReader(open(R + "2026-11-01_main/offline_comparison.csv")) if r["experiment"].startswith("ANN")]
+check(len(ann) == 3 and all(r["ann_recall@10_vs_exact"] == "1.0" and 5 <= float(r["hnsw_search_ms_p50"]) <= 7 for r in ann), "ANN")
+check(close("0.736", v1[("B0", "all")]["acceptable_rate"]) and close("0.661", v2[("B0", "all")]["acceptable_rate"]), "slide 43 B0")
+b1 = {r["preset"].split("_")[0]: r for r in csv.DictReader(open(R + "test-final/posthoc_branch_detection.csv")) if r["evaluator"] == "v1"}
+check(b1["R16"]["tp"] == "0" and branch["R16"]["tp"] == "2", "slide 43 R16 0 -> 2")
+check(len(json.load(open(R + "index_reports/hyu_20261110_97dc1269_r5.json"))["checks"]) == 15, "VERIFY 15 checks")
 print("checked", n, "mismatches", bad)
