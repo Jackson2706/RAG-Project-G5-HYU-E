@@ -1058,3 +1058,17 @@ test split. Re-scoring saved outputs with a new, versioned evaluator is allowed 
   detection precision/recall, G0 as the base rate, the share of test cases that need branching, A0 counts.
 - Report, slides and demo script are rewritten to this story; root causes are checked against `app/rag/aaes.py`.
 - Optional A0b "AAES spec-fixed" only if all of the above is pushed by 14:00 KST; dev only, never on test.
+
+**A35 Final plan (decision from the planning chat, 2026-11-14).** Deadline: not filled in by the human when the
+plan was given (14:44 KST Sat); Step 8 starts 3 hours before it once known, else when Steps 1-7 are done.
+- test-1 (the frozen test split) stays the main pre-registered result: no system re-run on it, no change to its
+  labels or to evaluator v2 (prompt hash 5151f273055b). New method work uses dev only; a new held-out set
+  (test-2) is used exactly once. A33 autonomous mode continues; stop conditions as before plus NO-GO in Step 4.
+  The repository's visibility is the human's decision.
+- Step 1 cleanup (done in 00fdb89). Step 2 presentation cases from saved replies only. Step 3 preset AG "AAES
+  guard" (base pipeline's reply unless a five-condition guard fires; no tuned thresholds). Step 4 dev GO/NO-GO:
+  GO only if AG >= base on dev AND override precision >= 0.4; afterwards bug fixes only, logged. Step 5 test-2:
+  blind drafts (topics, personas, GUIDELINES v1.3 only), 80 selected in test-1's slice x campus proportions, two
+  blind annotators + adjudicator, deterministic checks, kappa, frozen sha256 before any system run. Step 6
+  PREREG_test2.md before one run (primary AG vs base acceptable rate, v2). Step 7 report and slides. Step 8
+  finalize.
