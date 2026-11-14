@@ -37,3 +37,13 @@
   `stated_profile` although neither the question nor the history names a campus. The system sees only the text,
   so such a case counts against every profile-aware method. Labels are frozen; this was found on dev and the
   test split was not inspected for it.
+
+## A34 (2026-11-14)
+
+- Evaluator v1 scored every non-AAES reply as answer or abstain from the generation outcome. Evaluator v2 reads the
+  reply text; it was frozen on dev outputs, but designed after the v1 test results were known. Validation: one
+  blind LLM annotator on 100 dev replies (kappa 0.899), no human.
+- The saved raw records keep no AAES trace, so CLARIFY reasons come from a dev replay of A0's decision step.
+- The automatic G5 gate checked completion, not whether the code matched the design (branch = distinct answer
+  values), so the mismatch reached the test run although dev already showed A0 below B0.
+- The planning chat's `section9_course_mapping.md` never reached this session; draft section 9 has a TODO.

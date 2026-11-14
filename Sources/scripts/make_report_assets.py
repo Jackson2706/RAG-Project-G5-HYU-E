@@ -3,6 +3,7 @@
 Run from Sources/:
   python scripts/make_report_assets.py test-final          # -> Report/tables/test-final_*.{csv,md}, Report/figures/test-final_*.{png,svg}
   python scripts/make_report_assets.py dev-02
+  python scripts/make_report_assets.py test-final v2   # evaluator v2 tables -> Report/tables/test-final_v2_*, figures likewise
 
 Reads only the run's summary CSVs (hyu_<split>_slices.csv, _comparisons_paired.csv, _actions_confusion.csv), never
 labels. Every table and figure names its source file, so each number in the report traces to Report/results/.
@@ -62,11 +63,13 @@ def save(fig, name: str, source: Path, out: Path) -> None:
     plt.close(fig)
 
 
-def main(run_id: str) -> int:
+def main(run_id: str, evaluator: str = "v1") -> int:
     run = RESULTS_DIR / run_id
-    slices_path = next(run.glob("hyu_*_slices.csv"))
-    split = slices_path.name.split("_")[1]
-    paired_path, confusion_path = run / f"hyu_{split}_comparisons_paired.csv", run / f"hyu_{split}_actions_confusion.csv"
+    tag = "" if evaluator == "v1" else f"_{evaluator}"
+    split = next(p for p in run.glob("hyu_*_slices.csv") if "_v2_" not in p.name).name.split("_")[1]
+    slices_path = run / f"hyu_{split}{tag}_slices.csv"
+    paired_path, confusion_path = run / f"hyu_{split}{tag}_comparisons_paired.csv", run / f"hyu_{split}{tag}_actions_confusion.csv"
+    run_id = run_id + tag  # output names: test-final_v2_main.md, ...
     tables, figures = REPORT_DIR / "tables", REPORT_DIR / "figures"
     tables.mkdir(parents=True, exist_ok=True)
     figures.mkdir(parents=True, exist_ok=True)
@@ -128,4 +131,4 @@ def main(run_id: str) -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(sys.argv[1] if len(sys.argv) > 1 else "test-final"))
+    raise SystemExit(main(sys.argv[1] if len(sys.argv) > 1 else "test-final", sys.argv[2] if len(sys.argv) > 2 else "v1"))
