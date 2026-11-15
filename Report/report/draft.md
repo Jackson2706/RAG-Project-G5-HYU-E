@@ -129,7 +129,7 @@ Pre-registered comparisons, Holm-corrected, with paired bootstrap 95% intervals 
 
 Comparison 2 needs a judge of answer correctness. None was validated before the test run, so it was reported as not
 computed then. It is now computed post hoc on the saved replies with evaluator v3, an LLM judge (PLAYBOOK A36; section
-6). v3 is validated against a second LLM judge, not against humans.
+6). v3 is validated against two other LLM judges (Sonnet, and GPT from another vendor), not against people.
 
 **Two evaluator versions (PLAYBOOK A34).** The action metrics need the action each method took.
 - *Evaluator v1* (`evaluation/metrics/aaes.py`, `label_action`) takes the AAES action where there is one. For
@@ -223,8 +223,12 @@ a prompt frozen before any test reply was judged (`Sources/evaluation/judge_v3_p
 to the wrong student group, and for whether each cited sentence is supported by its source. Questions are checked
 for asking about a branch attribute, and referrals for naming the right office or next step. A second judge (Sonnet
 5.5) re-judged 100 dev replies: κ = 0.859 on facts, 0.854 on wrong group, 0.791 on referral, 0.656 on "every cited
-sentence supported", and 1.0 on the 15 questions and 10 conditional answers. The human check of 20 dev replies is
-not filled in yet.
+sentence supported", and 1.0 on the 15 questions and 10 conditional answers. A third judge from another vendor (GPT,
+through ChatGPT; the model name was not recorded) judged 20 of the same dev replies. It agrees with the main judge
+on wrong group, questions and conditions in every pair (13, 3 and 2 pairs). On facts, κ is 0.679 (agreement 0.815,
+27 facts), below our 0.7 bar. On referrals, κ is 0.000 with agreement 0.750 on only 4 pairs, because GPT never
+marked a referral right. Both fields are less certain than the Sonnet check suggests. We changed no judgment. No
+person checked the judge (`Report/results/quality_v3/validation.json`).
 
 | Test-1 | Fact coverage | Wrong-fact rate | Wrong group (answered replies) | Citation support | Correct conditions (15 branching) | Useful question | Right referral, per abstain case (46) | Right referral, among own referrals |
 |---|---|---|---|---|---|---|---|---|
@@ -458,8 +462,8 @@ keeps the branching benefit seen on test-1.
 - The fresh test-2 set (75 cases) was annotated and adjudicated only by LLMs, like test-1, and it was frozen but
   never run.
 - Comparison 2 (correctness) was computed post hoc with an LLM judge (evaluator v3), after the test run. The judge was
-  validated against a second LLM judge (κ 0.66 to 1.0 per field), not against humans; the 20-reply human check is
-  pending. The cited [E#] markers could be matched to their chunks only when the counts agree (388 of 436 test
+  validated against two other LLMs, not against people: Sonnet 5.5 on 100 dev replies (κ 0.66 to 1.0 per field)
+  and GPT from another vendor on 20 (facts κ 0.679, below 0.7; referral κ 0.000 on 4 pairs). The cited [E#] markers could be matched to their chunks only when the counts agree (388 of 436 test
   replies with citations); otherwise all cited chunks count as the source.
 - The test split has 121 cases and only 15 of them need branching, so the branching results rest on few cases.
   The per-slice numbers also rest on far fewer cases (counts in the slice table). We used one generator
@@ -532,7 +536,7 @@ Slide numbers refer to the lesson PDFs. "Status" says whether the idea is implem
 | 8–11 | What belongs in a case; coverage vs representativeness | Five slices sampled on purpose (conditional, temporal, negative, multi-session, unconditional), so averages are diagnostic, not representative | done |
 | 12 | Relevance labels need a unit and a rubric | `GUIDELINES.md` v1.3: span-level gold, inapplicable and outdated evidence, expected behaviour | done |
 | 14–19 | Recall, precision, reciprocal rank, nDCG | BEIR suite; Applicable-Recall@k on HYU | done |
-| 20–22 | Answer quality; citation metrics need a counting unit | Evaluator v3: units are required facts and cited sentences; LLM judge validated against a second LLM judge, not humans | partial (post hoc, LLM judge) |
+| 20–22 | Answer quality; citation metrics need a counting unit | Evaluator v3: units are required facts and cited sentences; LLM judge validated against two other LLMs (Sonnet; GPT, another vendor), not humans | partial (post hoc, LLM judge) |
 | 23–25 | A diagnostic tree locates the earliest defect | Failure categories by earliest stage; the A0 trace analysis in §6–7 | done |
 | 26, 28, 30 | Dev vs test; threshold selection on dev; repeated test inspection changes what the test means | One test run (`TEST_RUNS.md`); no tuning of any method; post-hoc fixes evaluated on dev only | done |
 | 27 | A gate confusion matrix evaluates a decision | Collapsed 2×2 (proceed vs withhold) plus the 4×4 action matrix | done |

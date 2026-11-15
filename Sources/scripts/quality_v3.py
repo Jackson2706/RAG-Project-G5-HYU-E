@@ -141,6 +141,24 @@ def field_pairs(main: dict, other: dict, items: dict) -> dict[str, list[tuple]]:
     return out
 
 
+def sheet_agreement(path: Path, judged: dict, facts_col: str, yes_no_cols: tuple[str, ...]) -> dict:
+    """Agreement of a filled-in check sheet with the main judge: facts per fact, yes/no fields where both are set.
+    Each yes/no column name starts with the judgment field ("wrong_group (yes/no)" -> wrong_group). {} if not filled."""
+    if not path.exists():
+        return {}
+    rows = [r for r in csv.DictReader(open(path)) if r[facts_col].strip() or any(r[c].strip() for c in yes_no_cols)]
+    pairs = defaultdict(list)
+    for r in rows:
+        j = judged.get(r["id"]) or {}
+        for x, y in zip([f.strip() for f in r[facts_col].split(";") if f.strip()], j.get("facts") or []):
+            pairs["facts (per fact)"].append((x, y))
+        for col in yes_no_cols:
+            field, value = col.split(" ")[0], r[col].strip().lower()
+            if value and j.get(field) is not None:
+                pairs[field].append((value.startswith("y"), j[field]))
+    return {f: {"kappa": kappa(p), "agreement": sum(a == b for a, b in p) / len(p), "pairs": len(p)} for f, p in pairs.items() if p}
+
+
 def main() -> int:
     key = {k["id"]: k for k in load(RAW / "key.jsonl")}
     judged = {j["id"]: j for f in sorted((RAW / "judgments").glob("*.jsonl")) for j in load(f)}
@@ -198,33 +216,32 @@ def main() -> int:
     pairs = field_pairs(judged, second, items_dev)
     validation = {"items": len(second), "second_judge": "claude-code:claude-sonnet-5-5",
                   "kappa": {f: {"kappa": kappa(p), "pairs": len(p), "agreement": sum(a == b for a, b in p) / len(p)} for f, p in pairs.items() if p}}  # fmt: skip
-    human = REPORT_DIR / "notes" / "quality_human_check.csv"
-    rows = [r for r in csv.DictReader(open(human)) if any(r[c].strip() for c in r if c.startswith(("facts", "wrong_group")))] if human.exists() else []
-    if rows:
-        def yn(v):
-            v = v.strip().lower()
-            return None if not v else v.startswith("y")
-
-        hp = defaultdict(list)
-        for r in rows:
-            j = judged.get(r["id"]) or {}
-            for x, y in zip([f.strip() for f in r["facts (correct/wrong/missing per fact, ; separated)"].split(";") if f.strip()], j.get("facts") or []):
-                hp["facts (per fact)"].append((x, y))
-            for col, field in (("wrong_group (yes/no)", "wrong_group"), ("conditions_match (yes/no, conditional only)", "conditions_match"),
-                               ("asks_branch_attribute (yes/no, clarify only)", "asks_branch_attribute"), ("right_referral (yes/no, abstain only)", "right_referral")):
-                if yn(r[col]) is not None and j.get(field) is not None:
-                    hp[field].append((yn(r[col]), j[field]))
-        validation["human"] = {f: {"agreement": sum(a == b for a, b in p) / len(p), "pairs": len(p)} for f, p in hp.items() if p}
+    human = sheet_agreement(REPORT_DIR / "notes" / "quality_human_check.csv", judged, "facts (correct/wrong/missing per fact, ; separated)",
+                            ("wrong_group (yes/no)", "conditions_match (yes/no, conditional only)",
+                             "asks_branch_attribute (yes/no, clarify only)", "right_referral (yes/no, abstain only)"))  # fmt: skip
+    if human:
+        validation["human"] = human
+    # Third judge, a different vendor: ChatGPT's judgments of the same 20 dev items, saved by the human (A36 follow-up).
+    gpt = sheet_agreement(REPORT_DIR / "notes" / "quality_gpt_check.csv", judged, "facts",
+                          ("wrong_group", "conditions_match", "asks_branch_attribute", "right_referral"))
+    if gpt:
+        validation["third_judge_gpt"] = {"judge": "GPT via ChatGPT (model name not recorded)", "items": 20, "fields": gpt}
     (OUT / "validation.json").write_text(json.dumps(validation, indent=1) + "\n")
     lines += ["", "## Validation on dev", "", f"Second judge ({validation['second_judge']}, {validation['items']} dev items, blind to the first):", "",
               "| Field | kappa | agreement | pairs |", "|---|---|---|---|"]  # fmt: skip
     for f, v in validation["kappa"].items():
         k = "n/a" if v["kappa"] is None else f"{v['kappa']:.3f}"
         lines.append(f"| {f} | {k} | {v['agreement']:.3f} | {v['pairs']} |")
+    if "third_judge_gpt" in validation:
+        lines += ["", "Third judge, different vendor (GPT via ChatGPT, model name not recorded), 20 of the same dev items:", "",
+                  "| Field | kappa | agreement | pairs |", "|---|---|---|---|"]  # fmt: skip
+        for f, v in validation["third_judge_gpt"]["fields"].items():
+            k = "n/a" if v["kappa"] is None else f"{v['kappa']:.3f}"
+            lines.append(f"| {f} | {k} | {v['agreement']:.3f} | {v['pairs']} |")
     if "human" in validation:
         lines += ["", "Human check (20 dev items): " + "; ".join(f"{f} {v['agreement']:.2f} ({v['pairs']})" for f, v in validation["human"].items())]
     else:
-        lines += ["", "Human check: `Report/notes/quality_human_check.csv` not filled in yet."]
+        lines += ["", "No human check: the judge was validated against two other LLMs only."]
     (OUT / "summary.md").write_text("\n".join(lines) + "\n")
     print("\n".join(lines))
     return 0

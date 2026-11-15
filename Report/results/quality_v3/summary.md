@@ -61,4 +61,14 @@ Second judge (claude-code:claude-sonnet-5-5, 100 dev items, blind to the first):
 | asks_branch_attribute | 1.000 | 1.000 | 15 |
 | conditions_match | 1.000 | 1.000 | 10 |
 
-Human check: `Report/notes/quality_human_check.csv` not filled in yet.
+Third judge, different vendor (GPT via ChatGPT, model name not recorded), 20 of the same dev items:
+
+| Field | kappa | agreement | pairs |
+|---|---|---|---|
+| facts (per fact) | 0.679 | 0.815 | 27 |
+| wrong_group | 1.000 | 1.000 | 13 |
+| right_referral | 0.000 | 0.750 | 4 |
+| asks_branch_attribute | 1.000 | 1.000 | 3 |
+| conditions_match | 1.000 | 1.000 | 2 |
+
+No human check: the judge was validated against two other LLMs only.
