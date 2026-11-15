@@ -1,6 +1,7 @@
 """Check every page quote of the deck v2 brief against the frozen snapshot text AND the raw crawled bytes.
 
 Run from Sources/:  python scripts/verify_deck_quotes.py   # -> Report/slides/deck_v2/quotes.csv (quote, url, found_in_snapshot, found_in_raw, raw_source)
+                    python scripts/verify_deck_quotes.py quotes.json out.csv   # another list: [[id, url, quote, kind], ...]
 
 Whitespace is collapsed and HTML entities decoded before matching; a quote counts as verbatim only if it is a
 substring of the page text after that normalisation. Raw sources: the page's HTML (tags stripped) and, for notices
@@ -86,6 +87,7 @@ def pdf_text(path: Path) -> str:
 
 
 def main() -> int:
+    quotes, out = (json.load(open(sys.argv[1])), Path(sys.argv[2])) if len(sys.argv) == 3 else (QUOTES, OUT)
     docs = {d["source_uri"]: d for d in map(json.loads, open(SNAP, encoding="utf-8"))}
     manifest = [json.loads(line) for line in open(DATA / "HYU" / "manifest.jsonl", encoding="utf-8")]
     raw_cache: dict[str, list[tuple[str, str]]] = {}
@@ -104,15 +106,15 @@ def main() -> int:
         return raw_cache[url]
 
     rows, bad = [], 0
-    for qid, url, quote, kind in QUOTES:
+    for qid, url, quote, kind in quotes:
         snap = norm(docs[url]["text"]) if url in docs else ""
         parts = [p.strip() for p in quote.split("|")] if kind == "table" else [norm(quote)]
         in_snap = all(p in snap for p in parts)
         hit = next((src for src, text in raw_texts(url) if all(p in text for p in parts)), "")
         bad += not (in_snap and hit)
         rows.append({"id": qid, "url": url, "kind": kind, "found_in_snapshot": in_snap, "found_in_raw": bool(hit), "raw_source": hit, "quote": quote})
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    with OUT.open("w", newline="", encoding="utf-8") as handle:
+    out.parent.mkdir(parents=True, exist_ok=True)
+    with out.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
         writer.writeheader()
         writer.writerows(rows)
