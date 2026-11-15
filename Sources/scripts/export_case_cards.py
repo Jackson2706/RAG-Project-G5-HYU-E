@@ -21,7 +21,8 @@ from evaluation.reports import load_jsonl  # noqa: E402
 
 from app.config import RESULTS_DIR  # noqa: E402
 
-PRESETS = ("B0_BASIC_DENSE_RAG", "R16_PROMPTED_CONDITIONAL", "A0_AAES", "A0b_AAES_SPEC_FIXED", "AG_AAES_GUARD")
+PRESETS = ("B0_BASIC_DENSE_RAG", "R5_HYBRID_CROSS_ENCODER", "R9S_SCOPE_PREFILTER", "R15_SELF_QUERY", "R16_PROMPTED_CONDITIONAL",
+           "A0_AAES", "A3_AAES_ALWAYS_CLARIFY", "A0b_AAES_SPEC_FIXED", "AG_AAES_GUARD")
 
 
 def main(run_id: str, split: str, case_ids: list[str]) -> int:
