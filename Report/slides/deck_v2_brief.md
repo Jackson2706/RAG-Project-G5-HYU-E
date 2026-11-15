@@ -469,4 +469,4 @@ own index (`status.json` index_id for every task).
 - No page states a penalty for working over the hour limit specifically (1b).
 - Everything rests on LLM-made labels; nothing was verified by a person.
 
-Commit: see the final line of the reply that delivered this brief.
+Commit: 5b9e2ce (the brief and its data files; this line was added in the next commit).
