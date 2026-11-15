@@ -225,7 +225,7 @@ def main() -> int:
     gpt = sheet_agreement(REPORT_DIR / "notes" / "quality_gpt_check.csv", judged, "facts",
                           ("wrong_group", "conditions_match", "asks_branch_attribute", "right_referral"))
     if gpt:
-        validation["third_judge_gpt"] = {"judge": "GPT via ChatGPT (model name not recorded)", "items": 20, "fields": gpt}
+        validation["third_judge_gpt"] = {"judge": "GPT-6.1 in ChatGPT, max thinking", "items": 20, "fields": gpt}
     (OUT / "validation.json").write_text(json.dumps(validation, indent=1) + "\n")
     lines += ["", "## Validation on dev", "", f"Second judge ({validation['second_judge']}, {validation['items']} dev items, blind to the first):", "",
               "| Field | kappa | agreement | pairs |", "|---|---|---|---|"]  # fmt: skip
@@ -233,7 +233,7 @@ def main() -> int:
         k = "n/a" if v["kappa"] is None else f"{v['kappa']:.3f}"
         lines.append(f"| {f} | {k} | {v['agreement']:.3f} | {v['pairs']} |")
     if "third_judge_gpt" in validation:
-        lines += ["", "Third judge, different vendor (GPT via ChatGPT, model name not recorded), 20 of the same dev items:", "",
+        lines += ["", "Third judge, different vendor (GPT-6.1 in ChatGPT, max thinking), 20 of the same dev items:", "",
                   "| Field | kappa | agreement | pairs |", "|---|---|---|---|"]  # fmt: skip
         for f, v in validation["third_judge_gpt"]["fields"].items():
             k = "n/a" if v["kappa"] is None else f"{v['kappa']:.3f}"

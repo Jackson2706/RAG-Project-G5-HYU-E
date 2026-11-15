@@ -179,7 +179,9 @@ check(close("0.669", v2[("G0", "all")]["acceptable_rate"]) and close("0.661", v2
 v3val = json.load(open(R + "quality_v3/validation.json"))["kappa"]
 for f, v in (("facts (per fact)", 0.859), ("wrong_group", 0.854), ("right_referral", 0.791), ("all cited sentences supported", 0.656)):
     check(abs(v3val[f]["kappa"] - v) < 6e-4, "v3 kappa", f)
-g3 = json.load(open(R + "quality_v3/validation.json"))["third_judge_gpt"]["fields"]
+g3_all = json.load(open(R + "quality_v3/validation.json"))["third_judge_gpt"]
+check(g3_all["judge"] == "GPT-6.1 in ChatGPT, max thinking" and "GPT-6.1" in draft, "GPT judge name")
+g3 = g3_all["fields"]
 check(abs(g3["facts (per fact)"]["kappa"] - 0.679) < 6e-4 and abs(g3["facts (per fact)"]["agreement"] - 0.815) < 6e-4 and g3["facts (per fact)"]["pairs"] == 27
       and g3["right_referral"]["kappa"] == 0.0 and g3["right_referral"]["agreement"] == 0.75 and g3["right_referral"]["pairs"] == 4
       and all(g3[f]["agreement"] == 1.0 for f in ("wrong_group", "asks_branch_attribute", "conditions_match"))

@@ -61,7 +61,7 @@ Second judge (claude-code:claude-sonnet-5-5, 100 dev items, blind to the first):
 | asks_branch_attribute | 1.000 | 1.000 | 15 |
 | conditions_match | 1.000 | 1.000 | 10 |
 
-Third judge, different vendor (GPT via ChatGPT, model name not recorded), 20 of the same dev items:
+Third judge, different vendor (GPT-6.1 in ChatGPT, max thinking), 20 of the same dev items:
 
 | Field | kappa | agreement | pairs |
 |---|---|---|---|

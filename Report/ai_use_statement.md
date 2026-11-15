@@ -66,7 +66,7 @@ LLM-annotated, so every result is a relative comparison between methods on these
 - Fresh `claude-code:claude-opus-5-5` subagents judged all 1,008 saved replies (6 presets; dev and test-1), blind to
   preset names; a fresh `claude-code:claude-sonnet-5-5` subagent re-judged 100 dev replies for agreement. The judges
   saw the labels and the replies; nothing was re-run.
-- A third check came from another vendor: the human ran ChatGPT (GPT; model name not recorded) on 20 of the same dev
+- A third check came from another vendor: the human ran ChatGPT (GPT-6.1, max thinking) on 20 of the same dev
   replies and saved its judgments in `Report/notes/quality_gpt_check.csv`. No person judged the replies.
 
 ## Runs

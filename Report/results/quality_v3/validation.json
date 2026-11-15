@@ -34,7 +34,7 @@
   }
  },
  "third_judge_gpt": {
-  "judge": "GPT via ChatGPT (model name not recorded)",
+  "judge": "GPT-6.1 in ChatGPT, max thinking",
   "items": 20,
   "fields": {
    "facts (per fact)": {

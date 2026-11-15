@@ -17,7 +17,7 @@ Every number comes from `Report/results/` (test-1: `test-final/summary.md`, `sum
 4. **Test-1 results (pre-registered, one run).** Acceptable action, v2: B0 0.661, R15 0.661, R16 0.628, G1 0.719,
    A0 0.256. AER vs R15: 2 comparable cases. Macro-F1 vs A4: −0.066, Holm 0.463, not significant. G0 closed book
    0.669: the action metric mostly measures answer vs referral.
-   **Answer quality (evaluator v3, post-hoc LLM judge; validated against Sonnet, κ 0.66 to 1.0, and GPT from another vendor on 20 replies, facts κ 0.679 below 0.7; not against people).** Fact
+   **Answer quality (evaluator v3, post-hoc LLM judge; validated against Sonnet, κ 0.66 to 1.0, and GPT-6.1 (ChatGPT, max thinking) from another vendor on 20 replies, facts κ 0.679 below 0.7; not against people).** Fact
    coverage on answer cases: B0 0.300, R16 0.258, A0 0.119 (A0 answers 42% of them; covers 0.287 when it answers,
    B0 0.474). Pre-registered comparison 2 (A0 vs R15, unconditional): −0.185 [−0.312, −0.065], non-inferiority not
    met. Branching advantage on content: 4 of 15 correct (p = 0.12, not confirmed). Right referral per abstain case:
