@@ -56,7 +56,8 @@ async def check_runnable(request: Request, config: dict, index_id: str) -> None:
     db = index_database(request, index_id)
     manifest = db.get_manifest()
     if index_id != DEFAULT_INDEX and manifest is None:
-        errors.append({"stage_id": None, "param": None, "message": f"Index '{index_id}' does not exist"})
+        raise HTTPException(422, {"message": "This configuration cannot run", "errors": [{"stage_id": None, "param": None,
+                            "message": f"Index '{index_id}' does not exist. Pick an existing index in the Configuration tab (Index to search), or build it first (Sources/data/DATA.md)."}]})  # fmt: skip
     # older indexes have no manifest: each document still records its embedding method
     built_with = ((manifest or {}).get("embedding_contract") or {}).get("method") or db.index_info()["embedding_method"]
     if built_with and built_with != config["embedding"]["method"]:

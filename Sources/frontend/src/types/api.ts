@@ -127,7 +127,7 @@ export interface Health {
 /** A named experiment configuration (backend/app/rag/presets.py), validated by the registry. */
 export interface Preset {
   id: string; // e.g. "R2_HYBRID_RRF"
-  kind: "baseline" | "offline" | "online" | "proposed";
+  kind: "baseline" | "offline" | "online" | "aaes" | "proposed";
   name: string;
   description: string;
   enabled: boolean;

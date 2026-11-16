@@ -28,7 +28,7 @@ class OllamaClient:
             response = await self.http.get("/api/tags")
             response.raise_for_status()
         except httpx.HTTPError as exc:
-            raise OllamaError(f"Cannot reach Ollama at {self.base_url}. Is it running? ({exc.__class__.__name__})") from exc
+            raise OllamaError(f"Cannot reach Ollama at {self.base_url}. Start the Ollama app (or run: ollama serve) and send the question again.") from exc
         return [
             {"name": m["name"], "digest": m.get("digest"), "parameter_size": m.get("details", {}).get("parameter_size"),
              "quantization": m.get("details", {}).get("quantization_level"), "capabilities": m.get("capabilities", [])}

@@ -69,7 +69,8 @@ function ExperimentPanel({ config }: { config: PipelineConfigState }) {
   const preset = config.presets.find((p) => p.id === config.presetId);
   const index = config.indexes.find((i) => i.index_id === config.indexId);
   const differs = offlineDifferences(config);
-  const kinds = [["baseline", "Baseline"], ["offline", "Offline (needs its own index)"], ["online", "Online"], ["proposed", "Reserved"]] as const;
+  const kinds = [["baseline", "Baseline"], ["offline", "Offline (needs its own index)"], ["online", "Online"],
+                 ["aaes", "AAES (ours), its ablations and the profile baselines"], ["proposed", "Reserved"]] as const;
   const download = () => {
     const url = URL.createObjectURL(new Blob([config.exportJson()], { type: "application/json" }));
     const a = Object.assign(document.createElement("a"), { href: url, download: "hyu-compass-config.json" });

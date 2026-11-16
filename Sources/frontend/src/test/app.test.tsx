@@ -110,6 +110,7 @@ describe("Configuration tab (driven by the registry)", () => {
     const presets: Preset[] = [
       { id: "B0_BASIC_DENSE_RAG", kind: "baseline", name: "B0 — Basic Dense RAG", description: "The original app.", enabled: true, config: {}, errors: [] },
       { id: "PROPOSED_APPROACH", kind: "proposed", name: "Proposed approach", description: "Reserved.", enabled: false, config: null, errors: [] },
+      { id: "A0_AAES", kind: "aaes", name: "A0 — AAES", description: "Ours.", enabled: true, config: {}, errors: [] },
     ];
     const indexes: IndexRevision[] = [
       { index_id: "default", manifest: null, info: { documents: 5, chunks: 23, vectors: 23, chunking: null, embedding_method: "bge_small_en" } },
@@ -120,6 +121,7 @@ describe("Configuration tab (driven by the registry)", () => {
     render(<TooltipProvider><ConfigurationTab config={config} system={system} /></TooltipProvider>);
     fireEvent.change(screen.getByLabelText("Experiment preset"), { target: { value: "B0_BASIC_DENSE_RAG" } });
     expect(config.applyPreset).toHaveBeenCalledWith("B0_BASIC_DENSE_RAG");
+    expect(screen.getByRole("option", { name: "A0 — AAES" })).toBeInTheDocument(); // AAES presets are selectable outside compare mode
     expect((screen.getByRole("option", { name: /Proposed approach/ }) as HTMLOptionElement).disabled).toBe(true);
     fireEvent.change(screen.getByLabelText("Index to search"), { target: { value: "default" } });
     expect(config.selectIndex).toHaveBeenCalledWith("default");
@@ -196,6 +198,42 @@ describe("AAES in the chat", () => {
   });
 });
 
+describe("new-user help and plain errors (deck v4 Task 1)", () => {
+  it("shows dismissible help, forgets remembered details, and explains empty, long and invalid questions", async () => {
+    const { ChatPanel } = await import("@/components/chat/ChatPanel");
+    const { errorText } = await import("@/services/api");
+    Element.prototype.scrollTo = vi.fn();
+    const forget = vi.fn();
+    const chat = { messages: [{ id: "1", role: "user", content: "I'm at ERICA." }], busy: false, reset: vi.fn(), cancel: vi.fn(), forget, remembered: ["I'm at ERICA."] } as unknown as ChatState;
+    const onSend = vi.fn();
+    render(<TooltipProvider><ChatPanel chat={chat} onSend={onSend} blockedReason={null} onInspect={vi.fn()} presets={[]} compare={null} onCompare={vi.fn()} /></TooltipProvider>);
+    expect(screen.getByText("Not official advice; confirm with the OIA office.")).toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText("Close help"));
+    expect(screen.queryByText("Not official advice; confirm with the OIA office.")).toBeNull();
+    fireEvent.click(screen.getByLabelText("Forget my details"));
+    expect(forget).toHaveBeenCalled();
+    fireEvent.submit(screen.getByLabelText("Ask a question").closest("form")!);
+    expect(screen.getByRole("alert")).toHaveTextContent("The question is empty");
+    fireEvent.change(screen.getByLabelText("Ask a question"), { target: { value: "x".repeat(2001) } });
+    expect(screen.getByRole("alert")).toHaveTextContent("the limit is 2,000");
+    expect(onSend).not.toHaveBeenCalled();
+    expect(errorText([{ loc: ["body", "question"], type: "string_too_long" }], 422)).toMatch(/too long/);
+  });
+
+  it("lists what step 1 knows about the student", async () => {
+    const { knownDetails } = await import("@/components/chat/ChatPanel");
+    const trace = { stages: [{ stage_id: "query_understanding", output: { profile: { campus: { values: ["seoul"], status: "remembered" },
+      visa: { values: [], status: "missing" }, academic_status: { values: ["enrolled"], status: "scope_default" } } } }] } as unknown as import("@/types/api").Trace;
+    expect(knownDetails(trace)).toEqual(["campus seoul (remembered)"]);
+  });
+
+  it("stops sending earlier turns after Forget my details", async () => {
+    const { historyOf } = await import("@/hooks/useChat");
+    const turns = [{ id: "1", role: "user" as const, content: "I'm at ERICA." }, { id: "2", role: "assistant" as const, content: "ok" }];
+    expect(historyOf(turns.slice(turns.length))).toEqual([]); // forget() sets the start index to the current length
+  });
+});
+
 describe("compare mode", () => {
   it("picks at most 4 presets and opens a column's trace on click", async () => {
     const { ComparePicker, CompareColumns } = await import("@/components/chat/CompareView");
@@ -229,7 +267,7 @@ describe("demo cases (P8D T37)", () => {
                    stated_profile: { campus: "erica" }, expected_behavior: "answer" };  // prettier-ignore
     const onDemo = vi.fn();
     Element.prototype.scrollTo = vi.fn(); // jsdom has no scrollTo
-    const chat = { messages: [], busy: false, reset: vi.fn(), cancel: vi.fn() } as unknown as ChatState;
+    const chat = { messages: [], busy: false, reset: vi.fn(), cancel: vi.fn(), forget: vi.fn(), remembered: [] } as unknown as ChatState;
     render(<TooltipProvider><ChatPanel chat={chat} onSend={vi.fn()} blockedReason={null} onInspect={vi.fn()} presets={[]} compare={null}
                                        onCompare={vi.fn()} demoCases={[demo]} demo={null} onDemo={onDemo} /></TooltipProvider>);  // prettier-ignore
     fireEvent.change(screen.getByLabelText("Demo case"), { target: { value: "T14-001" } });

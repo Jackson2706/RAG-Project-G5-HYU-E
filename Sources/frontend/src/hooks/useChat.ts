@@ -60,6 +60,9 @@ export function useChat() {
   const abort = useRef<AbortController | null>(null);
   const latest = useRef<ChatMessage[]>([]);
   latest.current = messages;
+  const [forgotAt, setForgotAt] = useState(0); // "Forget my details": turns before this message index are no longer sent as history
+  const forgot = useRef(0);
+  forgot.current = forgotAt;
 
   const patch = (id: string, change: Partial<ChatMessage> | ((m: ChatMessage) => Partial<ChatMessage>)) =>
     setMessages((ms) => ms.map((m) => (m.id === id ? { ...m, ...(typeof change === "function" ? change(m) : change) } : m)));
@@ -91,7 +94,7 @@ export function useChat() {
   /** A demo case sends its own session history and id (the oracle presets read the case's labels). */
   const send = useCallback(async (question: string, config: StageChoices, indexId = "default", demo: DemoCase | null = null) => {
     const answerId = newId();
-    const history = demo ? demo.history : historyOf(latest.current);
+    const history = demo ? demo.history : historyOf(latest.current.slice(forgot.current));
     setMessages((ms) => [...ms, { id: newId(), role: "user", content: question }, { id: answerId, role: "assistant", content: "", status: "streaming" }]);
     const controller = new AbortController();
     abort.current = controller;
@@ -104,7 +107,7 @@ export function useChat() {
   const sendCompare = useCallback(async (question: string, presets: { id: string; name: string; config: StageChoices }[], indexId = "default",
                                          demo: DemoCase | null = null) => {
     const answerId = newId();
-    const history = demo ? demo.history : historyOf(latest.current);
+    const history = demo ? demo.history : historyOf(latest.current.slice(forgot.current));
     const runs: CompareRun[] = presets.map((p) => ({ presetId: p.id, name: p.name, content: "", status: "queued" }));
     setMessages((ms) => [...ms, { id: newId(), role: "user", content: question }, { id: answerId, role: "assistant", content: "", status: "streaming", runs }]);
     const controller = new AbortController();
@@ -125,7 +128,12 @@ export function useChat() {
   const reset = useCallback(() => {
     setMessages([]);
     setSelected(null);
+    setForgotAt(0);
   }, []);
+
+  /** Keep the conversation on screen, but stop sending earlier turns, so nothing said about the student is remembered. */
+  const forget = useCallback(() => setForgotAt(latest.current.length), []);
+  const remembered = historyOf(messages.slice(forgotAt));
 
   /** Show a request in the Execution tab (loads it from the backend if it is not in memory). */
   const select = useCallback(async (requestId: string) => {
@@ -135,7 +143,7 @@ export function useChat() {
     if (trace) setTraces((t) => ({ ...t, [requestId]: applyEvent({ requestId, question: trace.question, status: trace.status, stages: {} }, { type: "done", request_id: requestId, trace }) }));
   }, [traces]);
 
-  return { messages, traces, selected, select, send, sendCompare, cancel, reset, busy };
+  return { messages, traces, selected, select, send, sendCompare, cancel, reset, forget, remembered, busy };
 }
 
 export type ChatState = ReturnType<typeof useChat>;

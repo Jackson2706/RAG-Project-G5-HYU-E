@@ -1,0 +1,8 @@
+error,input,message_shown,screenshot
+empty question,Enter pressed with an empty input box,The question is empty. Type a question first.,u08_error_empty_question.png
+very long question,"a 2,400-character question pasted","Your question is 2,420 characters; the limit is 2,000. Shorten it to send it.",u09_error_long_question.png
+model not pulled,generation model set to 'qwen3.5:9b' (not installed),Ollama model 'qwen3.5:9b' is not installed. Run: ollama pull qwen3.5:9b,u10_error_model_missing.png
+index missing,index_id set to 'hyu_missing_r9',"Index 'hyu_missing_r9' does not exist. Pick an existing index in the Configuration tab (Index to search), or build it first (Sources/data/DATA.md).",u11_error_index_missing.png
+Ollama not running,backend pointed at a closed Ollama port (:11999),Cannot reach Ollama at http://127.0.0.1:11999. Start the Ollama app (or run: ollama serve) and send the question again.,u12_error_ollama_down.png
+backend down,every /api request fails to connect,"Cannot reach the HYU Compass backend at http://127.0.0.1:8000. Start it with ./start.sh in the Sources folder, then send the question again. | Fix the configuration error in the RAG Pipeline panel first.",u13_error_backend_down.png
+backend down (page load),page opened while the backend is down,"HYU Compass Cannot reach the HYU Compass backend at http://127.0.0.1:8000. Start it with ./start.sh in the Sources folder, then send the question again.",u14_error_backend_down_header.png

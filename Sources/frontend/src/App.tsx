@@ -34,7 +34,7 @@ export default function App() {
   useEffect(() => { api.demoCases().then((r) => setDemoCases(r.cases)).catch(() => setDemoCases([])); }, []);
   const blocked = compare
     ? compare.length < 2 ? "Choose at least 2 presets to compare." : null
-    : !config.choices ? "Loading the pipeline configuration…" : !config.valid ? "Fix the configuration error in the RAG Pipeline panel first."
+    : system.error ? system.error : !config.choices ? "Loading the pipeline configuration…" : !config.valid ? "Fix the configuration error in the RAG Pipeline panel first."
     : needsDemo(config.choices) && !demo ? "This preset needs a labeled demo case: pick one in the Demo case list." : null;
 
   const send = (question: string) => {

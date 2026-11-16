@@ -6,16 +6,24 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   try {
     res = await fetch(path, { ...init, headers: { "Content-Type": "application/json", ...init?.headers } });
   } catch {
-    throw new Error("Cannot reach the backend. Is it running on http://127.0.0.1:8000?");
+    throw new Error(BACKEND_DOWN);
   }
   const body = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(errorText(body.detail, res.status));
   return body as T;
 }
 
-/** FastAPI errors are a string, or {message, errors: [...]} for an invalid configuration. */
-function errorText(detail: unknown, status: number): string {
+export const BACKEND_DOWN = "Cannot reach the HYU Compass backend at http://127.0.0.1:8000. Start it with ./start.sh in the Sources folder, then send the question again.";
+
+/** FastAPI errors are a string, a list of field errors (request validation), or {message, errors: [...]} for an invalid configuration. */
+export function errorText(detail: unknown, status: number): string {
   if (typeof detail === "string") return detail;
+  if (Array.isArray(detail)) {
+    const fields = detail.map((e: { loc?: unknown[]; type?: string }) => `${e.loc?.[e.loc.length - 1]}:${e.type}`).join(" ");
+    if (/question:string_too_long/.test(fields)) return "Your question is too long (over 2,000 characters). Shorten it and send it again.";
+    if (/question:(string_too_short|missing)/.test(fields)) return "The question is empty. Type a question first.";
+    return `The request was not accepted (${fields}). Reload the page and try again.`;
+  }
   const d = detail as { errors?: ConfigError[] } | undefined;
   if (d?.errors?.length) return d.errors.map((e) => e.message).join("; ");
   return `Request failed (${status})`;
@@ -60,7 +68,7 @@ export async function streamChat(question: string, stages: StageChoices, indexId
     });
   } catch (err) {
     if (signal.aborted) throw err;
-    throw new Error("Cannot reach the backend. Is it running on http://127.0.0.1:8000?");
+    throw new Error(BACKEND_DOWN);
   }
   if (!res.ok || !res.body) {
     const body = await res.json().catch(() => ({}));

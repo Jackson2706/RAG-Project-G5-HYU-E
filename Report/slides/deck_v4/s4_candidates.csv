@@ -1,0 +1,12 @@
+source,question,aaes_action,reason,seconds,reply
+dev T14-184 + ERICA,I'm an ERICA campus student. Which partner schools offer a one-semester visit taught fully in English?,ANSWER,no_branch,4.0,"I could not find enough information in the indexed HYU documents to answer this question. Please check the official Hanyang University website or ask the relevant office.
+
+_Model note: The provided evidence lists support programs like field programs and K-Movie Nights for international students at the ERICA Campus but does not mention any partner schools, exchange programs, or specific details about visits being taught fully in English._"
+dev T14-190 wording,I'm at the ERICA campus. Were newly admitted students allowed at the 2023 talent fair?,CONDITIONAL,few_branches,4.0,"I could not find enough information in the indexed HYU documents to answer this question. Please check the official Hanyang University website or ask the relevant office.
+
+_Model note: The provided evidence blocks do not contain information regarding the 2023 talent fair or whether newly admitted students were allowed to attend it. They only provide statistics on student numbers and a welcome message from the Vice President._"
+dev T14-176 + Seoul,I'm a Seoul campus student. Can you check whether immigration approved my re-entry permit?,CLARIFY,many_branches,0.2,"The answer depends on your academic status. Which applies to you: admitted not enrolled, enrolled, leave of absence, completed coursework or graduating?"
+new,I'm a Seoul campus student. Can I bring my pet dog into the dormitory?,ABSTAIN,not_applicable,0.2,The official pages I found do not apply to you (they are for another campus or student group). Please contact the Seoul campus OIA office.
+new,I'm an ERICA campus student. Does the university reimburse my flight ticket to Korea?,CONDITIONAL,few_branches,5.1,"I could not find enough information in the indexed HYU documents to answer this question. Please check the official Hanyang University website or ask the relevant office.
+
+_Model note: The provided evidence blocks do not contain any information regarding flight ticket reimbursement policies for ERICA campus students. They only discuss the university's location, industry cooperation, international student admissions processes, and visa application guides for returning to school._"
