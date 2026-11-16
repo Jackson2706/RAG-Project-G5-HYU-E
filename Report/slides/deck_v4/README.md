@@ -67,3 +67,34 @@ Execution tab · u07 compare mode · u08–u14 the error messages · u15 after F
    B0 and R16 answer directly.
 
 Not done by me: the human still has to rehearse once live and click through the Help panel.
+
+## Status of Tasks 2–4 (2026-11-16, in progress)
+
+The weekly usage limit for subagents was reached at about 12:40 (it resets 2026-11-20 06:00 KST). Labelling,
+adjudication and the v3 content judge all run on subagents, so they wait until the reset. Local runs (Ollama, no
+Claude usage) continue.
+
+- **Task 2 (follow-up):** `Sources/scripts/deck_v4_followup.py`, 67 personas (43 dev cases + 24 from the deck-v3
+  illustrative questions, `followup/personas_illustrative.json`). Runs are still going in `followup/runs.jsonl` (not
+  committed yet: raw). The score rule was fixed before judging (script docstring). Waiting for: the v3 judge.
+- **Task 3 (dev-2 / test-3):** 204 drafted, 187 kept after the overlap check (`questions/overlap_check.json`:
+  17 near-duplicates dropped, max cosine to any dev/test-1/test-2 question 0.895, no evidence passage shared with
+  them). Writers' first seed type (similar passage pairs) was mostly noise (22 questions from 136 seeds). Topic
+  bundles gave the rest. 113 are student-dependent by the writers, 74 controls: **fewer than the 140 / 60 asked**.
+  Labeller A finished 47 of 187; labeller B none. Nothing is frozen and no system has seen these questions.
+- **Task 4 (AAES+):** code done and tested (`aaes_llm.py`, the three AAES blocks take `mode` / `step3_mode` /
+  `step4_mode`; 14 presets `AP_<code>`; RRRR = A0 unchanged, backend tests 263). A0b diagnosis:
+  `aaes_plus/a0b_diagnosis.md` (the campus rule removed 4 of A0's 5 splits; NONE extractions the fifth). Stage B
+  has started on dev (47 cases × 15 versions, `Report/results/deck4-dev`, LLM cache in `.run/llm_cache`). Dev-2,
+  the stage-A component labels, the content judge, and stage C wait for the reset.
+
+## Task 5 · Privacy and data check (done)
+
+`privacy_check.md`, `privacy_scan.json` (`Sources/scripts/deck_v4_privacy.py`).
+- Chat and remembered profile live only in the browser. **Forget my details** clears the profile (Task 1).
+- Every request's trace (question, earlier turns, answer) is kept in MongoDB `hyu_compass.traces` with no expiry and no
+  delete button (44 traces, the oldest from 2026-10-28). This is the main gap.
+- Nothing from the chat leaves the Mac. The page loads Google Fonts, and the models come from Hugging Face on the
+  first start.
+- Index r5: 0 unmasked e-mails (1,424 masked). 292 office phone numbers. 23 title-plus-name candidates (public staff
+  on notices).
