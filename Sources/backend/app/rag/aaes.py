@@ -137,8 +137,17 @@ def _value_space(attribute: str, profile: dict[str, dict]) -> list[str]:
     return list(entry["values"]) if entry.get("status") == "scope_default" else list(VOCABULARY[attribute])
 
 
+def _applies(c: dict, known: dict[str, list[str]]) -> bool:
+    """AAES+ step 2 (llm/both) may fix a chunk's label: conflicting never applies, compatible/unconditioned always
+    apply; "open"/"unknown" (and every chunk in rules mode, which has no fixed label) use the tags."""
+    fixed = c.get("fixed_label")
+    if fixed in (FIT_CONFLICTING, FIT_COMPATIBLE, "unconditioned"):
+        return fixed != FIT_CONFLICTING
+    return label_chunk(c["condition"], c.get("status"), known) != FIT_CONFLICTING
+
+
 def _applying(chunks: list[dict], known: dict[str, list[str]]) -> list[str]:
-    return [c["id"] for c in chunks if label_chunk(c["condition"], c.get("status"), known) != FIT_CONFLICTING]
+    return [c["id"] for c in chunks if _applies(c, known)]
 
 
 def _entropy(outcomes: list) -> float:
@@ -195,7 +204,7 @@ def decide(chunks: list[dict], profile: dict[str, dict], max_branches: int = 3, 
     exclude: attributes that may not branch (A0b drops the campus unless both campuses have campus-scoped support).
     """
     known = known_values(profile)
-    labels = {c["id"]: label_chunk(c["condition"], c.get("status"), known) for c in chunks}
+    labels = {c["id"]: c.get("fixed_label") or label_chunk(c["condition"], c.get("status"), known) for c in chunks}
     support = [c for c in chunks if labels[c["id"]] != FIT_CONFLICTING]
     if temporal and any(not c.get("superseded") for c in support):
         support = [c for c in support if not c.get("superseded")]

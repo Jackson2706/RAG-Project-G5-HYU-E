@@ -119,3 +119,25 @@ def test_health_and_documents(api, ingested):
     assert health["mongodb"]["ok"] and health["qdrant"]["ok"] and health["ollama"]["ok"] and health["index"]["documents"] == 5
     docs = api.get("/api/documents").json()["documents"]
     assert len(docs) == 5 and {"doc_id", "title", "source_uri", "language", "source_hash", "metadata"} <= set(docs[0])
+
+
+def test_llm_cache_replays_an_identical_request(tmp_path, monkeypatch):
+    """HYU_LLM_CACHE: the second identical request is served from disk, a different one is not."""
+    import asyncio
+
+    import httpx
+
+    from app import ollama as mod
+
+    calls = []
+
+    def handler(request):
+        calls.append(1)
+        return httpx.Response(200, text='{"message": {"content": "hi"}, "done": true, "eval_count": 1}\n')
+
+    monkeypatch.setattr(mod, "CACHE_DIR", tmp_path)
+    client = mod.OllamaClient("http://x", transport=httpx.MockTransport(handler))
+    model = {"name": "m", "digest": "d", "capabilities": []}
+    run = lambda content: asyncio.run(client.complete(model, [{"role": "user", "content": content}], {"temperature": 0}))  # noqa: E731
+    assert run("q")[0] == "hi" and run("q")[0] == "hi" and len(calls) == 1
+    assert run("other")[0] == "hi" and len(calls) == 2

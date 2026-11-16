@@ -63,6 +63,9 @@ LLM_METHODS = {"query_rewriting": None, "generation": None, "query_understanding
                "evidence_sufficiency": ("applicability_sufficiency_spec", "applicability_guard")}  # None = any method calls the LLM
 
 
+AAES_PLUS_METHODS = ("profile_understanding", "applicability_reranker", "applicability_sufficiency")
+
+
 def llm_calls(trace: dict) -> int:
     """Completed stages that called the LLM (generation, query rewriting, the self-query parser, A0b/AG's checks)."""
     config = trace.get("config") or {}
@@ -72,7 +75,24 @@ def llm_calls(trace: dict) -> int:
         method = (config.get(stage_id) or {}).get("method")
         return wanted is None or method in (wanted if isinstance(wanted, tuple) else (wanted,))
 
-    return sum(1 for s in trace["stages"] if s["status"] == "completed" and s["stage_id"] in LLM_METHODS and calls_llm(s["stage_id"]))
+    plus = sum((s.get("details") or {}).get("llm_calls", 0) for s in trace["stages"]  # AAES+ steps count their own calls (0 in rules mode)
+               if s["status"] == "completed" and (config.get(s["stage_id"]) or {}).get("method") in AAES_PLUS_METHODS)
+    return plus + sum(1 for s in trace["stages"] if s["status"] == "completed" and s["stage_id"] in LLM_METHODS and calls_llm(s["stage_id"]))
+
+
+def aaes_plus_details(trace: dict) -> dict:
+    """AAES+ fallbacks per step (invalid LLM output -> rules) and step-1 profile, for the component and dev tables."""
+    stages = {s["stage_id"]: s for s in trace["stages"]}
+    fallbacks: dict[str, int] = {}
+    for sid in ("query_understanding", "reranking", "evidence_sufficiency"):
+        for step, n in ((stages.get(sid) or {}).get("details") or {}).get("fallbacks", {}).items():
+            fallbacks[step] = fallbacks.get(step, 0) + n
+    qu = stages.get("query_understanding") or {}
+    profile = (qu.get("output") or {}).get("profile") if qu.get("status") == "completed" else None
+    suff = stages.get("evidence_sufficiency") or {}
+    signals = ((suff.get("output") or {}).get("signals") or {}) if suff.get("status") == "completed" else {}
+    return {"fallbacks": fallbacks, "profile": profile, "reason": signals.get("reason"), "branch_attributes": signals.get("branch_attributes"),
+            "clarify_attribute": signals.get("clarify_attribute")}
 
 
 def trace_record(case: dict, trace: dict, lookup) -> dict:
@@ -100,7 +120,7 @@ def trace_record(case: dict, trace: dict, lookup) -> dict:
             "status": trace["status"], "error": trace["error"], "action": trace.get("action"), "outcome": trace.get("outcome"),
             "behavior": label_action(trace.get("action"), trace.get("outcome")),
             "unknown_condition_evidence": bool(trace.get("unknown_condition_evidence")),
-            "answer": trace.get("answer", ""), "total_ms": trace.get("total_ms"), "usage": trace.get("usage"), "llm_calls": llm_calls(trace),
+            "answer": trace.get("answer", ""), "total_ms": trace.get("total_ms"), "usage": trace.get("usage"), "llm_calls": llm_calls(trace), "aaes_plus": aaes_plus_details(trace),
             "ranked": [chunk(c) for c in ranked_ids] if retrieval_used else None, "cited": [chunk(c) for c in cited_ids], "uncited": uncited}  # fmt: skip
 
 

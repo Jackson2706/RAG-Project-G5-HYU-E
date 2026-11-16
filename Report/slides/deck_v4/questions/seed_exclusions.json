@@ -1,0 +1,16 @@
+{
+ "chunks_over_200_chars": 1698,
+ "excluded_overlap_existing_cases": 418,
+ "free": 1273,
+ "pairs_found": 6022,
+ "student_dependent_seeds": 136,
+ "control_seeds": 80,
+ "differs_on": {
+  "campus": 40,
+  "visa": 4,
+  "degree_level": 32,
+  "student_type": 9,
+  "academic_status": 77
+ },
+ "similarity_threshold": 0.78
+}

@@ -1,0 +1,43 @@
+{
+ "index": "hyu_20261110_97dc1269_r5",
+ "chunks": 1867,
+ "matches": {
+  "email_unmasked": 0,
+  "email_masked": 1424,
+  "phone": 292,
+  "name_title": 23,
+  "name_intro": 0
+ },
+ "chunks_with_match": {
+  "email_unmasked": 0,
+  "email_masked": 255,
+  "phone": 158,
+  "name_title": 20,
+  "name_intro": 0
+ },
+ "masked_examples": {
+  "email_unmasked": [],
+  "email_masked": [
+   "[e****]",
+   "[e****]",
+   "[e****]",
+   "[e****]",
+   "[e****]"
+  ],
+  "phone": [
+   "+8*-2-2***-1***",
+   "0*-2***-2***",
+   "0*-2***-2***",
+   "+8*-2-2***-2***",
+   "+8*-3*-6**-1***"
+  ],
+  "name_title": [
+   "P******** E******* P******",
+   "D*. M******* A****",
+   "P***. Y***",
+   "P********\nH**",
+   "D*. J***"
+  ],
+  "name_intro": []
+ }
+}

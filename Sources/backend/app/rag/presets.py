@@ -25,7 +25,21 @@ WIDE_DENSE = {"dense_retrieval": {"method": "qdrant_cosine", "params": {"top_k":
 GATE = {"evidence_sufficiency": {"method": "score_threshold", "params": {"signal": "query_coverage", "threshold": 0.30}}}
 CRITERIA = {"query_understanding": {"method": "stated_criteria"}}  # the user fills in campus, audience, …
 # AAES: fixed retrieval (hybrid + cross-encoder, Appendix E) with the three AAES steps
+
+def aaes_plus(code: str) -> dict[str, Any]:
+    """AAES+ version from a four-letter code, one letter per online step (R rules, L LLM, B both): "RLRR" = A0 with an LLM step 2."""
+    m = [STEP_MODE[c] for c in code]
+    words = {"R": "rules", "L": "LLM", "B": "rules+LLM"}
+    return {"id": f"AP_{code}", "kind": "aaes", "group": "Ablations", "name": f"AAES+ {code}",
+            "description": "AAES with each step done by " + ", ".join(f"{n} {words[c]}" for n, c in zip(("1", "2", "3", "4"), code, strict=True))
+                           + " (steps: 1 read the student, 2 does each passage apply, 3 which detail matters, 4 decide).",
+            "stages": {**AAES, "query_understanding": {"method": "profile_understanding", "params": {"mode": m[0]}},
+                       "reranking": {"method": "applicability_reranker", "params": {"mode": m[1]}},
+                       "evidence_sufficiency": {"method": "applicability_sufficiency", "params": {"step3_mode": m[2], "step4_mode": m[3]}}}}  # fmt: skip
+
 PRESETS_R16_STAGES = {**HYBRID, "reranking": {"method": "cross_encoder"}, "context_construction": {"method": "conditional_prompt"}}  # AG's base (A35)
+AAES_PLUS = ["LLLL", "BBBB", "LRRR", "RLRR", "RRLR", "RRRL", "BRRR", "RBRR", "RRBR", "RRRB", "RBBB", "BRBB", "BBRB", "BBBR"]  # RRRR = A0
+STEP_MODE = {"R": "rules", "L": "llm", "B": "both"}
 AAES = {**HYBRID, "query_understanding": {"method": "profile_understanding"}, "reranking": {"method": "applicability_reranker"},
         "evidence_sufficiency": {"method": "applicability_sufficiency"}}
 
@@ -146,6 +160,8 @@ PRESETS: list[dict[str, Any]] = [
     {"id": "A6_AAES_NO_TEMPORAL", "kind": "aaes", "group": "Ablations", "name": "A6 — AAES without the temporal rule",
      "description": "A0, but old versions of a notice count as much as the newest one.",
      "stages": {**AAES, "evidence_sufficiency": {"method": "applicability_sufficiency", "params": {"temporal": False}}}},
+    # ---------------------------------------------------------------- AAES+ (deck v4 Task 4): rules / LLM / both per step
+    *[aaes_plus(code) for code in AAES_PLUS],
     # ---------------------------------------------------------------- reserved
     {"id": "PROPOSED_APPROACH", "kind": "proposed", "name": "Proposed approach (not defined yet)",
      "description": "Reserved for the team's own method. Disabled until it is designed and implemented.", "stages": {}, "enabled": False},

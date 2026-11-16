@@ -1,0 +1,20 @@
+{
+ "drafted": 204,
+ "kept": 187,
+ "dropped": {
+  "duplicate_new": 17
+ },
+ "kind": {
+  "student_dependent": 113,
+  "control": 74
+ },
+ "form": {
+  "missing": 56,
+  "control": 74,
+  "partly_stated": 28,
+  "earlier_turn": 29
+ },
+ "dup_threshold": 0.92,
+ "max_similarity_to_existing": 0.895,
+ "evidence_chunk_ids_not_in_index": 0
+}

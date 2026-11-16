@@ -6,8 +6,11 @@ calls (query rewriting, multi-query, HyDE, RankGPT).
 
 from __future__ import annotations
 
+import hashlib
 import json
+import os
 from collections.abc import AsyncIterator
+from pathlib import Path
 from typing import Any
 
 import httpx
@@ -15,6 +18,18 @@ import httpx
 
 class OllamaError(Exception):
     pass
+
+
+# shortcut: HYU_LLM_CACHE=<dir> replays identical requests (same model digest, messages, options, think) from disk. Only the
+# evaluation scripts set it; every call is temperature 0 with seed 42, so a replay equals a rerun. Off (None) in the app.
+CACHE_DIR = Path(os.environ["HYU_LLM_CACHE"]) if os.environ.get("HYU_LLM_CACHE") else None
+if CACHE_DIR:
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def cache_key(model: dict, messages: list[dict], options: dict, think: str) -> str:
+    raw = json.dumps([model["name"], model.get("digest"), messages, options, think], sort_keys=True, ensure_ascii=False)
+    return hashlib.sha256(raw.encode()).hexdigest()
 
 
 class OllamaClient:
@@ -63,7 +78,7 @@ class OllamaClient:
         return models[0]
 
     async def chat_stream(self, model: dict, messages: list[dict], options: dict[str, Any], think: str = "off",
-                          timeout: float | None = None, usage: dict | None = None) -> AsyncIterator[str]:
+                          timeout: float | None = None, usage: dict | None = None, _no_cache: bool = False) -> AsyncIterator[str]:
         """Yield the answer piece by piece.
 
         options: Ollama options, e.g. {"temperature": 0, "num_predict": 512, "num_ctx": 4096, "top_p": 0.9, "seed": 42}
@@ -76,6 +91,23 @@ class OllamaClient:
         """
         thinking = "thinking" in model["capabilities"]
         body: dict[str, Any] = {"model": model["name"], "messages": messages, "stream": True, "options": options}
+        key = cache_key(model, messages, options, think) if CACHE_DIR and not _no_cache else None
+        if key and (hit := CACHE_DIR / f"{key}.json").exists():  # an identical request was answered before (evaluation runs only)
+            cached = json.loads(hit.read_text())
+            if usage is not None:
+                usage.update(cached["usage"], cache_hit=True)
+            yield cached["text"]
+            return
+        if key:
+            pieces: list[str] = []
+            inner_usage: dict = {}
+            async for piece in self.chat_stream(model, messages, options, think, timeout, inner_usage, _no_cache=True):
+                pieces.append(piece)
+                yield piece
+            if usage is not None:
+                usage.update(inner_usage)
+            (CACHE_DIR / f"{key}.json").write_text(json.dumps({"text": "".join(pieces), "usage": inner_usage}))
+            return
         if think == "on" and not thinking:
             raise OllamaError(f"Model '{model['name']}' does not support thinking; set Thinking to off.")
         if thinking and think != "model_default":
