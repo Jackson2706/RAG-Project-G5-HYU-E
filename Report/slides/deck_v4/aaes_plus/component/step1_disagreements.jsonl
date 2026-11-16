@@ -1,0 +1,3 @@
+{"mid": "S036", "message": "Currently D-2-5, planning to switch to D-10 after my PhD. Is there any school support?", "history": [], "A": {"visa": "D-2-5", "degree_level": "doctoral"}, "B": {"visa": "D-2-5"}}
+{"mid": "S069", "message": "I'm an applicant for the master's program at ERICA. Is a TOPIK certificate required?", "history": [], "A": {"academic_status": "applicant", "campus": "erica"}, "B": {"academic_status": "applicant", "degree_level": "master", "campus": "erica"}}
+{"mid": "S077", "message": "Correction: I'm on D-2 now, I changed from D-4 last week. Still need the form?", "history": ["I'm on a D-4 visa in the language program."], "A": {"visa": "D-2", "degree_level": "language_program", "student_type": "language_program"}, "B": {"visa": "D-2"}}
