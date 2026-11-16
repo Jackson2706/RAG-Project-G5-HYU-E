@@ -4,7 +4,7 @@ mode (AAES+, deck v4 Task 4): rules = labels from the chunk tags (condition_fit,
 call over the top `llm_depth` passages after the cross-encoder gives each a label (everyone / this student / other
 students / depends) and a relevance flag, which replaces the word-overlap relevance rule in step 3; both = tag labels
 where tags exist, the LLM label only for passages whose tag label is "unknown", and a passage counts as relevant if
-either the overlap rule or the LLM says so. An invalid LLM item is "unknown" in llm mode and keeps its tag label in both.
+either the overlap rule or the LLM says so. Every invalid or missing LLM item keeps its rule label and overlap relevance.
 """
 
 from __future__ import annotations
@@ -38,7 +38,8 @@ class ApplicabilityReranker(CrossEncoderReranker):
         for e in head:
             app = dict(e.applicability)
             if e.chunk_id in llm:
-                labels[e.chunk_id] = llm[e.chunk_id]["label"]
+                if mode == "llm" or labels[e.chunk_id] == "unknown":
+                    labels[e.chunk_id] = llm[e.chunk_id]["label"]
                 app.update({"llm_label": llm[e.chunk_id]["label"], "llm_relevant": llm[e.chunk_id]["relevant"],
                             "llm_depends_on": llm[e.chunk_id]["depends_on"]})  # fmt: skip
             if mode != "rules":
@@ -55,17 +56,15 @@ class ApplicabilityReranker(CrossEncoderReranker):
 
     async def _llm_labels(self, query: str, head: list[Evidence], known: dict, labels: dict) -> dict[str, dict]:
         top = head[: self.params.get("llm_depth", 6)]
-        if self.params["mode"] == "both":
-            top = [e for e in top if labels[e.chunk_id] == "unknown"]
         if not top:
             return {}
         ids = {f"P{i}": e for i, e in enumerate(top, 1)}
         student = "; ".join(f"{a}: {', '.join(v)}" for a, v in known.items()) or "nothing known"
         user = f"Question: {query}\nKnown about the student: {student}\n\n" + "\n\n".join(f"[{pid}]\n{e.text[:1200]}" for pid, e in ids.items())
         parsed, rejected = aaes_llm.parse_applies(await aaes_llm.call(self, aaes_llm.APPLIES, user), {p: e.text for p, e in ids.items()}, known)
-        aaes_llm.fallback(self, "applies", rejected + [f"{p}:missing" for p in ids if p not in parsed and "unparseable" not in rejected])
-        if self.params["mode"] == "llm":  # spec: an invalid item is "unknown"; its relevance falls back to the overlap rule
-            parsed |= {p: {"relevant": None, "label": "unknown", "depends_on": []} for p in ids if p not in parsed}
+        rejected_ids = {item.split(":", 1)[0] for item in rejected}
+        missing = [] if "unparseable" in rejected else [f"{p}:missing" for p in ids if p not in parsed and p not in rejected_ids]
+        aaes_llm.fallback(self, "applies", rejected + missing)
         out = {ids[p].chunk_id: v for p, v in parsed.items()}
         self.trace_details["llm_labels"] = out
         return out

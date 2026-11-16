@@ -20,13 +20,13 @@ def test_conflict_needs_a_verified_quote_naming_a_known_attribute():
     raw = ('{"passages": [{"id": "P1", "relevant": true, "applies": "other_students", "quote": "Only ERICA campus students"}, '
            '{"id": "P2", "relevant": true, "applies": "other_students", "quote": "pay 25,000 won"}, {"id": "P9", "relevant": true, "applies": "everyone"}]}')
     out, rejected = aaes_llm.parse_applies(raw, passages, {"campus": ["seoul"]})
-    assert out["P1"]["label"] == "conflicting" and out["P2"]["label"] == "open"  # no known attribute named -> depends
+    assert out["P1"]["label"] == "conflicting" and "P2" not in out  # invalid quote: corresponding rules decide
     assert "P9:shape" in rejected and "P2:conflict_quote" in rejected
 
 
 def test_differs_needs_an_unknown_vocabulary_detail_and_two_distinct_answers():
-    ok = '{"differs": true, "detail": "campus", "answers": {"seoul": "20 hours per week", "erica": "30 hours on weekdays"}}'
-    assert aaes_llm.parse_differs(ok, {})["answers"]["erica"] == "30 hours on weekdays"
+    ok = '{"differs": true, "detail": "campus", "answers": {"seoul": "20 hours per week", "erica": "30 hours per week"}}'
+    assert aaes_llm.parse_differs(ok, {})["answers"]["erica"] == "30 hours per week"
     assert aaes_llm.parse_differs(ok, {"campus": ["seoul"]}) is None  # already known
     assert aaes_llm.parse_differs('{"differs": true, "detail": "gpa", "answers": {"a": "x", "b": "y"}}', {}) is None
     assert aaes_llm.parse_differs('{"differs": true, "detail": "campus", "answers": {"seoul": "25,000 won fee", "erica": "fee 25,000 won"}}', {}) is None

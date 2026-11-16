@@ -127,8 +127,8 @@ def parse_applies(raw: str, passages: dict[str, str], known: dict[str, list[str]
             quote = str(item.get("quote", ""))
             names_known = any(w in norm(quote) for a in known for w in SURFACE.get(a, ()))
             if not (quoted(quote, passages[pid]) and names_known):
-                label = "open"
                 rejected.append(f"{pid}:conflict_quote")
+                continue
         depends = [a for a in item.get("depends_on") or [] if a in VOCABULARY and a not in known]
         out[pid] = {"relevant": item["relevant"], "label": label, "depends_on": depends}
     return out, rejected

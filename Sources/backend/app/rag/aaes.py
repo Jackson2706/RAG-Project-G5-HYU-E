@@ -295,7 +295,8 @@ def distinct_answers(keys: list[frozenset[str] | None]) -> list[int]:
     """Group label per answer (-1 = no answer); two answers are the same when their word sets overlap >= 0.5 (Jaccard).
 
     shortcut: lexical sameness, so paraphrases with different words count as different; upgrade to an LLM comparison
-    if dev shows that. [{"30000","won"}, {"30000","won","fee"}, {"free"}, None] -> [0, 0, 1, -1].
+    if dev shows that. Numeric tokens must match, so "20 hours" and "30 hours" stay different answers.
+    [{"30000","won"}, {"30000","won","fee"}, {"free"}, None] -> [0, 0, 1, -1].
     """
     groups: list[frozenset[str]] = []
     out = []
@@ -303,7 +304,10 @@ def distinct_answers(keys: list[frozenset[str] | None]) -> list[int]:
         if key is None:
             out.append(-1)
             continue
-        match = next((i for i, g in enumerate(groups) if len(key & g) / len(key | g) >= 0.5 and key & _NEG == g & _NEG), None)
+        numbers = {word for word in key if word.isdigit()}
+        match = next((i for i, g in enumerate(groups)
+                      if numbers == {word for word in g if word.isdigit()}
+                      and len(key & g) / len(key | g) >= 0.5 and key & _NEG == g & _NEG), None)  # fmt: skip
         if match is None:
             groups.append(key)
             match = len(groups) - 1

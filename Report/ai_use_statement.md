@@ -6,7 +6,9 @@ This project was built with AI coding agents. This file lists which tool did wha
 ## Code
 
 - **Codex CLI** (`codex:gpt-5`) implemented most backend, crawler, evaluation and frontend code from task files
-  written by Claude Code (`Sources/docs/agent_tasks/T*.md`, each with a `.result.md`). Codex never committed.
+  written by Claude Code (`Sources/docs/agent_tasks/T*.md`, each with a `.result.md`). Earlier Codex changes were
+  reviewed and committed by Claude Code. On 2026-11-16 Codex also reconstructed and tested the AAES+ fallback patch
+  described in T39, audited the local continuation state, and ran the dev-only model-call probe.
 - **Claude Code** (Claude Opus 5.5) planned the phases, wrote specs and tests first for the research-critical
   code (AAES steps and policy, metrics, the split/freeze logic, the test-run guard), reviewed every Codex change,
   and committed. From 2026-11-13 (amendment A33; Codex unavailable until 2026-11-17) Claude Code also wrote code

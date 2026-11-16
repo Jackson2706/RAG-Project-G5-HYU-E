@@ -88,6 +88,11 @@ Claude usage) continue.
   has started on dev (47 cases × 15 versions, `Report/results/deck4-dev`, LLM cache in `.run/llm_cache`). Dev-2,
   the stage-A component labels, the content judge, and stage C wait for the reset.
 
+Continuation audit: `aaes_plus/audit_2026-11-16.md`. Both 187-row candidate label drafts now exist, but they have
+no annotator metadata and are not treated as independent labels. Stage B has completed RRRR and LLLL on 47 dev
+cases; BBBB has 11 resumable rows. T39 fixed Step 2 fallbacks and numeric Step 3 comparisons. Its dev-only probe
+kept two measured failures: hypothetical identity extraction and the unnecessary winter-school campus split.
+
 ## Task 5 · Privacy and data check (done)
 
 `privacy_check.md`, `privacy_scan.json` (`Sources/scripts/deck_v4_privacy.py`).

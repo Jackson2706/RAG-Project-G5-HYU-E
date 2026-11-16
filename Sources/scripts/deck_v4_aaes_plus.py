@@ -217,7 +217,7 @@ async def step2() -> int:
             rule = RULE_NAME[label_chunk(cond, chunks[t["chunk_id"]].get("condition_status"), known)]
             overlap = query_coverage(t["question"], chunks[t["chunk_id"]]["text"]) >= 0.30
             llm = parsed.get(p)
-            llm_label = RULE_NAME[llm["label"]] if llm else "unknown"
+            llm_label = RULE_NAME[llm["label"]] if llm else rule
             both = llm_label if rule == "unknown" else rule
             results.append({"tid": t["tid"], "unknown_tags": t["unknown_tags"], "gold": gold[t["tid"]], "ms_llm": round(ms, 1),
                             "rules": {"applies": rule, "relevant": overlap}, "llm": {"applies": llm_label, "relevant": llm["relevant"] if llm else overlap},
@@ -286,8 +286,49 @@ async def step34() -> int:
     return 0
 
 
+async def probe() -> int:
+    """Short dev-only checks of the patched LLM boundaries; stops before answer generation."""
+    from app.rag.pipeline import run_rag
+    from app.rag.presets import preset_config
+
+    svc = services()
+    models = {m["name"]: m for m in await svc.ollama.list_models()}
+    identity = await svc.ollama.model_identity(models[AUX["model"]])
+    rows = []
+    block = create_block("query_understanding", "profile_understanding", {"mode": "both", **AUX}, svc)
+    for name, question in (("topik", "I don't have a TOPIK score. Can I still get a part-time permit?"),
+                           ("hypothetical_identity", "If I were a master's student at ERICA, could I work more hours?")):
+        block.trace_details = {}
+        analysis = await block.analyze(question)
+        rows.append({"name": name, "question": question, "profile": known_of(analysis.profile), "details": block.trace_details})
+
+    dev = {c["case_id"]: c for c in hyu_suite.load_cases("dev")}
+    scenarios = [("winter_school", "AP_RRBR", dev["T14-042"]["question"], []),
+                 ("different_insurance_rules", "AP_BBBB", dev["T14-132"]["question"], []),
+                 ("insurance_after_coursework", "AP_BBBB", "I finished my coursework. Which insurance applies to me?", [])]  # fmt: skip
+    assert len({name for name, *_ in scenarios}) == len(scenarios)
+    for name, preset, question, history in scenarios:
+        trace = await run_rag(question, preset_config(preset), svc, stop_after="evidence_sufficiency", save_trace=False, history=history)
+        stages = {stage["stage_id"]: stage for stage in trace["stages"]}
+        rows.append({"name": name, "preset": preset, "question": question, "status": trace["status"], "error": trace.get("error"),
+                     "profile": (stages.get("query_understanding", {}).get("output") or {}).get("profile"),
+                     "reranking_details": stages.get("reranking", {}).get("details"),
+                     "decision": stages.get("evidence_sufficiency", {}).get("output"),
+                     "sufficiency_details": stages.get("evidence_sufficiency", {}).get("details")})  # fmt: skip
+        print(name, trace["status"], trace.get("action"), flush=True)
+
+    prior = load_jsonl(COMP / "step1_results.jsonl") if (COMP / "step1_results.jsonl").exists() else []
+    invalid = next((r for r in prior if r.get("fallbacks")), None)
+    result = {"scope": "dev and synthetic only; stopped after evidence sufficiency", "index_id": svc.db.index_id,
+              "model": identity, "options": {"temperature": 0.0, "seed": 42, "thinking": "off", "num_ctx": 4096},
+              "existing_actual_invalid_step1_item": invalid, "probes": rows}  # fmt: skip
+    (OUT / "patch_probe.json").write_text(json.dumps(result, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+    return 0
+
+
 if __name__ == "__main__":
     assert prf(8, 2, 2) == {"precision": 0.8, "recall": 0.8, "f1": 0.8}
     cmd = sys.argv[1]
     sync = {"step1-build": step1_build, "freeze": freeze}
-    raise SystemExit(sync[cmd]() if cmd in sync else asyncio.run({"step1": step1, "step2-build": step2_build, "step2": step2, "step34": step34}[cmd]()))
+    raise SystemExit(sync[cmd]() if cmd in sync else asyncio.run({"step1": step1, "step2-build": step2_build, "step2": step2, "step34": step34,
+                                                                  "probe": probe}[cmd]()))  # fmt: skip
