@@ -19,7 +19,7 @@ def required_terms(question: str) -> list[str]:
     words = re.findall(r"[A-Za-z][\w'-]*", question)
     for i, word in enumerate(words):
         sentence_start = i == 0 or re.search(re.escape(words[i - 1]) + r"[.?!]\s+" + re.escape(word), question)
-        if (word.isupper() and len(word) > 1) or (word[0].isupper() and not sentence_start):
+        if word != "I" and ((word.isupper() and len(word) > 1) or (word[0].isupper() and not sentence_start)):
             terms.append(word)
     return list(dict.fromkeys(terms))
 

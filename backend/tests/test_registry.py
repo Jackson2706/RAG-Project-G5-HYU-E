@@ -7,6 +7,7 @@ import pytest
 
 from app.rag.blocks.retrieval.dense_retrieval.base import BaseDenseRetriever
 from app.rag.blocks.retrieval.dense_retrieval.qdrant_cosine import QdrantDenseRetriever
+from app.rag.blocks.query_processing.query_understanding.llm_understanding import LLMQueryUnderstanding
 from app.rag.blocks.evidence.metadata_enrichment.mongodb_enrichment import MongoChunkLookup
 from app.rag.registry import PIPELINE, STAGES, ConfigError, Method, Param, check_registry, create_block, registry_json, validate_config
 from app.rag.schemas import RetrievalResult
@@ -79,9 +80,19 @@ def test_registry_json_is_serializable_and_marks_status():
     json.dumps(data)
     stages = {s["stage_id"]: s for s in data["stages"]}
     assert stages["metadata_prefiltering"]["base_class"] == "BaseMetadataPrefilter"
+    understanding_methods = {m["method_id"]: m for m in stages["query_understanding"]["methods"]}
+    assert understanding_methods["llm_understanding"]["implemented"] is True
+    assert set(understanding_methods["llm_understanding"]["parameters"]) == {"model", "temperature", "max_tokens"}
     assert stages["metadata_postfiltering"]["methods"][0]["file"] == "metadata_filtering/metadata_postfiltering/candidate_postfilter.py"
     assert stages["generation"]["methods"][0]["parameters"]["model"]["ui"] == "ollama_model"
     assert stages["chunking"]["methods"][0]["parameters"]["chunk_size"]["scope"] == "ingestion"
+
+
+def test_llm_query_understanding_can_be_selected_and_created(services):
+    config = validate_config({"query_understanding": {"method": "llm_understanding"}})
+    block = create_block("query_understanding", "llm_understanding", config["query_understanding"]["params"], services)
+
+    assert isinstance(block, LLMQueryUnderstanding)
 
 
 class StubRetriever(BaseDenseRetriever):

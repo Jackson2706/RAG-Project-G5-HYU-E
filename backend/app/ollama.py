@@ -63,7 +63,8 @@ class OllamaClient:
         return models[0]
 
     async def chat_stream(self, model: dict, messages: list[dict], options: dict[str, Any], think: str = "off",
-                          timeout: float | None = None, usage: dict | None = None) -> AsyncIterator[str]:
+                          timeout: float | None = None, usage: dict | None = None,
+                          format: str | dict[str, Any] | None = None) -> AsyncIterator[str]:
         """Yield the answer piece by piece.
 
         options: Ollama options, e.g. {"temperature": 0, "num_predict": 512, "num_ctx": 4096, "top_p": 0.9, "seed": 42}
@@ -76,6 +77,8 @@ class OllamaClient:
         """
         thinking = "thinking" in model["capabilities"]
         body: dict[str, Any] = {"model": model["name"], "messages": messages, "stream": True, "options": options}
+        if format is not None:
+            body["format"] = format
         if think == "on" and not thinking:
             raise OllamaError(f"Model '{model['name']}' does not support thinking; set Thinking to off.")
         if thinking and think != "model_default":
@@ -118,8 +121,8 @@ class OllamaClient:
             raise OllamaError(f"Lost connection to Ollama at {self.base_url}.") from exc
 
     async def complete(self, model: dict, messages: list[dict], options: dict[str, Any], think: str = "off",
-                       timeout: float | None = None) -> tuple[str, dict]:
+                       timeout: float | None = None, format: str | dict[str, Any] | None = None) -> tuple[str, dict]:
         """The whole answer at once (for auxiliary calls such as query rewriting): (text, usage)."""
         usage: dict = {}
-        parts = [piece async for piece in self.chat_stream(model, messages, options, think, timeout, usage)]
+        parts = [piece async for piece in self.chat_stream(model, messages, options, think, timeout, usage, format)]
         return "".join(parts).strip(), usage

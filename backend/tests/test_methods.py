@@ -17,6 +17,7 @@ from app.rag.blocks.query_processing.query_rewriting.base import required_terms,
 from app.rag.blocks.query_processing.query_rewriting.hyde import HyDERewriter
 from app.rag.blocks.query_processing.query_rewriting.llm_rewriter import LLMQueryRewriter
 from app.rag.blocks.query_processing.query_rewriting.multi_query import MultiQueryRewriter
+from app.rag.blocks.query_processing.query_understanding.llm_understanding import LLMQueryUnderstanding
 from app.rag.blocks.retrieval.hybrid_fusion.rrf import ReciprocalRankFusion, reciprocal_rank_fusion
 from app.rag.blocks.retrieval.lexical_retrieval.bm25 import BM25Retriever, LexicalIndex, bm25_scores, tokenize
 from app.rag.pipeline import run_rag
@@ -215,6 +216,7 @@ async def test_rankgpt_repairs_or_falls_back(services, fake_ollama):
 def test_rewrite_validation_keeps_constraints():
     q = 'Can ERICA students without a visa apply before March 2026 for the "need-based" scholarship?'
     assert {"ERICA", "2026", "need-based", "March"} <= set(required_terms(q))
+    assert "I" not in required_terms("How do I apply for a dormitory at the ERICA campus?")
     assert validate_rewrite(q, 'ERICA "need-based" scholarship March 2026 students without visa')["passed"]
     dropped = validate_rewrite(q, "need-based scholarship application")
     assert not dropped["passed"] and "2026" in dropped["missing"]
@@ -224,21 +226,42 @@ def test_rewrite_validation_keeps_constraints():
 
 async def test_llm_rewrite_used_or_falls_back(ingested, services, fake_ollama):
     params = {"model": "", "temperature": 0.0, "max_tokens": 64}
-    fake_ollama.answer = "need-based scholarship required documents"
+    fake_ollama.answer = '{"query":"need-based scholarship required documents"}'
     good = await LLMQueryRewriter(params, services).rewrite(QUESTION)
     assert good.query == "need-based scholarship required documents" and good.validation["used"] == "rewrite"
+    assert fake_ollama.requests[-1]["format"]["required"] == ["query"]
     question = "How many credits can I take in 2026?"
-    fake_ollama.answer = "credit limit"  # drops 2026
+    fake_ollama.answer = '{"query":"credit limit"}'  # drops 2026
     bad = await LLMQueryRewriter(params, services).rewrite(question)
     assert bad.query == question and bad.validation["used"] == "original question" and "2026" in bad.validation["missing"]
 
 
+async def test_llm_rewrite_rejects_reasoning_instead_of_json(services, fake_ollama):
+    question = "How do I apply for a dormitory at the ERICA campus?"
+    fake_ollama.answer = (
+        'We are given the user question. We must rewrite this as one concise query. '
+        'Keep ERICA exactly and do not explain reasoning.'
+    )
+
+    rewritten = await LLMQueryRewriter({"model": "", "temperature": 0.0, "max_tokens": 64}, services).rewrite(question)
+
+    assert rewritten.query == question
+    assert rewritten.validation["used"] == "original question"
+    assert rewritten.validation["rejected_rewrite"] == ""
+
+
 async def test_multi_query_generates_searches_each_and_merges(ingested, services, fake_ollama):
-    fake_ollama.answer = "1. need-based scholarship documents\n2. income certificate scholarship\n2. income certificate scholarship\n- tuition waiver"
-    rewritten = await MultiQueryRewriter({"model": "", "temperature": 0.0, "max_tokens": 64, "num_queries": 3, "include_original": True,
-                                          "rrf_k": 60}, services).rewrite(QUESTION)  # fmt: skip
+    fake_ollama.answer = (
+        '{"queries":["need-based scholarship documents","income certificate scholarship",'
+        '"income certificate scholarship","tuition waiver"]}'
+    )
+    block = MultiQueryRewriter({"model": "", "temperature": 0.0, "max_tokens": 64, "num_queries": 3, "include_original": True,
+                                "rrf_k": 60}, services)
+    rewritten = await block.rewrite(QUESTION)
     assert rewritten.query == QUESTION and rewritten.alternatives == ["need-based scholarship documents", "income certificate scholarship",
                                                                       "tuition waiver"]  # numbering removed, duplicate dropped  # fmt: skip
+    assert fake_ollama.requests[-1]["format"]["required"] == ["queries"]
+    assert "raw_output" not in block.trace_details
     trace = await run_rag(QUESTION, preset_config("R7_MULTI_QUERY"), services)
     dense = stages_of(trace)["dense_retrieval"]
     assert len(dense["input"]["queries"]) == 4 and len(dense["output"]["details"]["per_query"]) == 4
@@ -246,11 +269,33 @@ async def test_multi_query_generates_searches_each_and_merges(ingested, services
     assert len(ids) == len(set(ids)) and "query_1_rank" in str(dense["output"]["candidates"])
 
 
+async def test_multi_query_ignores_reasoning_text_and_falls_back(services, fake_ollama):
+    question = "How do I apply for a dormitory at the ERICA campus?"
+    fake_ollama.answer = (
+        'We are given the user question. We must generate search queries.\n'
+        'The name ERICA is a proper noun and must be kept exactly.'
+    )
+    block = MultiQueryRewriter(
+        {"model": "", "temperature": 0.0, "max_tokens": 192, "num_queries": 3, "include_original": True, "rrf_k": 60},
+        services,
+    )
+
+    rewritten = await block.rewrite(question)
+
+    assert rewritten.query == question
+    assert rewritten.alternatives == []
+    assert rewritten.validation["reason"] == "invalid JSON response; no alternative queries accepted"
+    assert "raw_output" not in block.trace_details
+
+
 async def test_hyde_passage_is_only_a_search_vector(ingested, services, fake_ollama):
-    fake_ollama.answer = "Applicants submit a household income certificate and an application form to the scholarship office."
-    hyde = await HyDERewriter({"model": "", "temperature": 0.0, "max_tokens": 64}, services).rewrite(QUESTION)
-    assert hyde.query == QUESTION and hyde.embedding_text.startswith("Applicants")
-    fake_ollama.answer = "The answer is in the evidence [E1]."
+    fake_ollama.answer = '{"passage":"Need-based scholarship application requires a household income certificate and an application form."}'
+    block = HyDERewriter({"model": "", "temperature": 0.0, "max_tokens": 64}, services)
+    hyde = await block.rewrite(QUESTION)
+    assert hyde.query == QUESTION and hyde.embedding_text.startswith("Need-based")
+    assert fake_ollama.requests[-1]["format"]["required"] == ["passage"]
+    assert "raw_output" not in block.trace_details
+    fake_ollama.answer = '{"passage":"Need-based scholarship application requires household income documents and an application form."}'
     trace = await run_rag(QUESTION, preset_config("R8_HYDE"), services)
     s = stages_of(trace)
     assert s["dense_retrieval"]["output"]["details"]["embedded"] == "hypothetical passage (HyDE)"
@@ -258,6 +303,43 @@ async def test_hyde_passage_is_only_a_search_vector(ingested, services, fake_oll
     assert all(passage not in e["text"] for e in s["evidence_selection"]["output"])  # never evidence
     assert all(passage not in src["excerpt"] for src in trace["sources"])  # never a source
     assert s["context_construction"]["input"]["question"] == QUESTION
+
+
+async def test_hyde_rejects_reasoning_and_uses_original_query(services, fake_ollama):
+    question = "How do I apply for a dormitory at the ERICA campus?"
+    fake_ollama.answer = (
+        '{"passage":"The user is asking how to apply for a dormitory at the ERICA campus. '
+        'I should explain application steps for the University of the Philippines."}'
+    )
+    block = HyDERewriter({"model": "", "temperature": 0.0, "max_tokens": 160}, services)
+
+    rewritten = await block.rewrite(question)
+
+    assert rewritten.query == question
+    assert rewritten.embedding_text is None
+    assert rewritten.validation["passed"] is False
+    assert "reasoning text" in rewritten.validation["reason"]
+    assert "raw_output" not in block.trace_details
+    assert block.trace_details["fallback_reason"] == "reasoning text was returned instead of a passage"
+
+
+async def test_llm_query_understanding_requests_json_and_extracts_explicit_criteria(services, fake_ollama):
+    fake_ollama.answer = (
+        '{"intent":"find dormitory application","campus":"ERICA","audience":null,'
+        '"academic_year":null,"document_type":"DORMITORY","effective_date":null}'
+    )
+    block = LLMQueryUnderstanding({"model": "", "temperature": 0.0, "max_tokens": 128}, services)
+
+    analysis = await block.analyze("How do I apply for a dormitory at the ERICA campus?")
+
+    assert analysis.intent == "find dormitory application"
+    assert analysis.criteria.campus == "ERICA"
+    assert analysis.criteria.audience is None
+    assert analysis.criteria.document_type == "DORMITORY"
+    assert fake_ollama.requests[-1]["format"] == "json"
+    assert fake_ollama.requests[-1]["options"]["num_predict"] == 128
+    assert "raw_output" not in block.trace_details
+    assert block.trace_details["accepted_fields"] == ["campus", "document_type"]
 
 
 # ------------------------------------------------------------------ R9/R10 (predicate), R11 selection, R12 gate

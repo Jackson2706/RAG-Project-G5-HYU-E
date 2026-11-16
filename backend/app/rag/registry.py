@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import inspect
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, Literal
 
 from app.rag.blocks.pipeline_block import PipelineBlock
@@ -511,6 +512,15 @@ def create_block(stage_id: str, method_id: str, params: dict[str, Any], services
 
 def registry_json() -> dict[str, Any]:
     """The registry as JSON for GET /api/pipeline/registry (no Python classes)."""
+    blocks_dir = (Path(__file__).resolve().parent / "blocks").resolve()
+    backend_dir = Path(__file__).resolve().parent.parent
+
+    def file_from_class(cls: type) -> str:
+        path = Path(inspect.getfile(cls)).resolve()
+        if path.is_relative_to(blocks_dir):
+            return path.relative_to(blocks_dir).as_posix()
+        return path.relative_to(backend_dir).as_posix()
+
     stages = []
     for stage in PIPELINE:
         stages.append({
@@ -526,7 +536,7 @@ def registry_json() -> dict[str, Any]:
             "implemented": any(m.implemented for m in stage.methods),
             "methods": [
                 {"method_id": m.method_id, "name": m.name, "description": m.description, "implemented": m.implemented,
-                 "class_name": m.cls.__name__, "file": inspect.getfile(m.cls).split("app/rag/blocks/")[-1],
+                 "class_name": m.cls.__name__, "file": file_from_class(m.cls),
                  "parameters": {name: {"type": p.type, "default": p.default, "label": p.label, "description": p.description,
                                        "ui": p.ui, "min": p.min, "max": p.max, "step": p.step,
                                        "options": list(p.options) if p.options else None, "scope": p.scope, "advanced": p.advanced}

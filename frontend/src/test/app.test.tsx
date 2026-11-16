@@ -35,6 +35,17 @@ const reranking: StageDef = {
   folder: "app/rag/blocks/evidence/reranking/", group: null, optional: true, default_method: null, implemented: false,
   methods: [{ method_id: "cross_encoder", name: "Cross-encoder", description: "", implemented: false, class_name: "CrossEncoderReranker", file: "evidence/reranking/cross_encoder.py", parameters: {} }],
 };
+const queryUnderstanding: StageDef = {
+  stage_id: "query_understanding", name: "Query Understanding", phase: "online", description: "Extract stated metadata criteria.",
+  base_class: "BaseQueryUnderstanding", folder: "app/rag/blocks/query_processing/query_understanding/", group: null,
+  optional: true, default_method: null, implemented: true,
+  methods: [
+    { method_id: "stated_criteria", name: "Stated criteria (manual)", description: "", implemented: true, class_name: "StatedCriteria",
+      file: "query_processing/query_understanding/stated_criteria.py", parameters: {} },
+    { method_id: "llm_understanding", name: "LLM understanding", description: "The LLM extracts intent and criteria.", implemented: true,
+      class_name: "LLMQueryUnderstanding", file: "query_processing/query_understanding/llm_understanding.py", parameters: {} },
+  ],
+};
 const system = { models: [], defaultModel: null, health: null, refresh: vi.fn() } as unknown as SystemState;
 
 function configFor(stages: StageDef[], errors: PipelineConfigState["errors"] = [], extra: Partial<PipelineConfigState> = {}) {
@@ -73,6 +84,17 @@ describe("Configuration tab (driven by the registry)", () => {
     expect(options.other_dense.disabled).toBe(true);
     expect(options.other_dense.textContent).toContain("not implemented");
     expect(options.__off__.textContent).toContain("Off"); // optional stage can be switched off
+  });
+
+  it("allows LLM query understanding to be selected", () => {
+    const config = configFor([queryUnderstanding]);
+    render(<TooltipProvider><StageConfigCard stage={queryUnderstanding} config={config} system={system} /></TooltipProvider>);
+    const select = screen.getByLabelText("Method") as HTMLSelectElement;
+    const option = screen.getByRole("option", { name: "LLM understanding" }) as HTMLOptionElement;
+
+    expect(option.disabled).toBe(false);
+    fireEvent.change(select, { target: { value: "llm_understanding" } });
+    expect(config.setMethod).toHaveBeenCalledWith(queryUnderstanding, "llm_understanding");
   });
 
   it("draws hyperparameters from the registry and sends changes to the config", () => {

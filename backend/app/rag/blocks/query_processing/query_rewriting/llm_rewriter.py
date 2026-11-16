@@ -2,12 +2,24 @@
 
 from __future__ import annotations
 
+import json
+
 from app.rag.blocks.query_processing.query_rewriting.base import BaseQueryRewriter, clean_query, validate_rewrite
 from app.rag.schemas import RewrittenQuery
 
-INSTRUCTION = ("Rewrite the user's question as one concise search query for a document search engine. "
-               "Keep every name, number, date, quoted phrase and negation exactly. Do not add facts or answer the question. "
-               "Reply with the search query only.")  # fmt: skip
+INSTRUCTION = (
+    "Convert the user's conversational question into a concise, KEYWORD-BASED search query "
+    "for a document search engine. You MUST strip away all conversational filler words "
+    "(such as 'How do I', 'What is', 'Where can I', 'Please tell me'). "
+    "Keep every name, number, date, quoted phrase, and negation exactly. Do not add facts. "
+    "Return only a JSON object with one string field named 'query'. Do not include reasoning."
+) # fmt: skip
+OUTPUT_SCHEMA = {
+    "type": "object",
+    "properties": {"query": {"type": "string"}},
+    "required": ["query"],
+    "additionalProperties": False,
+}
 
 
 class LLMQueryRewriter(BaseQueryRewriter):
@@ -22,10 +34,15 @@ class LLMQueryRewriter(BaseQueryRewriter):
         model = await ollama.pick_model(self.params["model"], self.services.settings.ollama_chat_model)
         messages = [{"role": "system", "content": INSTRUCTION}, {"role": "user", "content": question}]
         options = {"temperature": self.params["temperature"], "num_predict": self.params["max_tokens"], "num_ctx": 4096, "seed": 42}
-        text, usage = await ollama.complete(model, messages, options)
-        candidate = clean_query(text.splitlines()[0] if text.strip() else "")
+        text, usage = await ollama.complete(model, messages, options, format=OUTPUT_SCHEMA)
+        try:
+            response = json.loads(text)
+            raw_query = response.get("query") if isinstance(response, dict) else None
+            candidate = clean_query(raw_query) if isinstance(raw_query, str) else ""
+        except json.JSONDecodeError:
+            candidate = ""
         check = validate_rewrite(question, candidate)
-        self.trace_details = {"model": model["name"], "raw_output": text[:500], "prompt_tokens": usage.get("prompt_eval_count"),
+        self.trace_details = {"model": model["name"], "prompt_tokens": usage.get("prompt_eval_count"),
                               "output_tokens": usage.get("eval_count")}  # fmt: skip
         if not check["passed"]:
             return RewrittenQuery(query=question, validation={**check, "rejected_rewrite": candidate, "used": "original question"})
