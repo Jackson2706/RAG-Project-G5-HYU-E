@@ -26,7 +26,7 @@ SCOPES = ("national", "campus")
 ANNOTATOR = re.compile(r"^(?:codex:[^\s]+|claude-code:[^\s]+|human:[A-Za-z][A-Za-z0-9_-]*)$")
 # Who may adjudicate or verify (A33): a human's initials (short, not a model name) or an agent with its model id.
 HUMAN_ID = re.compile(r"^human:[A-Za-z][A-Za-z0-9_-]{0,7}$")
-AGENT_ID = re.compile(r"^claude-code:claude-[a-z]+-\d+(?:-\d+)*$")
+AGENT_ID = re.compile(r"^(?:claude-code:claude-[a-z]+-\d+(?:-\d+)*|codex:[^\s]+)$")
 MODEL_WORDS = re.compile(r"claude|codex|gpt|sonnet|opus|haiku|fable|gemini|llama|qwen", re.I)
 
 
@@ -167,8 +167,8 @@ def validate_cases(cases: list[dict], rows: list[dict], snapshot_id: str, annota
             if case_id in seen:
                 errors.append(_message(case_id, "case_id", "must be unique"))
             seen.add(case_id)
-        if "split" in case and case["split"] not in ("dev", "test", "test2"):
-            errors.append(_message(case_id, "split", "must be dev, test or test2"))
+        if "split" in case and case["split"] not in ("dev", "test", "test2", "dev2", "test3"):
+            errors.append(_message(case_id, "split", "must be dev, test, test2, dev2 or test3"))
         if case.get("snapshot_id") != snapshot_id:
             errors.append(_message(case_id, "snapshot_id", f"must equal {snapshot_id}"))
         if not annotation and case.get("slice") not in SLICES:

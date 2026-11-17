@@ -77,11 +77,11 @@ Claude usage) continue.
 - **Task 2 (follow-up):** `Sources/scripts/deck_v4_followup.py`, 67 personas (43 dev cases + 24 from the deck-v3
   illustrative questions, `followup/personas_illustrative.json`). Runs are still going in `followup/runs.jsonl` (not
   committed yet: raw). The score rule was fixed before judging (script docstring). Waiting for: the v3 judge.
-- **Task 3 (dev-2 / test-3):** 204 drafted, 187 kept after the overlap check (`questions/overlap_check.json`:
-  17 near-duplicates dropped, max cosine to any dev/test-1/test-2 question 0.895, no evidence passage shared with
-  them). Writers' first seed type (similar passage pairs) was mostly noise (22 questions from 136 seeds). Topic
-  bundles gave the rest. 113 are student-dependent by the writers, 74 controls: **fewer than the 140 / 60 asked**.
-  Labeller A finished 47 of 187; labeller B none. Nothing is frozen and no system has seen these questions.
+- **Task 3 (dev-2 / test-3):** frozen. The final pool had 328 blind candidates. Independent Sol and Astra labels,
+  Terra adjudication of 57 decision disputes, deterministic checks, and one Astra verifier produced dev2=60 and
+  test3=140. Twelve unresolved rows were excluded and replaced from the reserve. Verification reduced the final
+  dependent slice to 87/200, below the requested 140/60 balance; this is a dataset limitation. The SHA manifest is
+  `Sources/data/HYU/labels/FROZEN_dev2_test3.sha256`. No system read test3 before the freeze.
 - **Task 4 (AAES+):** code done and tested (`aaes_llm.py`, the three AAES blocks take `mode` / `step3_mode` /
   `step4_mode`; 14 presets `AP_<code>`; RRRR = A0 unchanged, backend tests 263). A0b diagnosis:
   `aaes_plus/a0b_diagnosis.md` (the campus rule removed 4 of A0's 5 splits; NONE extractions the fifth). Stage B
@@ -92,6 +92,10 @@ Continuation audit: `aaes_plus/audit_2026-11-16.md`. Both 187-row candidate labe
 no annotator metadata and are not treated as independent labels. Stage B has completed RRRR and LLLL on 47 dev
 cases; BBBB has 11 resumable rows. T39 fixed Step 2 fallbacks and numeric Step 3 comparisons. Its dev-only probe
 kept two measured failures: hypothetical identity extraction and the unnecessary winter-school campus split.
+
+Task 3 methodology and agreement numbers are in `questions/METHODOLOGY.md`. The labels are LLM-annotated,
+LLM-adjudicated and LLM-verified, not human-verified. A partial local Qwen pilot was retained only as an uncommitted
+audit artifact and did not contribute to the freeze.
 
 ## Task 5 · Privacy and data check (done)
 

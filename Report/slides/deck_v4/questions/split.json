@@ -1,0 +1,40 @@
+{
+ "dev2": {
+  "cases": 60,
+  "slice": {
+   "conditional": 28,
+   "multi_session": 7,
+   "negative": 7,
+   "unconditional": 18
+  },
+  "student_dependent": 31,
+  "plain": 29,
+  "expected": {
+   "clarify": 4,
+   "conditional_answer": 25,
+   "abstain": 10,
+   "answer": 21
+  }
+ },
+ "test3": {
+  "cases": 140,
+  "slice": {
+   "conditional": 39,
+   "multi_session": 30,
+   "unconditional": 49,
+   "negative": 22
+  },
+  "student_dependent": 56,
+  "plain": 84,
+  "expected": {
+   "clarify": 4,
+   "conditional_answer": 48,
+   "abstain": 27,
+   "answer": 61
+  }
+ },
+ "excluded": {
+  "cases": 12,
+  "path": "excluded_dev2_test3.jsonl"
+ }
+}

@@ -30,5 +30,7 @@ For each case decide, from the official pages only:
 Write one JSON object per case, one per line, to the output file you are given:
 {"case_id": "N001", "expected_behavior": "...", "acceptable_behaviors": [...], "branch_attributes": [...],
  "stated_profile": {...}, "required_facts": [...], "gold_evidence": [...], "inapplicable_evidence": [...],
- "answerability": "...", "exclude": false, "notes": ""}
+ "answerability": "...", "exclude": false, "notes": "", "annotator": "<the exact model identity assigned to you>",
+ "origin": "agent_draft"}
+Use the same assigned `annotator` value on every row. Do not infer or copy another labeller's identity.
 Label every case in your input file. Reply with: cases labelled, counts by expected_behavior, excluded.

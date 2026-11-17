@@ -1,0 +1,52 @@
+{
+  "model": "codex:gpt-6.1-terra",
+  "timestamp_utc": "2026-11-16T13:34:37.122966+00:00",
+  "input_sha256": "ea9ab356561202a56b648c124d630ac3da2e5cfdaae7d9de5b16fdc71aa13a3f",
+  "prompt_sha256": "79ca1e069152ade52e03bc983d7fdab8536adbe1092837da230fac7b0e314997",
+  "submission_sol_sha256": "99460e7ea9e0484330fda01730c9ad064971bcf9393ad4eb934e5f3cd161c9de",
+  "submission_astra_sha256": "3714d75598a78558de49f22f2d76c6063224a1cd2acad10059c9505106a6fc52",
+  "disagreements_sha256": "69bcbe3f73bae75c5119f2a0051a7d10fc5c93534995376a50ad46fbca82cf7c",
+  "adjudicated_sha256": "3879193a181f2977017e6ba6d3a17864d608af805346b900f5cabd59e324884d",
+  "rows": 27,
+  "expected_behavior_counts": {
+    "conditional_answer": 11,
+    "clarify": 6,
+    "answer": 5,
+    "abstain": 5
+  },
+  "answerability_counts": {
+    "answerable": 12,
+    "partial": 14,
+    "unanswerable": 1
+  },
+  "excluded_count": 0,
+  "case_ids": [
+    "N003",
+    "N010",
+    "N011",
+    "N012",
+    "N032",
+    "N047",
+    "N049",
+    "N055",
+    "N065",
+    "N069",
+    "N078",
+    "N109",
+    "N110",
+    "N121",
+    "N126",
+    "N127",
+    "N133",
+    "N139",
+    "N140",
+    "N143",
+    "N144",
+    "N145",
+    "N149",
+    "N158",
+    "N191",
+    "N196",
+    "N201"
+  ]
+}

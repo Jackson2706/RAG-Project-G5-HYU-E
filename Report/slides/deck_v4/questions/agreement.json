@@ -1,0 +1,45 @@
+{
+ "files": {
+  "A": "labels_sol.jsonl",
+  "B": "labels_astra.jsonl"
+ },
+ "annotators": {
+  "A": [
+   "codex:gpt-6.1-sol"
+  ],
+  "B": [
+   "codex:gpt-6-astra"
+  ]
+ },
+ "origins": {
+  "A": [
+   "agent_draft"
+  ],
+  "B": [
+   "agent_draft"
+  ]
+ },
+ "cases": 214,
+ "missing_in_A": [],
+ "missing_in_B": [],
+ "reply_type_agreement": 0.902,
+ "reply_type_kappa": 0.827,
+ "student_dependent_agreement": 0.958,
+ "student_dependent_kappa": 0.907,
+ "branch_attributes_exact_agreement": 0.902,
+ "confusion_A_by_B": {
+  "abstain|abstain": 11,
+  "abstain|answer": 1,
+  "abstain|conditional_answer": 1,
+  "answer|abstain": 2,
+  "answer|answer": 121,
+  "answer|conditional_answer": 1,
+  "clarify|abstain": 1,
+  "clarify|clarify": 8,
+  "clarify|conditional_answer": 2,
+  "conditional_answer|abstain": 2,
+  "conditional_answer|answer": 4,
+  "conditional_answer|clarify": 7,
+  "conditional_answer|conditional_answer": 53
+ }
+}

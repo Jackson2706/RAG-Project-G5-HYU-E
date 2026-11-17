@@ -19,6 +19,14 @@ This project was built with AI coding agents. This file lists which tool did wha
 
 ## Questions and labels (all LLM; nothing human-verified)
 
+For the deck-v4 dev2/test3 extension, Codex writers produced 328 candidates from pre-screened official passage
+bundles. `codex:gpt-6.1-sol` and `codex:gpt-6-astra` labeled the three blind pools independently. Fresh
+`codex:gpt-6.1-terra` contexts adjudicated 57 decision disputes. At the user's request, one verifier model was used:
+a fresh `codex:gpt-6-astra` context reviewed every selected test3 case, all 30 flagged dev2 cases and 12 reserve
+replacements. It fixed 170 rows across the main and replacement passes and excluded 12 unresolved rows. No person
+checked the labels. The final freeze contains 60 dev2 and 140 test3 cases; 87/200 are evidence-supported dependent
+cases, below the planned 140/60 balance. Full provenance is in `Report/slides/deck_v4/questions/METHODOLOGY.md`.
+
 | Step | Who | Cases |
 |---|---|---|
 | Questions | Codex and Claude Code (agent-written; no human-written question, PLAYBOOK A28) | 180 |

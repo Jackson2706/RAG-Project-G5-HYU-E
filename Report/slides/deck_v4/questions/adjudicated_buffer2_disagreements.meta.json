@@ -1,0 +1,20 @@
+{
+  "adjudicated_by": "codex:gpt-6.1-terra",
+  "created_at_utc": "2026-11-16T23:24:43.389899+00:00",
+  "case_count": 3,
+  "expected_behavior_counts": {
+    "conditional_answer": 2,
+    "abstain": 1
+  },
+  "excluded_count": 0,
+  "inputs_sha256": {
+    "Report/slides/deck_v4/questions/label_input_buffer2.jsonl": "674aa46dedcdcd0a1661cc8bb397d8a074084c49e18e01dfe105075ced490280",
+    "Report/slides/deck_v4/questions/LABEL_PROMPT.md": "79ca1e069152ade52e03bc983d7fdab8536adbe1092837da230fac7b0e314997",
+    "Report/slides/deck_v4/questions/labels_buffer2_sol.jsonl": "9d69da44312824fa8c16d6faae7d2d8ea9d1012f4c11996db8a2d70555e19f42",
+    "Report/slides/deck_v4/questions/labels_buffer2_astra.jsonl": "ddc3fe0da15c317eaf097de70a6587417534e0fadbecfa22efc728c05939770c",
+    "Report/slides/deck_v4/questions/disagreements_buffer2.jsonl": "2e3dcc5ec0473f7a5fb4a623fbc8f3a54f975f5d9025bb768d3b072aa2e07725"
+  },
+  "vocabulary_sha256": "e804c123be122881348b453cf7eb2df1c9e457f5b7497bcd0f0a977ab9d4878a",
+  "output_sha256": "fb0cbbde9ae75b5504b5a20764e24c3932132db931df812d3e1867dac6b70edd",
+  "validation": "Exact disagreement coverage, vocabulary values, behavior, evidence IDs, notes length, and fact count passed; evidence and facts reviewed against supplied passages."
+}

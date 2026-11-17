@@ -1,0 +1,17 @@
+{
+  "threshold": 0.92,
+  "embedding_model": "BAAI/bge-small-en-v1.5",
+  "buffer1": {
+    "cases": 90,
+    "max_cosine_to_prior_candidates": 0.915,
+    "max_cosine_within_buffer": 0.91,
+    "pairs_at_or_above_threshold": 0
+  },
+  "buffer2": {
+    "cases": 24,
+    "max_cosine_to_prior_candidates": 0.889,
+    "max_cosine_within_buffer": 0.862,
+    "pairs_at_or_above_threshold": 0
+  },
+  "heldout_labels_reopened": false
+}

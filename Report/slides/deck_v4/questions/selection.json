@@ -1,0 +1,27 @@
+{
+ "pool": 328,
+ "pool_slice": {
+  "conditional": 149,
+  "unconditional": 179
+ },
+ "selected": 200,
+ "selected_slice": {
+  "student_dependent": 140,
+  "plain": 60
+ },
+ "dev2": 60,
+ "test3": 140,
+ "dev2_slice": {
+  "plain": 18,
+  "student_dependent": 42
+ },
+ "test3_slice": {
+  "plain": 42,
+  "student_dependent": 98
+ },
+ "reserve": 128,
+ "verification_batches": [
+  70,
+  70
+ ]
+}

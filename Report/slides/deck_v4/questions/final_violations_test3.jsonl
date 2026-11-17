@@ -1,0 +1,71 @@
+{"case_id": "DBUF004", "check": "facts", "detail": "2/5 content words in the gold spans: One of four undergraduate applications leaves three"}
+{"case_id": "DBUF005", "check": "facts", "detail": "0/5 content words in the gold spans: Remaining application counts may independently limit use"}
+{"case_id": "DBUF008", "check": "facts", "detail": "5/11 content words in the gold spans: General master's/doctoral and combined graduate programs have already exhausted their two/three application limits"}
+{"case_id": "DBUF008", "check": "facts", "detail": "1/4 content words in the gold spans: Check the applicable graduate-school subtype"}
+{"case_id": "DBUF010", "check": "facts", "detail": "1/3 content words in the gold spans: Application limits also apply"}
+{"case_id": "DBUF014", "check": "facts", "detail": "0/5 content words in the gold spans: Current Seoul award amount is not supplied"}
+{"case_id": "DBUF017", "check": "facts", "detail": "0/5 content words in the gold spans: Current Seoul award amount is not supplied"}
+{"case_id": "DBUF021", "check": "facts", "detail": "0/5 content words in the gold spans: Current Seoul award amount is not supplied"}
+{"case_id": "DBUF024", "check": "facts", "detail": "0/5 content words in the gold spans: Current Seoul award amount is not supplied"}
+{"case_id": "DBUF025", "check": "facts", "detail": "3/9 content words in the gold spans: Seoul ordinary award uses qualifying level-5/6 reports and prior-award limits"}
+{"case_id": "DBUF040", "check": "unstated", "detail": "answer with gold evidence from both campuses while campus is unstated"}
+{"case_id": "DBUF040", "check": "campus", "detail": "span ae317f16 is seoul but the profile campus is erica"}
+{"case_id": "DBUF042", "check": "campus", "detail": "span ae317f16 is seoul but the profile campus is erica"}
+{"case_id": "DBUF044", "check": "facts", "detail": "2/5 content words in the gold spans: Item 12 is the master’s graduation certificate or diploma"}
+{"case_id": "DBUF050", "check": "facts", "detail": "2/5 content words in the gold spans: Item 12 is the master’s graduation certificate or diploma"}
+{"case_id": "DBUF060", "check": "facts", "detail": "1/4 content words in the gold spans: Current test arrangements must be confirmed"}
+{"case_id": "DBUF068", "check": "campus", "detail": "span 4401d839 is seoul but the profile campus is erica"}
+{"case_id": "DBUF068", "check": "campus", "detail": "span 4401d839 is seoul but the profile campus is erica"}
+{"case_id": "DBUF071", "check": "campus", "detail": "span 4401d839 is seoul but the profile campus is erica"}
+{"case_id": "DBUF071", "check": "campus", "detail": "span 4401d839 is seoul but the profile campus is erica"}
+{"case_id": "DBUF075", "check": "profile", "detail": "multi_session update in the history but no stale_update: true (11.7)"}
+{"case_id": "DBUF075", "check": "campus", "detail": "span 4401d839 is seoul but the profile campus is erica"}
+{"case_id": "DBUF075", "check": "campus", "detail": "span 4401d839 is seoul but the profile campus is erica"}
+{"case_id": "DBUF078", "check": "facts", "detail": "1/4 content words in the gold spans: Listed application statuses include D-2"}
+{"case_id": "DBUF078", "check": "facts", "detail": "2/7 content words in the gold spans: The internship needs an appropriate six-month internship-capable status and is described as D-10"}
+{"case_id": "DBUF078", "check": "profile", "detail": "multi_session update in the history but no stale_update: true (11.7)"}
+{"case_id": "DBUF202", "check": "facts", "detail": "2/5 content words in the gold spans: The score alone does not complete other return administration"}
+{"case_id": "DBUF203", "check": "facts", "detail": "1/4 content words in the gold spans: Per-application and application-count limits also apply"}
+{"case_id": "DBUF208", "check": "facts", "detail": "3/7 content words in the gold spans: Master's-degree applicants do not require a master's transcript in the prior-degree section"}
+{"case_id": "DBUF209", "check": "facts", "detail": "2/5 content words in the gold spans: Item 12 is the master’s graduation certificate or diploma"}
+{"case_id": "DBUF214", "check": "facts", "detail": "2/5 content words in the gold spans: Satisfied-standard instructions begin on page 27; unsatisfied-standard instructions begin on page 5"}
+{"case_id": "N007", "check": "facts", "detail": "0/2 content words in the gold spans: The app name is not supplied"}
+{"case_id": "N010", "check": "facts", "detail": "1/4 content words in the gold spans: Current main-intake availability is not established"}
+{"case_id": "N011", "check": "facts", "detail": "1/4 content words in the gold spans: Current main-intake availability is not established"}
+{"case_id": "N015", "check": "facts", "detail": "2/5 content words in the gold spans: Higher host-university requirements take precedence"}
+{"case_id": "N028", "check": "facts", "detail": "1/3 content words in the gold spans: Vacation hours listed: 09:00–24:00"}
+{"case_id": "N032", "check": "facts", "detail": "1/4 content words in the gold spans: Seoul undergraduate previous-semester GPA minimum: 3.0"}
+{"case_id": "N032", "check": "facts", "detail": "1/4 content words in the gold spans: Seoul graduate previous-semester GPA minimum: 4.2"}
+{"case_id": "N035", "check": "facts", "detail": "0/5 content words in the gold spans: The current HIEA payment date is not supplied"}
+{"case_id": "N036", "check": "facts", "detail": "2/6 content words in the gold spans: Other newer undergraduate categories are not resolved in the supplied passage"}
+{"case_id": "N053", "check": "facts", "detail": "1/3 content words in the gold spans: Failure to act results in expulsion"}
+{"case_id": "N055", "check": "facts", "detail": "2/6 content words in the gold spans: Internship required an appropriate status, described as D-10"}
+{"case_id": "N055", "check": "facts", "detail": "1/4 content words in the gold spans: A current application opening is not supplied"}
+{"case_id": "N060", "check": "facts", "detail": "0/4 content words in the gold spans: The Seoul application period is not supplied"}
+{"case_id": "N071", "check": "facts", "detail": "4/9 content words in the gold spans: Undergraduate same-level repeat awards are disallowed; first level-6 award prevents a second"}
+{"case_id": "N073", "check": "facts", "detail": "1/3 content words in the gold spans: Failure to act results in expulsion"}
+{"case_id": "N083", "check": "facts", "detail": "1/4 content words in the gold spans: Current LG CNS internship availability is not supplied"}
+{"case_id": "N088", "check": "facts", "detail": "1/4 content words in the gold spans: Current test arrangements must be confirmed"}
+{"case_id": "N097", "check": "facts", "detail": "3/8 content words in the gold spans: ERICA permits self-financed study at non-partner universities with prior approval"}
+{"case_id": "N110", "check": "facts", "detail": "0/6 content words in the gold spans: The venue of a current Hyundai E&C pop-up session is not supplied"}
+{"case_id": "N118", "check": "facts", "detail": "1/5 content words in the gold spans: It does not fund an ordinary undergraduate exchange semester"}
+{"case_id": "N121", "check": "facts", "detail": "0/4 content words in the gold spans: Current-round availability and criteria are not established"}
+{"case_id": "N123", "check": "facts", "detail": "2/6 content words in the gold spans: A student still in the first semester has completed neither minimum"}
+{"case_id": "N124", "check": "facts", "detail": "1/5 content words in the gold spans: An appropriate six-month internship-capable status is required"}
+{"case_id": "N124", "check": "profile", "detail": "multi_session update in the history but no stale_update: true (11.7)"}
+{"case_id": "N126", "check": "facts", "detail": "0/4 content words in the gold spans: The incoming-exchange return-report requirement is not supplied"}
+{"case_id": "N131", "check": "term", "detail": "question names ['2027'] but no gold span or its document shows that year"}
+{"case_id": "N132", "check": "facts", "detail": "2/8 content words in the gold spans: The supplied graduate guide also uses HY-in, but all Seoul student routes are not established"}
+{"case_id": "N132", "check": "campus", "detail": "span e9213d36 is seoul but the profile campus is erica"}
+{"case_id": "N148", "check": "facts", "detail": "1/5 content words in the gold spans: Undergraduate total is not supplied in these passages"}
+{"case_id": "N151", "check": "campus", "detail": "span de9c4135 is erica but the profile campus is seoul"}
+{"case_id": "N185", "check": "campus", "detail": "span de9c4135 is erica but the profile campus is seoul"}
+{"case_id": "N195", "check": "profile", "detail": "multi_session update in the history but no stale_update: true (11.7)"}
+{"case_id": "N195", "check": "campus", "detail": "span 4401d839 is seoul but the profile campus is erica"}
+{"case_id": "N195", "check": "campus", "detail": "span 4401d839 is seoul but the profile campus is erica"}
+{"case_id": "N196", "check": "facts", "detail": "1/4 content words in the gold spans: Seoul undergraduate threshold: 3.0, so 3.5 meets it"}
+{"case_id": "N196", "check": "facts", "detail": "1/4 content words in the gold spans: Seoul graduate threshold: 4.2, so 3.5 does not meet it"}
+{"case_id": "N197", "check": "facts", "detail": "2/6 content words in the gold spans: Other GPA, enrollment, tuition and language-evidence conditions still apply"}
+{"case_id": "N201", "check": "facts", "detail": "1/4 content words in the gold spans: Current main-intake availability is not established"}
+{"case_id": "N206", "check": "facts", "detail": "2/5 content words in the gold spans: A Korean doctorate satisfies that degree-level condition"}
+{"case_id": "N208", "check": "facts", "detail": "1/9 content words in the gold spans: A current third-year undergraduate without a completed qualifying degree does not meet that condition"}
