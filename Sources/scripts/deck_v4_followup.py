@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import asyncio
 import csv
+import hashlib
 import json
 import random
 import sys
@@ -276,6 +277,39 @@ def compare() -> int:
     return 0
 
 
+JUDGE_KEYS = {"id", "facts", "wrong_group", "cited_sentences", "supported_sentences", "conditions_match",
+              "asks_branch_attribute", "right_referral", "note"}
+
+
+def merge_judgments() -> int:
+    """Merge disjoint same-model judge batches only after exact coverage and v3-schema checks."""
+    items = {row["id"]: row for row in load_jsonl(OUT / "judge" / "items.jsonl")}
+    rows = [row for part in range(1, 4) for row in load_jsonl(OUT / "judge" / f"judgments_part{part}.jsonl")]
+    ids = [row.get("id") for row in rows]
+    if len(ids) != len(set(ids)) or set(ids) != set(items):
+        raise SystemExit(f"judge coverage mismatch: rows={len(rows)}, unique={len(set(ids))}, expected={len(items)}")
+    for row in rows:
+        if set(row) != JUDGE_KEYS:
+            raise SystemExit(f"{row.get('id')}: judge keys differ from frozen v3 schema")
+        item = items[row["id"]]
+        if item["reply_type"] in ("answer", "conditional_answer") and (
+            not isinstance(row["facts"], list) or len(row["facts"]) != len(item["required_facts"])
+            or any(value not in ("correct", "wrong", "missing") for value in row["facts"])
+        ):
+            raise SystemExit(f"{row['id']}: facts must align with required_facts")
+    output = OUT / "judge" / "judgments.jsonl"
+    rows.sort(key=lambda row: int(row["id"][1:]))
+    output.write_text("".join(json.dumps(row, ensure_ascii=False) + "\n" for row in rows), encoding="utf-8")
+    prompt = Path(__file__).resolve().parents[1] / "evaluation" / "judge_v3_prompt.md"
+    meta = {"judge": "codex:gpt-6-astra", "items": len(rows),
+            "prompt_sha256": hashlib.sha256(prompt.read_bytes()).hexdigest(),
+            "items_sha256": hashlib.sha256((OUT / "judge" / "items.jsonl").read_bytes()).hexdigest(),
+            "judgments_sha256": hashlib.sha256(output.read_bytes()).hexdigest()}  # fmt: skip
+    (OUT / "judge" / "judgments.meta.json").write_text(json.dumps(meta, indent=1) + "\n")
+    print(json.dumps(meta, indent=1))
+    return 0
+
+
 def _count(values) -> dict:
     out: dict = defaultdict(int)
     for v in values:
@@ -302,4 +336,5 @@ if __name__ == "__main__":
     assert reply_for("campus", {"campus": "seoul"}) == "I'm a Seoul campus student." and reply_for("year", {}) == "I'm not sure."
     assert score("abstain", {"right_referral": True}, True) == 2 and score("answer", {"facts": ["correct", "missing"], "wrong_group": False}, False) == 1
     cmd = sys.argv[1]
-    raise SystemExit(asyncio.run(run()) if cmd == "run" else {"items": items, "compare": compare, "transcripts": transcripts}[cmd]())
+    raise SystemExit(asyncio.run(run()) if cmd == "run" else {"items": items, "merge": merge_judgments,
+                                                               "compare": compare, "transcripts": transcripts}[cmd]())
