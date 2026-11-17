@@ -6,7 +6,7 @@ Contract of labeling/freeze.py:
         each stratum's dev count is within 1 of its proportional share.
     freeze(labels_path, out_dir, dev_size, seed=13) -> dict
         writes dev.jsonl, test.jsonl (read-only, 0o444) and FROZEN.sha256; refuses to re-freeze;
-        refuses unless every case is human-adjudicated (adjudicated_by starts with "human:").
+        refuses unless every case has an independent human or A33 agent adjudicator.
     verify(out_dir) -> bool     True only if both files still match FROZEN.sha256.
 """
 
@@ -82,9 +82,9 @@ def test_verify_detects_a_changed_file(tmp_path):
     assert not freeze.verify(out)
 
 
-def test_freeze_refuses_cases_without_human_adjudication(tmp_path):
+def test_freeze_refuses_self_adjudication(tmp_path):
     cases = make_cases()
-    cases[5]["adjudicated_by"] = "codex:gpt"
+    cases[5]["annotator"] = cases[5]["adjudicated_by"] = "codex:gpt"
     labels = tmp_path / "labels.jsonl"
     labels.write_text("\n".join(json.dumps(c) for c in cases) + "\n")
     with pytest.raises(ValueError, match=cases[5]["case_id"]):
