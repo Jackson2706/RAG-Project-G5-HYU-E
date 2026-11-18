@@ -26,7 +26,7 @@ def create_app(db: Database | None = None, ollama: OllamaClient | None = None) -
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         app.state.db = db or Database.connect(settings)
-        app.state.ollama = ollama or OllamaClient(settings.ollama_base_url, settings.ollama_timeout)
+        app.state.ollama = ollama or OllamaClient.from_settings(settings)
         try:
             app.state.db.create_indexes()
         except Exception as exc:  # the API still starts; /api/health shows what is wrong

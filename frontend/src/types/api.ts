@@ -116,7 +116,7 @@ export interface IndexInfo {
 export interface Health {
   mongodb: { ok: boolean; error?: string };
   qdrant: { ok: boolean; error?: string };
-  ollama: { ok: boolean; error?: string; models?: number };
+  ollama: { ok: boolean; error?: string; models?: number; provider?: string };
   index: IndexInfo | null;
 }
 

@@ -23,7 +23,7 @@ class OllamaGenerator(BaseGenerator):
 
     async def generate(self, prompt: PromptContext, on_token: Callable[[str], None]) -> GenerationResult:
         ollama, settings, p = self.services.ollama, self.services.settings, self.params
-        model = await ollama.pick_model(p["model"], settings.ollama_chat_model)
+        model = await ollama.pick_model(p["model"], ollama.default_model)
         estimated = round(sum(self.services.embedder.count_tokens(m["content"]) for m in prompt.messages) * PROMPT_TOKEN_MARGIN)
         if estimated + p["max_tokens"] > p["context_window"]:
             raise ValueError(f"The prompt (≈{estimated} tokens) plus Max generated tokens ({p['max_tokens']}) does not fit the "

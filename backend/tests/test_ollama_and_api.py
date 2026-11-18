@@ -65,6 +65,36 @@ async def test_ollama_http_error():
         [p async for p in client.chat_stream({"name": "m", "capabilities": []}, [], {"num_predict": 10})]
 
 
+@pytest.mark.anyio
+async def test_groq_uses_openai_compatible_models_and_streaming():
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path.endswith("/models"):
+            return httpx.Response(200, json={"data": [{"id": "openai/gpt-oss-20b"}]})
+        if request.url.path.endswith("/chat/completions"):
+            body = json.loads(request.content)
+            assert body["model"] == "openai/gpt-oss-20b"
+            assert body["stream"] is True
+            content = [
+                'data: {"choices":[{"delta":{"content":"Groq "},"finish_reason":null}]}\n\n',
+                'data: {"choices":[{"delta":{"content":"works"},"finish_reason":"stop"}],"usage":{"prompt_tokens":10,"completion_tokens":2,"total_tokens":12}}\n\n',
+                "data: [DONE]\n\n",
+            ]
+            return httpx.Response(200, text="".join(content), headers={"content-type": "text/event-stream"})
+        return httpx.Response(404)
+
+    client = OllamaClient(
+        "https://api.groq.com/openai/v1",
+        api_key="test-key",
+        provider="groq",
+        transport=httpx.MockTransport(handler),
+    )
+    model = await client.pick_model("", "openai/gpt-oss-20b")
+    usage = {}
+    pieces = [p async for p in client.chat_stream(model, [], {"temperature": 0.1, "top_p": 0.9, "num_predict": 100}, usage=usage)]
+    assert "".join(pieces) == "Groq works"
+    assert usage["total_tokens"] == 12
+
+
 # ------------------------------------------------------------------ API
 
 

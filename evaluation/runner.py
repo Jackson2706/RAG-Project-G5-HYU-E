@@ -156,7 +156,7 @@ class Run:
         self.split = args.split or self.online["split"]
         self.settings = get_settings().model_copy(update={"embedding_device": "auto"})
         self.db = Database.connect(self.settings)
-        self.ollama = OllamaClient(self.settings.ollama_base_url, timeout=self.settings.ollama_timeout)
+        self.ollama = OllamaClient.from_settings(self.settings)
         self.services = Services(db=self.db, ollama=self.ollama, settings=self.settings)
         self._datasets: dict[str, tuple] = {}
         self._built: set[str] = set()  # indexes already (re)built in this session (--force rebuilds each once)

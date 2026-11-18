@@ -28,7 +28,7 @@ export function Header({ system, dark, onToggleTheme, mobileView, onMobileView }
           <>
             <Status ok={h?.mongodb.ok} label="MongoDB" detail={h?.mongodb.error} />
             <Status ok={h?.qdrant.ok} label="Qdrant" detail={h?.qdrant.error} />
-            <Status ok={h?.ollama.ok} label="Ollama" detail={h?.ollama.error} />
+            <Status ok={h?.ollama.ok} label={h?.ollama.provider === "groq" ? "Groq" : "Ollama"} detail={h?.ollama.error} />
             <Status ok={h ? !!h.index?.chunks : undefined} label="Index" detail={h?.index ? `${h.index.documents} documents, ${h.index.chunks} chunks` : "Nothing indexed"} />
           </>
         )}

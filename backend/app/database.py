@@ -67,7 +67,7 @@ class Database:
         if settings.qdrant_path:  # embedded Qdrant; a relative path is inside backend/
             qdrant = QdrantClient(path=str(BACKEND_DIR / settings.qdrant_path))
         else:
-            qdrant = QdrantClient(url=settings.qdrant_url, timeout=10)
+            qdrant = QdrantClient(url=settings.qdrant_url, api_key=settings.qdrant_api_key, timeout=10)
         return cls(mongo, qdrant, settings.qdrant_collection)
 
     def create_indexes(self) -> None:

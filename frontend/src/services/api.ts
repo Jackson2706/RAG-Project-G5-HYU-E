@@ -1,10 +1,12 @@
 // Every call the frontend makes to FastAPI (backend/app/api.py).
 import type { ConfigError, Health, IndexInfo, IndexRevision, OllamaModel, Preset, StageChoices, StageDef, StreamEvent, Trace } from "@/types/api";
 
+const apiBase = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, "") ?? "";
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let res: Response;
   try {
-    res = await fetch(path, { ...init, headers: { "Content-Type": "application/json", ...init?.headers } });
+    res = await fetch(`${apiBase}${path}`, { ...init, headers: { "Content-Type": "application/json", ...init?.headers } });
   } catch {
     throw new Error("Cannot reach the backend. Is it running on http://127.0.0.1:8000?");
   }
@@ -50,7 +52,7 @@ export function parseEvents(buffer: string): { events: StreamEvent[]; rest: stri
 export async function streamChat(question: string, stages: StageChoices, indexId: string, onEvent: (e: StreamEvent) => void, signal: AbortSignal) {
   let res: Response;
   try {
-    res = await fetch("/api/chat/stream", {
+    res = await fetch(`${apiBase}/api/chat/stream`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ question, stages, index_id: indexId }),

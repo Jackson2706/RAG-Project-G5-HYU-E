@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import inspect
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, Literal
 
 from app.rag.blocks.pipeline_block import PipelineBlock
@@ -526,7 +527,8 @@ def registry_json() -> dict[str, Any]:
             "implemented": any(m.implemented for m in stage.methods),
             "methods": [
                 {"method_id": m.method_id, "name": m.name, "description": m.description, "implemented": m.implemented,
-                 "class_name": m.cls.__name__, "file": inspect.getfile(m.cls).split("app/rag/blocks/")[-1],
+                 "class_name": m.cls.__name__,
+                 "file": str(Path(inspect.getfile(m.cls)).as_posix()).split("app/rag/blocks/", 1)[-1],
                  "parameters": {name: {"type": p.type, "default": p.default, "label": p.label, "description": p.description,
                                        "ui": p.ui, "min": p.min, "max": p.max, "step": p.step,
                                        "options": list(p.options) if p.options else None, "scope": p.scope, "advanced": p.advanced}

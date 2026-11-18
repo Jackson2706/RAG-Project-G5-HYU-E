@@ -90,10 +90,12 @@ def checked(stages: StageChoices) -> dict:
 async def health(request: Request):
     db = request.app.state.db
     status = db.check()
+    settings = get_settings()
     try:
         status["ollama"] = {"ok": True, "models": len(await request.app.state.ollama.list_models())}
     except OllamaError as exc:
         status["ollama"] = {"ok": False, "error": str(exc)}
+    status["ollama"]["provider"] = settings.llm_provider
     status["index"] = db.index_info() if status["mongodb"]["ok"] and status["qdrant"]["ok"] else None
     return status
 
@@ -137,7 +139,14 @@ async def ollama_models(request: Request):
         models = await request.app.state.ollama.list_models()
     except OllamaError as exc:
         raise HTTPException(503, str(exc)) from exc
-    return {"models": models, "default": get_settings().ollama_chat_model or (models[0]["name"] if models else None)}
+    settings = get_settings()
+    default = settings.groq_chat_model if settings.llm_provider == "groq" else settings.ollama_chat_model
+    return {"models": models, "default": default or (models[0]["name"] if models else None)}
+
+
+@router.get("/llm/models")
+async def llm_models(request: Request):
+    return await ollama_models(request)
 
 
 # ------------------------------------------------------------------------- documents

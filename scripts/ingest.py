@@ -43,10 +43,10 @@ def main() -> None:
     db.create_indexes()
 
     print(f"Ingesting {args.path} (chunk size {args.chunk_size}, overlap {args.chunk_overlap}) …")
-    services = Services(db=db, ollama=OllamaClient(settings.ollama_base_url), settings=settings)
+    services = Services(db=db, ollama=OllamaClient.from_settings(settings), settings=settings)
     report = run_ingestion(Path(args.path), config, services)
     for f in report["files"]:
-        print(f"  ✓ {f['source_uri']:40s} {f['chunks']:3d} chunks  {f['title']}")
+        print(f"  OK {f['source_uri']:40s} {f['chunks']:3d} chunks  {f['title']}")
     for message in report["errors"] + report["skipped"]:
         print(f"  ✗ {message}")
     print(f"Done: {report['documents']} documents, {report['chunks']} chunks, {report['dimension']}-dimensional vectors.")
