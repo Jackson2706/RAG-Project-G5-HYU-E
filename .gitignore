@@ -48,3 +48,14 @@ Sources/data/HYU/cache/
 
 # personal writing sample for the Humanizer skill; public repo (A32)
 Report/voice_sample.md
+
+# Deck v4 intermediate inputs (untracked in v5 Phase 1; see Report/slides/deck_v4/CLEANUP.md)
+Report/slides/deck_v4/questions/label_input*.jsonl
+Report/slides/deck_v4/questions/verification_input_*.jsonl
+Report/slides/deck_v4/questions/drafts/*_in_*.jsonl
+Report/slides/deck_v4/questions/seeds.jsonl
+Report/slides/deck_v4/questions/bundles.jsonl
+Report/slides/deck_v4/questions/selection_reserve.jsonl
+Report/slides/deck_v4/questions/prepared_*.jsonl
+Report/slides/deck_v4/followup/runs.jsonl
+Report/slides/deck_v4/followup/judge/items.jsonl
