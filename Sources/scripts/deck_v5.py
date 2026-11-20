@@ -2,7 +2,8 @@
 
 Run from Sources/: python scripts/deck_v5.py --help
 Rates use cases as the denominator, except kept/needed, correct/required facts,
-and supported/cited sentences. Undefined rates and absent timings stay blank.
+supported/cited sentences and the component rates defined in components_table.
+Undefined rates and absent timings stay blank.
 """
 
 from __future__ import annotations
@@ -178,19 +179,24 @@ def select_version(rows: list[dict]) -> dict:
             "choice": choice["preset"] if choice else None}
 
 
-def ablation_table(run_ids: list[str], splits: list[str]) -> list[dict]:
-    if set(splits) - {"dev", "dev2"}:
-        raise ValueError("ablation and selection use dev/dev2 only")
-    cases, records, types = load_runs(run_ids, splits)
+def complete_aaes_presets(cases: dict, records: dict, types: dict) -> list[str]:
+    """Require every case and matching v2 label for A0_AAES and every planned AP_* preset."""
+    presets = sorted(p for p in set(records) | {"A0_AAES"} if p == "A0_AAES" or p.startswith("AP_"))
     missing = {}
-    for preset in sorted(set(records) | {"A0_AAES"}):
-        if preset != "A0_AAES" and not preset.startswith("AP_"):
-            continue
+    for preset in presets:
         gaps = set(cases) - (set(records.get(preset, {})) & set(types.get(preset, {})))
         if gaps:
             missing[preset] = [f"{split}/{qid}" for split, qid in sorted(gaps)]
     if missing:
-        raise ValueError(f"selection needs completed records and matching v2 labels for all cases; missing: {missing}")
+        raise ValueError(f"AAES tables need completed records and matching v2 labels for all cases; missing: {missing}")
+    return presets
+
+
+def ablation_table(run_ids: list[str], splits: list[str]) -> list[dict]:
+    if set(splits) - {"dev", "dev2"}:
+        raise ValueError("ablation and selection use dev/dev2 only")
+    cases, records, types = load_runs(run_ids, splits)
+    complete_aaes_presets(cases, records, types)
     table = []
     for preset, per in sorted(records.items()):
         if not per:
@@ -226,6 +232,65 @@ def ablation(args) -> None:
     write_csv(folder / "dev_ablation.csv", table)
     write_json(folder / "selection.json", selection)
     print(json.dumps(selection, indent=2))
+
+
+def components_table(run_ids: list[str], splits: list[str]) -> list[dict]:
+    """Pool all dev/dev2 cases once per A0_AAES/AP_* preset, with complete record/v2 coverage.
+
+    Step 3 detail: choose aaes_plus.clarify_attribute, else the first branch_attributes
+    entry. Count only cases with both a chosen detail and nonempty label branch_attributes;
+    a hit means the chosen detail is in that label list. Hit rate = hits/detail cases.
+    Step 3 split: predicted positive iff aaes_plus.branch_attributes is nonempty OR
+    record action is CLARIFY/CONDITIONAL. Gold positive iff expected_behavior is in
+    BRANCHING (case_score's needed). Precision = TP/(TP+FP), recall = TP/(TP+FN),
+    F1 = 2*TP/(2*TP+FP+FN), counting every case, independent of the v2 reply type.
+    Step 4: step4_expected_<gold>__predicted_<v2> holds each of the 4x4 counts,
+    including zeros, in reply_action.LABELS order. Gold is expected_behavior, never
+    acceptable_behaviors; v2 comes only from matching cached reply_actions_v2.jsonl
+    labels. Correct = diagonal sum; accuracy = correct/all cases. Undefined rates
+    are None (JSON null, CSV blank), including F1 when TP=FP=FN=0.
+    """
+    if set(splits) - {"dev", "dev2"}:
+        raise ValueError("components use dev/dev2 only")
+    cases, records, types = load_runs(run_ids, splits)
+    presets = complete_aaes_presets(cases, records, types)
+    table = []
+    for preset in presets:
+        detail_cases = detail_hits = tp = fp = fn = correct = 0
+        confusion = {(gold, predicted): 0 for gold in reply_action.LABELS for predicted in reply_action.LABELS}
+        for key, case in sorted(cases.items()):
+            rec, kind = records[preset][key], types[preset][key]
+            details = rec.get("aaes_plus") or {}
+            branches = details.get("branch_attributes") or []
+            chosen = details.get("clarify_attribute") or (branches[0] if branches else None)
+            if chosen and case.get("branch_attributes"):
+                detail_cases += 1
+                detail_hits += chosen in case["branch_attributes"]
+            predicted = bool(branches) or rec.get("action") in {"CLARIFY", "CONDITIONAL"}
+            needed = case_score(case, rec, kind)["needed"]
+            tp += predicted and needed
+            fp += predicted and not needed
+            fn += not predicted and needed
+            confusion[(case["expected_behavior"], kind)] += 1
+            correct += kind == case["expected_behavior"]
+        table.append({"preset": preset, "cases": len(cases),
+                      "step3_detail_cases": detail_cases, "step3_detail_hits": detail_hits,
+                      "step3_detail_hit_rate": ratio(detail_hits, detail_cases),
+                      "step3_split_tp": tp, "step3_split_fp": fp, "step3_split_fn": fn,
+                      "step3_split_precision": ratio(tp, tp + fp), "step3_split_recall": ratio(tp, tp + fn),
+                      "step3_split_f1": ratio(2 * tp, 2 * tp + fp + fn),
+                      "step4_correct": correct, "step4_accuracy": ratio(correct, len(cases)),
+                      **{f"step4_expected_{gold}__predicted_{predicted}": n
+                         for (gold, predicted), n in confusion.items()}})
+    return table
+
+
+def components(args) -> None:
+    table = components_table(args.runs, args.splits)
+    folder = OUT / "aaes_plus"
+    folder.mkdir(parents=True, exist_ok=True)
+    write_csv(folder / "components_v5.csv", table)
+    write_json(folder / "components_v5.json", table)
 
 
 def select(args) -> None:
@@ -529,6 +594,10 @@ def main(argv=None) -> int:
     ab.add_argument("--splits", default="dev,dev2", type=csv_list)
     ab.add_argument("--timing", type=resolve_stored_path)
     ab.set_defaults(func=ablation)
+    comp = commands.add_parser("components", help="Step 3 detail/split scores and Step 4 reply-type confusion")
+    comp.add_argument("--runs", required=True, type=csv_list)
+    comp.add_argument("--splits", default="dev,dev2", type=csv_list)
+    comp.set_defaults(func=components)
     commands.add_parser("select", help="repeat fixed selection from dev_ablation.csv").set_defaults(func=select)
     held = commands.add_parser("heldout", help="balanced reply types and paired hypotheses")
     held.add_argument("--run", required=True)

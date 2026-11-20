@@ -121,16 +121,113 @@ def test_ablation_combines_splits_times_and_selects(tmp_path, offline, capsys):
         deck.main(["ablation", "--runs", "first", "--splits", "test3"])
 
 
+def test_components_hand_computed_and_exports(offline):
+    """8 cases: detail 2/3; split TP=3 FP=2 FN=1 -> P=3/5 R=3/4 F1=2/3; reply accuracy=4/8."""
+    rows = [
+        (case("D1"), "answer", rec("D1", action="ABSTAIN", aaes_plus={
+            "clarify_attribute": "campus", "branch_attributes": ["degree_level"]})),
+        (case("D2", "conditional_answer"), "conditional_answer", rec("D2", action="ANSWER", aaes_plus={
+            "branch_attributes": ["visa", "campus"]})),
+        (case("D3"), "clarify", rec("D3", action="ANSWER", aaes_plus={})),
+        (case("E1", "answer", branch_attributes=[]), "answer", rec("E1", action="CLARIFY", aaes_plus={
+            "clarify_attribute": "campus"})),
+        (case("E2", "abstain"), "abstain", rec("E2", action="CONDITIONAL", aaes_plus={
+            "clarify_attribute": "", "branch_attributes": []})),
+        (case("E3", "conditional_answer", branch_attributes=["visa"]), "clarify", rec("E3", action="ABSTAIN", aaes_plus={
+            "clarify_attribute": None, "branch_attributes": ["visa"]})),
+        (case("E4", "answer", acceptable=["answer", "clarify"]), "clarify", rec("E4", action="ANSWER", aaes_plus={
+            "branch_attributes": None})),
+        (case("E5", "answer"), "abstain", rec("E5", action="ANSWER", aaes_plus=None)),
+    ]
+    presets = (AAES, OURS, "AP_OTHER")
+    for run_id, split, selected in (("first", "dev", rows[:3]), ("second", "dev2", rows[3:])):
+        offline[split] = [c for c, _, _ in selected]
+        # Unrelated planned presets need no complete coverage for a component table.
+        save_run(deck.RESULTS_DIR, run_id, {split: {**{p: selected for p in presets}, COND: [
+            (selected[0][0], None, selected[0][2])]}})
+    assert deck.main(["components", "--runs", "first,second"]) == 0
+    folder = deck.OUT / "aaes_plus"
+    table = json.loads((folder / "components_v5.json").read_text())
+    assert [r["preset"] for r in table] == sorted(presets)
+    expected_confusion = {(gold, predicted): 0 for gold in deck.reply_action.LABELS for predicted in deck.reply_action.LABELS}
+    for c, kind, _ in rows:
+        expected_confusion[(c["expected_behavior"], kind)] += 1
+    for row in table:
+        assert row["cases"] == 8
+        assert row["step3_detail_cases"] == 3 and row["step3_detail_hits"] == 2
+        assert row["step3_detail_hit_rate"] == pytest.approx(2 / 3)
+        assert (row["step3_split_tp"], row["step3_split_fp"], row["step3_split_fn"]) == (3, 2, 1)
+        assert row["step3_split_precision"] == pytest.approx(3 / 5)
+        assert row["step3_split_recall"] == pytest.approx(3 / 4)
+        assert row["step3_split_f1"] == pytest.approx(2 / 3)
+        assert row["step4_correct"] == 4 and row["step4_accuracy"] == 0.5
+        cells = {k: v for k, v in row.items() if k.startswith("step4_expected_")}
+        assert cells == {f"step4_expected_{gold}__predicted_{predicted}": n
+                         for (gold, predicted), n in expected_confusion.items()}
+    with (folder / "components_v5.csv").open() as handle:
+        assert list(csv.DictReader(handle)) == [{k: str(v) for k, v in row.items()} for row in table]
+    before = (folder / "components_v5.json").read_bytes()
+    assert deck.main(["components", "--runs", "first,second", "--splits", "dev,dev2"]) == 0
+    assert (folder / "components_v5.json").read_bytes() == before
+
+
+@pytest.mark.parametrize("expected,action,precision,recall,f1", [
+    ("answer", "ANSWER", None, None, None),
+    ("answer", "CLARIFY", 0, None, 0),
+    ("clarify", "ANSWER", None, 0, 0),
+])
+def test_components_zero_denominators(offline, expected, action, precision, recall, f1):
+    """No chosen detail -> null hit rate; FP-only or FN-only F1 is 0, all negatives -> null."""
+    offline["dev"] = [case("D1", expected)]
+    save_run(deck.RESULTS_DIR, "dev", {"dev": {p: [(offline["dev"][0], "answer", rec("D1", action=action))]
+                                              for p in (AAES, OURS)}})
+    assert deck.main(["components", "--runs", "dev", "--splits", "dev"]) == 0
+    folder = deck.OUT / "aaes_plus"
+    table = json.loads((folder / "components_v5.json").read_text())
+    for row in table:
+        assert row["step3_detail_cases"] == row["step3_detail_hits"] == 0
+        assert row["step3_detail_hit_rate"] is None
+        assert row["step3_split_precision"] == precision
+        assert row["step3_split_recall"] == recall
+        assert row["step3_split_f1"] == f1
+    with (folder / "components_v5.csv").open() as handle:
+        assert list(csv.DictReader(handle)) == [{k: "" if v is None else str(v) for k, v in r.items()} for r in table]
+
+
+def test_components_rejects_heldout_before_loading(offline, capsys):
+    # The fixture has no test labels: the dev-only guard must run before load_runs.
+    with pytest.raises(SystemExit) as error:
+        deck.main(["components", "--runs", "unused", "--splits", "dev,test"])
+    assert error.value.code == 2
+    assert "dev/dev2 only" in capsys.readouterr().err
+    assert not deck.OUT.exists()
+
+
+def test_components_requires_reference_and_every_planned_candidate(offline, capsys):
+    offline["dev"] = [case("D1")]
+    save_run(deck.RESULTS_DIR, "dev", {"dev": {OURS: [(offline["dev"][0], "clarify", rec("D1"))]}})
+    deck.write_json(deck.RESULTS_DIR / "dev" / "status.json", {"hyu/dev/AP_MISSING__-": {"status": "PENDING"}})
+    with pytest.raises(SystemExit) as error:
+        deck.main(["components", "--runs", "dev", "--splits", "dev"])
+    assert error.value.code == 2
+    message = capsys.readouterr().err
+    assert AAES in message and "AP_MISSING" in message and "dev/D1" in message
+    assert not deck.OUT.exists()
+
+
+@pytest.mark.parametrize("command_name", ["ablation", "components"])
 @pytest.mark.parametrize("preset", [AAES, OURS])
 @pytest.mark.parametrize("gap", ["partial", "failed", "missing_label", "stale_label", "missing_file", "no_labels"])
-def test_selection_rejects_incomplete_coverage(offline, capsys, preset, gap):
+def test_selection_rejects_incomplete_coverage(offline, capsys, preset, gap, command_name):
     offline.update(dev=[case("D1"), case("D2")], dev2=[case("E1")])
     splits = {split: {p: [(c, "clarify", rec(c["case_id"])) for c in cases] for p in (AAES, OURS)}
               for split, cases in offline.items()}
     save_run(deck.RESULTS_DIR, "dev", splits)
-    assert deck.main(["ablation", "--runs", "dev"]) == 0
-    selection_path = deck.OUT / "aaes_plus" / "selection.json"
+    assert deck.main([command_name, "--runs", "dev"]) == 0
+    selection_path = deck.OUT / "aaes_plus" / ("selection.json" if command_name == "ablation" else "components_v5.json")
     before = selection_path.read_bytes()
+    csv_path = selection_path.with_name("dev_ablation.csv" if command_name == "ablation" else "components_v5.csv")
+    before_csv = csv_path.read_bytes()
     raw_path = deck.RESULTS_DIR / "dev" / "raw" / "hyu" / "dev" / f"{preset}__-.jsonl"
     label_path = deck.RESULTS_DIR / "dev" / "reply_actions_v2.jsonl"
     if gap == "partial":
@@ -150,7 +247,10 @@ def test_selection_rejects_incomplete_coverage(offline, capsys, preset, gap):
             next(r for r in labels if (r["preset"], r["qid"]) == (preset, "D2"))["reply_sha"] = "stale"
         deck.write_jsonl(label_path, labels)
     capsys.readouterr()
-    for command in (["ablation", "--runs", "dev"], ["select"]):
+    commands = [[command_name, "--runs", "dev"]]
+    if command_name == "ablation":
+        commands.append(["select"])
+    for command in commands:
         with pytest.raises(SystemExit) as error:
             deck.main(command)
         assert error.value.code == 2
@@ -159,10 +259,13 @@ def test_selection_rejects_incomplete_coverage(offline, capsys, preset, gap):
         if gap == "partial":
             assert "dev2/E1" in message
         assert selection_path.read_bytes() == before
+        assert csv_path.read_bytes() == before_csv
     selection_path.unlink()
+    csv_path.unlink()
     with pytest.raises(SystemExit):
-        deck.main(["ablation", "--runs", "dev"])
+        deck.main([command_name, "--runs", "dev"])
     assert not selection_path.exists()
+    assert not csv_path.exists()
 
 
 @pytest.mark.parametrize("change", ["partial_table", "missing_candidate", "no_provenance"])

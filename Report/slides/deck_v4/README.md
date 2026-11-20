@@ -131,7 +131,46 @@ model (GPT-6 Astra); no person checked them. All comparisons on them are relativ
    instead of a separate script, so the held-out run uses the same pipeline and records as every other run.
 5. **The machine was restarted mid-Phase 1** (lag). T44's Codex session ended before its note; Claude Code read the code,
    re-ran its tests (116 pass) and wrote `T44.result.md`. Docker volumes were intact after the restart.
-6. **u16 screenshot** shows the in-page confirmation and then clicks Cancel, so no stored trace was deleted for the picture.
+6. **Controlled "before" for T42:** the brief's before numbers (BBBB kept 4) came from an older commit; the fixes were
+   judged against a re-run at `1441216` in a clean git worktree (`.run/wt_pre_t42`, results via `HYU_RESULTS_DIR`).
+7. **Runner order:** `--experiment` does not set the order (the config's list does), so on dev-2 every version runs in
+   its own invocation in the brief's order, with LLLL last under its own `--stop-at`.
+8. **u16 screenshot** shows the in-page confirmation and then clicks Cancel, so no stored trace was deleted for the picture.
+
+### Phase 1 · Fixes and cleanup
+
+Commits `6e0d712` (cleanup), `b698b3b` (code), `faf4179` (the commit the dev measurement ran from). Tests: backend 327,
+evaluation 158, frontend 24, typecheck.
+
+- **Cleanup:** 23 intermediate files (≈10.4 MB) untracked with `git rm --cached`, patterns in `.gitignore`, SHA-256 of
+  each in `CLEANUP.md`. Git history was not rewritten, so they remain in `72a05f6`.
+- **Trace expiry and delete (T41, T41b):** TTL index on `expires_from` (default 30 days, `TRACE_TTL_DAYS`, backfilled
+  from `created_at`); localhost-only `GET/DELETE /api/traces` over **every** trace store (the default database and each
+  index revision; the Codex review found that HYU-index chats store traces in their own database); "Delete stored
+  history" in the Help panel with an in-page confirmation (`Report/figures/usability/u16_delete_history.png`, taken
+  with Cancel: 47 traces counted, none deleted). `privacy_check.md` updated.
+- **AAES+ both-mode fixes (T42).** Measured on dev (47) under evaluator v2. The fair "before" is a controlled re-run at
+  the pre-T42 commit `1441216` with the same index and LLM cache (`Report/results/deck5-dev-preT42`); the "after" is
+  `Report/results/deck5-dev`.
+
+  | Version | Needed questions/splits kept (of 7), before → after | T14-042 winter school, before → after | Acceptable reply type |
+  |---|---|---|---|
+  | RRBR (Step 3 both) | 4 → 4 | clarify (campus) → **answer** | 0.447 → 0.468 |
+  | BRBB | 4 → 4 | clarify (campus) → **answer** | 0.447 → 0.468 |
+  | BRRR (Step 1 both) | 5 → 5 | clarify → clarify | 0.362 → 0.340 |
+  | BBRB | 3 → 3 | answer → answer | 0.596 → 0.574 |
+  | BBBB, BBBR, RBBB | 2 → 2 | answer → answer | unchanged |
+
+  **Both fixes accepted** under the rule: T14-042 is answered without a campus question in the "both" versions and no
+  version keeps fewer needed questions or splits. **The brief's "BBBB kept 4" is not the right baseline:** it came from
+  the 16 Nov run (`deck4-dev`, commit `bacb730`), before T39 changed Step 2. At `1441216`, BBBB already kept only 2;
+  every version with `both` at Step 2 lost splits there (e.g. RBRR 5 → 3), versions with rules at Step 2 did not.
+- **Step 1 component set (150 messages; now development data):** both mode, before → after: hypothetical 2/6 → 5/6,
+  campus-not-self 1/6 → 4/6, but plain 27/33 → 23/33, dev questions 28/47 → 20/47, campus recall 0.921 → 0.684,
+  micro F1 0.793 → 0.769, invented values 26 → 19. Rules and LLM modes are unchanged (F1 0.768 and 0.767). The fix
+  removes hypothetical values at the cost of dropping campuses a student names without "I'm …". Probe "If I were a
+  master's student at ERICA, could I take the TOPIK class?": campus and degree level are dropped unless the LLM
+  confirms them (unit test with a fake LLM, `test_aaes_plus_v5.py`).
 
 ### Phase 4 · Task 2 follow-up, judged by GPT-6 Sol (v3 prompt)
 

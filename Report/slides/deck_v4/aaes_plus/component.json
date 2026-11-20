@@ -80,7 +80,7 @@
     "topik_phrasing": "0/8",
     "two_visas": "1/5"
    },
-   "ms_per_message": 0.1,
+   "ms_per_message": 0.0,
    "fallback_items": 0
   },
   "llm": {
@@ -163,57 +163,57 @@
     "topik_phrasing": "6/8",
     "two_visas": "3/5"
    },
-   "ms_per_message": 21236.6,
+   "ms_per_message": 8.9,
    "fallback_items": 38
   },
   "both": {
    "messages": 150,
    "micro": {
-    "precision": 0.789,
-    "recall": 0.797,
-    "f1": 0.793
+    "precision": 0.829,
+    "recall": 0.718,
+    "f1": 0.769
    },
    "per_attribute": {
     "campus": {
-     "precision": 0.833,
-     "recall": 0.921,
-     "f1": 0.875,
+     "precision": 0.929,
+     "recall": 0.684,
+     "f1": 0.788,
      "gold": 38
     },
     "degree_level": {
-     "precision": 0.75,
-     "recall": 0.947,
-     "f1": 0.837,
+     "precision": 0.761,
+     "recall": 0.921,
+     "f1": 0.833,
      "gold": 38
     },
     "year": {
-     "precision": 0.696,
-     "recall": 0.762,
-     "f1": 0.727,
+     "precision": 0.667,
+     "recall": 0.667,
+     "f1": 0.667,
      "gold": 21
     },
     "student_type": {
-     "precision": 0.875,
-     "recall": 0.56,
-     "f1": 0.683,
+     "precision": 0.923,
+     "recall": 0.48,
+     "f1": 0.632,
      "gold": 25
     },
     "visa": {
-     "precision": 0.565,
-     "recall": 0.619,
-     "f1": 0.591,
+     "precision": 0.632,
+     "recall": 0.571,
+     "f1": 0.6,
      "gold": 21
     },
     "topik_level": {
-     "precision": 0.875,
+     "precision": 0.933,
      "recall": 0.933,
-     "f1": 0.903,
+     "f1": 0.933,
      "gold": 15
     },
     "english_track": {
-     "precision": 0.818,
+     "precision": 1.0,
      "recall": 0.818,
-     "f1": 0.818,
+     "f1": 0.9,
      "gold": 11
     },
     "academic_status": {
@@ -224,29 +224,29 @@
     },
     "korean_standard": {
      "precision": 1.0,
-     "recall": 1.0,
-     "f1": 1.0,
+     "recall": 0.889,
+     "f1": 0.941,
      "gold": 9
     }
    },
-   "exact_profile_match": 0.627,
-   "invented_values": 26,
+   "exact_profile_match": 0.587,
+   "invented_values": 19,
    "exact_match_by_hard_case": {
-    "ansan": "5/5",
-    "campus_not_self": "1/6",
+    "ansan": "4/5",
+    "campus_not_self": "4/6",
     "correction": "1/5",
-    "dev": "28/47",
+    "dev": "20/47",
     "grad_student": "1/6",
-    "hypothetical": "2/6",
-    "negation": "2/7",
+    "hypothetical": "5/6",
+    "negation": "3/7",
     "nothing": "4/4",
-    "plain": "27/33",
+    "plain": "23/33",
     "semester_year": "2/5",
     "template": "13/13",
     "topik_phrasing": "7/8",
     "two_visas": "1/5"
    },
-   "ms_per_message": 18.0,
+   "ms_per_message": 7.6,
    "fallback_items": 38
   }
  }
