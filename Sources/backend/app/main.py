@@ -28,7 +28,8 @@ def create_app(db: Database | None = None, ollama: OllamaClient | None = None) -
         app.state.db = db or Database.connect(settings)
         app.state.ollama = ollama or OllamaClient(settings.ollama_base_url, settings.ollama_timeout)
         try:
-            app.state.db.create_indexes()
+            for trace_db in app.state.db.trace_databases():
+                trace_db.create_indexes()
         except Exception as exc:  # the API still starts; /api/health shows what is wrong
             log.error("MongoDB is not reachable (%s). Start it with: docker compose up -d", exc)
         yield

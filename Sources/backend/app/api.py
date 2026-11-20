@@ -233,6 +233,21 @@ async def chat_stream(body: ChatRequest, request: Request):
     return StreamingResponse(events(), media_type="text/event-stream", headers={"Cache-Control": "no-cache"})
 
 
+@router.get("/traces")
+async def trace_count(request: Request):
+    if request.client is None or request.client.host not in {"127.0.0.1", "::1", "testclient"}:
+        raise HTTPException(403, "Stored history can only be managed from localhost")
+    stores = {db.index_id: db.count_traces() for db in request.app.state.db.trace_databases()}
+    return {"count": sum(stores.values()), "stores": stores}
+
+
+@router.delete("/traces")
+async def delete_traces(request: Request):
+    if request.client is None or request.client.host not in {"127.0.0.1", "::1", "testclient"}:
+        raise HTTPException(403, "Stored history can only be managed from localhost")
+    return {"deleted": sum(db.delete_traces() for db in request.app.state.db.trace_databases())}
+
+
 @router.get("/traces/{request_id}")
 async def get_trace(request_id: str, request: Request):
     trace = request.app.state.db.get_trace(request_id)

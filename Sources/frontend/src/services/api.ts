@@ -41,6 +41,8 @@ export const api = {
   ingest: (folder: string, stages: StageChoices) =>
     post<{ documents: number; chunks: number; errors: string[] } & Partial<IndexInfo>>("/api/ingest", { folder, stages }),
   trace: (requestId: string) => request<Trace>(`/api/traces/${requestId}`),
+  traceCount: () => request<{ count: number }>("/api/traces"),
+  deleteTraces: () => request<{ deleted: number }>("/api/traces", { method: "DELETE" }),
   demoCases: () => request<{ cases: DemoCase[]; reason: string | null }>("/api/demo/cases"),
 };
 

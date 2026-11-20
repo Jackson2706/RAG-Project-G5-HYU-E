@@ -257,6 +257,37 @@ rendered by `render_action(decision, profile)` from fixed templates without an L
 CONDITIONAL go to generation; CONDITIONAL adds the branch table to the prompt so each branch is stated
 with its citation. The chat shows the action as a badge.
 
+## AAES+
+
+Each online step can use `rules`, `llm`, or `both`. These T42 checks apply only to `both`;
+AAES (`RRRR` = A0) and the `llm` modes keep their existing behaviour.
+
+In Step 1, `rule_kind(text, quote)` classifies each current-question rule value. A quote after
+`I'm`, `I am`, `I study`, or `my` ownership in the same sentence is `self`. A hypothetical cue
+(`if I were`, `if I was`, `suppose`, `imagine`, `what if`, `hypothetically`, or `let's say`) opens
+a clause that lasts to the sentence end and takes precedence over self wording. Other quotes
+are `mention`, including a bare campus name or a question about another group. The classifier
+uses the last quote occurrence, except that campus quotes follow the rules' last campus
+self-pattern match when present.
+
+Self values and earlier-turn rule values retain priority. A current hypothetical or mentioned
+rule value needs a valid, quote-verified LLM extraction of the same attribute and value.
+Without that confirmation, the attribute becomes missing, even if the LLM proposes another
+value or returns invalid JSON. Scope defaults then apply as usual. The trace records each
+discarded value in `dropped_unconfirmed` with its attribute, value, and kind.
+
+In Step 3, the rules propose branches and `EXTRACT` answers each distinct nonempty evidence
+set. Answers in one lexical group still produce `ANSWER` with reason `same_answer`. A `NONE`
+answer keeps the split and refers that group. Different numeric-token sets also keep the split
+under the T39 rule. Neither case calls `SAME`.
+
+If every set has an answer, at least two lexical groups remain, and their numeric tokens match,
+one `SAME` call compares one answer per group against the question. Its JSON must contain a
+boolean `same` and a string `difference` of at most 15 words. Agreement produces `ANSWER`
+with reason `same_meaning`; disagreement keeps the rules' split. Invalid output also keeps
+the split and increments the `same` fallback count. The trace's `same_check` records the group
+count, boolean, and difference, or the reason the check was skipped.
+
 ## LLM fallback contract
 
 The fallback runs only when enabled and the rules found no vocabulary constraint or `any_of` set.

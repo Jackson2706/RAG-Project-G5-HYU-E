@@ -59,3 +59,5 @@ Report/slides/deck_v4/questions/selection_reserve.jsonl
 Report/slides/deck_v4/questions/prepared_*.jsonl
 Report/slides/deck_v4/followup/runs.jsonl
 Report/slides/deck_v4/followup/judge/items.jsonl
+# Deck v5 held-out blind judge items (the key, the command and its tests are committed)
+Report/slides/deck_v4/heldout/judge/items*.jsonl

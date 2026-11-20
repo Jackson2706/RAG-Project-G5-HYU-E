@@ -7,7 +7,7 @@
     python -m evaluation.runner --suite all --resume       # continue an interrupted run
     python -m evaluation.runner --download scifact,nfcorpus,arguana
 
-Each task (experiment × dataset × protocol) ends as COMPLETED, NOT_APPLICABLE, BLOCKED (a model or
+Each task (experiment × dataset × protocol) ends as COMPLETED, STOPPED (unfinished HYU cases), NOT_APPLICABLE, BLOCKED (a model or
 service is missing) or FAILED (an error) — with the reason. Per-query results are appended to
 Report/results/<run-id>/raw/ as they are produced, so an interrupted run can be resumed.
 Metrics and reports are computed from those files by evaluation/reports.py.
@@ -416,15 +416,26 @@ async def run_generation_task(run: Run, task: Task) -> dict:
     return {"queries": len(read_done(path)), "model_identity": identity, "config": config}
 
 
-async def run_hyu_task(run: Run, task: Task) -> dict:
-    """One preset on the frozen HYU labels of task.dataset (dev or test), with each case's session history."""
+async def run_hyu_case(case: dict, config: dict, services: Services, documents: dict, lookup) -> dict:
+    """The same pipeline call and raw record for either HYU run order."""
+    trace = await run_rag(hyu_suite.question_for(case, config), config, services, save_trace=False, history=hyu_suite.history_of(case),
+                          oracle=hyu_suite.oracle_for(case, documents))
+    return hyu_suite.trace_record(case, trace, lookup)
+
+
+async def run_hyu_tasks(run: Run, tasks: list[Task]) -> dict[str, dict]:
+    """Run each ready preset on one case before starting the next. Tasks share the planned split."""
     db = run.db.for_index(run.hyu["index"] or run.settings.hyu_index_id)
     services = Services(db=db, ollama=run.ollama, settings=run.settings)
-    overrides = {"generation": {"params": run.hyu["generation"]}} if "generation" in preset_config(task.preset) else {}
-    config = preset_config(task.preset, overrides)
-    path = run.raw_file(task)
-    done = read_done(path)
-    cases = hyu_suite.load_cases(task.dataset)[: task.query_limit]
+    configs = {}
+    for task in tasks:
+        overrides = {"generation": {"params": run.hyu["generation"]}} if "generation" in preset_config(task.preset) else {}
+        configs[task.key] = preset_config(task.preset, overrides)
+    paths = {task.key: run.raw_file(task) for task in tasks}
+    done = {key: read_done(path) for key, path in paths.items()}
+    cases = hyu_suite.load_cases(tasks[0].dataset)
+    limits = {task.key: len(cases[: task.query_limit]) for task in tasks}
+    cases = cases[: max(limits.values())]
     to_snapshot = hyu_suite.snapshot_doc_ids(cases[0]["snapshot_id"]) if cases else {}
     documents = {r["doc_id"]: r for r in load_jsonl(hyu_suite.snapshot_dir(cases[0]["snapshot_id"]) / "documents.jsonl")} if cases else {}
 
@@ -433,15 +444,44 @@ async def run_hyu_task(run: Run, task: Task) -> dict:
                  for c in db.chunks.find({"chunk_id": {"$in": sorted(ids)}}, {"_id": 0, "chunk_id": 1, "doc_id": 1, "source_spans": 1})}  # fmt: skip
         return {**found, **{i: g for i in ids if (g := hyu_suite.gold_chunk(i))}}
 
+    errors: dict[str, dict] = {}
+    stopped_at, complete_cases = None, 0
+    stop_at = run.args.stop_at
     for n, case in enumerate(cases, start=1):
-        if case["case_id"] in done:
+        pending = [task for task in tasks if n <= limits[task.key] and task.key not in errors and case["case_id"] not in done[task.key]]
+        if not pending:
+            complete_cases += all(case["case_id"] in done[task.key] for task in tasks if n <= limits[task.key])
             continue
-        trace = await run_rag(hyu_suite.question_for(case, config), config, services, save_trace=False, history=hyu_suite.history_of(case),
-                              oracle=hyu_suite.oracle_for(case, documents))
-        rec = hyu_suite.trace_record(case, trace, lookup)
-        append(path, rec)
-        print(f"    {task.key}: {n}/{len(cases)} {case['case_id']} → {rec['behavior']} {rec['error'] or ''}", flush=True)
-    return {"queries": len(read_done(path)), "index_id": db.index_id, "config": config}
+        if stop_at is not None and (now := datetime.now(UTC)) >= stop_at:
+            stopped_at = now.isoformat()
+            print(f"STOP_AT reached after {complete_cases} complete cases", flush=True)
+            break
+        for task in pending:
+            try:
+                rec = await run_hyu_case(case, configs[task.key], services, documents, lookup)
+                append(paths[task.key], rec)
+                if rec["status"] == "completed":
+                    done[task.key].add(case["case_id"])
+                print(f"    {task.key}: {n}/{limits[task.key]} {case['case_id']} → {rec['behavior']} {rec['error'] or ''}", flush=True)
+            except LookupError as exc:
+                errors[task.key] = {"status": "BLOCKED", "reason": str(exc)}
+            except Exception as exc:
+                errors[task.key] = {"status": "FAILED", "reason": f"{exc.__class__.__name__}: {exc}"}
+        complete_cases += all(case["case_id"] in done[task.key] for task in tasks if n <= limits[task.key])
+    results = {}
+    for task in tasks:
+        completed = {case["case_id"] for case in cases[: limits[task.key]]} <= done[task.key]
+        info = {"status": "COMPLETED" if completed else "STOPPED", "queries": len(read_done(paths[task.key])),
+                "index_id": db.index_id, "config": configs[task.key]}
+        if stopped_at and not completed:
+            info["stopped_at"] = stopped_at
+        results[task.key] = errors.get(task.key, info)
+    return results
+
+
+async def run_hyu_task(run: Run, task: Task) -> dict:
+    """One preset on the frozen HYU labels, with each case's session history."""
+    return (await run_hyu_tasks(run, [task]))[task.key]
 
 
 # --------------------------------------------------------------------------------------------- dry run, manifest, main
@@ -573,6 +613,7 @@ async def main_async(args) -> int:
             print(f"Refusing to run: {exc}")
             return 2
     await write_manifest(run, tasks)
+    case_major_tasks = []
     for t in tasks:
         previous = run.status.get(t.key, {})
         if t.status in ("NOT_APPLICABLE", "SHARED", "BLOCKED", "FAILED"):
@@ -591,6 +632,9 @@ async def main_async(args) -> int:
         if args.force and path.exists():
             path.unlink()
         print(f"[run] {t.key}", flush=True)
+        if t.suite == "hyu" and args.case_major:
+            case_major_tasks.append(t)
+            continue
         started = time.perf_counter()
         try:
             if t.suite in ("offline", "retrieval"):
@@ -608,12 +652,34 @@ async def main_async(args) -> int:
             run.status[t.key] = {"status": "FAILED", "reason": f"{exc.__class__.__name__}: {exc}"}
         run.save_status()
         print(f"  → {run.status[t.key]['status']} {run.status[t.key].get('reason', '')}", flush=True)
+    if case_major_tasks:
+        started = time.perf_counter()
+        try:
+            results = await run_hyu_tasks(run, case_major_tasks)
+        except LookupError as exc:
+            results = {t.key: {"status": "BLOCKED", "reason": str(exc)} for t in case_major_tasks}
+        except Exception as exc:
+            results = {t.key: {"status": "FAILED", "reason": f"{exc.__class__.__name__}: {exc}"} for t in case_major_tasks}
+        for t in case_major_tasks:
+            run.status[t.key] = {"seconds": round(time.perf_counter() - started, 1), **results[t.key]}
+            run.save_status()
+            print(f"  → {run.status[t.key]['status']} {run.status[t.key].get('reason', '')}", flush=True)
     write_reports(run.dir)
     print(f"\nReports: {run.dir / 'summary.md'}")
     bad = [k for k, v in run.status.items() if v.get("status") in ("FAILED", "BLOCKED") and k in {t.key for t in tasks}]
     if bad:
         print(f"{len(bad)} tasks did not complete: {', '.join(bad)}")
     return 1 if bad else 0
+
+
+def stop_at_time(value: str) -> datetime:
+    try:
+        deadline = datetime.fromisoformat(value)
+        if deadline.utcoffset() is not None:
+            return deadline
+    except ValueError:
+        pass
+    raise argparse.ArgumentTypeError("--stop-at needs an ISO 8601 time with a UTC offset (e.g. 2026-11-21T12:00:00+09:00)")
 
 
 def main() -> int:
@@ -630,8 +696,12 @@ def main() -> int:
     parser.add_argument("--confirm-frozen", action="store_true", help="required for --suite hyu --split test (AGENTS.md)")
     parser.add_argument("--reason", help="why this test run happens (recorded in Report/results/TEST_RUNS.md)")
     parser.add_argument("--max-queries", type=int, help="limit queries per task (recorded in the run manifest)")
+    parser.add_argument("--case-major", action="store_true", help="HYU only: run all presets on each case before the next case")
+    parser.add_argument("--stop-at", type=stop_at_time, help="HYU only: stop before the next case at this ISO 8601 time with UTC offset")
     parser.add_argument("--download", help="download scifact,nfcorpus,arguana,scifact_original,conditionalqa into Sources/data/benchmarks/ and exit")
     args = parser.parse_args()
+    if (args.case_major or args.stop_at is not None) and args.suite != "hyu":
+        parser.error("--case-major and --stop-at require --suite hyu")
     if args.download:
         from evaluation import conditionalqa, scifact_original
 

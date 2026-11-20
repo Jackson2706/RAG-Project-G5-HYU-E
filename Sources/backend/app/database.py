@@ -15,19 +15,22 @@ manifest (how it was built) in its `manifest` collection.
 
 from __future__ import annotations
 
+import logging
 import time
+from datetime import UTC, datetime
 from typing import Any
 
 from pymongo import MongoClient
 from pymongo.database import Database as MongoDatabase
 from qdrant_client import QdrantClient, models
 
-from app.config import BACKEND_DIR, Settings
+from app.config import BACKEND_DIR, Settings, get_settings
 from app.rag.schemas import metadata_values
 
 DEFAULT_INDEX = "default"
 BENCH_DB_PREFIX = "hyu_bench_"
 BENCH_COLLECTION_PREFIX = "bench_"
+log = logging.getLogger("hyu_compass")
 
 
 def _applicability_payload(chunk: dict) -> dict:
@@ -70,6 +73,10 @@ class Database:
                     found.append({"index_id": other.index_id, "manifest": manifest})
         return found
 
+    def trace_databases(self) -> list[Database]:
+        """Every trace store the app can chat with, including smoke index revisions."""
+        return [self.for_index(entry["index_id"]) for entry in self.list_index_revisions()]
+
     @classmethod
     def connect(cls, settings: Settings) -> Database:
         mongo = MongoClient(settings.mongodb_uri, serverSelectionTimeoutMS=3000, tz_aware=True)[settings.mongodb_db]
@@ -84,6 +91,34 @@ class Database:
         self.chunks.create_index("chunk_id", unique=True)
         self.chunks.create_index("doc_id")
         self.traces.create_index("request_id", unique=True)
+        unparseable = 0
+        for trace in self.traces.find({"expires_from": {"$exists": False}}, {"created_at": 1}):
+            created_at = trace.get("created_at")
+            try:
+                if isinstance(created_at, str):
+                    created_at = datetime.fromisoformat(created_at)
+                if not isinstance(created_at, datetime):
+                    raise ValueError("Missing or invalid created_at")
+                if created_at.tzinfo is None:
+                    created_at = created_at.replace(tzinfo=UTC)
+                created_at = created_at.astimezone(UTC)
+            except ValueError:
+                unparseable += 1
+                continue
+            self.traces.update_one({"_id": trace["_id"], "expires_from": {"$exists": False}},
+                                   {"$set": {"expires_from": created_at}})
+        if unparseable:
+            log.warning("Trace expiry backfill: %d traces have unparseable created_at; left untouched", unparseable)
+
+        ttl_seconds = get_settings().trace_ttl_days * 86400
+        for name, index in self.traces.index_information().items():
+            if index["key"] == [("expires_from", 1)]:
+                if index.get("expireAfterSeconds") != ttl_seconds:
+                    self.mongo.command({"collMod": self.traces.name,
+                                        "index": {"name": name, "expireAfterSeconds": ttl_seconds}})
+                break
+        else:
+            self.traces.create_index("expires_from", expireAfterSeconds=ttl_seconds)
 
     # ----------------------------------------------------------------- health
 
@@ -211,7 +246,14 @@ class Database:
     # ----------------------------------------------------------------- traces
 
     def save_trace(self, trace: dict) -> None:
-        self.traces.replace_one({"request_id": trace["request_id"]}, trace, upsert=True)
+        self.traces.replace_one({"request_id": trace["request_id"]},
+                                {**trace, "expires_from": datetime.now(UTC)}, upsert=True)
+
+    def count_traces(self) -> int:
+        return self.traces.count_documents({})
+
+    def delete_traces(self) -> int:
+        return self.traces.delete_many({}).deleted_count
 
     def get_trace(self, request_id: str) -> dict | None:
         return self.traces.find_one({"request_id": request_id}, {"_id": 0})

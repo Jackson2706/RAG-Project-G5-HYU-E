@@ -1,6 +1,8 @@
 import { X } from "lucide-react";
+import { useState } from "react";
 
-import { IconButton } from "@/components/ui/primitives";
+import { Button, IconButton } from "@/components/ui/primitives";
+import { api } from "@/services/api";
 
 export const HELP_EXAMPLES = [
   "Which insurance rules apply to me?",
@@ -18,6 +20,31 @@ const REPLIES: [string, string][] = [
 
 /** First-visit help for a new user (dismissible; reopen it with the Help button). */
 export function HelpPanel({ onClose, onExample, disabled }: { onClose: () => void; onExample: (q: string) => void; disabled: boolean }) {
+  const [traceCount, setTraceCount] = useState<number | null>(null);
+  const [pending, setPending] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+
+  async function manageHistory(remove: boolean) {
+    setPending(true);
+    setMessage("");
+    setError("");
+    try {
+      if (remove) {
+        const { deleted } = await api.deleteTraces();
+        setTraceCount(null);
+        setMessage(`Deleted ${deleted} stored traces.`);
+      } else {
+        const { count } = await api.traceCount();
+        setTraceCount(count);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setPending(false);
+    }
+  }
+
   return (
     <section aria-label="How to use HYU Compass" className="relative w-full rounded-xl border border-border bg-card p-4 text-left text-sm">
       <div className="absolute right-2 top-2"><IconButton label="Close help" onClick={onClose}><X className="h-4 w-4" /></IconButton></div>
@@ -42,6 +69,21 @@ export function HelpPanel({ onClose, onExample, disabled }: { onClose: () => voi
         open the passage and the link to the official page. Details you mention (campus, degree, visa…) are remembered for this conversation
         only. <span className="font-medium text-foreground">Forget my details</span> or New conversation clears them.
       </p>
+      <div className="mt-3 space-y-2">
+        {traceCount === null ? (
+          <Button size="sm" disabled={pending} onClick={() => void manageHistory(false)}>Delete stored history</Button>
+        ) : (
+          <div role="group" aria-label="Confirm deleting stored history" className="space-y-2 rounded-lg border border-border p-3">
+            <p>Delete all {traceCount} stored request traces on this computer? This cannot be undone.</p>
+            <div className="flex gap-2">
+              <Button size="sm" disabled={pending} onClick={() => void manageHistory(true)}>Delete</Button>
+              <Button size="sm" disabled={pending} onClick={() => { setTraceCount(null); setError(""); }}>Cancel</Button>
+            </div>
+          </div>
+        )}
+        {message && <p role="status">{message}</p>}
+        {error && <p role="alert" className="text-danger">{error}</p>}
+      </div>
       <p className="mt-3 rounded-lg bg-warning/10 px-3 py-2 font-medium">Not official advice; confirm with the OIA office.</p>
     </section>
   );

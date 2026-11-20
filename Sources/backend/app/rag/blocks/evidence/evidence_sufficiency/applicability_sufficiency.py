@@ -5,8 +5,9 @@ AAES+ (deck v4 Task 4) adds two modes, each rules (AAES today) | llm | both:
               llm  = one LLM call: {"differs", "detail", "answers"}; valid only if the detail is in the vocabulary, unknown
                      for the student, and there are >= 2 distinct answers; else the rules' branches are kept.
               both = the rules propose the branch table; the LLM writes a <= 12-word answer per branch evidence set (the
-                     A0b EXTRACT prompt); every set answered with one distinct answer -> ANSWER; otherwise (>= 2 answers,
-                     or a NONE, which means that group is referred) the rules' decision is kept (never ABSTAIN on NONE).
+                     A0b EXTRACT prompt); every set answered with one distinct answer -> ANSWER. Multiple lexical groups
+                     with matching numbers get one SAME comparison; semantic agreement -> ANSWER. A NONE (that group
+                     is referred), differing numbers, disagreement or an invalid comparison keeps the rules' decision.
   step4_mode  decide and write.
               llm  = one LLM call picks answer / per_case / ask / refer; the writer then runs as today.
               both = the rules choose the action; for ask and refer the LLM writes the wording, checked to name only
@@ -131,17 +132,36 @@ class ApplicabilitySufficiency(BaseSufficiencyChecker):
         sets = list(dict.fromkeys(tuple(row["evidence"]) for row in d["branch_table"] if row["evidence"]))
         if not sets or len(sets) > MAX_EXTRACTIONS:
             self.trace_details["extractions"] = f"skipped: {len(sets)} evidence sets"
+            self.trace_details["same_check"] = "skipped: extraction_limit" if sets else "skipped: no_sets"
             return d
         values = []
         for ids in sets:
             block = "\n\n".join(texts[c][:1500] for c in ids if c in texts)
             values.append(await aaes_llm.call(self, aaes_llm.EXTRACT, f"Question: {question}\n\nEvidence:\n{block}"))
-        groups = distinct_answers([answer_key(v) for v in values])
+        keys = [answer_key(v) for v in values]
+        groups = distinct_answers(keys)
         distinct = {g for g in groups if g >= 0}
         self.trace_details["extractions"] = [{"evidence": list(ids), "value": v[:120], "group": g} for ids, v, g in zip(sets, values, groups, strict=True)]
-        if len(distinct) == 1 and -1 not in groups:  # every set answered, all the same: no split
+        if -1 in groups:
+            self.trace_details["same_check"] = "skipped: unanswered_set"
+            return d  # the group without an answer is referred; keep the split
+        if len(distinct) == 1:
+            self.trace_details["same_check"] = "skipped: same_answer"
             return {**d, "action": "ANSWER", "reason": "same_answer", "branch_attributes": [], "clarify_attribute": None}
-        return d  # >= 2 distinct answers, or a set without an answer (that group is referred): the rules' split or question
+        numbers = {frozenset(w for w in key if w.isdigit()) for key in keys if key is not None}
+        if len(numbers) > 1:  # T39: numbers override any semantic comparison
+            self.trace_details["same_check"] = "skipped: different_numbers"
+            return d
+        answers = "\n".join(f"[G{g + 1}] {values[groups.index(g)]}" for g in sorted(distinct))
+        same = aaes_llm.parse_same(await aaes_llm.call(self, aaes_llm.SAME, f"Question: {question}\n\nAnswers:\n{answers}"))
+        if same is None:
+            self.trace_details["same_check"] = "skipped: invalid"
+            aaes_llm.fallback(self, "same", ["invalid"])
+            return d
+        self.trace_details["same_check"] = {"groups": len(distinct), **same}
+        if same["same"]:
+            return {**d, "action": "ANSWER", "reason": "same_meaning", "branch_attributes": [], "clarify_attribute": None}
+        return d
 
     async def _llm_decide(self, question: str, evidence: list[Evidence], profile: dict, d: dict, note: str | None) -> tuple[dict, str | None]:
         branches = (f"Step 3 found that the answer depends on: {', '.join(d['branch_attributes'])}" + (f" ({d['branch_answers']})" if d.get("branch_answers") else "")

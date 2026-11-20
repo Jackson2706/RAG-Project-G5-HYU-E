@@ -4,6 +4,7 @@ validated before use. Anything invalid falls back to the rules for that item, an
     Step 1  PROFILE   -> parse_profile(raw, question, history)      {attribute: entry} (values in vocabulary v1, quote verified)
     Step 2  APPLIES   -> parse_applies(raw, passages, known)        {chunk_id: {"relevant", "label", "depends_on"}}
     Step 3  DIFFERS   -> parse_differs(raw, known)                  {"differs", "detail", "answers"} or None
+            SAME      -> parse_same(raw)                           {"same", "difference"} or None (both mode only)
     Step 4  DECIDE    -> parse_decide(raw, known)                   {"action", "detail"} or None
             WORDING   -> check_wording(text, kind, options, campus) the LLM's ask / refer sentence, or None
 
@@ -15,7 +16,7 @@ from __future__ import annotations
 import json
 import re
 
-from app.rag.aaes import NAMES, SHOWN, _show, answer_key, distinct_answers
+from app.rag.aaes import CAMPUS_SELF, CAMPUS_WORD, NAMES, SHOWN, _show, answer_key, distinct_answers
 from app.rag.applicability import VOCABULARY
 from app.rag.blocks.query_processing.query_understanding.self_query import INSTRUCTION as SELF_QUERY
 
@@ -50,6 +51,10 @@ REFER = ("Write one or two short sentences (at most 40 words) telling the studen
          "question and that they should contact {office}. Do not answer the question. Reply with the sentences only.")
 EXTRACT = ("Answer the question using only the evidence, in at most 12 words (a number, a date, yes/no or a short phrase). "
            "If the evidence does not answer the question, reply NONE.")  # the A0b extraction prompt, unchanged
+SAME = ("Decide whether all the supplied answers mean the same thing for the student's question. Ignore wording differences, "
+        "but keep differences in eligibility, requirements, dates, amounts, and yes/no. Reply with JSON only: "
+        "{\"same\": true, \"difference\": \"\"} if all agree, otherwise {\"same\": false, \"difference\": "
+        "\"<what differs, at most 15 words>\"}.")
 
 # Words that name an attribute in a passage (a conflict needs a quote that names one of the student's known attributes).
 SURFACE = {"campus": ("seoul", "erica", "ansan"), "degree_level": ("undergraduate", "bachelor", "master", "doctoral", "ph.d", "phd", "graduate", "language"),
@@ -68,6 +73,38 @@ def quoted(quote: str, text: str) -> bool:
     """A quote counts only if (after normalisation) it appears in the text it claims to quote."""
     q = norm(quote).strip(" .,!?\"'")
     return bool(q) and q in norm(text)
+
+
+def rule_kind(text: str, quote: str) -> str:
+    """Classify a current-turn rule quote: self, hypothetical, or mention. A hypothetical cue lasts to the sentence end.
+
+    >>> rule_kind("If I were a master's student at ERICA, could I take TOPIK?", "ERICA")
+    'hypothetical'
+    >>> rule_kind("I'm a Seoul campus student.", "Seoul")
+    'self'
+    >>> rule_kind("What about ERICA students?", "ERICA")
+    'mention'
+    >>> rule_kind("Suppose I'm at Seoul. My campus is ERICA.", "ERICA")
+    'self'
+    """
+    text, quote = norm(text), norm(quote).strip(" .,!?\"'")
+    at = text.rfind(quote)
+    if not quote or at < 0:
+        return "mention"
+    # Campus rules prefer the last self-pattern over a later bare campus mention.
+    campus_hits = list(CAMPUS_SELF.finditer(text)) if CAMPUS_WORD.fullmatch(quote) else []
+    if campus_hits:
+        hit = campus_hits[-1]
+        group = 1 if hit.group(1) else 2
+        if hit.group(group) == quote:
+            at = hit.start(group)
+    start = max(text.rfind(mark, 0, at) for mark in ".?!") + 1
+    prefix = text[start:at + len(quote)]
+    if re.search(r"\b(?:if i (?:were|was)|suppose|imagine|what if|hypothetically|let's say)\b", prefix):
+        return "hypothetical"
+    if re.search(r"\b(?:i'm|i am|i study|my)\b", prefix):
+        return "self"
+    return "mention"
 
 
 def load_json(raw: str):
@@ -153,6 +190,23 @@ def parse_differs(raw: str, known: dict[str, list[str]]) -> dict | None:
     if len({g for g in groups if g >= 0}) < 2:
         return None
     return {"differs": True, "detail": detail, "answers": answers}
+
+
+def parse_same(raw: str) -> dict | None:
+    """A semantic comparison needs a JSON boolean and a difference of at most 15 words.
+
+    >>> parse_same('{"same": true, "difference": ""}')
+    {'same': True, 'difference': ''}
+    >>> parse_same('{"same": "true", "difference": ""}') is None
+    True
+    """
+    data = load_json(raw)
+    if not isinstance(data, dict) or not isinstance(data.get("same"), bool):
+        return None
+    difference = data.get("difference")
+    if not isinstance(difference, str) or len(difference.split()) > 15:
+        return None
+    return {"same": data["same"], "difference": difference.strip()}
 
 
 ACTION = {"answer": "ANSWER", "per_case": "CONDITIONAL", "ask": "CLARIFY", "refer": "ABSTAIN"}

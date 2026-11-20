@@ -10,6 +10,7 @@ from __future__ import annotations
 import os
 from functools import lru_cache
 from pathlib import Path
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BACKEND_DIR = Path(__file__).resolve().parent.parent
@@ -52,6 +53,7 @@ class Settings(BaseSettings):
     qdrant_url: str = "http://127.0.0.1:6333"
     qdrant_path: str | None = None  # optional: embedded Qdrant in a folder instead of the Docker server
     qdrant_collection: str = "hyu_chunks"
+    trace_ttl_days: int = Field(default=30, ge=0)
     # The HYU snapshot index revision that HYU experiments, labeling and the demo use (PLAYBOOK A13).
     # r1/r2 stay in the databases for rollback; switch back with HYU_INDEX_ID=hyu_20261110_97dc1269_r2.
     hyu_index_id: str = "hyu_20261110_97dc1269_r5"
