@@ -19,6 +19,17 @@ prompt (sha `3541b5db8960…`) and its batch. `key.jsonl` was opened only by `sc
 | prompted conditional (R16) | all | 166 | 0.453 [0.402, 0.508] | 0.295 [0.229, 0.367] | 0.223 [0.163, 0.289] | 0.539 [0.446, 0.627] |
 | prompted conditional (R16) | student_dependent | 52 | 0.327 [0.258, 0.395] | 0.404 [0.269, 0.538] | 0.481 [0.346, 0.615] | 0.337 [0.202, 0.471] |
 
+## Gold-evidence reference (G1, same judge procedure, 5 batches of ≤ 35; `judge/content_scores_gold.csv`)
+
+| Method | Slice | Answered replies | Facts covered | Replies with a wrong fact | Wrong-group replies | Cited sentences supported |
+|---|---|---|---|---|---|---|
+| gold evidence (G1) | all | 171 | 0.609 [0.559, 0.659] | 0.135 [0.088, 0.187] | 0.181 [0.123, 0.240] | 0.837 [0.784, 0.884] |
+| gold evidence (G1) | student_dependent | 57 | 0.541 [0.461, 0.621] | 0.228 [0.123, 0.333] | 0.509 [0.386, 0.632] | 0.775 [0.664, 0.869] |
+
+With the right evidence the same small model covers 0.61 of the facts and cites correctly 84% of the time, but still
+gives a wrong-group reply to half the student-dependent questions: retrieval limits the facts, the one-answer reply
+limits the group.
+
 ## Reading
 
 - Over its answered replies AAES+ covers about as many required facts as the others (0.383 vs AAES 0.358, B0 0.407, R16
@@ -33,6 +44,6 @@ prompt (sha `3541b5db8960…`) and its batch. `key.jsonl` was opened only by `sc
 - Partly stated multi-part facts: batches 01, 02 and 09 mostly marked them *missing*; 04, 05, 06 and 10 mostly *correct*;
   11 decided per item with a note. Items were shuffled across methods, so this adds noise, not bias toward one method.
 - A citation marker on its own line was counted for the sentence before it (05, 08, 09); markers written as (E1) were not
-  counted (09, H0360). A reply that says information does not exist where the fact exists was judged *wrong* (05).
+  counted (09, H0360); gold batch 01 did not count a marker standing alone (G0016). A reply that says information does not exist where the fact exists was judged *wrong* (05).
 - Hard calls carry a `note` in `judge/judgments.jsonl`. Not re-judged: the prompt is frozen and no second judge was planned.
 

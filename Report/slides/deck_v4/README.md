@@ -113,6 +113,15 @@ audit artifact and did not contribute to the freeze.
 Label limitation, stated plainly: the dev-2 and test-3 labels are LLM-annotated, LLM-adjudicated and verified by one
 model (GPT-6 Astra); no person checked them. All comparisons on them are relative.
 
+**Summary (2026-11-21).** All six phases done and pushed to `hyu-aaes`. AAES+ = `AP_RRRL`. On held-out test-3 + test-2
+(215 questions, run once; test-1 never touched) all three pre-registered hypotheses hold: more acceptable reply types
+than AAES (+0.084), needed questions/splits kept (−0.030, non-inferior), and far better than prompted conditional
+answering on student-dependent questions (+0.471). Over all questions AAES+ is still below every baseline (0.395 vs
+0.54–0.67) because it asks or splits on 41% of questions that need one answer. Content (judged blind by Claude Opus
+5.5): AAES+ answers cover facts about as well as the baselines, with fewer wrong-group replies on student-dependent
+questions; CIs overlap. Demo: Scenario 2 works 3/3 for both; the winter-school question still triggers an unneeded
+campus question with AAES+ (3/3), so it is not a success demo.
+
 ### Decisions taken without the user
 
 1. **No `codex-plugin-cc` in this Claude Code install** (only `ponytail` and `humanizer` are installed, so `/codex:*`
@@ -141,6 +150,14 @@ model (GPT-6 Astra); no person checked them. All comparisons on them are relativ
 9. **Test-2 method list:** test-2 had never been run; its A35 list (`PREREG_test2.md`) is replaced by the brief's seven
    held-out methods (`hyu.yaml test2_presets`), set before the freeze.
 10. **u16 screenshot** shows the in-page confirmation and then clicks Cancel, so no stored trace was deleted for the picture.
+11. **H1 over both held-out sets:** test-3 and test-2 are separate runs; `deck_v5.py heldout` and `judge-items` now take
+    several run ids, so H1–H3 are computed over all 215 questions as pre-registered ("all held-out questions run").
+12. **Phase 5 judges:** 12 + 5 blind Claude Opus 5.5 subagents (one per batch) instead of one long session, to keep
+    batches disjoint and each judge's context to its batch. Some ran a format check (line count, keys) after judging
+    by hand; none produced judgments by program. Their split on partly stated facts is reported, not re-judged.
+13. **Gold items judged** (usage allowed): 171 G1 replies, same procedure, scored separately (`--gold`).
+14. **Demo script** `deck_v5_demo.py` reuses `deck_v4_demo.py` with methods A0 / AP_RRRL and scenarios S5 (winter
+    school) and S2; it ran while the judges worked (the judges use no Ollama).
 
 ### Phase 1 · Fixes and cleanup
 
@@ -243,6 +260,8 @@ after the merge. Table and judge-consistency notes: `heldout/content_summary.md`
 - Wrong-group replies on student-dependent questions: AAES+ 0.333 (24) vs B0 0.489, R16 0.481 (CIs overlap).
 - Replies with a wrong fact: AAES+ 0.227, AAES 0.179, B0 0.324, R16 0.295. Citation support 0.51–0.57 for all.
 - Not paired: AAES+ answers fewer questions, so its rates come from a different, smaller set.
+- Gold evidence (G1, 171 replies, judged the same way): facts covered 0.609 [0.559, 0.659], citation support 0.837,
+  but wrong-group 0.509 on student-dependent questions.
 - Limitation: judges split on partly stated facts (some batches *missing*, others *correct*); not re-judged.
 
 ### Phase 6 · Demo rehearsal (AAES vs AAES+, 3 runs each)
