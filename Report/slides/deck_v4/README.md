@@ -233,6 +233,29 @@ Frozen commit `4e6d007`; test-3 (140) then test-2 (75), both complete (≥ 2.5 h
 - Blind judge items for Phase 5: 475 answered replies of AAES+, AAES, B0, R16 (`heldout/judge/items.jsonl`, gitignored)
   and 171 of G1 (`items_gold.jsonl`); `key.jsonl` committed.
 
+### Phase 5 · Held-out content, judged by Claude Opus 5.5 (v3 prompt)
+
+475 answered replies (AAES+, AAES, B0, R16) in 12 disjoint blind batches, one Claude Opus 5.5 subagent each; key read only
+after the merge. Table and judge-consistency notes: `heldout/content_summary.md`; numbers `heldout/judge/content_scores.csv`.
+
+- Facts covered over each method's answered replies: AAES+ 0.383 [0.316, 0.454] (97), AAES 0.358 (67), B0 0.407 (145),
+  R16 0.453 (166); CIs overlap.
+- Wrong-group replies on student-dependent questions: AAES+ 0.333 (24) vs B0 0.489, R16 0.481 (CIs overlap).
+- Replies with a wrong fact: AAES+ 0.227, AAES 0.179, B0 0.324, R16 0.295. Citation support 0.51–0.57 for all.
+- Not paired: AAES+ answers fewer questions, so its rates come from a different, smaller set.
+- Limitation: judges split on partly stated facts (some batches *missing*, others *correct*); not re-judged.
+
+### Phase 6 · Demo rehearsal (AAES vs AAES+, 3 runs each)
+
+`demo_trials_v5.csv` (script `scripts/deck_v5_demo.py`, same procedure as v4: run 1 cold, runs 2–3 warm).
+
+- Winter school ("Is there a winter school for international students?", dev T14-042): **AAES+ still asks the campus,
+  3/3 runs**, as AAES does (0.9–5.0 s vs 0.2 s). The T42 fix is in "both" mode; the chosen AAES+ (RRRL) uses rules in
+  Step 1, so this demo failure stays. The held-out wording (T2-011) was answered. Do not use S5 as a success demo.
+- Scenario 2 (counseling, then "I'm a Seoul campus student.", then the question again): identical behaviour for both,
+  3/3 runs: asks campus → asks student type → answers per degree level with the campus remembered. AAES+ seconds per
+  turn 0.9–6.6 (cold 3.1 / 2.1 / 6.6), AAES 0.2–9.0.
+
 ### Phase 4 · Task 2 follow-up, judged by GPT-6 Sol (v3 prompt)
 
 All numbers in this section are **judged by GPT-6 Sol (v3 prompt)** (`followup/judge/judgments.meta.json`: 516 items,
