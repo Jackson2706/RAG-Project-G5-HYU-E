@@ -39,7 +39,7 @@ AP_BBBB,unconditional,answer,39,4,2,4
 AP_BBBB,unconditional,conditional_answer,0,0,0,0
 AP_BBBB,unconditional,clarify,0,0,0,0
 AP_BBBB,unconditional,abstain,0,0,0,0
-AP_RRRL,all,answer,13,23,18,6
+AP_RRRL,all,answer,13,24,18,6
 AP_RRRL,all,conditional_answer,0,14,24,10
 AP_RRRL,all,clarify,0,0,1,3
 AP_RRRL,all,abstain,6,8,12,1
@@ -55,7 +55,7 @@ AP_RRRL,negative,answer,0,0,0,0
 AP_RRRL,negative,conditional_answer,0,0,0,0
 AP_RRRL,negative,clarify,0,0,0,0
 AP_RRRL,negative,abstain,5,5,11,1
-AP_RRRL,unconditional,answer,12,19,14,3
+AP_RRRL,unconditional,answer,12,20,14,3
 AP_RRRL,unconditional,conditional_answer,0,0,0,0
 AP_RRRL,unconditional,clarify,0,0,0,0
 AP_RRRL,unconditional,abstain,0,0,0,0

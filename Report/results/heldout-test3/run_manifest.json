@@ -1,6 +1,6 @@
 {
   "run_id": "heldout-test3",
-  "started_at": "2026-11-20T10:58:49.617175+00:00",
+  "started_at": "2026-11-20T16:26:45.632069+00:00",
   "argv": [
     "--suite",
     "hyu",
@@ -8,15 +8,17 @@
     "test3",
     "--run-id",
     "heldout-test3",
-    "--case-major",
+    "--experiment",
+    "AP_RRRL",
+    "--resume",
     "--stop-at",
     "2026-11-21T12:00:00+09:00",
     "--confirm-frozen",
     "--reason",
-    "deck v5 Phase 3: single held-out run on test-3 after aaes_plus_freeze.md"
+    "Infra retry (resume): AP_RRRL N038 failed on an Ollama Metal GPU error (kIOGPUCommandBufferCallbackErrorInnocentVictim); --resume runs only that failed record"
   ],
   "git": {
-    "commit": "4e6d007ffbe48caaf1d5de8845e49d53e8818ad0",
+    "commit": "209b16992893da3b3c4c76af7a7f01a2dae64897",
     "dirty": true
   },
   "machine": {
@@ -420,13 +422,7 @@
     }
   },
   "tasks": [
-    "hyu/test3/AP_RRRL__-",
-    "hyu/test3/A0_AAES__-",
-    "hyu/test3/AP_BBBB__-",
-    "hyu/test3/B0_BASIC_DENSE_RAG__-",
-    "hyu/test3/R15_SELF_QUERY__-",
-    "hyu/test3/R16_PROMPTED_CONDITIONAL__-",
-    "hyu/test3/G1_ORACLE_CONTEXT__-"
+    "hyu/test3/AP_RRRL__-"
   ],
   "sessions": [
     {
@@ -458,6 +454,33 @@
         "hyu/test3/R15_SELF_QUERY__-",
         "hyu/test3/R16_PROMPTED_CONDITIONAL__-",
         "hyu/test3/G1_ORACLE_CONTEXT__-"
+      ]
+    },
+    {
+      "started_at": "2026-11-20T16:26:45.632069+00:00",
+      "argv": [
+        "--suite",
+        "hyu",
+        "--split",
+        "test3",
+        "--run-id",
+        "heldout-test3",
+        "--experiment",
+        "AP_RRRL",
+        "--resume",
+        "--stop-at",
+        "2026-11-21T12:00:00+09:00",
+        "--confirm-frozen",
+        "--reason",
+        "Infra retry (resume): AP_RRRL N038 failed on an Ollama Metal GPU error (kIOGPUCommandBufferCallbackErrorInnocentVictim); --resume runs only that failed record"
+      ],
+      "git": {
+        "commit": "209b16992893da3b3c4c76af7a7f01a2dae64897",
+        "dirty": true
+      },
+      "split": "test3",
+      "tasks": [
+        "hyu/test3/AP_RRRL__-"
       ]
     }
   ]

@@ -1,8 +1,8 @@
 {
   "hyu/test3/AP_RRRL__-": {
-    "seconds": 14646.6,
-    "status": "STOPPED",
-    "queries": 139,
+    "status": "COMPLETED",
+    "seconds": 5.7,
+    "queries": 140,
     "index_id": "hyu_20261110_97dc1269_r5",
     "config": {
       "document_loading": {

@@ -418,6 +418,7 @@ AP_RRRL,N201,negative,abstain,answer,True,False,1.0,1.0,N/A,N/A,N/A,False,True,F
 AP_RRRL,N206,multi_session,answer,clarify,False,False,1.0,1.0,N/A,N/A,N/A,N/A,False,N/A,4506.1,1
 AP_RRRL,N208,unconditional,answer,clarify,False,False,0.0,1.0,N/A,N/A,N/A,N/A,False,N/A,6384.3,1
 AP_RRRL,N214,conditional,conditional_answer,conditional_answer,True,True,0.0,0.0,N/A,N/A,N/A,False,True,False,9219.4,2
+AP_RRRL,N038,unconditional,answer,conditional_answer,False,False,1.0,1.0,N/A,N/A,N/A,False,True,False,5651.2,2
 B0_BASIC_DENSE_RAG,DBUF001,conditional,clarify,answer,False,False,1.0,1.0,N/A,N/A,N/A,False,True,False,9609.3,1
 B0_BASIC_DENSE_RAG,DBUF003,multi_session,conditional_answer,answer,False,False,0.0,0.0,N/A,N/A,N/A,False,True,False,6341.9,1
 B0_BASIC_DENSE_RAG,DBUF004,conditional,clarify,answer,False,False,0.0,0.0,N/A,N/A,N/A,False,True,False,17142.5,1
