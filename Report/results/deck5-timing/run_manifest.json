@@ -1,6 +1,6 @@
 {
   "run_id": "deck5-timing",
-  "started_at": "2026-11-20T08:26:20.692162+00:00",
+  "started_at": "2026-11-20T10:49:45.128437+00:00",
   "argv": [
     "--suite",
     "hyu",
@@ -11,11 +11,12 @@
     "--case-major",
     "--max-queries",
     "11",
+    "--resume",
     "--experiment",
     "AP_RRRL,A0_AAES,AP_BBBB,B0_BASIC_DENSE_RAG,R15_SELF_QUERY,R16_PROMPTED_CONDITIONAL,G1_ORACLE_CONTEXT"
   ],
   "git": {
-    "commit": "ac9b42a300102d0a497783ed9e633b3180a31ab9",
+    "commit": "c989d8ea786ae1fce90f89dc89626b8f90dea727",
     "dirty": false
   },
   "machine": {
@@ -348,15 +349,23 @@
         "AP_BBRB",
         "AP_BBBR"
       ],
-      "heldout_presets": [],
-      "test2_presets": [
+      "heldout_presets": [
+        "AP_RRRL",
+        "A0_AAES",
+        "AP_BBBB",
         "B0_BASIC_DENSE_RAG",
         "R15_SELF_QUERY",
         "R16_PROMPTED_CONDITIONAL",
-        "G0_CLOSED_BOOK",
-        "G1_ORACLE_CONTEXT",
+        "G1_ORACLE_CONTEXT"
+      ],
+      "test2_presets": [
+        "AP_RRRL",
         "A0_AAES",
-        "AG_AAES_GUARD"
+        "AP_BBBB",
+        "B0_BASIC_DENSE_RAG",
+        "R15_SELF_QUERY",
+        "R16_PROMPTED_CONDITIONAL",
+        "G1_ORACLE_CONTEXT"
       ],
       "ours": "A0_AAES",
       "baselines": [
@@ -437,6 +446,37 @@
       ],
       "git": {
         "commit": "ac9b42a300102d0a497783ed9e633b3180a31ab9",
+        "dirty": false
+      },
+      "split": "dev2",
+      "tasks": [
+        "hyu/dev2/B0_BASIC_DENSE_RAG__-",
+        "hyu/dev2/R15_SELF_QUERY__-",
+        "hyu/dev2/R16_PROMPTED_CONDITIONAL__-",
+        "hyu/dev2/G1_ORACLE_CONTEXT__-",
+        "hyu/dev2/A0_AAES__-",
+        "hyu/dev2/AP_BBBB__-",
+        "hyu/dev2/AP_RRRL__-"
+      ]
+    },
+    {
+      "started_at": "2026-11-20T10:49:45.128437+00:00",
+      "argv": [
+        "--suite",
+        "hyu",
+        "--split",
+        "dev2",
+        "--run-id",
+        "deck5-timing",
+        "--case-major",
+        "--max-queries",
+        "11",
+        "--resume",
+        "--experiment",
+        "AP_RRRL,A0_AAES,AP_BBBB,B0_BASIC_DENSE_RAG,R15_SELF_QUERY,R16_PROMPTED_CONDITIONAL,G1_ORACLE_CONTEXT"
+      ],
+      "git": {
+        "commit": "c989d8ea786ae1fce90f89dc89626b8f90dea727",
         "dirty": false
       },
       "split": "dev2",

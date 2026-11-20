@@ -18,7 +18,7 @@
     "unneeded": 50,
     "wrong_referrals": 13,
     "llm_calls_mean": 0.3364485981308411,
-    "fresh_seconds_median": null
+    "fresh_seconds_median": 0.33999999999999997
   },
   "minimum_kept": 20.0,
   "candidates": [
@@ -32,7 +32,7 @@
       "unneeded": 12,
       "wrong_referrals": 16,
       "llm_calls_mean": 3.7757009345794392,
-      "fresh_seconds_median": null,
+      "fresh_seconds_median": 35.55,
       "eligible": false
     },
     {
@@ -201,7 +201,7 @@
       "unneeded": 45,
       "wrong_referrals": 13,
       "llm_calls_mean": 1.4205607476635513,
-      "fresh_seconds_median": null,
+      "fresh_seconds_median": 7.55,
       "eligible": true
     }
   ],

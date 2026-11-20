@@ -48,8 +48,9 @@ def main() -> int:
                 "judge_v3_prompt.md": hashlib.sha256((ROOT / "Sources" / "evaluation" / "judge_v3_prompt.md").read_bytes()).hexdigest()}
     commit = subprocess.run(["git", "-C", str(ROOT), "rev-parse", "HEAD"], capture_output=True, text=True, check=True).stdout.strip()
     lines = ["# AAES+ freeze (deck v5, before the held-out run)", "",
-             f"Frozen at commit `{commit}` (the freeze commit itself adds only this file, selection.json, dev_ablation.csv and "
-             "the held-out preset lists). The held-out run must start from the commit that contains this file.", "",
+             f"Frozen on top of commit `{commit}` (which already holds the held-out preset lists in evaluation/configs/hyu.yaml); "
+             "the freeze commit adds only this file, selection.json, dev_ablation.csv and timing_v5.csv. The held-out run "
+             "must start from the commit that contains this file.", "",
              f"**AAES+ = `{ours}`**, chosen by the rule fixed before Stage B: {selection['rule']}", "",
              f"Reference (A0_AAES = RRRR) kept {selection['reference']['kept']} needed questions/splits on dev + dev-2; minimum "
              f"for eligibility {selection['minimum_kept']:.1f}. Candidates: `aaes_plus/selection.json`, table "

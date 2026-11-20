@@ -135,7 +135,12 @@ model (GPT-6 Astra); no person checked them. All comparisons on them are relativ
    judged against a re-run at `1441216` in a clean git worktree (`.run/wt_pre_t42`, results via `HYU_RESULTS_DIR`).
 7. **Runner order:** `--experiment` does not set the order (the config's list does), so on dev-2 every version runs in
    its own invocation in the brief's order, with LLLL last under its own `--stop-at`.
-8. **u16 screenshot** shows the in-page confirmation and then clicks Cancel, so no stored trace was deleted for the picture.
+8. **Swap stall during timing:** with Docker's VM at 8.3 GB and Ollama holding ≈ 11.8 GB for Qwen 3.5, the Mac
+   swapped (13.6 GB) and the first timing attempt reached 5 of 11 questions in 2 h 15 min. It was stopped, its partial
+   results committed, and resumed from a clean tree (8 min). The recorded seconds are the pipeline's own `total_ms`.
+9. **Test-2 method list:** test-2 had never been run; its A35 list (`PREREG_test2.md`) is replaced by the brief's seven
+   held-out methods (`hyu.yaml test2_presets`), set before the freeze.
+10. **u16 screenshot** shows the in-page confirmation and then clicks Cancel, so no stored trace was deleted for the picture.
 
 ### Phase 1 · Fixes and cleanup
 
@@ -171,6 +176,41 @@ evaluation 158, frontend 24, typecheck.
   removes hypothetical values at the cost of dropping campuses a student names without "I'm …". Probe "If I were a
   master's student at ERICA, could I take the TOPIK class?": campus and degree level are dropped unless the LLM
   confirms them (unit test with a fake LLM, `test_aaes_plus_v5.py`).
+
+### Phase 2 · Stage B on dev + dev-2, re-scored with evaluator v2
+
+Runs: `Report/results/deck5-dev` (dev 47, commit `faf4179`), `Report/results/deck5-dev2` (dev-2 60, commit `55f9ce5`;
+same system code). All 15 versions completed on all 107 cases (LLLL included, 20 min on dev-2). Reply types: frozen
+evaluator v2 (prompt hash `5151f273055b`), never the runner's decision. Table: `aaes_plus/dev_ablation.csv`.
+
+| Version | Acceptable reply type | Needed kept (of 36) | Unneeded questions/splits | Wrong referrals | LLM calls / question | Fresh s (median) |
+|---|---|---|---|---|---|---|
+| RBRR | 0.570 | 19 | 19 | 13 | 1.78 | |
+| BBRB | 0.561 | 19 | 19 | 15 | 3.00 | |
+| RLRR | 0.561 | 14 | 13 | 16 | 1.77 | |
+| BBBB | 0.542 | 11 | 12 | 16 | 3.78 | 35.6 |
+| LLLL | 0.533 | 14 | 16 | 15 | 4.76 | |
+| **RRRL (AAES+)** | **0.393** | **23** | 45 | 13 | 1.42 | 7.6 |
+| RRRB | 0.383 | 25 | 49 | 13 | 1.00 | |
+| A0 = RRRR (AAES) | 0.374 | 25 | 50 | 13 | 0.34 | 0.3 |
+| BRRR | 0.374 | 26 | 51 | 11 | 1.31 | |
+| LRRR | 0.374 | 26 | 52 | 10 | 1.33 | |
+
+(Full 15 rows in the CSV.) **Selection, rule fixed earlier:** RRRR keeps 25, so a version needs ≥ 20; eligible RRRL
+(23), RRLR (22), RRRB (25), BRRR (26), LRRR (26); the highest acceptable rate among them is **RRRL = AAES+** (Step 4 decided
+by the LLM, steps 1–3 by the rules). The versions with the best acceptable rate (RBRR 0.570, BBRB 0.561) keep only 19 of 36
+needed questions or splits and are not eligible: on dev + dev-2 the gain in acceptable replies comes from asking less.
+
+**Fresh timing** (`aaes_plus/timing_v5.csv`, dev-2 questions 2–11, LLM cache off, question 1 warmed every method):
+median seconds / LLM calls per question: A0 0.3 / 0, AAES+ 7.5 / 1, B0 6.2 / 1, R15 9.5 / 2, G1 12.6 / 1 (9 questions:
+one reply failed), R16 13.2 / 1, BBBB 35.5 / 4.
+
+**Components** (`aaes_plus/components_v5.csv`, from the Stage B traces, no new labels; the Step 2 component set was skipped
+for time): Step 3 chosen detail among the labelled branch details, A0 14/29 (0.48), BBBB 6/10 (0.60), LLLL 13/24 (0.54);
+"needs a split" A0 precision 0.333 / recall 0.750, BBBB 0.417 / 0.278, RBRR 0.487 / 0.528; Step 4 exact reply type vs the
+label, A0 0.187, AAES+ 0.215, LLLL 0.430.
+
+Freeze: `aaes_plus_freeze.md` (committed and pushed before the held-out run).
 
 ### Phase 4 · Task 2 follow-up, judged by GPT-6 Sol (v3 prompt)
 
