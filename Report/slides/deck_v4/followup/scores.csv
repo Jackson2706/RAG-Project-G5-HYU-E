@@ -1,0 +1,517 @@
+id,pid,system,user_turns,expect_refer,reply_type,score,facts,wrong_group,conditions_match,right_referral
+F423,I01-g0,A0 details up front,1,False,clarify,0,,,,
+F263,I01-g0,A0 one turn (asks),1,False,clarify,0,,,,
+F323,I01-g0,A0 reply_only,4,False,abstain,0,,,,True
+F158,I01-g0,A0 reply_reask,4,False,conditional_answer,0,['missing'],False,False,
+F099,I01-g0,B0 details up front,1,False,answer,0,['missing'],False,,
+F498,I01-g0,B0 one turn,1,False,answer,0,['correct'],True,,
+F506,I01-g0,R15 details up front,1,False,abstain,0,,,,True
+F454,I01-g0,R15 one turn,1,False,answer,0,['missing'],True,,
+F118,I01-g0,R16 details up front,1,False,abstain,0,,,,True
+F208,I01-g0,R16 one turn,1,False,conditional_answer,0,['missing'],True,False,
+F259,I01-g0,R5 details up front,1,False,abstain,0,,,,True
+F160,I01-g0,R5 one turn,1,False,conditional_answer,0,['wrong'],True,False,
+F330,I01-g0,R9S details up front,1,False,abstain,0,,,,True
+F054,I01-g0,R9S one turn,1,False,conditional_answer,0,['correct'],True,False,
+F258,I01-g1,A0 details up front,1,False,clarify,0,,,,
+F221,I01-g1,A0 one turn (asks),1,False,clarify,0,,,,
+F227,I01-g1,A0 reply_only,2,False,abstain,0,,,,True
+F401,I01-g1,A0 reply_reask,4,False,answer,0,['missing'],False,,
+F290,I01-g1,B0 details up front,1,False,answer,2,['correct'],False,,
+F194,I01-g1,B0 one turn,1,False,answer,0,['correct'],True,,
+F048,I01-g1,R15 details up front,1,False,abstain,0,,,,True
+F206,I01-g1,R15 one turn,1,False,answer,0,['correct'],True,,
+F184,I01-g1,R16 details up front,1,False,abstain,0,,,,True
+F088,I01-g1,R16 one turn,1,False,conditional_answer,0,['correct'],True,False,
+F061,I01-g1,R5 details up front,1,False,abstain,0,,,,True
+F277,I01-g1,R5 one turn,1,False,conditional_answer,0,['correct'],True,False,
+F449,I01-g1,R9S details up front,1,False,abstain,0,,,,True
+F345,I01-g1,R9S one turn,1,False,conditional_answer,1,['correct'],False,False,
+F404,I01-g2,A0 details up front,1,False,conditional_answer,0,['missing'],False,False,
+F137,I01-g2,A0 one turn (asks),1,False,clarify,0,,,,
+F392,I01-g2,A0 reply_only,3,False,answer,0,['missing'],False,,
+F193,I01-g2,A0 reply_reask,4,False,conditional_answer,0,['wrong'],True,False,
+F058,I01-g2,B0 details up front,1,False,answer,0,['wrong'],True,,
+F125,I01-g2,B0 one turn,1,False,answer,0,['wrong'],True,,
+F215,I01-g2,R15 details up front,1,False,abstain,0,,,,True
+F096,I01-g2,R15 one turn,1,False,answer,0,['wrong'],True,,
+F223,I01-g2,R16 details up front,1,False,abstain,0,,,,True
+F515,I01-g2,R16 one turn,1,False,conditional_answer,0,['wrong'],True,False,
+F185,I01-g2,R5 details up front,1,False,abstain,0,,,,True
+F334,I01-g2,R5 one turn,1,False,conditional_answer,0,['wrong'],True,False,
+F018,I01-g2,R9S details up front,1,False,abstain,0,,,,True
+F440,I01-g2,R9S one turn,1,False,conditional_answer,0,['wrong'],True,False,
+F391,I01-g3,A0 details up front,1,False,abstain,0,,,,True
+F053,I01-g3,A0 one turn (asks),1,False,clarify,0,,,,
+F303,I01-g3,A0 reply_only,3,False,answer,0,['missing'],False,,
+F142,I01-g3,A0 reply_reask,4,False,answer,0,['wrong'],True,,
+F368,I01-g3,B0 details up front,1,False,answer,0,['wrong'],True,,
+F364,I01-g3,B0 one turn,1,False,answer,0,['wrong'],True,,
+F411,I01-g3,R15 details up front,1,False,abstain,0,,,,True
+F275,I01-g3,R15 one turn,1,False,answer,0,['wrong'],True,,
+F412,I01-g3,R16 details up front,1,False,abstain,0,,,,True
+F402,I01-g3,R16 one turn,1,False,conditional_answer,0,['wrong'],True,False,
+F192,I01-g3,R5 details up front,1,False,abstain,0,,,,True
+F115,I01-g3,R5 one turn,1,False,conditional_answer,0,['wrong'],True,False,
+F476,I01-g3,R9S details up front,1,False,abstain,0,,,,True
+F426,I01-g3,R9S one turn,1,False,conditional_answer,0,['wrong'],True,False,
+F059,I02-g0,A0 details up front,1,False,clarify,0,,,,
+F485,I02-g0,A0 one turn (asks),1,False,clarify,0,,,,
+F309,I02-g0,A0 reply_only,4,False,answer,0,['missing'],False,,
+F100,I02-g0,A0 reply_reask,4,False,conditional_answer,1,['correct'],False,False,
+F422,I02-g0,B0 details up front,1,False,answer,2,['correct'],False,,
+F287,I02-g0,B0 one turn,1,False,answer,0,['correct'],True,,
+F262,I02-g0,R15 details up front,1,False,abstain,0,,,,True
+F028,I02-g0,R15 one turn,1,False,abstain,0,,,,False
+F298,I02-g0,R16 details up front,1,False,abstain,0,,,,True
+F145,I02-g0,R16 one turn,1,False,conditional_answer,2,['correct'],False,True,
+F370,I02-g0,R5 details up front,1,False,abstain,0,,,,True
+F204,I02-g0,R5 one turn,1,False,answer,2,['correct'],False,,
+F217,I02-g0,R9S details up front,1,False,abstain,0,,,,True
+F165,I02-g0,R9S one turn,1,False,abstain,0,,,,False
+F465,I02-g1,A0 details up front,1,False,clarify,0,,,,
+F316,I02-g1,A0 one turn (asks),1,False,clarify,0,,,,
+F113,I02-g1,A0 reply_only,2,False,abstain,0,,,,True
+F340,I02-g1,A0 reply_reask,3,False,abstain,0,,,,True
+F377,I02-g1,B0 details up front,1,False,answer,2,['correct'],False,,
+F417,I02-g1,B0 one turn,1,False,answer,0,['correct'],True,,
+F348,I02-g1,R15 details up front,1,False,abstain,0,,,,True
+F266,I02-g1,R15 one turn,1,False,abstain,0,,,,False
+F021,I02-g1,R16 details up front,1,False,abstain,0,,,,True
+F044,I02-g1,R16 one turn,1,False,conditional_answer,2,['correct'],False,True,
+F024,I02-g1,R5 details up front,1,False,abstain,0,,,,True
+F066,I02-g1,R5 one turn,1,False,answer,2,['correct'],False,,
+F106,I02-g1,R9S details up front,1,False,abstain,0,,,,True
+F367,I02-g1,R9S one turn,1,False,abstain,0,,,,False
+F381,I02-g2,A0 details up front,1,False,abstain,0,,,,True
+F274,I02-g2,A0 one turn (asks),1,False,clarify,0,,,,
+F103,I02-g2,A0 reply_only,3,False,answer,0,['missing'],False,,
+F075,I02-g2,A0 reply_reask,4,False,conditional_answer,0,['missing'],False,False,
+F037,I02-g2,B0 details up front,1,False,abstain,0,,,,True
+F420,I02-g2,B0 one turn,1,False,answer,0,['wrong'],True,,
+F074,I02-g2,R15 details up front,1,False,abstain,0,,,,True
+F039,I02-g2,R15 one turn,1,False,abstain,0,,,,False
+F123,I02-g2,R16 details up front,1,False,abstain,0,,,,True
+F335,I02-g2,R16 one turn,1,False,conditional_answer,0,['wrong'],True,False,
+F310,I02-g2,R5 details up front,1,False,abstain,0,,,,True
+F448,I02-g2,R5 one turn,1,False,answer,0,['missing'],True,,
+F153,I02-g2,R9S details up front,1,False,abstain,0,,,,True
+F396,I02-g2,R9S one turn,1,False,abstain,0,,,,False
+F326,I03-g0,A0 details up front,1,False,abstain,0,,,,True
+F138,I03-g0,A0 one turn (asks),1,False,clarify,0,,,,
+F315,I03-g0,A0 reply_only,3,False,answer,0,['missing'],False,,
+F069,I03-g0,A0 reply_reask,3,False,abstain,0,,,,True
+F006,I03-g0,B0 details up front,1,False,answer,2,['correct'],False,,
+F031,I03-g0,B0 one turn,1,False,answer,2,['correct'],False,,
+F172,I03-g0,R15 details up front,1,False,abstain,0,,,,True
+F023,I03-g0,R15 one turn,1,False,answer,2,['correct'],False,,
+F183,I03-g0,R16 details up front,1,False,answer,0,['missing'],False,,
+F159,I03-g0,R16 one turn,1,False,answer,0,['missing'],True,,
+F101,I03-g0,R5 details up front,1,False,abstain,0,,,,True
+F474,I03-g0,R5 one turn,1,False,answer,2,['correct'],False,,
+F076,I03-g0,R9S details up front,1,False,abstain,0,,,,True
+F378,I03-g0,R9S one turn,1,False,answer,2,['correct'],False,,
+F346,I03-g1,A0 details up front,1,False,clarify,0,,,,
+F107,I03-g1,A0 one turn (asks),1,False,clarify,0,,,,
+F405,I03-g1,A0 reply_only,4,False,abstain,0,,,,True
+F237,I03-g1,A0 reply_reask,5,False,conditional_answer,0,['missing'],True,False,
+F355,I03-g1,B0 details up front,1,False,abstain,0,,,,False
+F062,I03-g1,B0 one turn,1,False,answer,0,['missing'],False,,
+F173,I03-g1,R15 details up front,1,False,abstain,0,,,,False
+F328,I03-g1,R15 one turn,1,False,answer,2,['correct'],False,,
+F036,I03-g1,R16 details up front,1,False,abstain,0,,,,False
+F104,I03-g1,R16 one turn,1,False,answer,0,['wrong'],True,,
+F112,I03-g1,R5 details up front,1,False,abstain,0,,,,False
+F324,I03-g1,R5 one turn,1,False,answer,2,['correct'],False,,
+F502,I03-g1,R9S details up front,1,False,abstain,0,,,,False
+F248,I03-g1,R9S one turn,1,False,answer,2,['correct'],False,,
+F495,I03-g2,A0 details up front,1,False,clarify,0,,,,
+F374,I03-g2,A0 one turn (asks),1,False,clarify,0,,,,
+F337,I03-g2,A0 reply_only,4,False,abstain,0,,,,True
+F235,I03-g2,A0 reply_reask,5,False,conditional_answer,0,['missing'],True,False,
+F313,I03-g2,B0 details up front,1,False,abstain,0,,,,False
+F143,I03-g2,B0 one turn,1,False,answer,2,['correct'],False,,
+F032,I03-g2,R15 details up front,1,False,abstain,0,,,,False
+F382,I03-g2,R15 one turn,1,False,answer,2,['correct'],False,,
+F503,I03-g2,R16 details up front,1,False,abstain,0,,,,False
+F431,I03-g2,R16 one turn,1,False,answer,0,['correct'],True,,
+F019,I03-g2,R5 details up front,1,False,abstain,0,,,,False
+F372,I03-g2,R5 one turn,1,False,answer,2,['correct'],False,,
+F513,I03-g2,R9S details up front,1,False,abstain,0,,,,False
+F201,I03-g2,R9S one turn,1,False,answer,2,['correct'],False,,
+F484,I03-g3,A0 details up front,1,False,clarify,0,,,,
+F318,I03-g3,A0 one turn (asks),1,False,clarify,0,,,,
+F149,I03-g3,A0 reply_only,2,False,abstain,0,,,,True
+F124,I03-g3,A0 reply_reask,5,False,clarify,0,,,,
+F134,I03-g3,B0 details up front,1,False,answer,2,['correct'],False,,
+F129,I03-g3,B0 one turn,1,False,answer,2,['correct'],False,,
+F276,I03-g3,R15 details up front,1,False,abstain,0,,,,True
+F278,I03-g3,R15 one turn,1,False,answer,2,['correct'],False,,
+F493,I03-g3,R16 details up front,1,False,abstain,0,,,,False
+F128,I03-g3,R16 one turn,1,False,answer,0,['correct'],True,,
+F091,I03-g3,R5 details up front,1,False,abstain,0,,,,False
+F432,I03-g3,R5 one turn,1,False,answer,2,['correct'],False,,
+F056,I03-g3,R9S details up front,1,False,abstain,0,,,,True
+F456,I03-g3,R9S one turn,1,False,answer,2,['correct'],False,,
+F252,I06-g0,A0 one turn (asks),1,False,clarify,0,,,,
+F486,I06-g0,A0 reply_only,3,False,abstain,0,,,,False
+F230,I06-g0,A0 reply_reask,4,False,answer,2,['correct'],False,,
+F092,I06-g0,B0 one turn,1,False,answer,2,['correct'],False,,
+F453,I06-g0,R15 one turn,1,False,answer,2,['correct'],False,,
+F105,I06-g0,R16 one turn,1,False,answer,2,['correct'],False,,
+F234,I06-g0,R5 one turn,1,False,answer,2,['correct'],False,,
+F351,I06-g0,R9S one turn,1,False,answer,2,['correct'],False,,
+F108,I06-g1,A0 details up front,1,False,conditional_answer,0,['missing'],False,False,
+F472,I06-g1,A0 one turn (asks),1,False,clarify,0,,,,
+F468,I06-g1,A0 reply_only,2,False,conditional_answer,0,['missing'],False,False,
+F249,I06-g1,A0 reply_reask,3,False,abstain,0,,,,False
+F473,I06-g1,B0 details up front,1,False,abstain,0,,,,False
+F213,I06-g1,B0 one turn,1,False,answer,0,['wrong'],True,,
+F455,I06-g1,R15 details up front,1,False,answer,0,['missing'],False,,
+F195,I06-g1,R15 one turn,1,False,answer,0,['wrong'],True,,
+F139,I06-g1,R16 details up front,1,False,abstain,0,,,,False
+F475,I06-g1,R16 one turn,1,False,answer,0,['wrong'],True,,
+F357,I06-g1,R5 details up front,1,False,abstain,0,,,,False
+F373,I06-g1,R5 one turn,1,False,answer,0,['wrong'],True,,
+F414,I06-g1,R9S details up front,1,False,answer,0,['missing'],False,,
+F156,I06-g1,R9S one turn,1,False,answer,0,['wrong'],True,,
+F361,I07-g0,A0 details up front,1,False,clarify,0,,,,
+F354,I07-g0,A0 one turn (asks),1,False,clarify,0,,,,
+F047,I07-g0,A0 reply_only,3,False,abstain,0,,,,True
+F322,I07-g0,A0 reply_reask,3,False,conditional_answer,0,['wrong'],True,False,
+F154,I07-g0,B0 details up front,1,False,answer,0,['wrong'],True,,
+F471,I07-g0,B0 one turn,1,False,answer,0,['missing'],False,,
+F425,I07-g0,R15 details up front,1,False,abstain,0,,,,False
+F169,I07-g0,R15 one turn,1,False,answer,0,['wrong'],True,,
+F166,I07-g0,R16 details up front,1,False,abstain,0,,,,False
+F029,I07-g0,R16 one turn,1,False,answer,0,['missing'],False,,
+F231,I07-g0,R5 details up front,1,False,abstain,0,,,,False
+F009,I07-g0,R5 one turn,1,False,answer,0,['missing'],False,,
+F073,I07-g0,R9S details up front,1,False,abstain,0,,,,False
+F035,I07-g0,R9S one turn,1,False,answer,0,['missing'],False,,
+F285,I07-g1,A0 details up front,1,False,conditional_answer,0,['missing'],False,False,
+F040,I07-g1,A0 one turn (asks),1,False,clarify,0,,,,
+F146,I07-g1,A0 reply_only,2,False,conditional_answer,0,['missing'],False,False,
+F327,I07-g1,A0 reply_reask,3,False,abstain,0,,,,False
+F280,I07-g1,B0 details up front,1,False,answer,0,['wrong'],True,,
+F013,I07-g1,B0 one turn,1,False,answer,0,['wrong'],True,,
+F446,I07-g1,R15 details up front,1,False,answer,0,['missing'],False,,
+F250,I07-g1,R15 one turn,1,False,answer,0,['wrong'],True,,
+F110,I07-g1,R16 details up front,1,False,answer,0,['missing'],False,,
+F283,I07-g1,R16 one turn,1,False,answer,0,['wrong'],True,,
+F120,I07-g1,R5 details up front,1,False,answer,0,['missing'],False,,
+F332,I07-g1,R5 one turn,1,False,answer,0,['wrong'],True,,
+F505,I07-g1,R9S details up front,1,False,answer,0,['missing'],False,,
+F114,I07-g1,R9S one turn,1,False,answer,0,['missing'],False,,
+F188,I09-g0,A0 details up front,1,False,answer,2,['correct'],False,,
+F386,I09-g0,A0 one turn (asks),1,False,clarify,0,,,,
+F488,I09-g0,A0 reply_only,2,False,conditional_answer,0,['missing'],False,False,
+F080,I09-g0,A0 reply_reask,3,False,answer,0,['correct'],True,,
+F443,I09-g0,B0 details up front,1,False,answer,2,['correct'],False,,
+F281,I09-g0,B0 one turn,1,False,answer,0,['correct'],True,,
+F268,I09-g0,R15 details up front,1,False,answer,2,['correct'],False,,
+F314,I09-g0,R15 one turn,1,False,answer,0,['correct'],True,,
+F393,I09-g0,R16 details up front,1,False,answer,2,['correct'],False,,
+F384,I09-g0,R16 one turn,1,False,answer,0,['correct'],True,,
+F022,I09-g0,R5 details up front,1,False,answer,2,['correct'],False,,
+F200,I09-g0,R5 one turn,1,False,answer,0,['correct'],True,,
+F050,I09-g0,R9S details up front,1,False,answer,2,['correct'],False,,
+F489,I09-g0,R9S one turn,1,False,answer,0,['correct'],True,,
+F253,I10-g0,A0 details up front,1,False,clarify,0,,,,
+F512,I10-g0,A0 one turn (asks),1,False,clarify,0,,,,
+F295,I10-g0,A0 reply_only,2,False,conditional_answer,0,['missing'],False,False,
+F087,I10-g0,A0 reply_reask,4,False,abstain,0,,,,False
+F203,I10-g0,B0 details up front,1,False,answer,0,['wrong'],False,,
+F121,I10-g0,B0 one turn,1,False,answer,2,['correct'],False,,
+F182,I10-g0,R15 details up front,1,False,abstain,0,,,,False
+F241,I10-g0,R15 one turn,1,False,abstain,0,,,,False
+F445,I10-g0,R16 details up front,1,False,answer,0,['wrong'],False,,
+F338,I10-g0,R16 one turn,1,False,answer,2,['correct'],False,,
+F409,I10-g0,R5 details up front,1,False,answer,2,['correct'],False,,
+F245,I10-g0,R5 one turn,1,False,answer,2,['correct'],False,,
+F242,I10-g0,R9S details up front,1,False,abstain,0,,,,False
+F081,I10-g0,R9S one turn,1,False,answer,2,['correct'],False,,
+F015,I10-g1,A0 details up front,1,True,clarify,0,,,,
+F049,I10-g1,A0 one turn (asks),1,True,clarify,0,,,,
+F482,I10-g1,A0 reply_only,3,True,abstain,2,,,,True
+F477,I10-g1,A0 reply_reask,3,True,conditional_answer,0,['missing'],True,False,
+F210,I10-g1,B0 details up front,1,True,answer,0,['wrong'],True,,
+F150,I10-g1,B0 one turn,1,True,answer,0,['wrong'],True,,
+F148,I10-g1,R15 details up front,1,True,abstain,2,,,,True
+F152,I10-g1,R15 one turn,1,True,abstain,1,,,,False
+F421,I10-g1,R16 details up front,1,True,abstain,1,,,,False
+F467,I10-g1,R16 one turn,1,True,answer,0,['wrong'],True,,
+F144,I10-g1,R5 details up front,1,True,abstain,1,,,,False
+F415,I10-g1,R5 one turn,1,True,answer,0,['wrong'],True,,
+F224,I10-g1,R9S details up front,1,True,abstain,1,,,,False
+F196,I10-g1,R9S one turn,1,True,answer,0,['wrong'],True,,
+F205,T14-015,A0 one turn (asks),1,False,clarify,0,,,,
+F254,T14-015,A0 reply_only,3,False,abstain,0,,,,True
+F162,T14-015,A0 reply_reask,4,False,answer,2,"['correct', 'correct']",False,,
+F451,T14-015,B0 one turn,1,False,answer,2,"['correct', 'correct']",False,,
+F222,T14-015,R15 one turn,1,False,answer,2,"['correct', 'correct']",False,,
+F030,T14-015,R16 one turn,1,False,answer,2,"['correct', 'correct']",False,,
+F353,T14-015,R5 one turn,1,False,answer,2,"['correct', 'correct']",False,,
+F038,T14-015,R9S one turn,1,False,answer,2,"['correct', 'correct']",False,,
+F111,T14-017,A0 details up front,1,False,clarify,0,,,,
+F508,T14-017,A0 one turn (asks),1,False,clarify,0,,,,
+F220,T14-017,A0 reply_only,3,False,abstain,0,,,,False
+F375,T14-017,A0 reply_reask,3,False,conditional_answer,0,"['missing', 'wrong', 'missing']",False,False,
+F487,T14-017,B0 details up front,1,False,answer,0,"['missing', 'missing', 'missing']",False,,
+F094,T14-017,B0 one turn,1,False,answer,0,"['missing', 'missing', 'missing']",False,,
+F202,T14-017,R15 details up front,1,False,answer,0,"['missing', 'wrong', 'missing']",False,,
+F325,T14-017,R15 one turn,1,False,answer,0,"['missing', 'wrong', 'missing']",True,,
+F383,T14-017,R16 details up front,1,False,answer,0,"['missing', 'wrong', 'missing']",False,,
+F331,T14-017,R16 one turn,1,False,answer,0,"['missing', 'wrong', 'missing']",True,,
+F004,T14-017,R5 details up front,1,False,answer,0,"['missing', 'wrong', 'missing']",False,,
+F086,T14-017,R5 one turn,1,False,answer,0,"['missing', 'wrong', 'missing']",False,,
+F181,T14-017,R9S details up front,1,False,answer,0,"['missing', 'wrong', 'missing']",False,,
+F304,T14-017,R9S one turn,1,False,answer,0,"['missing', 'wrong', 'wrong']",True,,
+F191,T14-032,A0 one turn (asks),1,False,clarify,0,,,,
+F430,T14-032,A0 reply_only,3,False,abstain,0,,,,True
+F428,T14-032,A0 reply_reask,4,False,conditional_answer,1,"['correct', 'missing', 'missing']",False,False,
+F117,T14-032,B0 one turn,1,False,answer,0,"['correct', 'missing', 'missing']",True,,
+F336,T14-032,R15 one turn,1,False,abstain,0,,,,False
+F246,T14-032,R16 one turn,1,False,answer,0,"['correct', 'missing', 'missing']",True,,
+F292,T14-032,R5 one turn,1,False,answer,0,"['correct', 'missing', 'missing']",True,,
+F002,T14-032,R9S one turn,1,False,answer,0,"['correct', 'missing', 'missing']",True,,
+F016,T14-033,A0 details up front,1,False,abstain,0,,,,True
+F045,T14-033,A0 one turn (asks),1,False,clarify,0,,,,
+F501,T14-033,A0 reply_only,3,False,answer,0,"['missing', 'missing', 'missing', 'missing']",True,,
+F397,T14-033,A0 reply_reask,3,False,abstain,0,,,,False
+F211,T14-033,B0 details up front,1,False,answer,0,"['missing', 'missing', 'missing', 'correct']",True,,
+F509,T14-033,B0 one turn,1,False,abstain,0,,,,False
+F429,T14-033,R15 details up front,1,False,answer,0,"['missing', 'missing', 'missing', 'missing']",False,,
+F251,T14-033,R15 one turn,1,False,answer,0,"['missing', 'missing', 'missing', 'missing']",False,,
+F161,T14-033,R16 details up front,1,False,answer,0,"['wrong', 'missing', 'missing', 'missing']",True,,
+F380,T14-033,R16 one turn,1,False,answer,0,"['missing', 'missing', 'missing', 'missing']",False,,
+F060,T14-033,R5 details up front,1,False,answer,0,"['wrong', 'missing', 'missing', 'missing']",False,,
+F133,T14-033,R5 one turn,1,False,answer,0,"['missing', 'missing', 'missing', 'missing']",True,,
+F366,T14-033,R9S details up front,1,False,answer,0,"['missing', 'missing', 'missing', 'missing']",False,,
+F269,T14-033,R9S one turn,1,False,answer,0,"['missing', 'missing', 'missing', 'missing']",True,,
+F510,T14-042,A0 one turn (asks),1,False,clarify,0,,,,
+F469,T14-042,A0 reply_only,3,False,conditional_answer,0,"['missing', 'missing', 'missing']",False,False,
+F457,T14-042,A0 reply_reask,5,False,clarify,0,,,,
+F284,T14-042,B0 one turn,1,False,answer,1,"['correct', 'missing', 'missing']",False,,
+F179,T14-042,R15 one turn,1,False,answer,1,"['correct', 'missing', 'missing']",False,,
+F398,T14-042,R16 one turn,1,False,answer,1,"['correct', 'correct', 'missing']",False,,
+F010,T14-042,R5 one turn,1,False,answer,1,"['correct', 'missing', 'missing']",False,,
+F344,T14-042,R9S one turn,1,False,answer,1,"['correct', 'missing', 'missing']",False,,
+F007,T14-044,A0 details up front,1,False,clarify,0,,,,
+F492,T14-044,A0 one turn (asks),1,False,clarify,0,,,,
+F197,T14-044,A0 reply_only,3,False,conditional_answer,0,"['missing', 'missing', 'missing']",False,False,
+F027,T14-044,A0 reply_reask,3,False,abstain,0,,,,True
+F068,T14-044,B0 details up front,1,False,answer,1,"['missing', 'correct', 'missing']",False,,
+F239,T14-044,B0 one turn,1,False,answer,2,"['correct', 'correct', 'correct']",False,,
+F090,T14-044,R15 details up front,1,False,abstain,0,,,,True
+F389,T14-044,R15 one turn,1,False,abstain,0,,,,True
+F264,T14-044,R16 details up front,1,False,abstain,0,,,,True
+F132,T14-044,R16 one turn,1,False,abstain,0,,,,True
+F289,T14-044,R5 details up front,1,False,abstain,0,,,,True
+F339,T14-044,R5 one turn,1,False,abstain,0,,,,True
+F083,T14-044,R9S details up front,1,False,abstain,0,,,,True
+F003,T14-044,R9S one turn,1,False,abstain,0,,,,True
+F360,T14-053,A0 details up front,1,False,answer,1,"['missing', 'correct', 'missing']",False,,
+F070,T14-053,A0 one turn (asks),1,False,clarify,0,,,,
+F164,T14-053,A0 reply_only,2,False,conditional_answer,0,"['missing', 'missing', 'missing']",True,False,
+F097,T14-053,A0 reply_reask,3,False,answer,0,"['missing', 'correct', 'correct']",True,,
+F055,T14-053,B0 details up front,1,False,abstain,0,,,,True
+F008,T14-053,B0 one turn,1,False,answer,0,"['wrong', 'correct', 'correct']",True,,
+F177,T14-053,R15 details up front,1,False,abstain,0,,,,False
+F333,T14-053,R15 one turn,1,False,answer,1,"['missing', 'correct', 'missing']",False,,
+F511,T14-053,R16 details up front,1,False,abstain,0,,,,False
+F371,T14-053,R16 one turn,1,False,answer,1,"['missing', 'correct', 'missing']",False,,
+F116,T14-053,R5 details up front,1,False,answer,0,"['wrong', 'correct', 'missing']",True,,
+F294,T14-053,R5 one turn,1,False,answer,1,"['missing', 'correct', 'missing']",False,,
+F147,T14-053,R9S details up front,1,False,answer,1,"['missing', 'correct', 'missing']",False,,
+F418,T14-053,R9S one turn,1,False,answer,1,"['missing', 'correct', 'missing']",False,,
+F167,T14-082,A0 details up front,1,True,abstain,2,,,,True
+F436,T14-082,A0 one turn (asks),1,True,clarify,0,,,,
+F141,T14-082,A0 reply_only,2,True,answer,0,"['missing', 'missing']",False,,
+F356,T14-082,A0 reply_reask,5,True,clarify,0,,,,
+F261,T14-082,B0 details up front,1,True,abstain,1,,,,False
+F479,T14-082,B0 one turn,1,True,abstain,1,,,,False
+F461,T14-082,R15 details up front,1,True,answer,0,"['wrong', 'missing']",True,,
+F387,T14-082,R15 one turn,1,True,abstain,1,,,,False
+F187,T14-082,R16 details up front,1,True,answer,0,"['correct', 'missing']",True,,
+F209,T14-082,R16 one turn,1,True,conditional_answer,0,"['missing', 'missing']",False,False,
+F130,T14-082,R5 details up front,1,True,abstain,1,,,,False
+F349,T14-082,R5 one turn,1,True,answer,0,"['missing', 'missing']",False,,
+F042,T14-082,R9S details up front,1,True,answer,0,"['wrong', 'missing']",True,,
+F494,T14-082,R9S one turn,1,True,abstain,1,,,,False
+F305,T14-084,A0 one turn (asks),1,True,clarify,0,,,,
+F408,T14-084,A0 reply_only,3,True,abstain,2,,,,True
+F171,T14-084,A0 reply_reask,4,True,answer,0,"['wrong', 'wrong']",True,,
+F267,T14-084,B0 one turn,1,True,answer,0,"['wrong', 'wrong']",True,,
+F416,T14-084,R15 one turn,1,True,answer,0,"['wrong', 'wrong']",True,,
+F400,T14-084,R16 one turn,1,True,answer,0,"['wrong', 'wrong']",True,,
+F363,T14-084,R5 one turn,1,True,answer,0,"['wrong', 'wrong']",True,,
+F480,T14-084,R9S one turn,1,True,answer,0,"['wrong', 'wrong']",True,,
+F514,T14-105,A0 details up front,1,False,conditional_answer,1,"['correct', 'missing', 'missing']",False,False,
+F084,T14-105,A0 one turn (asks),1,False,clarify,0,,,,
+F320,T14-105,A0 reply_only,3,False,answer,0,"['missing', 'missing', 'missing']",False,,
+F413,T14-105,A0 reply_reask,3,False,conditional_answer,0,"['missing', 'missing', 'wrong']",False,False,
+F282,T14-105,B0 details up front,1,False,abstain,0,,,,False
+F342,T14-105,B0 one turn,1,False,abstain,0,,,,False
+F500,T14-105,R15 details up front,1,False,answer,0,"['missing', 'correct', 'wrong']",True,,
+F312,T14-105,R15 one turn,1,False,abstain,0,,,,False
+F119,T14-105,R16 details up front,1,False,answer,1,"['missing', 'correct', 'missing']",False,,
+F085,T14-105,R16 one turn,1,False,answer,1,"['missing', 'correct', 'missing']",False,,
+F490,T14-105,R5 details up front,1,False,answer,1,"['missing', 'correct', 'missing']",False,,
+F175,T14-105,R5 one turn,1,False,answer,1,"['missing', 'correct', 'missing']",False,,
+F256,T14-105,R9S details up front,1,False,answer,1,"['missing', 'correct', 'missing']",False,,
+F307,T14-105,R9S one turn,1,False,answer,0,"['missing', 'missing', 'missing']",False,,
+F435,T14-106,A0 details up front,1,True,abstain,2,,,,True
+F297,T14-106,A0 one turn (asks),1,True,clarify,0,,,,
+F199,T14-106,A0 reply_only,2,True,answer,0,"['missing', 'missing', 'missing']",False,,
+F395,T14-106,A0 reply_reask,3,True,abstain,2,,,,True
+F390,T14-106,B0 details up front,1,True,answer,0,"['missing', 'missing', 'missing']",False,,
+F225,T14-106,B0 one turn,1,True,answer,1,"['correct', 'missing', 'missing']",False,,
+F462,T14-106,R15 details up front,1,True,answer,0,"['missing', 'missing', 'wrong']",True,,
+F460,T14-106,R15 one turn,1,True,abstain,1,,,,False
+F301,T14-106,R16 details up front,1,True,abstain,1,,,,False
+F359,T14-106,R16 one turn,1,True,abstain,1,,,,False
+F317,T14-106,R5 details up front,1,True,abstain,1,,,,False
+F176,T14-106,R5 one turn,1,True,abstain,1,,,,False
+F216,T14-106,R9S details up front,1,True,answer,0,"['missing', 'missing', 'wrong']",True,,
+F300,T14-106,R9S one turn,1,True,answer,0,"['missing', 'missing', 'wrong']",True,,
+F483,T14-107,A0 details up front,1,False,abstain,0,,,,True
+F433,T14-107,A0 one turn (asks),1,False,clarify,0,,,,
+F302,T14-107,A0 reply_only,3,False,conditional_answer,0,"['missing', 'missing', 'missing']",False,False,
+F186,T14-107,A0 reply_reask,3,False,conditional_answer,0,"['missing', 'missing', 'missing']",False,False,
+F046,T14-107,B0 details up front,1,False,answer,1,"['correct', 'missing', 'correct']",False,,
+F491,T14-107,B0 one turn,1,False,answer,0,"['missing', 'missing', 'missing']",True,,
+F496,T14-107,R15 details up front,1,False,answer,1,"['missing', 'missing', 'correct']",False,,
+F238,T14-107,R15 one turn,1,False,abstain,0,,,,False
+F458,T14-107,R16 details up front,1,False,answer,0,"['missing', 'missing', 'correct']",True,,
+F394,T14-107,R16 one turn,1,False,abstain,0,,,,False
+F273,T14-107,R5 details up front,1,False,answer,1,"['correct', 'missing', 'correct']",False,,
+F052,T14-107,R5 one turn,1,False,abstain,0,,,,False
+F481,T14-107,R9S details up front,1,False,answer,1,"['missing', 'missing', 'correct']",False,,
+F163,T14-107,R9S one turn,1,False,answer,0,"['missing', 'missing', 'missing']",True,,
+F439,T14-120,A0 details up front,1,False,answer,1,"['missing', 'correct', 'missing']",False,,
+F379,T14-120,A0 one turn (asks),1,False,clarify,0,,,,
+F017,T14-120,A0 reply_only,3,False,answer,0,"['missing', 'missing', 'missing']",False,,
+F051,T14-120,A0 reply_reask,3,False,conditional_answer,0,"['missing', 'missing', 'missing']",True,False,
+F450,T14-120,B0 details up front,1,False,abstain,0,,,,True
+F504,T14-120,B0 one turn,1,False,abstain,0,,,,False
+F232,T14-120,R15 details up front,1,False,answer,1,"['missing', 'correct', 'missing']",False,,
+F063,T14-120,R15 one turn,1,False,abstain,0,,,,False
+F077,T14-120,R16 details up front,1,False,abstain,0,,,,False
+F434,T14-120,R16 one turn,1,False,abstain,0,,,,False
+F279,T14-120,R5 details up front,1,False,abstain,0,,,,False
+F365,T14-120,R5 one turn,1,False,abstain,0,,,,False
+F452,T14-120,R9S details up front,1,False,abstain,0,,,,True
+F218,T14-120,R9S one turn,1,False,abstain,0,,,,False
+F291,T14-136,A0 details up front,1,True,conditional_answer,0,"['missing', 'missing']",False,False,
+F180,T14-136,A0 one turn (asks),1,True,clarify,0,,,,
+F478,T14-136,A0 reply_only,2,True,conditional_answer,0,"['missing', 'missing']",False,False,
+F447,T14-136,A0 reply_reask,3,True,conditional_answer,0,"['missing', 'missing']",False,False,
+F178,T14-136,B0 details up front,1,True,abstain,1,,,,False
+F011,T14-136,B0 one turn,1,True,abstain,1,,,,False
+F388,T14-136,R15 details up front,1,True,abstain,1,,,,False
+F095,T14-136,R15 one turn,1,True,abstain,1,,,,False
+F233,T14-136,R16 details up front,1,True,abstain,1,,,,False
+F057,T14-136,R16 one turn,1,True,answer,1,"['correct', 'missing']",False,,
+F399,T14-136,R5 details up front,1,True,abstain,1,,,,False
+F403,T14-136,R5 one turn,1,True,answer,1,"['correct', 'missing']",False,,
+F376,T14-136,R9S details up front,1,True,abstain,1,,,,False
+F293,T14-136,R9S one turn,1,True,answer,1,"['correct', 'missing']",False,,
+F419,T14-154,A0 details up front,1,False,abstain,0,,,,True
+F079,T14-154,A0 one turn (asks),1,False,clarify,0,,,,
+F466,T14-154,A0 reply_only,3,False,conditional_answer,0,['missing'],False,False,
+F272,T14-154,A0 reply_reask,3,False,answer,0,['missing'],False,,
+F065,T14-154,B0 details up front,1,False,abstain,0,,,,False
+F126,T14-154,B0 one turn,1,False,answer,0,['missing'],False,,
+F102,T14-154,R15 details up front,1,False,abstain,0,,,,True
+F407,T14-154,R15 one turn,1,False,answer,2,['correct'],False,,
+F347,T14-154,R16 details up front,1,False,answer,0,['wrong'],False,,
+F497,T14-154,R16 one turn,1,False,answer,0,['wrong'],False,,
+F033,T14-154,R5 details up front,1,False,abstain,0,,,,True
+F219,T14-154,R5 one turn,1,False,answer,0,['missing'],False,,
+F135,T14-154,R9S details up front,1,False,abstain,0,,,,True
+F020,T14-154,R9S one turn,1,False,answer,0,['missing'],False,,
+F151,T14-175,A0 details up front,1,True,abstain,2,,,,True
+F072,T14-175,A0 one turn (asks),1,True,clarify,0,,,,
+F352,T14-175,A0 reply_only,4,True,answer,0,['missing'],False,,
+F122,T14-175,A0 reply_reask,4,True,abstain,2,,,,True
+F071,T14-175,B0 details up front,1,True,abstain,2,,,,True
+F470,T14-175,B0 one turn,1,True,abstain,2,,,,True
+F243,T14-175,R15 details up front,1,True,abstain,2,,,,True
+F207,T14-175,R15 one turn,1,True,abstain,2,,,,True
+F257,T14-175,R16 details up front,1,True,abstain,2,,,,True
+F464,T14-175,R16 one turn,1,True,abstain,2,,,,True
+F025,T14-175,R5 details up front,1,True,abstain,2,,,,True
+F155,T14-175,R5 one turn,1,True,abstain,2,,,,True
+F358,T14-175,R9S details up front,1,True,abstain,2,,,,True
+F098,T14-175,R9S one turn,1,True,abstain,2,,,,True
+F078,T14-176,A0 details up front,1,True,abstain,2,,,,True
+F265,T14-176,A0 one turn (asks),1,True,clarify,0,,,,
+F271,T14-176,A0 reply_only,2,True,conditional_answer,0,['missing'],False,False,
+F190,T14-176,A0 reply_reask,3,True,abstain,2,,,,True
+F507,T14-176,B0 details up front,1,True,abstain,2,,,,True
+F255,T14-176,B0 one turn,1,True,abstain,1,,,,False
+F442,T14-176,R15 details up front,1,True,abstain,1,,,,False
+F369,T14-176,R15 one turn,1,True,answer,0,['wrong'],True,,
+F296,T14-176,R16 details up front,1,True,abstain,2,,,,True
+F082,T14-176,R16 one turn,1,True,abstain,1,,,,False
+F244,T14-176,R5 details up front,1,True,abstain,2,,,,True
+F288,T14-176,R5 one turn,1,True,abstain,1,,,,False
+F321,T14-176,R9S details up front,1,True,abstain,1,,,,False
+F131,T14-176,R9S one turn,1,True,abstain,1,,,,False
+F341,T14-182,A0 details up front,1,True,clarify,0,,,,
+F441,T14-182,A0 one turn (asks),1,True,clarify,0,,,,
+F026,T14-182,A0 reply_only,3,True,abstain,2,,,,True
+F311,T14-182,A0 reply_reask,3,True,conditional_answer,0,['missing'],False,False,
+F308,T14-182,B0 details up front,1,True,abstain,1,,,,False
+F014,T14-182,B0 one turn,1,True,abstain,1,,,,False
+F410,T14-182,R15 details up front,1,True,abstain,1,,,,False
+F343,T14-182,R15 one turn,1,True,abstain,1,,,,False
+F362,T14-182,R16 details up front,1,True,abstain,1,,,,False
+F212,T14-182,R16 one turn,1,True,abstain,1,,,,False
+F005,T14-182,R5 details up front,1,True,abstain,1,,,,False
+F438,T14-182,R5 one turn,1,True,abstain,1,,,,False
+F406,T14-182,R9S details up front,1,True,abstain,1,,,,False
+F136,T14-182,R9S one turn,1,True,abstain,1,,,,False
+F437,T14-187,A0 details up front,1,True,abstain,2,,,,True
+F089,T14-187,A0 one turn (asks),1,True,clarify,0,,,,
+F229,T14-187,A0 reply_only,3,True,conditional_answer,0,['missing'],False,False,
+F127,T14-187,A0 reply_reask,5,True,clarify,0,,,,
+F170,T14-187,B0 details up front,1,True,abstain,1,,,,False
+F350,T14-187,B0 one turn,1,True,abstain,1,,,,False
+F236,T14-187,R15 details up front,1,True,abstain,1,,,,False
+F001,T14-187,R15 one turn,1,True,abstain,1,,,,False
+F516,T14-187,R16 details up front,1,True,clarify,0,,,,
+F198,T14-187,R16 one turn,1,True,abstain,2,,,,True
+F385,T14-187,R5 details up front,1,True,abstain,1,,,,False
+F109,T14-187,R5 one turn,1,True,abstain,2,,,,True
+F260,T14-187,R9S details up front,1,True,abstain,1,,,,False
+F427,T14-187,R9S one turn,1,True,abstain,2,,,,True
+F189,T14-195,A0 details up front,1,True,abstain,1,,,,False
+F319,T14-195,A0 one turn (asks),1,True,clarify,0,,,,
+F459,T14-195,A0 reply_only,3,True,answer,0,['missing'],False,,
+F093,T14-195,A0 reply_reask,5,True,abstain,1,,,,False
+F240,T14-195,B0 details up front,1,True,answer,0,['correct'],True,,
+F214,T14-195,B0 one turn,1,True,abstain,1,,,,False
+F286,T14-195,R15 details up front,1,True,abstain,1,,,,False
+F043,T14-195,R15 one turn,1,True,abstain,2,,,,True
+F306,T14-195,R16 details up front,1,True,abstain,1,,,,False
+F270,T14-195,R16 one turn,1,True,abstain,1,,,,False
+F012,T14-195,R5 details up front,1,True,abstain,1,,,,False
+F140,T14-195,R5 one turn,1,True,abstain,1,,,,False
+F329,T14-195,R9S details up front,1,True,abstain,1,,,,False
+F064,T14-195,R9S one turn,1,True,abstain,2,,,,True
+F463,T14-203,A0 details up front,1,False,abstain,0,,,,False
+F226,T14-203,A0 one turn (asks),1,False,clarify,0,,,,
+F157,T14-203,A0 reply_only,2,False,conditional_answer,0,"['missing', 'missing']",False,False,
+F034,T14-203,A0 reply_reask,3,False,conditional_answer,0,"['missing', 'missing']",True,False,
+F174,T14-203,B0 details up front,1,False,abstain,0,,,,False
+F444,T14-203,B0 one turn,1,False,abstain,0,,,,False
+F228,T14-203,R15 details up front,1,False,abstain,0,,,,False
+F499,T14-203,R15 one turn,1,False,answer,0,"['missing', 'missing']",False,,
+F299,T14-203,R16 details up front,1,False,abstain,0,,,,False
+F168,T14-203,R16 one turn,1,False,abstain,0,,,,False
+F247,T14-203,R5 details up front,1,False,abstain,0,,,,False
+F067,T14-203,R5 one turn,1,False,answer,0,"['missing', 'missing']",False,,
+F424,T14-203,R9S details up front,1,False,abstain,0,,,,False
+F041,T14-203,R9S one turn,1,False,answer,0,"['missing', 'missing']",False,,

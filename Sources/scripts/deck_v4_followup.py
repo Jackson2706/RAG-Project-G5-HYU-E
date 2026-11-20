@@ -301,7 +301,7 @@ def merge_judgments() -> int:
     rows.sort(key=lambda row: int(row["id"][1:]))
     output.write_text("".join(json.dumps(row, ensure_ascii=False) + "\n" for row in rows), encoding="utf-8")
     prompt = Path(__file__).resolve().parents[1] / "evaluation" / "judge_v3_prompt.md"
-    meta = {"judge": "codex:gpt-6-astra", "items": len(rows),
+    meta = {"judge": "codex:gpt-6.1-sol (judged by GPT-6 Sol, v3 prompt)", "items": len(rows),
             "prompt_sha256": hashlib.sha256(prompt.read_bytes()).hexdigest(),
             "items_sha256": hashlib.sha256((OUT / "judge" / "items.jsonl").read_bytes()).hexdigest(),
             "judgments_sha256": hashlib.sha256(output.read_bytes()).hexdigest()}  # fmt: skip

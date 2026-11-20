@@ -107,3 +107,65 @@ audit artifact and did not contribute to the freeze.
   first start.
 - Index r5: 0 unmasked e-mails (1,424 masked). 292 office phone numbers. 23 title-plus-name candidates (public staff
   on notices).
+
+## Deck v5 (brief v5, 2026-11-20/21)
+
+Label limitation, stated plainly: the dev-2 and test-3 labels are LLM-annotated, LLM-adjudicated and verified by one
+model (GPT-6 Astra); no person checked them. All comparisons on them are relative.
+
+### Decisions taken without the user
+
+1. **No `codex-plugin-cc` in this Claude Code install** (only `ponytail` and `humanizer` are installed, so `/codex:*`
+   does not exist). Delegation used the same Codex through its CLI: `codex exec -s workspace-write -m gpt-6.1-sol` (the
+   brief's Sol id; it answered a test call) and reviews with `codex review --uncommitted -c model="gpt-6.1-sol"`. The
+   workspace-write sandbox makes `.git` read-only, so Codex cannot commit or push; every task said so and named its files.
+2. **Task 2 blind judging:** the 516 items were copied into `.run/task2_judge/` with only the frozen prompt, split into
+   6 disjoint batches of 86, one GPT-6 Sol run each, told to open no other file. The logs show each judge reading its
+   batch 8–10 items at a time and writing judgments by hand (no script). `merge_judgments` combined the batches in three
+   parts; its metadata label was changed from the stale `codex:gpt-6-astra` to `codex:gpt-6.1-sol`. No GPT-6 Astra
+   judgments of Task 2 existed locally, so none had to be excluded.
+3. **"I finished my coursework but I'm still living in Korea. How do I get insured?"** is not one of the 67 judged
+   Task 2 personas; it was run once, one turn, with A0 (abstain, "no evidence", 2.5 s; `followup/runs.jsonl`). No
+   two-turn transcript of it exists, so it is reported as that single turn.
+4. **Held-out runs need a question-major runner:** `--case-major` and `--stop-at` were added to the runner (T43)
+   instead of a separate script, so the held-out run uses the same pipeline and records as every other run.
+5. **The machine was restarted mid-Phase 1** (lag). T44's Codex session ended before its note; Claude Code read the code,
+   re-ran its tests (116 pass) and wrote `T44.result.md`. Docker volumes were intact after the restart.
+6. **u16 screenshot** shows the in-page confirmation and then clicks Cancel, so no stored trace was deleted for the picture.
+
+### Phase 4 · Task 2 follow-up, judged by GPT-6 Sol (v3 prompt)
+
+All numbers in this section are **judged by GPT-6 Sol (v3 prompt)** (`followup/judge/judgments.meta.json`: 516 items,
+prompt sha256 `3541b5db…`, judgments sha256 `3ebc12ca…`). Script: `Sources/scripts/deck_v5_task2.py` →
+`followup/content_v5.{csv,json}`. Facts covered = correct / required facts over a system's answered replies; paired
+differences use facts covered per persona (an unanswered reply counts 0), bootstrap 95% CI.
+
+| System | Replies | Answered | Facts covered | Wrong fact | Wrong group | Turns |
+|---|---|---|---|---|---|---|
+| A0 two-turn, reply only | 39 | 25 | 0.000 | 0.000 | 0.080 | 2.79 |
+| A0 two-turn, reply + re-ask | 39 | 24 | 0.200 | 0.175 | 0.458 | 3.67 |
+| A0 details up front | 34 | 8 | 0.267 | 0.000 | 0.000 | 1.00 |
+| B0 one turn | 39 | 28 | 0.455 | 0.205 | 0.536 | 1.00 |
+| B0 details up front | 34 | 19 | 0.367 | 0.200 | 0.368 | 1.00 |
+| R5 one turn | 39 | 30 | 0.354 | 0.188 | 0.400 | 1.00 |
+| R15 one turn | 39 | 22 | 0.353 | 0.265 | 0.500 | 1.00 |
+| R16 one turn | 39 | 29 | 0.348 | 0.239 | 0.552 | 1.00 |
+| R9S one turn | 39 | 28 | 0.306 | 0.184 | 0.429 | 1.00 |
+
+AAES two-turn final answer (reply + re-ask) minus each baseline, facts covered per persona: vs B0 one turn −0.222
+[−0.350, −0.103]; vs R16 one turn −0.158 [−0.278, −0.056]; vs R5 one turn −0.201 [−0.333, −0.085]; vs the "details up
+front" baselines between −0.164 (B0) and +0.020 (R15, R9S), every CI containing 0 except B0. Reply only is worse
+than every baseline (−0.06 to −0.35, all CIs below 0). **AAES's two-turn flow does not recover the content of a
+one-turn answer**, although its wrong-group rate on reply only (0.08) is the lowest of all answering systems.
+
+Why reply only scores 0: the student's second turn is only "I'm a ERICA campus student.", and AAES treats it as a new
+question. Transcripts (`followup/transcripts.md`):
+1. **Failure (T14-033, reply only):** "Where do international students apply to return to the Seoul campus?" → asks
+   academic status → "I'm on leave of absence." → asks degree level → "I'm an undergraduate student." → an answer about
+   **TOPIK scholarships** (the last reply was read as the question).
+2. **Success (I06, reply + re-ask, item F230):** "How do I take the mental health check for international students?" →
+   asks campus → "I'm a Seoul campus student." → … → re-asked → "log into HY-in, navigate to Foreign student …" with
+   all required facts correct and no wrong group.
+3. **The insurance question** exists only as one A0 turn: "I finished my coursework but I'm still living in Korea. How
+   do I get insured?" → "I could not find this in the official English HYU pages. Please contact the OIA office of your
+   campus." (Decision 3.)
