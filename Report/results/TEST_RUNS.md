@@ -12,3 +12,4 @@ Re-scores (no system run; saved replies only, amendment A34):
 | Date | Run id | Git SHA | Evaluator | Reason |
 |---|---|---|---|---|
 | 2026-11-14 | test-final | facacc3 | v2 (`evaluation/reply_action.py`, prompt hash 5151f273055b) | Evaluator v1 cannot score a baseline as conditional_answer or clarify; v2 frozen on dev-02 outputs before this re-score |
+| 2026-11-20 | heldout-test3 | 4e6d007ffbe48caaf1d5de8845e49d53e8818ad0 | AP_RRRL, A0_AAES, AP_BBBB, B0_BASIC_DENSE_RAG, R15_SELF_QUERY, R16_PROMPTED_CONDITIONAL, G1_ORACLE_CONTEXT | deck v5 Phase 3: single held-out run on test-3 after aaes_plus_freeze.md |
