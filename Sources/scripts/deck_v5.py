@@ -359,7 +359,7 @@ def balanced_cases(cases: dict, records: dict, types: dict) -> tuple[list, list]
 
 
 def heldout(args) -> None:
-    cases, records, types = load_runs([args.run], args.splits)
+    cases, records, types = load_runs(csv_list(args.run), args.splits)  # one or several runs, e.g. heldout-test3,heldout-test2
     for preset in (args.ours, args.aaes, args.conditional):
         if preset not in records:
             raise ValueError(f"preset not in run: {preset}")
@@ -410,7 +410,7 @@ def heldout(args) -> None:
 
 
 def judge_items(args) -> None:
-    cases, records, types = load_runs([args.run], args.splits)
+    cases, records, types = load_runs(csv_list(args.run), args.splits)  # one or several runs, e.g. heldout-test3,heldout-test2
     presets = list(dict.fromkeys([p for p in args.presets if p != args.gold_preset] + [args.gold_preset]))
     if set(presets) - set(records):
         raise ValueError(f"presets missing from run: {sorted(set(presets) - set(records))}")

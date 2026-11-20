@@ -212,6 +212,27 @@ label, A0 0.187, AAES+ 0.215, LLLL 0.430.
 
 Freeze: `aaes_plus_freeze.md` (committed and pushed before the held-out run).
 
+### Phase 3 · Held-out test, once
+
+Frozen commit `4e6d007`; test-3 (140) then test-2 (75), both complete (≥ 2.5 h were left: test-2 started 00:03 with
+11.9 h to STOP_AT); test-1 never run. Details, tables and traces: `heldout/summary.md`, `heldout/reply_types.csv`,
+`heldout/hypotheses.json`. Labels: LLM-annotated, adjudicated and verified by one model; no person checked them.
+
+- **H1 supported:** AAES+ acceptable reply type 0.395 vs AAES 0.312, +0.084 [+0.042, +0.126], Holm p = 0.0001 (215).
+- **H2 supported (non-inferior):** needed questions/splits kept on student-dependent questions 0.697 vs 0.727, −0.030
+  [−0.076, 0.000] (66), lower bound above −0.10.
+- **H3 supported:** on student-dependent questions AAES+ 0.671 vs prompted conditional 0.200, +0.471 [+0.329, +0.614] (70).
+- **But over all questions AAES+ is still below every baseline** (acceptable 0.395 vs B0 0.544, R15 0.577, R16 0.609,
+  BBBB 0.563, G1 0.674): 41% of its replies ask or split when the label says answer (AAES 52%, baselines 0–10%). Its
+  advantage is only on the student-dependent 70 (0.671 vs 0.086–0.314). AAES+ costs a median 8.8 s per question vs 0.4 s
+  for AAES.
+- Infra: one AAES+ test-3 reply (N038) failed on an Ollama Metal GPU error and was retried once as a recorded resume.
+- Slide examples (full text in `heldout/summary.md`): winter school (T2-011) now answered instead of an unneeded campus
+  question; OIA location (T2-017) answered for Seoul only (broke an acceptable AAES question); counseling sign-up (T2-009)
+  answered per campus while prompted conditional gave "please email us at the address below" with no address.
+- Blind judge items for Phase 5: 475 answered replies of AAES+, AAES, B0, R16 (`heldout/judge/items.jsonl`, gitignored)
+  and 171 of G1 (`items_gold.jsonl`); `key.jsonl` committed.
+
 ### Phase 4 · Task 2 follow-up, judged by GPT-6 Sol (v3 prompt)
 
 All numbers in this section are **judged by GPT-6 Sol (v3 prompt)** (`followup/judge/judgments.meta.json`: 516 items,

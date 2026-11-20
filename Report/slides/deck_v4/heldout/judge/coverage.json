@@ -1,0 +1,18 @@
+{
+  "run": "heldout-test3,heldout-test2",
+  "splits": [
+    "test3",
+    "test2"
+  ],
+  "presets": [
+    "A0_AAES",
+    "AP_BBBB",
+    "AP_RRRL",
+    "B0_BASIC_DENSE_RAG",
+    "G1_ORACLE_CONTEXT",
+    "R15_SELF_QUERY",
+    "R16_PROMPTED_CONDITIONAL"
+  ],
+  "cases": 215,
+  "dropped_unbalanced": []
+}
