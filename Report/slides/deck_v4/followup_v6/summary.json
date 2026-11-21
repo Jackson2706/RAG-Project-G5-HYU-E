@@ -1,0 +1,32 @@
+{
+ "scoring": "(fixed before judging), from the frozen v3 judge's fields:\n  expected answer : 2 = every required fact correct, none wrong, no wrong group, conditions match if per case;\n                    1 = at least one fact correct, none wrong, no wrong group; 0 otherwise (a question or referral too).\n  expected referral (dev abstain cases, I10 Seoul): 2 = referral naming the right office; 1 = referral without it;\n                    answers 1 if at least one fact correct and none wrong, else 0; a question 0.",
+ "personas": 39,
+ "systems": {
+  "A0 reply_only (v6 fix)": {
+   "n": 39,
+   "mean_score": 0.333,
+   "score_2": 4,
+   "score_0": 30,
+   "mean_user_turns": 2.64,
+   "final_reply_types": {
+    "abstain": 10,
+    "answer": 9,
+    "clarify": 3,
+    "conditional_answer": 17
+   }
+  },
+  "AP reply_only (v6 fix)": {
+   "n": 39,
+   "mean_score": 0.359,
+   "score_2": 4,
+   "score_0": 29,
+   "mean_user_turns": 2.36,
+   "final_reply_types": {
+    "abstain": 10,
+    "answer": 9,
+    "clarify": 2,
+    "conditional_answer": 18
+   }
+  }
+ }
+}
