@@ -248,4 +248,17 @@ says(f"covers {f3(gd['all']['facts_covered'])} [{f3(gd['all']['facts_covered_ci_
 says(f"but {f3(gd['student_dependent']['wrong_group_rate'])} of its answers to student-dependent", "s12 gold wrong group")
 says(f"With gold evidence it still covers only\n  {f3(gd['all']['facts_covered'])}", "s9 gold")
 says(f"held-out questions {un[('AP_RRRL', 'all')]} of its replies ask", "s9 over-asking")
+fu = {r["system"]: r for r in json.load(open(D + "followup/content_v5.json"))["systems"]}
+pair = next(x for x in json.load(open(D + "followup/content_v5.json"))["paired"] if x["ours"] == "A0 reply_reask" and x["baseline"] == "B0 one turn")
+says(f"cover {fu['A0 reply_only']['facts_covered']:.3f} of the required facts after {fu['A0 reply_only']['turns_mean']:.2f} user turns", "s13 before")
+says(f"AAES covers\n{fu['A0 reply_reask']['facts_covered']:.3f} of the facts after {fu['A0 reply_reask']['turns_mean']:.2f} turns", "s13 reask")
+says(f"({fu['B0 one turn']['facts_covered']:.3f}; paired difference {pair['diff_facts_covered']:+.3f}\n[{pair['ci95'][0]:+.3f}, {pair['ci95'][1]:+.3f}])".replace("-", "−"), "s13 paired")
+v6 = json.load(open(D + "followup_v6/content.json"))
+b = v6["phase4_A0_reply_only"][0]
+says(f"| AAES, Task 2 (before) | {b['facts_covered']:.3f} | {b['wrong_fact']:.3f} | {b['wrong_group']:.3f} | {b['turns_mean']:.2f} | 10 of 39 |", "s13 row before")
+for name, sysname in (("AAES with the fix", "A0 reply_only (v6 fix)"), ("AAES+ with the fix", "AP reply_only (v6 fix)")):
+    r = next(x for x in v6["v6"] if x["system"] == sysname)
+    says(f"| {name} | {r['facts_covered']:.3f} | {r['wrong_fact']:.3f} | {r['wrong_group']:.3f} | {r['turns_mean']:.2f} | {r['answered_after_one_reply']} of {r['asked_first']} |", "s13", name)
+sc = [r for r in csv.DictReader(open(D + "followup/scores.csv")) if r["system"] == "A0 reply_only"]  # items.jsonl is not committed
+check(sum(r["user_turns"] == "2" and r["reply_type"] in ("answer", "conditional_answer") for r in sc) == 10 and len(sc) == 39, "s13 answered after one reply (before)")
 print("checked", n, "mismatches", bad)

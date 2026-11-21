@@ -629,3 +629,36 @@ AAES asked the campus; AAES+ answered. "Where is the Office of International Aff
 (T2-017): AAES asked the campus, which the label accepts; AAES+ gave the Seoul office only. "How can I sign up for
 counseling services as an international student?" (T2-009): AAES+ answered per campus, R16 gave one answer for
 everyone.
+
+## 13. Follow-up turns
+
+**What happens after AAES asks** (Task 2, dev only, 39 personas; `Report/slides/deck_v4/followup/content_v5.json`,
+judged blind by GPT-6 Sol with the frozen v3 prompt). On the dev questions where AAES asks first, the student answers
+with a fixed sentence for the asked detail ("I'm a Seoul campus student."). If the student only replies, AAES
+treats the reply as a new question: its final replies cover 0.000 of the required facts after 2.79 user turns on
+average. One example (T14-033): after "I'm an undergraduate student." it answered about TOPIK scholarships instead
+of where to apply to return to the Seoul campus. If the student replies and asks the question again, AAES covers
+0.200 of the facts after 3.67 turns, below standard dense retrieval in one turn (0.455; paired difference −0.222
+[−0.350, −0.103]).
+
+**The fix (post-hoc, dev only).** After an AAES clarifying question, a message that only gives the asked detail (no
+question mark, no question word at the start, at most 20 words, and a detail Step 1 reads or one of the offered
+options) now answers the earlier question: the detail becomes a stated attribute, and Steps 1–4 and the writer run
+unchanged (`Sources/backend/app/rag/followup.py`). The backend marks each clarifying reply, and the client sends
+the mark back with the student's next message; the Execution tab shows "Answering your earlier question". The fix is
+on in the app and off in every frozen evaluation run. With it off and on, the 47 dev single-turn questions give
+identical replies for AAES and AAES+ (`Report/results/deck6-regress-off`, `deck6-regress-on`).
+
+**Result** (`Report/slides/deck_v4/followup_v6/content.json`, same 39 personas and reply sentences, judged blind by
+GPT-6 Sol with the v3 prompt):
+
+| Reply only | Facts covered | Wrong fact | Wrong group | Turns per persona | Answer after one reply |
+|---|---|---|---|---|---|
+| AAES, Task 2 (before) | 0.000 | 0.000 | 0.080 | 2.79 | 10 of 39 |
+| AAES with the fix | 0.205 | 0.136 | 0.269 | 2.64 | 13 of 39 |
+| AAES+ with the fix | 0.255 | 0.128 | 0.296 | 2.36 | 14 of 36 |
+
+The reply now answers the question that was asked, so facts covered rises above zero, but so do wrong facts and
+wrong-group answers: the replies before the fix were about another topic and could not be wrong about this one.
+After "I'm on leave of absence." AAES+ now looks for where to apply to return (T14-033) and says it found no page
+that covers it. These numbers are post-hoc and on dev only; the held-out sets were not run with the fix.
