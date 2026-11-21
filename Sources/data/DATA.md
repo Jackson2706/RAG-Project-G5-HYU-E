@@ -52,7 +52,7 @@ all extracted text.
 - `manifest.jsonl` has 1,365 rows and 1,356 unique raw files. Its sha256 is
   `97dc126903bdfafcd77643abd12df5306afa900379f5f43aefe0437818109b53`.
 - `crawl_report.json` at the HYU root describes only the last invocation, the ERICA resume. The
-  full-crawl numbers above come from `Sources/docs/agent_tasks/T05.result.md`.
+  full-crawl numbers above come from the crawl task notes (research branch `hyu-aaes`).
 
 ## 3. Extraction: the English filter, and deduplication
 
@@ -85,8 +85,7 @@ all extracted text.
   - `crawl_report.json` `cd8f41cefae7aad733e35bcd767d83b2fee0085776be08d8ec8452ef17418046`
 - **Warnings:** 94 `title_not_english`, 4 `.hwp` unsupported, 2 PDFs without a text layer, 2 near
   duplicates.
-- **Frozen:** never re-crawled or regenerated. `Sources/crawler/tests/test_committed_snapshot.py`
-  checks the hashes and the ID.
+- **Frozen:** never re-crawled or regenerated. `SNAPSHOT.sha256` holds the hashes and the ID.
 
 ## 5. Index revisions (MongoDB `hyu_bench_<id>` / Qdrant `bench_<id>`)
 
@@ -189,7 +188,6 @@ python scripts/ingest_snapshot.py --snapshot hyu-20261110-97dc1269 --index-id <i
 
 # 3. checks
 python -m evaluation.scifact_mapping
-pytest -q crawler/tests labeling/tests evaluation/tests && (cd backend && pytest -q)
 ```
 
 A new crawl produces a new manifest, and so a new snapshot ID. To reproduce *our* results, use the

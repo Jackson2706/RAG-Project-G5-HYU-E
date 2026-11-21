@@ -265,10 +265,8 @@ Returning the wrong type (e.g. a list
 instead of `RetrievalResult`) makes the *next* block fail, and the Execution tab shows it on that
 stage. Always return the type `base.py` promises, and test it.
 
-The backend tests check these rules: `Sources/backend/tests/test_blocks.py` (folder layout, abstract classes
-cannot be created, missing methods fail), `Sources/backend/tests/test_registry.py` (every registered
-class inherits from the right abstract class) and `Sources/backend/tests/test_methods.py` (every baseline
-method on small synthetic inputs).
+The registry enforces these rules when the backend starts (folder layout, abstract classes cannot be created,
+every registered class inherits from the right abstract class); the test suite is not part of this submission; it is kept on the research branch `hyu-aaes`.
 
 ### Two optional helpers every block has
 

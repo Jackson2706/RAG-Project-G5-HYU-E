@@ -30,8 +30,4 @@ to `Sources/data/HYU/manifest.jsonl`. Snapshot output is written to
 `Sources/data/HYU/snapshots/hyu-YYYYMMDD-<manifest-hash>/`. An existing snapshot directory is never
 overwritten.
 
-Run the offline tests with:
-
-```bash
-python -m pytest -q crawler/tests
-```
+Note: the test suite is not part of this submission; it is kept on the research branch `hyu-aaes`.

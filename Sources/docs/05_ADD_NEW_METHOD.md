@@ -5,8 +5,7 @@ empty file to a working method that is selectable in the UI **and** measured by 
 won't touch the pipeline runner, the API or the React code. At the end you find guides for the
 methods that are still skeletons, and pointers to the implemented baselines you can learn from.
 
-> **Before you start:** the app runs ([01_GETTING_STARTED.md](01_GETTING_STARTED.md)), `python -m pytest`
-> passes in `Sources/backend/`, and you have read [03_ABSTRACT_CLASSES.md](03_ABSTRACT_CLASSES.md) and
+> **Before you start:** the app runs ([01_GETTING_STARTED.md](01_GETTING_STARTED.md)) and you have read [03_ABSTRACT_CLASSES.md](03_ABSTRACT_CLASSES.md) and
 > [04_METHOD_REGISTRY.md](04_METHOD_REGISTRY.md).
 
 **The recipe for every method:**
@@ -17,7 +16,7 @@ methods that are still skeletons, and pointers to the implemented baselines you 
 | 2 | Create the algorithm's file (a subclass) | same folder, one file per algorithm |
 | 3 | Implement the abstract method | your class |
 | 4 | Register it (start with `implemented=False`) with its hyperparameters | `Sources/backend/app/rag/registry.py` |
-| 5 | Write a test | `Sources/backend/tests/` |
+| 5 | Check it on small inputs | a Python shell |
 | 6 | Mark it implemented | `registry.py` |
 | 7–8 | Select it in the UI and inspect its real input and output | browser |
 | 9 | Measure it against B0 | a preset + `python -m evaluation.runner` |
@@ -116,55 +115,26 @@ Restart the backend: `check_registry()` runs at startup and stops with `TypeErro
 if the class does not inherit from `BaseEvidenceSelector`, the `method_id` is already used, or a
 default is outside its range.
 
-### Step 5 — Add a test
+### Step 5 — Check it on small inputs
 
-Create `Sources/backend/tests/test_diverse_selector.py`:
+From `Sources/backend/`, call the method on a few hand-made `Evidence` objects and compare with what you expect
+(here: one chunk per document, at most `top_k`). The app's own services are not needed for a pure selector:
 
 ```python
-import pytest
-
+import asyncio
 from app.rag.blocks.evidence.evidence_selection.diverse_selector import DiverseDocumentSelector
 from app.rag.schemas import Evidence
 
-pytestmark = pytest.mark.anyio
-
-
-def evidence(doc_ids: list[str]) -> list[Evidence]:
-    return [Evidence(rank=i + 1, chunk_id=f"c{i + 1}", doc_id=d, score=1 - i / 10, text="t", title="T", source_uri="x")
-            for i, d in enumerate(doc_ids)]
-
-
-async def test_one_chunk_per_document(services):
-    out = await DiverseDocumentSelector({"top_k": 3, "max_per_document": 1}, services).select(evidence(["A", "A", "B", "A", "C"]))
-    assert [e.chunk_id for e in out] == ["c1", "c3", "c5"]
-
-
-async def test_two_per_document_and_top_k(services):
-    out = await DiverseDocumentSelector({"top_k": 3, "max_per_document": 2}, services).select(evidence(["A", "A", "A", "B"]))
-    assert [e.chunk_id for e in out] == ["c1", "c2", "c4"]
-
-
-async def test_fewer_documents_than_top_k_and_empty_input(services):
-    selector = DiverseDocumentSelector({"top_k": 3, "max_per_document": 1}, services)
-    assert [e.chunk_id for e in await selector.select(evidence(["A", "A"]))] == ["c1"]
-    assert await selector.select([]) == []
+ev = [Evidence(rank=i + 1, chunk_id=f"c{i + 1}", doc_id=d, score=1 - i / 10, text="t", title="T", source_uri="x")
+      for i, d in enumerate(["A", "A", "B", "A", "C"])]
+out = asyncio.run(DiverseDocumentSelector({"top_k": 3, "max_per_document": 1}, None).select(ev))
+print([e.chunk_id for e in out])   # ['c1', 'c3', 'c5']
 ```
-
-The `services` fixture (`Sources/backend/tests/conftest.py`) uses an in-memory MongoDB and a fake embedding
-model, so no Docker is needed. Run, from `Sources/backend/`:
-
-```bash
-conda activate RAG
-python -m pytest tests/test_diverse_selector.py -v
-```
-
-✅ `3 passed`.
 
 ### Step 6 — Mark it implemented
 
-In `registry.py`, change `False` to `True` in your `Method("diverse_documents", …)`. Run **all**
-tests: `python -m pytest`. ✅ Everything passes (the registry tests check that every implemented
-method inherits correctly and has valid defaults).
+In `registry.py`, change `False` to `True` in your `Method("diverse_documents", …)`. Restart the backend: the registry checks at startup that every implemented
+method inherits correctly and has valid defaults.
 
 ### Step 7 — Select it in the existing UI
 
@@ -226,7 +196,7 @@ That separation (ranking vs selection) is exactly why the report keeps them in d
 
 ## Learn from the implemented baselines
 
-Every method below is a complete, tested example of the recipe (tests: `Sources/backend/tests/test_methods.py`).
+Every method below is a complete, tested example of the recipe .
 
 | You want to… | Read |
 |---|---|
@@ -284,7 +254,7 @@ embedding index is a new index revision (its `contract()` must name the model an
 - [ ] It returns the promised type, built from real data with keywords.
 - [ ] It never silently ignores eligibility conditions, and an LLM output is checked before it is used.
 - [ ] It is registered with a unique `method_id` and its `Param`s, starting at `implemented=False`.
-- [ ] My test passes: `python -m pytest tests/test_<mine>.py`.
-- [ ] I set `implemented=True` and the whole suite passes.
+- [ ] It gives the expected output on small hand-made inputs.
+- [ ] I set `implemented=True` and the backend starts.
 - [ ] I restarted the backend, reloaded the page, selected my method, and inspected its real input and output.
 - [ ] I measured it against B0 with the benchmark runner and wrote down what changed (and what it costs).

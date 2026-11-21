@@ -290,7 +290,7 @@ benchmark index (its offline settings are copied in so the query embedding match
 ## 6. The metrics
 
 All retrieval metrics are computed per query from the saved rankings (`Sources/evaluation/metrics/retrieval.py`)
-and averaged over queries. They match the official `pytrec_eval` (tested in `Sources/evaluation/tests/`)
+and averaged over queries. They match the official `pytrec_eval` (checked on the research branch `hyu-aaes`)
 and reproduce the Lesson 6 slide examples exactly.
 
 | Metric | Question it answers | Definition |

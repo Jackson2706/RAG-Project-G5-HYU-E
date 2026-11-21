@@ -3,7 +3,7 @@
 The first part covers the offline step: the tagger records who a chunk applies to before the chunk
 is stored. The section "Online steps (P7)" specifies profile understanding, applicability labels,
 branches with information gain, and the answer policy. Its pure functions live in
-`backend/app/rag/aaes.py`; T24 (`backend/tests/test_aaes_t24.py`) tests them.
+`backend/app/rag/aaes.py`; its tests are on the research branch `hyu-aaes`.
 
 ## Vocabulary v1
 
@@ -411,7 +411,7 @@ wrote the tagging rules.
 ## Metrics (P8)
 
 Code: `evaluation/metrics/aaes.py` (per-case functions) and `evaluation/metrics/stats.py` (paired tests).
-Every function has a hand-computed example in its docstring and a test in `evaluation/tests/test_aaes_metrics.py`.
+Every function has a hand-computed example in its docstring (tests on the research branch `hyu-aaes`).
 A rate whose denominator is 0 is undefined (`None`) and is left out of means.
 
 **Actions.** The system action maps to a label behaviour: ANSWER → `answer`, CONDITIONAL →

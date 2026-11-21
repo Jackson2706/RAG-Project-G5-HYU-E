@@ -213,9 +213,8 @@ Run each command from `hyu-compass/`:
 
 ```bash
 conda activate RAG
-(cd Sources/backend && pytest -q)                    # backend tests (no Docker or Ollama needed)
-(cd Sources && pytest -q evaluation/tests)           # metric and runner tests (no Docker or Ollama needed)
-(cd Sources/frontend && npm test && npm run typecheck)
+(cd Sources/frontend && npm run typecheck)          # TypeScript check (the test suite is not part of this submission; it is kept on the research branch `hyu-aaes`)
+./Sources/demo_preflight.sh                          # health check of the running app
 ```
 
 ✅ The test commands report `passed`, and the typecheck exits without errors.
