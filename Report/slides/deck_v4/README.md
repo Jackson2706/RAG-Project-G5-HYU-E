@@ -183,6 +183,20 @@ AAES LLM option: `aaes_prompts.md` (generated from the code; all hashes match `a
 >
 > This may depend on your situation; please confirm with the OIA office.
 
+### Task 2 · Submission branch (brief v7b)
+
+- Branch `submission` (tip `21b9306`, from `a1f982b`; `hyu-aaes` untouched). Zip: `~/HYU_Compass_submission.zip`
+  (`git archive`, 29.9 MB). Removal list: `/tmp/REMOVED_FOR_SUBMISSION.md` (outside the repository).
+- 541 files removed, 2 added (the r5 chunk export and its manifest): 1,425 → 886 tracked files; code lines
+  (py, ts, tsx, sh, js, css) 45,668 → 22,991. Removed: agent rules and skills, agent task notes, working slide
+  folders and demo trials, slide/demo scripts, all test code (98 files) and test-only dependencies; 6 unused imports,
+  1 unused variable, 1 unused function. Every preset and code path the report cites is kept.
+- Export: `Sources/data/HYU/processed/r5_chunks.jsonl.gz` (1,867 chunks of the r5 index with tags, 0.71 MB,
+  0 unmasked e-mails; read-only query) + `r5_chunks.manifest.json`. No kept file is over 50 MB (largest: the 17 MB video).
+- Fresh clone of `submission`, installed (npm ci; pip requirements already satisfied), started against the existing
+  Docker services and r5 index: preflight 9/9 PASS at `a4bab28`; D1 per case, D2 asks the campus then answers the
+  earlier question, D3 refers to the Seoul campus OIA office. The clone folder was then deleted.
+
 ### Decisions taken without the user (v7)
 
 1. Merge "ask the office" cases only while at least two cases with facts remain; with one, the reply would read as a
@@ -191,6 +205,14 @@ AAES LLM option: `aaes_prompts.md` (generated from the code; all hashes match `a
    evidence/context/information/source/citation), so ordinary brackets such as "[Seoul]" stay.
 3. The T14-044 relabel is reported, not worked around.
 4. `aaes_prompts.md` is generated from the code (`scripts/deck_v7_prompts.py`) so it cannot drift from the system.
+5. Submission built in a separate git worktree instead of `git switch` in the main folder, so the running app and the
+   `hyu-aaes` working tree were never changed.
+6. Deletions and the dead-code pass were done with scripted `git rm`, ruff, tsc and vulture rather than Codex: Codex hit
+   its usage limit at the start of job 3 and made no change; the README was written directly for the same reason.
+7. `Report/project/gates.md`, `Report/notes/quality_gpt_check.csv` and `tag_audit_rules.md` are kept because the
+   report or the AI-use statement cites them; every script that produces a file the report cites is kept.
+8. Docker Desktop was not running at 16:01 (the Mac had restarted it down); it was started and the app restarted
+   with `start.sh` (no data change).
 
 ## Deck v6 (final prep, 2026-11-21)
 
