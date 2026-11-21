@@ -25,12 +25,20 @@ router = APIRouter(prefix="/api")
 StageChoices = dict[str, dict[str, Any]]  # {stage_id: {"method": "...", "params": {...}}}
 
 
+class ClarifyMarker(BaseModel):
+    question: str = Field(min_length=1, max_length=2000)
+    attribute: str | None = Field(default=None, max_length=40)
+    options: list[str] = Field(default_factory=list, max_length=20)
+    stated: dict[str, str] = Field(default_factory=dict, max_length=12)  # details resolved earlier in this follow-up
+
+
 class ChatRequest(BaseModel):
     question: str = Field(min_length=1, max_length=2000)
     stages: StageChoices = Field(default_factory=dict, description="Methods and parameters per stage; missing stages use defaults")
     index_id: str = Field(default=DEFAULT_INDEX, description="Which index revision to search (GET /api/indexes)")
     history: list[str] = Field(default_factory=list, max_length=20, description="Earlier user turns of this session (AAES step 1)")
     demo_case_id: str | None = Field(default=None, description="A dev demo case (GET /api/demo/cases); the oracle presets G1/A2 need one")
+    followup: ClarifyMarker | None = Field(default=None, description="The previous reply's clarify marker (trace.clarify), sent back as is")
 
 
 class IngestRequest(BaseModel):
@@ -201,7 +209,8 @@ async def chat(body: ChatRequest, request: Request):
     config = checked(body.stages)
     await check_runnable(request, config, body.index_id)
     oracle = demo_oracle(body, config)
-    return await run_rag(body.question.strip(), config, services(request, body.index_id), history=body.history, oracle=oracle)
+    return await run_rag(body.question.strip(), config, services(request, body.index_id), history=body.history, oracle=oracle,
+                         followup=body.followup and body.followup.model_dump(), followup_resolution=get_settings().followup_resolution)
 
 
 @router.post("/chat/stream")
@@ -215,7 +224,8 @@ async def chat_stream(body: ChatRequest, request: Request):
 
     async def run():
         try:
-            await run_rag(body.question.strip(), config, run_services, emit=queue.put_nowait, history=body.history, oracle=oracle)
+            await run_rag(body.question.strip(), config, run_services, emit=queue.put_nowait, history=body.history, oracle=oracle,
+                         followup=body.followup and body.followup.model_dump(), followup_resolution=get_settings().followup_resolution)
         finally:
             queue.put_nowait(None)  # tells the stream below that we are finished
 

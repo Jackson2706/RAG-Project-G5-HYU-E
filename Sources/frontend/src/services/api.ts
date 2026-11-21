@@ -1,5 +1,5 @@
 // Every call the frontend makes to FastAPI (backend/app/api.py).
-import type { ConfigError, DemoCase, Health, IndexInfo, IndexRevision, OllamaModel, Preset, StageChoices, StageDef, StreamEvent, Trace } from "@/types/api";
+import type { ClarifyMarker, ConfigError, DemoCase, Health, IndexInfo, IndexRevision, OllamaModel, Preset, StageChoices, StageDef, StreamEvent, Trace } from "@/types/api";
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let res: Response;
@@ -59,13 +59,13 @@ export function parseEvents(buffer: string): { events: StreamEvent[]; rest: stri
  * need to POST the question and the chosen methods in the request body.
  */
 export async function streamChat(question: string, stages: StageChoices, indexId: string, onEvent: (e: StreamEvent) => void, signal: AbortSignal,
-  history: string[] = [], demoCaseId: string | null = null) {
+  history: string[] = [], demoCaseId: string | null = null, followup: ClarifyMarker | null = null) {
   let res: Response;
   try {
     res = await fetch("/api/chat/stream", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question, stages, index_id: indexId, history, demo_case_id: demoCaseId }),
+      body: JSON.stringify({ question, stages, index_id: indexId, history, demo_case_id: demoCaseId, followup }),
       signal,
     });
   } catch (err) {

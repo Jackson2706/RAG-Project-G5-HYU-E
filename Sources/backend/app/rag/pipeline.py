@@ -18,7 +18,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from app.rag.aaes import with_caveat
+from app.rag.aaes import extract_profile, with_caveat
+from app.rag.followup import apply_stated, clarify_marker, resolve
 from app.rag.blocks.retrieval.hybrid_fusion.rrf import reciprocal_rank_fusion
 from app.rag.registry import PIPELINE, STAGES, create_block, get_method
 from app.rag.schemas import (INSUFFICIENT_ANSWER, INSUFFICIENT_MARKER, Evidence, FilterCriteria, FinalAnswer, GenerationResult,
@@ -266,22 +267,29 @@ async def _retrieve(block: Any, queries: list[str], prefilter: RetrievalFilter |
 
 async def run_rag(question: str, config: dict, services: Services, emit: Callable[[dict], None] = lambda event: None, *,
                   stop_after: str | None = None, save_trace: bool = True, history: list[str] | None = None,
-                  oracle: dict | None = None) -> dict:
+                  oracle: dict | None = None, followup: dict | None = None, followup_resolution: bool = False) -> dict:
     """Answer one question with the validated `config`. Returns the full trace (also saved to MongoDB).
 
     stop_after: a stage id; later stages are skipped (the benchmark runner uses "evidence_sufficiency"
                 for retrieval-only runs, so no LLM answer is generated).
     save_trace: False = do not store the trace in MongoDB (the benchmark keeps its own results).
     history:    earlier user turns of the session (AAES step 1 reads them as "remembered" profile facts).
+    followup:   the previous reply's clarify marker (trace["clarify"]); with followup_resolution=True a detail-only
+                reply answers the earlier question (app/rag/followup.py). Off by default: evaluation runs are unchanged.
     oracle:     a labeled case's {"profile": stated_profile, "evidence": [Evidence dicts]} for the oracle methods
                 (A2 oracle_profile, G1 oracle_evidence); a config using them without it fails with a clear error.
     """
+    resolved = resolve(question, followup) if followup_resolution else None
+    sent = question
+    if resolved:
+        question = resolved["question"]  # the effective question: the one before the clarifying turn
     request_id = uuid.uuid4().hex
     tracer = Tracer(request_id, emit)
     trace: dict[str, Any] = {"request_id": request_id, "question": question, "created_at": datetime.now(UTC).isoformat(),
                              "config": config, "status": "running", "stages": tracer.stages, "answer": "", "outcome": None,
                              "sources": [], "model": None, "error": None, "history": list(history or []),
-                             "action": None, "unknown_condition_evidence": None}  # fmt: skip
+                             "action": None, "unknown_condition_evidence": None,
+                             "followup": {"message": sent, "answering": question, "stated": resolved["stated"]} if resolved else None}  # fmt: skip
     emit({"type": "started", "request_id": request_id, "config": config})
     start = time.perf_counter()
 
@@ -323,10 +331,17 @@ async def run_rag(question: str, config: dict, services: Services, emit: Callabl
             return result
 
         # ---- before candidate retrieval
-        analysis = await step("query_understanding", lambda b: b.analyze(question, history or ()), {"question": question, "history": history or []},
-                              default=QueryAnalysis())
+        async def understand(b):
+            result = await b.analyze(question, history or ())
+            if resolved and result.profile:  # inside the traced step, so the Execution tab shows the profile used
+                result.profile = apply_stated(result.profile, resolved)
+            return result
+
+        analysis = await step("query_understanding", understand, {"question": question, "history": history or []}, default=QueryAnalysis())
         criteria: FilterCriteria = analysis.criteria  # the eligibility conditions both filters enforce
         profile = analysis.profile or None  # AAES step 1 (None: the AAES blocks read the question themselves)
+        if resolved and profile is None:  # step 1 switched off: the AAES blocks would re-read only the question
+            profile = apply_stated(extract_profile(question, history or ()), resolved)
         rewritten = await step("query_rewriting", lambda b: b.rewrite(question), {"question": question},
                                default=RewrittenQuery(query=question))  # fmt: skip
         query = rewritten.query
@@ -368,6 +383,8 @@ async def run_rag(question: str, config: dict, services: Services, emit: Callabl
                 tracer.skip(stage_id, STAGES[stage_id].name, f"Skipped: AAES action {decision.action} is answered without the LLM.")
             trace.update(status="completed", answer=decision.message, outcome=decision.action.lower(), action=decision.action,
                          unknown_condition_evidence=False, decision=to_jsonable(decision))
+            if decision.action == "CLARIFY":  # the marker the client sends back with the student's reply
+                trace["clarify"] = clarify_marker(question, decision.signals, resolved["stated"] if resolved else None)
         else:
             if decision is not None and decision.evidence_ids is not None:  # AAES: only evidence that may apply goes to the LLM
                 evidence = [e for e in evidence if e.chunk_id in set(decision.evidence_ids)]

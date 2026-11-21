@@ -98,7 +98,11 @@ export interface Trace {
   total_ms?: number;
   action?: AaesAction | null; // AAES presets only
   unknown_condition_evidence?: boolean | null;
+  clarify?: ClarifyMarker | null; // AAES CLARIFY: sent back with the student's reply (follow-up resolution)
+  followup?: { message: string; answering: string; stated: Record<string, string> } | null; // the reply answered an earlier question
 }
+
+export interface ClarifyMarker { question: string; attribute: string | null; options: string[]; stated?: Record<string, string> }
 
 export type AaesAction = "ANSWER" | "CONDITIONAL" | "CLARIFY" | "ABSTAIN" | "CONFIRM";
 

@@ -180,7 +180,7 @@ def test_shared_case_helper_preserves_history_oracle_and_record(monkeypatch):
     record = asyncio.run(runner.run_hyu_case(case, config, services, documents, lookup))
     assert record == runner.hyu_suite.trace_record(case, trace, lookup)
     fake_rag.assert_awaited_once_with("Q?", config, services, save_trace=False, history=["I'm at ERICA."],
-                                     oracle=runner.hyu_suite.oracle_for(case, documents))
+                                     oracle=runner.hyu_suite.oracle_for(case, documents), followup_resolution=False)
 
 
 @pytest.mark.parametrize("flags", [

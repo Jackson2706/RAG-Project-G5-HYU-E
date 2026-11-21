@@ -40,6 +40,7 @@ export function ExecutionTab({ stages, chat }: { stages: StageDef[]; chat: ChatS
             {live.requestId.slice(0, 10)} <CopyButton text={live.requestId} label="Copy request ID" />
           </span>
         </div>
+        {final?.followup && <p className="text-xs text-foreground">Answering your earlier question: “{final.followup.answering}”</p>}
         {final?.error && <p className="text-xs text-danger" role="alert">{final.error}</p>}
       </div>
       <ol className="space-y-1.5" aria-label="Pipeline stages">

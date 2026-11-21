@@ -2,7 +2,7 @@ import { useCallback, useRef, useState } from "react";
 
 import { newId } from "@/lib/utils";
 import { api, streamChat } from "@/services/api";
-import type { DemoCase, StageChoices, StageRecord, StreamEvent, Trace } from "@/types/api";
+import type { ClarifyMarker, DemoCase, StageChoices, StageRecord, StreamEvent, Trace } from "@/types/api";
 
 export interface ChatMessage {
   id: string;
@@ -31,6 +31,13 @@ type Run = Pick<CompareRun, "content" | "status" | "requestId" | "trace" | "erro
 /** Earlier user turns of this chat, oldest first: AAES reads them as remembered profile facts. */
 export function historyOf(messages: ChatMessage[]): string[] {
   return messages.filter((m) => m.role === "user").map((m) => m.content);
+}
+
+/** The clarify marker of the last reply (the column of `presetId` in compare mode), sent back with the next message. */
+export function lastClarify(messages: ChatMessage[], presetId?: string): ClarifyMarker | null {
+  const last = [...messages].reverse().find((m) => m.role === "assistant");
+  const trace = presetId === undefined ? last?.trace : last?.runs?.find((r) => r.presetId === presetId)?.trace;
+  return trace?.clarify ?? null;
 }
 
 /** Live state of one request while it runs: stages arrive one by one. */
@@ -69,7 +76,8 @@ export function useChat() {
 
   /** Stream one request; `update` writes into the message (chat) or into one compare column. */
   const stream = async (question: string, config: StageChoices, indexId: string, history: string[], signal: AbortSignal,
-                        update: (change: Partial<Run> | ((r: Run) => Partial<Run>)) => void, demoCaseId: string | null) => {
+                        update: (change: Partial<Run> | ((r: Run) => Partial<Run>)) => void, demoCaseId: string | null,
+                        followup: ClarifyMarker | null = null) => {
     try {
       await streamChat(question, config, indexId, (event) => {
         if (event.type === "started") {
@@ -85,7 +93,7 @@ export function useChat() {
           const ok = event.trace.status === "completed";
           update({ content: event.trace.answer, trace: event.trace, status: ok ? "done" : "error", error: event.trace.error ?? undefined });
         }
-      }, signal, history, demoCaseId);
+      }, signal, history, demoCaseId, followup);
     } catch (err) {
       update({ status: signal.aborted ? "cancelled" : "error", error: signal.aborted ? undefined : (err as Error).message });
     }
@@ -95,11 +103,12 @@ export function useChat() {
   const send = useCallback(async (question: string, config: StageChoices, indexId = "default", demo: DemoCase | null = null) => {
     const answerId = newId();
     const history = demo ? demo.history : historyOf(latest.current.slice(forgot.current));
+    const followup = demo ? null : lastClarify(latest.current.slice(forgot.current)); // "Forget my details" drops the marker too
     setMessages((ms) => [...ms, { id: newId(), role: "user", content: question }, { id: answerId, role: "assistant", content: "", status: "streaming" }]);
     const controller = new AbortController();
     abort.current = controller;
     setBusy(true);
-    await stream(question, config, indexId, history, controller.signal, (change) => patch(answerId, (m) => (typeof change === "function" ? change(m as Run) : change) as Partial<ChatMessage>), demo?.case_id ?? null);
+    await stream(question, config, indexId, history, controller.signal, (change) => patch(answerId, (m) => (typeof change === "function" ? change(m as Run) : change) as Partial<ChatMessage>), demo?.case_id ?? null, followup);
     setBusy(false);
   }, []);
 
@@ -108,6 +117,7 @@ export function useChat() {
                                          demo: DemoCase | null = null) => {
     const answerId = newId();
     const history = demo ? demo.history : historyOf(latest.current.slice(forgot.current));
+    const followups = presets.map((p) => (demo ? null : lastClarify(latest.current.slice(forgot.current), p.id)));
     const runs: CompareRun[] = presets.map((p) => ({ presetId: p.id, name: p.name, content: "", status: "queued" }));
     setMessages((ms) => [...ms, { id: newId(), role: "user", content: question }, { id: answerId, role: "assistant", content: "", status: "streaming", runs }]);
     const controller = new AbortController();
@@ -117,7 +127,7 @@ export function useChat() {
       const update = (change: Partial<Run> | ((r: Run) => Partial<Run>)) =>
         patch(answerId, (m) => ({ runs: m.runs!.map((r, j) => (j === i ? { ...r, ...(typeof change === "function" ? change(r) : change) } : r)) }));
       if (controller.signal.aborted) update({ status: "cancelled" });
-      else await stream(question, preset.config, indexId, history, controller.signal, update, demo?.case_id ?? null);
+      else await stream(question, preset.config, indexId, history, controller.signal, update, demo?.case_id ?? null, followups[i]);
     }
     patch(answerId, { status: controller.signal.aborted ? "cancelled" : "done" });
     setBusy(false);
