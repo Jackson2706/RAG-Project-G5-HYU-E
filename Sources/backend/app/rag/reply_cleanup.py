@@ -5,6 +5,8 @@
    markdown links stay.
 2. In an answer per case, every case that only tells the student to ask the office (no [E#] citation) is merged
    into one final line, "For other cases, please ask the OIA office of your campus." Cases with facts are unchanged.
+   Only when at least two cases with facts remain: one case plus "other cases" would read as a single answer (and
+   evaluator v2 labels it one), so such replies keep their cases and lose only the markers.
 
 Behind the `clean_reply` flag: on in the app (settings), off in run_rag's default, so evaluation runs are unchanged.
 """
@@ -34,7 +36,7 @@ def merge_ask_only_cases(text: str) -> str:
     prefix, cases = (parts[0], parts[1:]) if parts and not parts[0].lstrip(" -*").startswith("If you") else ("", parts)
     asks = [c for c in cases if not CITATION.search(c) and ASK_ONLY.search(c)]
     kept = [c for c in cases if c not in asks]
-    if not asks or not kept:  # nothing to merge, or no case with facts left: keep the writer's text
+    if not asks or len(kept) < 2:  # merge only while the reply still answers per case (>= 2 cases with facts)
         return text
     body = (prefix + "".join(kept)).rstrip()
     return f"{body}\n\n{OTHER_CASES}"

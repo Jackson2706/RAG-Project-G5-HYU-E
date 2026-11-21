@@ -22,15 +22,24 @@ def test_internal_markers_are_removed(raw, shown):
 def test_ask_only_cases_merge_into_one_line_and_cases_with_facts_stay():
     raw = ("If you are at the Seoul campus with an enrolled status, you should ask the OIA office. [No Evidence Provided]\n"
            "If you are at the ERICA campus with a leave of absence status, you must register for group insurance [E1].\n"
+           "If you are at the ERICA campus and enrolled, the fee is 25,000 Won [E2].\n"
            "If you are at the Seoul campus with a leave of absence status, you should ask the OIA office.")
     assert clean_reply(raw, "CONDITIONAL") == (
-        "If you are at the ERICA campus with a leave of absence status, you must register for group insurance [E1].\n\n" + OTHER_CASES)
+        "If you are at the ERICA campus with a leave of absence status, you must register for group insurance [E1].\n"
+        "If you are at the ERICA campus and enrolled, the fee is 25,000 Won [E2].\n\n" + OTHER_CASES)
+
+
+def test_one_case_with_facts_keeps_its_ask_cases_without_markers():
+    raw = ("If you are at Seoul, you should ask the OIA office. [No Evidence Provided]\n"
+           "If you are at ERICA, you must register for group insurance [E1].")
+    assert clean_reply(raw, "CONDITIONAL") == "If you are at Seoul, you should ask the OIA office.\nIf you are at ERICA, you must register for group insurance [E1]."
 
 
 def test_cases_in_one_paragraph_and_a_lead_in_are_handled():
-    raw = ("It depends on your campus. If you are at Seoul, you apply online [E1]. If you are at ERICA, the evidence does not "
-           "detail this, so please contact the OIA office.")
-    assert clean_reply(raw, "CONDITIONAL") == "It depends on your campus. If you are at Seoul, you apply online [E1].\n\n" + OTHER_CASES
+    raw = ("It depends on your campus. If you are at Seoul, you apply online [E1]. If you are a graduate student, use the form [E2]. "
+           "If you are at ERICA, the evidence does not detail this, so please contact the OIA office.")
+    assert clean_reply(raw, "CONDITIONAL") == ("It depends on your campus. If you are at Seoul, you apply online [E1]. "
+                                               "If you are a graduate student, use the form [E2].\n\n" + OTHER_CASES)
 
 
 @pytest.mark.parametrize("raw", [
