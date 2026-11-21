@@ -108,6 +108,90 @@ audit artifact and did not contribute to the freeze.
 - Index r5: 0 unmasked e-mails (1,424 masked). 292 office phone numbers. 23 title-plus-name candidates (public staff
   on notices).
 
+## Deck v7 (demo fixes, 2026-11-21)
+
+**Summary.** The reply cleanup is on in the app: internal markers are gone, and in an answer per case the cases that
+only say "ask the office" are merged into one closing line when at least two cases with facts remain. Regression
+(47 dev questions × AAES RRRL, cleanup off vs on): 46 of 47 reply types identical; the one change (T14-044) is the
+frozen 4B evaluator relabelling a reply whose only edit is a removed " [no evidence]". The per-case candidate T14-130
+gave a single answer in 3/3 AAES runs, so **the per-case demo stays D1 with the cleanup**. Exact prompt texts of every
+AAES LLM option: `aaes_prompts.md` (generated from the code; all hashes match `aaes_plus_freeze.md`).
+
+### Reply cleanup
+
+- Code: `Sources/backend/app/rag/reply_cleanup.py`; flag `clean_reply` (settings, default on in the app; `run_rag`
+  default off; runner `--clean-reply`). The trace keeps the writer's own text as `raw_answer` when the cleanup changed
+  it. Tests: `tests/test_reply_cleanup.py` (12: markers removed, `[E#]`, links and ordinary brackets kept, merging,
+  one-paragraph cases, no merge with fewer than two factual cases, only per-case answers merged).
+- Regression, first version (`Report/results/deck7-clean-off`, `-on`): 4 of 47 reply types changed (T14-044, T14-132,
+  T14-139, T14-158). In all four the merge left one case with facts plus "For other cases …", which evaluator v2
+  (it needs at least two "If you" lines) then labels a single answer. Fixed: merge only while two or more cases with
+  facts remain.
+- Regression, final (`Report/results/deck7-clean2-off`, `-on`, commit `912ca0d`): **46/47 identical reply types**; 4 texts
+  differ (markers removed). T14-044 changed from per case to answer under the frozen evaluator's 4B model; its text
+  differs only by the removed " [no evidence]". Recorded as a measured deviation; not hidden by keeping the marker.
+
+### Per-case scenario T14-130 and D1–D3 (cleanup on; `demo_trials_v7.csv`, `scripts/deck_v7_demo.py`)
+
+| Scenario | Standard dense (B0) | Prompted conditional (R16) | AAES+ (RRRL) |
+|---|---|---|---|
+| T14-130 "Can I work part time here?" (3 runs) | answer 3/3 (12.2–27.1 s) | answer 3/3 (13.6–13.8 s) | answer 3/3 (2.4–6.6 s) |
+| D1 insurance rules | answer 1/1 (13.1–13.1 s) | conditional_answer 1/1 (12.7–12.7 s) | conditional_answer 1/1 (20.0–20.0 s) |
+| D2 counseling | answer 1/1 (5.1–5.1 s) | clarify 1/1 (8.8–8.8 s) | clarify 1/1 (4.2–4.2 s) |
+| D2 → "I'm a Seoul campus student." | answer 1/1 (12.1–12.1 s) | conditional_answer 1/1 (13.2–13.2 s) | conditional_answer 1/1 (15.1–15.1 s) |
+| D3 pet dog, Seoul | abstain 1/1 (10.5–10.5 s) | abstain 1/1 (10.4–10.4 s) | abstain 1/1 (8.8–8.8 s) |
+
+- T14-130 (dev; label expects a question): AAES+ answered once for everyone, 3/3. It states **no hour limits**: its
+  only cited page is "Part-time work permit Document guide" (oia.hanyang.ac.kr/notice/1813514), and both facts it
+  gives match that page ("Is the employment start date at least 10 days from today?"; "Jobs requiring professional
+  skills are NOT permitted under a student visa. (e.g., Marketing, Translation/Interpretation)"). B0 and R16 state
+  hour limits from the "Visa" page and the permit guide, and not consistently (B0 run 1: TOPIK 3 → 20 h, TOPIK 4 →
+  25 h; run 2: TOPIK 4 → 20 h). Not checked further: those are baselines. test-1 T14-088 was not run.
+- **Choice (rule fixed in the brief): D1 with the cleanup**, because T14-130 gave neither a per-case answer nor a
+  campus question in all 3 AAES runs.
+- D1–D3 unchanged in behaviour: D1 per case, D2 asks the campus then answers the counseling question per degree
+  level, D3 refers to the Seoul campus OIA office. The D1 reply has one case with facts, so its seven "ask the
+  office" cases stay and only the eight "[No evidence provided]" markers are removed.
+- Video: the per-case demo did not change, so `demo_D1_D3_fallback_v6.webm` stays (recorded before the cleanup, so its
+  D1 column still shows the markers).
+
+**D1, AAES+ (cleanup on):**
+
+> If you are at Seoul campus with an admitted but not enrolled status, you should ask the OIA office.
+> If you are at Seoul campus with an enrolled status, you should ask the OIA office.
+> If you are at Seoul campus with a leave of absence status, you should ask the OIA office.
+> If you are at Seoul campus with a completed coursework or graduating status, you should ask the OIA office.
+> If you are at ERICA campus with an admitted but not enrolled status, you should ask the OIA office.
+> If you are at ERICA campus with an enrolled status, you should ask the OIA office.
+> If you are at ERICA campus with a leave of absence status, international students must register for group insurance due to strict laws of the Korean Ministry of Health and Welfare, submit the insurance registration certificate when applying for registration, pay a 25,000 Won fee, and access www.isamaster.co.kr/hanyang to click "Insurance applications" (Virtual account on Website); inquiry can be made via KAKAO ID ISACHINA or HYU OIA manager at 031-400-0791~0795. [E1]
+> If you are at ERICA campus with a completed coursework or graduating status, you should ask the OIA office.
+
+**D2, AAES+ after "I'm a Seoul campus student." (answering "How do I book the international student counseling program?"):**
+
+> If your degree level is undergraduate, language program, or non-degree, you can visit the Office of International Cooperation (OIA) at Hanyang University for help with psychological and affective problems as well as needs in daily life and study. [E2]
+> If your degree level is master or doctoral, you can participate in the International Students Counseling Month program which enriches hearts with 10 international students every session on four topics; please look at the topic and time you want to participate. [E1][E2]
+>
+> This may depend on your situation; please confirm with the OIA office.
+
+**D3, AAES+:**
+
+> The official pages I found do not apply to you (they are for another campus or student group). Please contact the Seoul campus OIA office.
+
+**T14-130, AAES+ run 1:**
+
+> Yes, you can work part time at Hanyang University under specific conditions. Students must have a valid Alien Registration Card and ensure their employment start date is at least 10 days from today [E1]. Additionally, jobs requiring professional skills such as Marketing or Translation/Interpretation are NOT permitted under a student visa [E1].
+>
+> This may depend on your situation; please confirm with the OIA office.
+
+### Decisions taken without the user (v7)
+
+1. Merge "ask the office" cases only while at least two cases with facts remain; with one, the reply would read as a
+   single answer for one group (and the evaluator agrees), which hides that the answer depends on the student.
+2. Markers are removed by two patterns only (upper-case words with an underscore, or a bracketed note about
+   evidence/context/information/source/citation), so ordinary brackets such as "[Seoul]" stay.
+3. The T14-044 relabel is reported, not worked around.
+4. `aaes_prompts.md` is generated from the code (`scripts/deck_v7_prompts.py`) so it cannot drift from the system.
+
 ## Deck v6 (final prep, 2026-11-21)
 
 **Summary.** The follow-up fix is **accepted**: after AAES asks a detail, a reply that only gives the detail now
