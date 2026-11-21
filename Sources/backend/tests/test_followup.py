@@ -20,6 +20,7 @@ DEGREE = {"question": Q, "attribute": "degree_level", "options": ["undergraduate
     ("ansan", CAMPUS, {"campus": "erica"}),
     ("I'm a master's student", DEGREE, {"degree_level": "master"}),
     ("grad", {**DEGREE, "options": ["undergraduate", "master"]}, {"degree_level": "master"}),
+    ("I'm a non-degree student.", {**DEGREE, "options": ["undergraduate", "non_degree"]}, {"degree_level": "non_degree"}),
 ])  # fmt: skip
 def test_detail_only_replies_answer_the_earlier_question(reply, marker, stated):
     assert resolve(reply, marker) == {"question": Q, "reply": reply, "stated": stated}

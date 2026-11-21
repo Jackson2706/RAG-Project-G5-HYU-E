@@ -37,7 +37,7 @@ def _option_match(message: str, options: list[str]) -> str | None:
     words = set(re.findall(r"[a-z0-9'-]+", text))
     hits = {ALIASES[w] for w in words if w in ALIASES} & set(options)
     for v in options:
-        names = {v.lower(), v.replace("_", " ").lower(), SHOWN.get(v, v).lower()}
+        names = {v.lower(), v.replace("_", " ").lower(), v.replace("_", "-").lower(), SHOWN.get(v, v).lower()}  # non_degree = "non-degree"
         if any(re.search(rf"(?<![a-z0-9]){re.escape(n)}(?![a-z0-9])", text) for n in names):
             hits.add(v)
     if words & {"grad", "graduate"} and len(grad := [o for o in options if o in GRADUATE]) == 1:

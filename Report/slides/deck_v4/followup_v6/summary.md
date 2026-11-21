@@ -11,7 +11,8 @@ A0 and AP_RRRL give the same reply type and the same reply text on all 94 replie
 **Dev check:** Task 2 "reply only" again, same 39 personas and reply sentences, A0 and AP_RRRL with the fix; reply
 types by evaluator v2; content judged blind by GPT-6 Sol with the frozen v3 prompt (3 batches of 26, merged by
 `merge_judgments`; `judge/judgments.meta.json`). 104 of the 107 detail replies were resolved to the earlier question
-(the other 3 were "I'm not sure." or a detail Step 1 cannot read, and ran as before).
+(the other 3 were "I'm a non-degree student.": the option matcher missed the hyphen in "non-degree", so those replies
+ran as before; fixed after this check, in `followup.py` with a test, and not re-run).
 
 | Reply only | Facts covered | Wrong fact | Wrong group | Turns per persona | Answer after one reply | Mean score (0–2) |
 |---|---|---|---|---|---|---|
