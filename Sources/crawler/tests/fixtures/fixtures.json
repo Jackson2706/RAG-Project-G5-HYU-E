@@ -76,44 +76,49 @@
   "url": "https://global.hanyang.ac.kr/eng/",
   "site": "erica",
   "fetched_at": "2026-11-10T01:43:35Z",
-  "bytes": 64251,
-  "sha256": "1c0141e5a8c343a34c83ca56b248c64ddc7c54fbab18f88a6e5f609142134829",
-  "tests": "ERICA English home: source of the menu (/eng/s1-s3/*.php) and board links; .main-board widgets contain Korean/Chinese titles (not content). REDACTED: personal e-mail addresses replaced with *.redacted@example.org (sha256 is of the redacted file)."
+  "bytes": 64249,
+  "sha256": "3db8449791168d7e214c278d013cd0d0e85ba1cbd1593126bbd63df35a49696c",
+  "tests": "ERICA English home: source of the menu (/eng/s1-s3/*.php) and board links; .main-board widgets contain Korean/Chinese titles (not content). REDACTED: personal e-mail addresses replaced with *.redacted@example.org (sha256 is of the redacted file).",
+  "edited": "the office e-mail address in the page footer was replaced by office@example.ac.k (same shape) before committing"
  },
  {
   "file": "erica_s3_1_visa.html",
   "url": "https://global.hanyang.ac.kr/eng/s3/s3_1.php",
   "site": "erica",
   "fetched_at": "2026-11-10T01:43:32Z",
-  "bytes": 71785,
-  "sha256": "423996d6a703a75c9494e0950d94eb9e032259a5032b05da73e9de94af391a2d",
-  "tests": "Visa page; main = .sub-cnt > section; 6 tables, the last one (part-time work hours) has rowspan/colspan merged cells and a 2-row header. REDACTED: personal e-mail addresses replaced with *.redacted@example.org (sha256 is of the redacted file)."
+  "bytes": 71783,
+  "sha256": "c302dd7cceb88d7dd211132e07ead58f44053e5078a95cb4cd62e900cab7fcab",
+  "tests": "Visa page; main = .sub-cnt > section; 6 tables, the last one (part-time work hours) has rowspan/colspan merged cells and a 2-row header. REDACTED: personal e-mail addresses replaced with *.redacted@example.org (sha256 is of the redacted file).",
+  "edited": "the office e-mail address in the page footer was replaced by office@example.ac.k (same shape) before committing"
  },
  {
   "file": "erica_board_s4_1_eng_list.html",
   "url": "https://global.hanyang.ac.kr/bbs/board.php?bo_table=s4_1_eng",
   "site": "erica",
   "fetched_at": "2026-11-10T01:44:16Z",
-  "bytes": 44436,
-  "sha256": "683623ac41a430444cd069b4cf26bfdd035d65ad105be3a5ea94fee1cd92b8ad",
-  "tests": "English notice board list: #fboardlist tbody tr; pinned rows (공지) repeat posts; dates are MM-DD only; pagination ./board.php?bo_table=s4_1_eng&page=N (page must be dropped from canonical URI). REDACTED: personal e-mail addresses replaced with *.redacted@example.org (sha256 is of the redacted file)."
+  "bytes": 44434,
+  "sha256": "22456d2788232241ad0359fb6e1a37981d44513bdd3f96e93cfdaa8766f55de5",
+  "tests": "English notice board list: #fboardlist tbody tr; pinned rows (공지) repeat posts; dates are MM-DD only; pagination ./board.php?bo_table=s4_1_eng&page=N (page must be dropped from canonical URI). REDACTED: personal e-mail addresses replaced with *.redacted@example.org (sha256 is of the redacted file).",
+  "edited": "the office e-mail address in the page footer was replaced by office@example.ac.k (same shape) before committing"
  },
  {
   "file": "erica_board_s4_1_eng_wr86.html",
   "url": "https://global.hanyang.ac.kr/bbs/board.php?bo_table=s4_1_eng&wr_id=86",
   "site": "erica",
   "fetched_at": "2026-11-10T01:44:19Z",
-  "bytes": 43593,
-  "sha256": "f2c701881b55a513884661dc9a5c0cd8122f00fbc6c34d8970d6cdea2545b190",
-  "tests": "English board post: title in #bo_v header, date in #bo_v_info ('Date : 2026-11-03'), body #bo_v_con; canonical keeps bo_table+wr_id only. REDACTED: personal e-mail addresses replaced with *.redacted@example.org (sha256 is of the redacted file)."
+  "bytes": 43591,
+  "sha256": "038d87e9b5b9889347eee24d1883386cc75aa82a57a098e0e0518cb3c7425bc3",
+  "tests": "English board post: title in #bo_v header, date in #bo_v_info ('Date : 2026-11-03'), body #bo_v_con; canonical keeps bo_table+wr_id only. REDACTED: personal e-mail addresses replaced with *.redacted@example.org (sha256 is of the redacted file).",
+  "edited": "the office e-mail address in the page footer was replaced by office@example.ac.k (same shape) before committing"
  },
  {
   "file": "erica_s3_3_1_scholarships.html",
   "url": "https://global.hanyang.ac.kr/eng/s3/s3_3_1.php",
   "site": "erica",
   "fetched_at": "2026-11-10T01:44:22Z",
-  "bytes": 44846,
-  "sha256": "c90c8a4f8c0a72441325643af699a2f2e5cbd11eb2639311cbbe4d6a64ddf19d",
-  "tests": "Scholarships page (HIEA); main = .sub-cnt > section; 3 tables, two with merged cells; amounts/percentages for near-duplicate/version tests. REDACTED: personal e-mail addresses replaced with *.redacted@example.org (sha256 is of the redacted file)."
+  "bytes": 44844,
+  "sha256": "c0c5c56eac1352f86c2b8305b4c800a5ba8ac70870166f1d032ba3fd1151327f",
+  "tests": "Scholarships page (HIEA); main = .sub-cnt > section; 3 tables, two with merged cells; amounts/percentages for near-duplicate/version tests. REDACTED: personal e-mail addresses replaced with *.redacted@example.org (sha256 is of the redacted file).",
+  "edited": "the office e-mail address in the page footer was replaced by office@example.ac.k (same shape) before committing"
  }
 ]

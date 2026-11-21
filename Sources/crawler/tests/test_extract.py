@@ -263,7 +263,7 @@ def test_key_value_table_rows_read_as_label_and_value():
 def test_broken_and_run_on_emails_are_masked():
     from crawler.extract import mask_email
 
-    text = "Mail coreaembajada@mofa.go.k\nr or gsisapply@sogang.ac.kr51, office@example.ac.kr. Follow @gksmentors"
+    text = "Mail embassy@example.go.k\nr or apply@example.ac.kr51, office@example.ac.kr. Follow @gksmentors"
     assert mask_email(text) == "Mail [email]\nr or [email], [email]. Follow @gksmentors"
 
 
