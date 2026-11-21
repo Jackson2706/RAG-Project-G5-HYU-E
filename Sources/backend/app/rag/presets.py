@@ -30,7 +30,8 @@ def aaes_plus(code: str) -> dict[str, Any]:
     """AAES+ version from a four-letter code, one letter per online step (R rules, L LLM, B both): "RLRR" = A0 with an LLM step 2."""
     m = [STEP_MODE[c] for c in code]
     words = {"R": "rules", "L": "LLM", "B": "rules+LLM"}
-    return {"id": f"AP_{code}", "kind": "aaes", "group": "Ablations", "name": f"AAES+ {code}",
+    chosen = code == "RRRL"  # AAES+ as frozen for the held-out run (aaes_plus_freeze.md); display only
+    return {"id": f"AP_{code}", "kind": "aaes", "group": "Ours (AAES)" if chosen else "Ablations", "name": "AAES+ (RRRL)" if chosen else f"AAES+ {code}",
             "description": "AAES with each step done by " + ", ".join(f"{n} {words[c]}" for n, c in zip(("1", "2", "3", "4"), code, strict=True))
                            + " (steps: 1 read the student, 2 does each passage apply, 3 which detail matters, 4 decide).",
             "stages": {**AAES, "query_understanding": {"method": "profile_understanding", "params": {"mode": m[0]}},
