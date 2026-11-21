@@ -211,7 +211,7 @@ AAES LLM option: `aaes_prompts.md` (generated from the code; all hashes match `a
    its usage limit at the start of job 3 and made no change; the README was written directly for the same reason.
 7. `Report/project/gates.md`, `Report/notes/quality_gpt_check.csv` and `tag_audit_rules.md` are kept because the
    report or the AI-use statement cites them; every script that produces a file the report cites is kept.
-8. Docker Desktop was not running at 16:01 (the Mac had restarted it down); it was started and the app restarted
+8. Docker Desktop was not running at 16:01 (cause unknown; the Mac had not restarted); it was started and the app restarted
    with `start.sh` (no data change).
 
 ## Deck v6 (final prep, 2026-11-21)
