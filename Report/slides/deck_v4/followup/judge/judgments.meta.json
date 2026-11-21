@@ -1,7 +1,0 @@
-{
- "judge": "codex:gpt-6.1-sol (judged by GPT-6 Sol, v3 prompt)",
- "items": 516,
- "prompt_sha256": "3541b5db89608e1bb3df8936cd9f187b5ab963071ede2ddba0b0290d1803c5ca",
- "items_sha256": "f98b2e91a1f991ce6a0c58f131472c1f6d51c7817db60ab3ebcddd5d8269268b",
- "judgments_sha256": "3ebc12ca36f2ea318071d0943c6a0e11b443365d89ddec5c21d6a0927556ca62"
-}
