@@ -91,3 +91,23 @@ through Ollama, running locally.
   skill with `Report/voice_sample.md` as the voice sample. Every number was re-checked against `Report/results/`
   afterwards.
 - The demo script and the choice of demo cases (dev split only) were made by Claude Code from dev results.
+
+## Deck v4–v6 (2026-11-16 to 2026-11-21)
+
+- **Claude Code (Claude Opus 5.5)** orchestrated the work: it wrote the task briefs for Codex, reviewed and tested
+  every Codex change before committing, ran every dev and held-out run (under `caffeinate`, logs in `.run/`), wrote
+  the analysis scripts, the follow-up fix of deck v6 (`Sources/backend/app/rag/followup.py`) and its tests, the demo
+  and preflight scripts, and the README, report and slide-facing summaries. It alone committed and pushed.
+- **Held-out content judging:** fresh Claude Opus 5.5 subagents (12 batches of answered replies, 5 batches of
+  gold-evidence replies) judged blind with the frozen v3 prompt; each saw only the prompt and its batch, and the
+  key was read only by the scoring script after all batches were merged.
+- **Codex CLI with GPT-6 Sol** (`codex exec -s workspace-write -m gpt-6.1-sol`): code tasks T41–T45 (trace expiry and
+  delete, the two AAES+ "both" fixes, the question-major runner, the deck v5 analysis script) under task files in
+  `Sources/docs/agent_tasks/`, told not to commit or push and to touch only the files named; code reviews
+  (`codex review`); and the blind Task 2 follow-up judging (6 batches, frozen v3 prompt) and the deck v6 dev
+  follow-up judging.
+- **Labels of dev-2 and test-3:** GPT-6 Sol and GPT-6 Astra (independent annotation),
+  GPT-6 Terra (adjudication of disputes) and GPT-6 Astra (single verifier), as described under "Questions and
+  labels" above and in `Report/slides/deck_v4/questions/METHODOLOGY.md`. **No person checked the dev-2 or test-3
+  labels.**
+- The system under test still uses only `qwen3.5:4b` through local Ollama, for generation and for the AAES+ LLM steps.

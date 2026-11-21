@@ -470,6 +470,24 @@ keeps the branching benefit seen on test-1.
   (`qwen3.5:4b`) on one 16 GB machine.
 - The memory methods (M1, M2, A7), the LLM-judge ablation A5 and the external ConditionalQA benchmark were not
   run (PLAYBOOK A29).
+- The dev-2 and test-3 labels (§11–12) were written, annotated, adjudicated and verified by LLMs only (GPT-6 Astra,
+  Sol and Terra); one model did the verification and no person checked them. The held-out results compare methods
+  on these labels; they are not accuracy figures.
+- The held-out content judges (12 + 5 Claude Opus 5.5 batches) disagreed on facts a reply states only in part: some
+  batches marked them missing, others correct. Items were shuffled across methods, so this adds noise rather than
+  favouring one method, but it was not re-judged (`heldout/content_summary.md`).
+- The content rates in §12 are over each method's own answered replies, not paired: AAES+ answers 97 of the
+  held-out questions and R16 166, so the methods are scored on different sets.
+- AAES+ still over-asks: on the 215 held-out questions 0.414 of its replies ask or split where one answer was
+  needed, so it is below every baseline on the acceptable rate over all questions (§12).
+- Everything runs on one 4B generator and auxiliary model (`qwen3.5:4b`). With gold evidence it still covers only
+  0.609 of the required facts, so part of every content gap is the model, not retrieval or AAES.
+- **Privacy.** The system keeps no account and no profile store. Each question's execution trace (question, earlier
+  turns, reply) is stored in the local MongoDB for the Execution tab and expires after 30 days (a TTL index;
+  `TRACE_TTL_DAYS`, default 30). The Help panel has a "Delete stored history" button that shows how many traces are
+  stored and deletes them only after an in-page confirmation; the delete endpoint answers only on localhost
+  (`Report/slides/deck_v4/privacy_check.md`). Staff directories were not crawled and e-mail addresses were masked at
+  crawl time; a few public staff names and office phone numbers on official notices remain in the index.
 
 ## 10. Mapping to the course (Lessons 3–6)
 
@@ -546,3 +564,68 @@ Slide numbers refer to the lesson PDFs. "Status" says whether the idea is implem
 | 37–41 | RAGAS dimensions; ARES judge correction | RAGAS-style claim decomposition planned, not scored; ARES-style correction impossible without human labels | not done |
 | 42 | RGB: behaviour under controlled contexts | The negative slice (no answer-bearing evidence) and conditional slice play RGB's role for abstention | partial |
 | 43 | The evaluator rule can change a rejection score | Our own case: evaluator v1 inferred actions from the generation outcome only, so no baseline could ever be scored as giving a conditional answer or asking a question. Evaluator v2 classifies every method's final reply text the same way (§6, evaluator v1 vs v2). On the same saved test replies, B0's acceptable-action rate goes from 0.736 to 0.661 (`hyu_test_slices.csv` → `hyu_test_v2_slices.csv`), and R16's branch hits on the 15 cases that need branching from 0 to 2 (`posthoc_branch_detection.csv`), all in `Report/results/test-final/` | done (finding) |
+
+## 11. AAES+: rules, an LLM or both per step
+
+**Design.** AAES has four steps: (1) read the student's profile from the question and earlier turns, (2) label each
+retrieved chunk as applying or not, (3) find the attributes on which the applying evidence gives different
+answers, and (4) choose the action (answer, answer per case, ask, refer). In AAES every step is a rule. AAES+ lets
+each step use the rules (R), one call to the auxiliary LLM (L), or both (B: rules first, the LLM only to confirm or
+fill a gap), so a version is named by four letters; RRRR is AAES (A0). Prompts and parsers are in
+`Sources/backend/app/rag/aaes_llm.py`; the step-by-step contract is in `aaes_spec.md`. Two "both" fixes were made on
+dev before the ablation: in Step 1 a value the rules read from a hypothetical or a mention ("if I were at ERICA")
+needs LLM confirmation, and in Step 3 two branches whose extracted answers have the same meaning are merged.
+
+**Ablation (dev + dev-2, 107 questions; 36 need a question or a per-case answer).** We ran 15 versions on dev (47)
+and dev-2 (60), scored with evaluator v2 (`Report/slides/deck_v4/aaes_plus/dev_ablation.csv`). AAES (RRRR) is
+acceptable on 0.374 and keeps 25 of the 36 needed questions or splits. The versions with the highest acceptable
+rate drop most of those: RBRR 0.570 keeps 19, BBRB 0.561 keeps 19, RLRR 0.561 keeps 14, BBBB 0.542 keeps 11.
+
+**Selection rule (fixed before the ablation, `aaes_plus/selection.json`).** Among the versions that keep at least
+80% of AAES's needed questions or splits (at least 20.0 of 25), take the highest acceptable rate; ties go to fewer
+LLM calls. Five versions qualify (BRRR 26, LRRR 26, RRRB 25, RRRL 23, RRLR 22 kept), and **RRRL** has the highest
+acceptable rate, 0.393: rules in Steps 1–3 and the LLM choosing the action in Step 4. It makes 1.42 LLM calls per
+question on average and takes a median 7.55 s on a fresh (uncached) run, against 0.34 s for AAES and 35.55 s for
+BBBB. AAES+ in what follows means RRRL, frozen in `Report/slides/deck_v4/aaes_plus_freeze.md` before any held-out run.
+
+## 12. Held-out results
+
+**Setup.** One run from the frozen commit on test-3 (140 questions, new) and test-2 (75, built for AG and never
+run before), 215 questions; test-1 was not touched. Seven methods ran on each question before the next: AAES+, AAES,
+the all-both version BBBB, standard dense retrieval (B0), self-query (R15), prompted conditional answering (R16) and
+gold evidence (G1). Reply types use the frozen evaluator v2. All 215 questions have a reply type for every method.
+The test-3 labels are LLM-annotated, adjudicated and verified by one model; no person checked them.
+
+**Reply types** (`Report/slides/deck_v4/heldout/reply_types.csv`, pooled in `heldout/summary.md`). AAES+ is
+acceptable on 0.395 of all questions and 0.671 of the 70 student-dependent ones. The baselines are better overall
+(B0 0.544, R15 0.577, R16 0.609, G1 0.674; BBBB 0.563) and worse on student-dependent questions (0.086–0.200;
+BBBB 0.314). Over all questions AAES+ asks or splits unneeded on 0.414 (AAES 0.516, BBBB 0.098, baselines 0.000–0.019).
+
+**Pre-registered hypotheses** (`heldout/hypotheses.json`; paired bootstrap 95% CI, 10,000 resamples; McNemar;
+Holm over H1–H3):
+
+| | Comparison | n | AAES+ | Baseline | Difference [95% CI] | Holm p | Decision |
+|---|---|---|---|---|---|---|---|
+| H1 | acceptable reply type vs AAES | 215 | 0.395 | 0.312 | +0.084 [+0.042, +0.126] | 0.0001 | superior |
+| H2 | needed questions/splits kept vs AAES (non-inferiority, margin 0.10) | 66 | 0.697 | 0.727 | −0.030 [−0.076, +0.000] | 0.5000 | non-inferior |
+| H3 | acceptable reply type vs R16, student-dependent | 70 | 0.671 | 0.200 | +0.471 [+0.329, +0.614] | 0.0000 | superior |
+
+All three hold. AAES+ asks fewer unneeded questions than AAES (−0.102 [−0.144, −0.065]) and has about the same
+wrong-referral rate (+0.009 [+0.000, +0.023]). It costs a median 8.8 s per question against 0.4 s for AAES and
+10.2 s for R16.
+
+**Content** (`heldout/judge/content_scores.csv`, `heldout/content_summary.md`). Claude Opus 5.5 judged the 475
+answered replies of AAES+, AAES, B0 and R16 blind, with the frozen v3 prompt, in 12 disjoint batches. Over each
+method's own answered replies, AAES+ covers 0.383 [0.316, 0.454] of the required facts (AAES 0.358, B0 0.407, R16
+0.453), and 0.227 of its replies contain a wrong fact (B0 0.324, R16 0.295). On student-dependent questions 0.333 of
+its answers are for the wrong group, against 0.489 for B0 and 0.481 for R16. The intervals overlap, and the rates
+are not paired: AAES+ answers 97 questions, R16 166. With gold evidence (G1, 171 replies,
+`heldout/judge/content_scores_gold.csv`) the same 4B model covers 0.609 [0.559, 0.659] of the facts with 0.837 of
+cited sentences supported, but 0.509 of its answers to student-dependent questions are still for the wrong group: a
+single answer cannot fit every student even when the evidence is right.
+
+**Examples** (`heldout/summary.md`). "Tell me about the International Winter School, what is it about?" (T2-011):
+AAES asked the campus; AAES+ answered. "Where is the Office of International Affairs and how can I reach them?"
+(T2-017): AAES asked the campus, which the label accepts; AAES+ gave the Seoul office only. "How can I sign up for
+counseling services as an international student?" (T2-009): AAES+ answered per campus, R16 gave one answer for
+everyone.

@@ -186,4 +186,66 @@ check(abs(g3["facts (per fact)"]["kappa"] - 0.679) < 6e-4 and abs(g3["facts (per
       and g3["right_referral"]["kappa"] == 0.0 and g3["right_referral"]["agreement"] == 0.75 and g3["right_referral"]["pairs"] == 4
       and all(g3[f]["agreement"] == 1.0 for f in ("wrong_group", "asks_branch_attribute", "conditions_match"))
       and [g3[f]["pairs"] for f in ("wrong_group", "asks_branch_attribute", "conditions_match")] == [13, 3, 2], "GPT third judge")
+# Deck v5/v6 sections 11-13: each number is recomputed from its committed file and must appear in the draft.
+D = "Report/slides/deck_v4/"
+
+
+def says(text, *what):
+    check(text in draft, *what, repr(text))
+
+
+ab = {r["preset"]: r for r in csv.DictReader(open(D + "aaes_plus/dev_ablation.csv"))}
+f3 = lambda x: f"{float(x):.3f}"  # noqa: E731
+says(f"acceptable on {f3(ab['A0_AAES']['acceptable_rate'])} and keeps {ab['A0_AAES']['kept']} of the {ab['A0_AAES']['needed']} needed", "s11 A0")
+for v in ("RBRR", "BBRB", "RLRR", "BBBB"):
+    says(f"{v} {f3(ab['AP_' + v]['acceptable_rate'])} keeps {ab['AP_' + v]['kept']}", "s11", v)
+sel = json.load(open(D + "aaes_plus/selection.json"))
+eligible = sorted((r for r in ab.values() if r["preset"].startswith("AP_") and int(r["kept"]) >= sel["minimum_kept"]), key=lambda r: -int(r["kept"]))
+check(sel["choice"] == "AP_RRRL" and len(eligible) == 5 and max(eligible, key=lambda r: float(r["acceptable_rate"]))["preset"] == "AP_RRRL", "s11 selection")
+says(f"at least {sel['minimum_kept']:.1f} of {sel['reference']['kept']}", "s11 minimum")
+says(", ".join(f"{r['preset'][3:]} {r['kept']}" for r in eligible[:4]) + f", {eligible[4]['preset'][3:]} {eligible[4]['kept']} kept", "s11 eligible")
+rr = ab["AP_RRRL"]
+says(f"rate, {f3(rr['acceptable_rate'])}: rules", "s11 RRRL")
+says(f"{float(rr['llm_calls_mean']):.2f} LLM calls", "s11 calls")
+says(f"median {float(rr['fresh_seconds_median']):.2f} s on a fresh", "s11 s")
+says(f"against {float(ab['A0_AAES']['fresh_seconds_median']):.2f} s for AAES and {float(ab['AP_BBBB']['fresh_seconds_median']):.2f} s for", "s11 s2")
+pooled = {}
+for r in csv.DictReader(open(D + "heldout/reply_types.csv")):
+    if r["slice"] in ("all", "student_dependent"):
+        a = pooled.setdefault((r["preset"], r["slice"]), [0, 0.0, 0.0])
+        a[0] += int(r["cases"]); a[1] += float(r["acceptable_rate"]) * int(r["cases"]); a[2] += float(r["unneeded_rate"] or 0) * int(r["cases"])
+acc = {k: f"{v[1] / v[0]:.3f}" for k, v in pooled.items()}
+un = {k: f"{v[2] / v[0]:.3f}" for k, v in pooled.items()}
+check(pooled[("AP_RRRL", "all")][0] == 215 and pooled[("AP_RRRL", "student_dependent")][0] == 70, "s12 sizes")
+says(f"acceptable on {acc[('AP_RRRL', 'all')]} of all questions and {acc[('AP_RRRL', 'student_dependent')]} of the 70", "s12 ours")
+says(f"(B0 {acc[('B0_BASIC_DENSE_RAG', 'all')]}, R15 {acc[('R15_SELF_QUERY', 'all')]}, R16 {acc[('R16_PROMPTED_CONDITIONAL', 'all')]}, "
+     f"G1 {acc[('G1_ORACLE_CONTEXT', 'all')]}; BBBB {acc[('AP_BBBB', 'all')]})", "s12 baselines")
+base = ("B0_BASIC_DENSE_RAG", "R15_SELF_QUERY", "R16_PROMPTED_CONDITIONAL", "G1_ORACLE_CONTEXT")
+says(f"({min(acc[(b, 'student_dependent')] for b in base)}–{max(acc[(b, 'student_dependent')] for b in base)};\nBBBB {acc[('AP_BBBB', 'student_dependent')]})", "s12 dependent")
+says(f"unneeded on {un[('AP_RRRL', 'all')]} (AAES {un[('A0_AAES', 'all')]}, BBBB {un[('AP_BBBB', 'all')]}, baselines "
+     f"{min(un[(b, 'all')] for b in base)}–{max(un[(b, 'all')] for b in base)})", "s12 unneeded")
+hyp = json.load(open(D + "heldout/hypotheses.json"))
+for k, v in hyp["hypotheses"].items():
+    says(f"| {k} |", "s12 row")
+    says(f"| {v['cases']} | {v['ours']:.3f} | {v['baseline']:.3f} | {v['difference']:+.3f} [{v['ci_low']:+.3f}, {v['ci_high']:+.3f}]".replace("-", "−")
+         + f" | {v['p_holm']:.4f} | {v['decision'].replace('_', '-')} |", "s12", k)
+sec = {(x["baseline_preset"], x["metric"]): x for x in hyp["secondary"]}
+u = sec[("A0_AAES", "unneeded")]; w = sec[("A0_AAES", "wrong_referral")]; t = sec[("A0_AAES", "seconds")]
+says(f"({u['difference']:+.3f} [{u['ci_low']:+.3f}, {u['ci_high']:+.3f}])".replace("-", "−"), "s12 unneeded diff")
+says(f"({w['difference']:+.3f} [{w['ci_low']:+.3f}, {w['ci_high']:+.3f}])", "s12 referral diff")
+says(f"median {t['ours_median']:.1f} s per question against {t['baseline_median']:.1f} s for AAES and\n{sec[('R16_PROMPTED_CONDITIONAL', 'seconds')]['baseline_median']:.1f} s for R16", "s12 seconds")
+cs = {(r["preset"], r["slice"]): r for r in csv.DictReader(open(D + "heldout/judge/content_scores.csv"))}
+o = cs[("AP_RRRL", "all")]
+says(f"covers {f3(o['facts_covered'])} [{f3(o['facts_covered_ci_low'])}, {f3(o['facts_covered_ci_high'])}]", "s12 facts")
+says(f"(AAES {f3(cs[('A0_AAES', 'all')]['facts_covered'])}, B0 {f3(cs[('B0_BASIC_DENSE_RAG', 'all')]['facts_covered'])}, R16\n{f3(cs[('R16_PROMPTED_CONDITIONAL', 'all')]['facts_covered'])})", "s12 facts others")
+says(f"and {f3(o['wrong_fact_rate'])} of its replies contain a wrong fact (B0 {f3(cs[('B0_BASIC_DENSE_RAG', 'all')]['wrong_fact_rate'])}, R16 {f3(cs[('R16_PROMPTED_CONDITIONAL', 'all')]['wrong_fact_rate'])})", "s12 wrong fact")
+says(f"questions {f3(cs[('AP_RRRL', 'student_dependent')]['wrong_group_rate'])} of\nits answers are for the wrong group, against {f3(cs[('B0_BASIC_DENSE_RAG', 'student_dependent')]['wrong_group_rate'])} for B0 and "
+     f"{f3(cs[('R16_PROMPTED_CONDITIONAL', 'student_dependent')]['wrong_group_rate'])} for R16", "s12 wrong group")
+says(f"AAES+ answers {o['cases']} questions, R16 {cs[('R16_PROMPTED_CONDITIONAL', 'all')]['cases']}", "s12 answered")
+gd = {r["slice"]: r for r in csv.DictReader(open(D + "heldout/judge/content_scores_gold.csv"))}
+says(f"(G1, {gd['all']['cases']} replies", "s12 gold n")
+says(f"covers {f3(gd['all']['facts_covered'])} [{f3(gd['all']['facts_covered_ci_low'])}, {f3(gd['all']['facts_covered_ci_high'])}] of the facts with {f3(gd['all']['citation_support'])}", "s12 gold")
+says(f"but {f3(gd['student_dependent']['wrong_group_rate'])} of its answers to student-dependent", "s12 gold wrong group")
+says(f"With gold evidence it still covers only\n  {f3(gd['all']['facts_covered'])}", "s9 gold")
+says(f"held-out questions {un[('AP_RRRL', 'all')]} of its replies ask", "s9 over-asking")
 print("checked", n, "mismatches", bad)
