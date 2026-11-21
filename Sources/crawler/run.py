@@ -8,7 +8,6 @@ from datetime import datetime, timezone
 import hashlib
 import json
 from pathlib import Path
-import re
 import sys
 import time
 from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
@@ -29,8 +28,8 @@ from .extract import (
     discover_sitemap,
     extract_document,
 )
-from .fetch import CrawlStore, FetchEvent, Fetcher, RedirectNotAllowed, RequestLimitReached, USER_AGENT, read_manifest
-from .sites import ERICA_BOARD_NAMES, SITES, SiteConfig, get_site, is_board_listing
+from .fetch import CrawlStore, FetchEvent, Fetcher, RedirectNotAllowed, RequestLimitReached, read_manifest
+from .sites import SITES, SiteConfig, get_site, is_board_listing
 
 
 FIXTURE_DIR = Path(__file__).resolve().parent / "tests" / "fixtures"

@@ -18,7 +18,7 @@ from collections import Counter
 from pathlib import Path
 
 from app.config import REPO_ROOT, RESULTS_DIR, resolve_stored_path
-from evaluation import ROOT, beir
+from evaluation import beir
 from evaluation.failure_analysis import CATEGORIES, classify_fixture, classify_generation, classify_retrieval
 from evaluation.metrics.attribution import marker_validity
 from evaluation.metrics.gate import gate_metrics

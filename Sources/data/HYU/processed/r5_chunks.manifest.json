@@ -1,0 +1,192 @@
+{
+ "index_id": "hyu_20261110_97dc1269_r5",
+ "chunks": 1867,
+ "file": "r5_chunks.jsonl.gz",
+ "sha256_gz": "5d8f2e5dd6ced8bdc93a9a25d5a901dde36ac360cf87a8a12da64fce3ab3e05d",
+ "sha256_jsonl": "eb621f77a6db95cfd24ce5f5602d5eee5fdb5edb63b7ff20b0679dfb9d9cc840",
+ "bytes_gz": 714137,
+ "unmasked_emails": 0,
+ "index_manifest": {
+  "index_id": "hyu_20261110_97dc1269_r5",
+  "collection": "bench_hyu_20261110_97dc1269_r5",
+  "built_at": "2026-11-11T09:23:26.157059+00:00",
+  "corpus": {
+   "source": "snapshot:hyu-20261110-97dc1269"
+  },
+  "source_manifest_sha256": "8d1899231210be314b3b58f32e5c2d566999919908e3f0b760041643621e052f",
+  "config": {
+   "parsing": {
+    "method": "basic_parser",
+    "params": {}
+   },
+   "chunking": {
+    "method": "section_tokens",
+    "params": {
+     "chunk_size": 320,
+     "chunk_overlap": 48
+    }
+   },
+   "metadata_extraction": {
+    "method": "applicability_extractor",
+    "params": {
+     "llm_fallback": false,
+     "model": "qwen3.5:4b",
+     "temperature": 0.0,
+     "max_tokens": 256
+    }
+   },
+   "embedding": {
+    "method": "bge_small_en",
+    "params": {}
+   },
+   "vector_indexing": {
+    "method": "qdrant_mongodb",
+    "params": {
+     "hnsw_m": 16,
+     "hnsw_ef_construct": 100,
+     "indexing_threshold_kb": 20000
+    }
+   }
+  },
+  "embedding_contract": {
+   "method": "bge_small_en",
+   "model": "BAAI/bge-small-en-v1.5",
+   "revision": "5c38ec7c405ec4b44b94cc5a9bb96e735b38267a",
+   "dimension": 384,
+   "normalize": true,
+   "similarity": "cosine",
+   "max_seq_length": 512,
+   "query_prefix": "Represent this sentence for searching relevant passages: ",
+   "document_prefix": "",
+   "document_text": "section heading + newline + chunk text",
+   "device": "cpu"
+  },
+  "documents": 362,
+  "chunks": 1867,
+  "vector_index": {
+   "points": 1867,
+   "indexed_vectors": 0,
+   "status": "green",
+   "segments": 5,
+   "hnsw_m": 16,
+   "hnsw_ef_construct": 100,
+   "indexing_threshold_kb": 20000,
+   "hnsw_built": false
+  },
+  "chunk_id_sha256": "7d37443a971672694f0c1b6cea299c51d8ac98ca0a1ae5e540a7068d995efb88",
+  "source_spans_valid": 1867,
+  "source_spans_invalid": 0,
+  "truncated_by_embedder": 0,
+  "applicability": {
+   "vocabulary_version": "v1",
+   "chunks": 1867,
+   "tagged_by_rule": 1189,
+   "tagged_by_llm": 0,
+   "rule_tagged": 1189,
+   "llm_tagged": 0,
+   "unconditioned": 678,
+   "partition": {
+    "rule_tagged": 1189,
+    "rule_unconditioned": 291,
+    "rule_cue_unknown": 387,
+    "llm_tagged": 0,
+    "llm_unconditioned": 0,
+    "llm_rejected": 0,
+    "llm_errors": 0
+   },
+   "constraint_fields_by_method": {
+    "rule": 2632
+   },
+   "llm_candidates": 0,
+   "llm_called": 0,
+   "llm_cache_hits": 0,
+   "llm_accepted": 0,
+   "llm_rejected": 0,
+   "llm_rejected_fields_by_reason": {},
+   "llm_rejected_total": 0,
+   "llm_errors": 0,
+   "degree_inherited": 804,
+   "llm": {
+    "enabled": false,
+    "role": "auxiliary",
+    "model": "qwen3.5:4b",
+    "digest": null,
+    "prompt_version": "v3",
+    "postcheck_version": "p1",
+    "vocabulary_version": "v1",
+    "temperature": 0,
+    "num_ctx": 4096,
+    "seed": 42,
+    "thinking": "off",
+    "cache_path": "/Users/jackson/Desktop/Courses/RAG Course - HYU-E/hyu-compass/Sources/data/HYU/cache/llm_tags.jsonl"
+   }
+  },
+  "timings": {
+   "parse_ms": 0.0,
+   "chunk_ms": 494.8,
+   "metadata_ms": 0.6,
+   "tag_ms": 2480.3,
+   "embed_ms": 39331.1,
+   "index_ms": 330.7,
+   "total_ms": 42637.5
+  },
+  "embedding_texts_per_s": 47.5,
+  "snapshot_id": "hyu-20261110-97dc1269",
+  "status": "published",
+  "snapshot_manifest_sha256": "97dc126903bdfafcd77643abd12df5306afa900379f5f43aefe0437818109b53",
+  "verification": {
+   "checks": {
+    "documents_expected": true,
+    "chunks_equal_points": true,
+    "dimension_384": true,
+    "chunk_ids_unique": true,
+    "every_point_has_chunk": true,
+    "max_tokens_le_512": true,
+    "truncated_zero": true,
+    "applicability_valid": true,
+    "llm_errors_zero": true,
+    "partition_complete": true,
+    "span_text_matches": true,
+    "payload_has_scope_campus": true,
+    "no_unmasked_emails": true,
+    "no_hangul_headers": true,
+    "default_index_unchanged": true
+   },
+   "facts": {
+    "expected_documents": 362,
+    "mongo_documents": 362,
+    "mongo_chunks": 1867,
+    "qdrant_points": 1867,
+    "dimension": 384,
+    "unique_chunk_ids": 1867,
+    "points_without_chunk": 0,
+    "max_embedded_tokens": 344,
+    "truncated_by_embedder": 0,
+    "invalid_applicability": 0,
+    "llm_errors": 0,
+    "partition": {
+     "rule_cue_unknown": 387,
+     "rule_unconditioned": 291,
+     "rule_tagged": 1189
+    },
+    "span_text_mismatches": 0,
+    "span_text_mismatch_chunk_ids": [],
+    "points_missing_app_fields": 0,
+    "unmasked_emails": 0,
+    "hangul_headers": 0,
+    "default_before": {
+     "documents": 5,
+     "chunks": 23,
+     "vectors": 23
+    },
+    "default_after": {
+     "documents": 5,
+     "chunks": 23,
+     "vectors": 23
+    }
+   }
+  },
+  "published_at": "2026-11-11T09:23:28.346253+00:00"
+ },
+ "source": "read-only export of the MongoDB chunks collection of the r5 index (text, section, spans, applicability tags)"
+}

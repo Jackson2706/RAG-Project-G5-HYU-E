@@ -90,11 +90,6 @@ def span_f1(a: list[dict], b: list[dict]) -> float:
     return 2 * precision * recall / (precision + recall) if overlap else 0.0
 
 
-def mean_span_f1(a: list[list[dict]], b: list[list[dict]]) -> float:
-    scores = [span_f1(left, right) for left, right in zip(a, b, strict=True)]
-    return sum(scores) / len(scores)
-
-
 def _load(path: Path) -> dict[str, dict]:
     """One label file, or a folder: every *.jsonl in it, keeping only label rows (with expected_behavior)."""
     rows = []

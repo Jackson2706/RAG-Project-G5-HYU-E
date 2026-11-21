@@ -44,7 +44,6 @@ OPEN = {"T14-113": "10.4.1, 10.4.5", "T14-026": "10.4.5", "T14-130": "11.6, 10.4
 def rule(a, b):
     rules = []
     if a["answerability"] != b["answerability"]:
-        neg = {"partial", "unanswerable", "external_only"}
         old = a["outdated_evidence"] or b["outdated_evidence"]
         rules.append("10.1 term" if old else "")
         rules.append("10.3 negative precedence" if {a["answerability"], b["answerability"]} & {"external_only", "unanswerable"} else "9.1 facts counted")
