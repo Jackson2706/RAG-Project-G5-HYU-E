@@ -108,6 +108,107 @@ audit artifact and did not contribute to the freeze.
 - Index r5: 0 unmasked e-mails (1,424 masked). 292 office phone numbers. 23 title-plus-name candidates (public staff
   on notices).
 
+## Deck v6 (final prep, 2026-11-21)
+
+**Summary.** The follow-up fix is **accepted**: after AAES asks a detail, a reply that only gives the detail now
+answers the student's earlier question. Single-turn behaviour is unchanged (94 of 94 dev replies identical with the flag
+off and on), and on the Task 2 personas reply-only facts covered rose from 0.000 to 0.205 (AAES) and 0.255 (AAES+) —
+post-hoc, dev only. Preflight: all 9 checks pass. Demo: D1–D3 work 3/3 with AAES+; D4 (winter school, dev wording)
+still asks the campus 3/3, the known failure. Report §9, §11–§13 and the AI-use statement are updated; the number
+check passes (377 checks, 0 mismatches).
+
+### Task 1 · Follow-up fix
+
+- Code: `Sources/backend/app/rag/followup.py` (detection, marker), hooks in `pipeline.run_rag` (effective question;
+  the reply's detail merged as a *stated* attribute inside the traced Step 1), `api.py` (validated `followup` marker),
+  `config.py` (`followup_resolution`, default on in the app), runner `--followup-resolution` (off unless set);
+  frontend sends back the last reply's marker (per preset in compare mode, dropped by "Forget my details") and the
+  Execution tab shows "Answering your earlier question: …". Tests: `tests/test_followup.py` (17: the brief's positive
+  and negative cases, carried details, end to end with the flag on and off), `src/test/followup.test.ts`.
+- Codex review (`codex review`, GPT-6 Sol) found six P2 issues, all fixed before any run: carry earlier resolved
+  details forward; imperative openers ("Tell me about … at Seoul") are a new question; "Forget my details" drops the
+  marker; compare mode matches markers by preset id; the detail applies when Step 1 is off; the traced profile is the
+  one used.
+- **Regression** (`Report/results/deck6-regress-off`, `deck6-regress-on`, commit `269eb54`): 47 dev questions × A0 and
+  AP_RRRL, LLM cache on: reply types and reply texts identical, 94/94.
+- **Dev check** (post-hoc, dev only; `followup_v6/summary.md`, `content.json`, `transcripts.md`; judged blind by
+  GPT-6 Sol, v3 prompt, 3 batches of 26):
+
+| Reply only | Facts covered | Wrong fact | Wrong group | Turns per persona | Answer after one reply |
+|---|---|---|---|---|---|
+| AAES, Phase 4 (before) | 0.000 | 0.000 | 0.080 | 2.79 | 10 of 39 |
+| AAES with the fix | 0.205 | 0.136 | 0.269 | 2.64 | 13 of 39 |
+| AAES+ with the fix | 0.255 | 0.128 | 0.296 | 2.36 | 14 of 36 |
+
+  Wrong facts and wrong-group answers rise too: before the fix the reply answered another question, so it could not
+  be wrong about this one. T14-033: before, "I'm an undergraduate student." got a TOPIK scholarship answer; now AAES+
+  answers the asked question (where to apply to return) and says it found no page (retrieval misses it).
+- Measured failure, fixed after the check: 3 of 107 detail replies ("I'm a non-degree student.") were not resolved
+  because the option matcher missed the hyphen; fixed with a test (`fffb4b2`), not re-run.
+
+### Task 2 · Demo preparation
+
+- Compare columns: B0, R16, **AAES+ (RRRL)**. AP_RRRL was already selectable; it is now shown as "AAES+ (RRRL)" in the
+  "Ours (AAES)" group (display only; id and configuration unchanged).
+- `Sources/demo_preflight.sh` output (`demo_preflight_v6.txt`):
+
+```
+HYU Compass demo preflight  2026-11-21 11:51:53 KST  commit 092638e
+PASS  Docker: MongoDB container running
+PASS  Docker: Qdrant container running
+PASS  Backend up and reaches MongoDB + Qdrant (http://127.0.0.1:8000/api/health)
+PASS  Ollama running with qwen3.5:4b
+PASS  Index hyu_20261110_97dc1269_r5 present
+PASS  Frontend up (http://127.0.0.1:5173)
+PASS  Warm-up B0_BASIC_DENSE_RAG: B0 — Basic Dense RAG: answered, 14.8 s
+PASS  Warm-up R16_PROMPTED_CONDITIONAL: R16 — Prompted conditional answering: answered, 13.3 s
+PASS  Warm-up AP_RRRL: AAES+ (RRRL): CONDITIONAL, 17.1 s
+ALL PASS
+```
+
+- Rehearsal, 3 runs each, run 1 cold (`demo_trials_v6.csv`, `scripts/deck_v6_demo.py`; reply types by evaluator v2):
+
+| Scenario | Standard dense (B0) | Prompted conditional (R16) | AAES+ (RRRL) |
+|---|---|---|---|
+| D1 insurance rules | answer 3/3 (7.6–12.6 s) | per case 3/3 (9.2–11.1 s) | per case 3/3 (10.2–13.9 s) |
+| D2 counseling | answer 3/3 (0.7–5.6 s) | asks 1/3, answer 2/3 (2.8–8.1 s) | asks 3/3 (1.1–4.1 s) |
+| D2 → "I'm a Seoul campus student." | answer 3/3 (5.9–11.4 s) | refers/abstains 2/3, answer 1/3 (4.8–7.6 s) | per case 2/3, answer 1/3 (5.9–12.1 s) |
+| D3 Seoul student, pet dog in dorm | refers/abstains 3/3 (2.2–9.3 s) | refers/abstains 3/3 (2.4–9.0 s) | refers/abstains 3/3 (1.2–7.7 s) |
+| D4 winter school (dev wording) | answer 3/3 (1.1–5.8 s) | answer 3/3 (2.1–7.5 s) | asks 3/3 (1.1–3.8 s) |
+
+  D2: AAES+ answers the counseling question per degree level after the campus reply, 3/3, with "Answering your
+  earlier question" in the trace; B0 and R16 treat the reply as a new question (dorm or "no information"). D3:
+  AAES+ refers to "the Seoul campus OIA office" 3/3; B0 and R16 say they found nothing. D4 is the known failure:
+  AAES+ asks the campus 3/3 while B0 and R16 answer; T2-011 (held-out wording) was not run.
+- Fallback video D1–D3 in compare mode: `Report/slides/deck_v4/demo_D1_D3_fallback_v6.webm` (17 MB, committed;
+  recorded after a first take that overlapped a backend reload was discarded, `.run/demo_video_v6_reloaded/`).
+  Screenshot: `Report/figures/usability/u17_followup_answer.png` (question, campus question, reply, answer, and
+  "Answering your earlier question" in the Execution tab).
+
+### Task 3 · Logs, report, AI use
+
+- `Report/results/TEST_RUNS.md`: the three deck v5 held-out rows now sit under "Held-out runs (deck v5)" with the
+  columns Date | Run id | Git SHA | Configs | Reason; no row changed.
+- `Report/report/draft.md`: new §11 (AAES+ design, 15-version ablation, selection rule, RRRL), §12 (held-out reply
+  types, H1–H3, content by Claude Opus 5.5, gold-evidence wrong-group 0.509, seconds), §13 (Task 2 and the fix);
+  §9 adds the LLM-only dev-2/test-3 labels, judge inconsistency, unpaired content rates, 41% over-asking, the 4B
+  model, and a privacy paragraph (30-day trace expiry, the delete button, localhost only).
+  `Report/notes/check_report_numbers.py` re-derives every new number from committed files: 377 checks, 0 mismatches.
+- `Report/ai_use_statement.md`: new "Deck v4–v6" section (Claude Code, Opus 5.5 judges, Codex/GPT-6 Sol, the GPT-6
+  Astra/Sol/Terra labels; no person checked dev-2/test-3).
+
+### Decisions taken without the user (v6)
+
+1. The clarify marker travels with the request (`followup` field) instead of being looked up server-side, because the
+   API is stateless; the backend validates it (sizes, vocabulary values) and the flag decides whether it is used.
+2. Imperative openers (tell, explain, show, give, list, describe) count like question words, after Codex showed
+   "Tell me about dormitory fees at Seoul" being resolved back to the counseling question.
+3. The dev check's judge items show the effective (earlier) question for resolved replies, so the judge scores the
+   reply against what it answered.
+4. The first fallback video was discarded because a backend auto-reload (my test edit) happened mid-recording; the
+   second take had no reload and all 12 requests completed.
+5. Demo method names: only the display name and group of AP_RRRL changed, so held-out results and freezes are untouched.
+
 ## Deck v5 (brief v5, 2026-11-20/21)
 
 Label limitation, stated plainly: the dev-2 and test-3 labels are LLM-annotated, LLM-adjudicated and verified by one
