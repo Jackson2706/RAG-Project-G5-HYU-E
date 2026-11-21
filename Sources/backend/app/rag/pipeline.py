@@ -20,6 +20,7 @@ from typing import Any
 
 from app.rag.aaes import extract_profile, with_caveat
 from app.rag.followup import apply_stated, clarify_marker, resolve
+from app.rag.reply_cleanup import clean_reply as tidy
 from app.rag.blocks.retrieval.hybrid_fusion.rrf import reciprocal_rank_fusion
 from app.rag.registry import PIPELINE, STAGES, create_block, get_method
 from app.rag.schemas import (INSUFFICIENT_ANSWER, INSUFFICIENT_MARKER, Evidence, FilterCriteria, FinalAnswer, GenerationResult,
@@ -267,7 +268,8 @@ async def _retrieve(block: Any, queries: list[str], prefilter: RetrievalFilter |
 
 async def run_rag(question: str, config: dict, services: Services, emit: Callable[[dict], None] = lambda event: None, *,
                   stop_after: str | None = None, save_trace: bool = True, history: list[str] | None = None,
-                  oracle: dict | None = None, followup: dict | None = None, followup_resolution: bool = False) -> dict:
+                  oracle: dict | None = None, followup: dict | None = None, followup_resolution: bool = False,
+                  clean_reply: bool = False) -> dict:
     """Answer one question with the validated `config`. Returns the full trace (also saved to MongoDB).
 
     stop_after: a stage id; later stages are skipped (the benchmark runner uses "evidence_sufficiency"
@@ -276,6 +278,8 @@ async def run_rag(question: str, config: dict, services: Services, emit: Callabl
     history:    earlier user turns of the session (AAES step 1 reads them as "remembered" profile facts).
     followup:   the previous reply's clarify marker (trace["clarify"]); with followup_resolution=True a detail-only
                 reply answers the earlier question (app/rag/followup.py). Off by default: evaluation runs are unchanged.
+    clean_reply: remove internal markers and merge "ask the office" cases of a per-case answer (app/rag/reply_cleanup.py);
+                off by default, so evaluation runs score the writer's own text (the raw text is kept as trace["raw_answer"]).
     oracle:     a labeled case's {"profile": stated_profile, "evidence": [Evidence dicts]} for the oracle methods
                 (A2 oracle_profile, G1 oracle_evidence); a config using them without it fails with a clear error.
     """
@@ -399,6 +403,11 @@ async def run_rag(question: str, config: dict, services: Services, emit: Callabl
                 generated = await step("generation", lambda b: b.generate(prompt, on_token), {"messages": prompt.messages})
                 trace["model"] = generated.model
             final = attach_sources(generated, prompt)
+            if clean_reply:
+                cleaned = tidy(final.answer, decision.action if decision is not None else None)
+                if cleaned != final.answer:
+                    trace["raw_answer"] = final.answer
+                    final.answer = cleaned
             if decision is not None and decision.action:
                 answered = final.outcome == "answered"
                 if answered:

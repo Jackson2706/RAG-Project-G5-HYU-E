@@ -54,6 +54,7 @@ class Settings(BaseSettings):
     qdrant_path: str | None = None  # optional: embedded Qdrant in a folder instead of the Docker server
     qdrant_collection: str = "hyu_chunks"
     trace_ttl_days: int = Field(default=30, ge=0)
+    clean_reply: bool = True  # deck v7: remove internal markers, merge "ask the office" cases (app only; runs score the raw text)
     followup_resolution: bool = True  # deck v6: a detail-only reply to an AAES question answers the earlier question (app only)
     # The HYU snapshot index revision that HYU experiments, labeling and the demo use (PLAYBOOK A13).
     # r1/r2 stay in the databases for rollback; switch back with HYU_INDEX_ID=hyu_20261110_97dc1269_r2.

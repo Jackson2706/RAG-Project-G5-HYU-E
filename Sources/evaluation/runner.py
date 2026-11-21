@@ -417,12 +417,14 @@ async def run_generation_task(run: Run, task: Task) -> dict:
 
 
 FOLLOWUP_RESOLUTION = False  # deck v6: off unless a run passes --followup-resolution (recorded in the manifest's argv)
+CLEAN_REPLY = False  # deck v7: off unless a run passes --clean-reply
 
 
 async def run_hyu_case(case: dict, config: dict, services: Services, documents: dict, lookup) -> dict:
     """The same pipeline call and raw record for either HYU run order."""
     trace = await run_rag(hyu_suite.question_for(case, config), config, services, save_trace=False, history=hyu_suite.history_of(case),
-                          oracle=hyu_suite.oracle_for(case, documents), followup_resolution=FOLLOWUP_RESOLUTION)
+                          oracle=hyu_suite.oracle_for(case, documents), followup_resolution=FOLLOWUP_RESOLUTION,
+                          clean_reply=CLEAN_REPLY)
     return hyu_suite.trace_record(case, trace, lookup)
 
 
@@ -702,10 +704,11 @@ def main() -> int:
     parser.add_argument("--case-major", action="store_true", help="HYU only: run all presets on each case before the next case")
     parser.add_argument("--stop-at", type=stop_at_time, help="HYU only: stop before the next case at this ISO 8601 time with UTC offset")
     parser.add_argument("--followup-resolution", action="store_true", help="HYU only: switch on follow-up resolution (off in every frozen run)")
+    parser.add_argument("--clean-reply", action="store_true", help="HYU only: switch on the reply cleanup (off in every frozen run)")
     parser.add_argument("--download", help="download scifact,nfcorpus,arguana,scifact_original,conditionalqa into Sources/data/benchmarks/ and exit")
     args = parser.parse_args()
-    global FOLLOWUP_RESOLUTION
-    FOLLOWUP_RESOLUTION = args.followup_resolution
+    global FOLLOWUP_RESOLUTION, CLEAN_REPLY
+    FOLLOWUP_RESOLUTION, CLEAN_REPLY = args.followup_resolution, args.clean_reply
     if (args.case_major or args.stop_at is not None) and args.suite != "hyu":
         parser.error("--case-major and --stop-at require --suite hyu")
     if args.download:

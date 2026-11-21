@@ -210,7 +210,8 @@ async def chat(body: ChatRequest, request: Request):
     await check_runnable(request, config, body.index_id)
     oracle = demo_oracle(body, config)
     return await run_rag(body.question.strip(), config, services(request, body.index_id), history=body.history, oracle=oracle,
-                         followup=body.followup and body.followup.model_dump(), followup_resolution=get_settings().followup_resolution)
+                         followup=body.followup and body.followup.model_dump(), followup_resolution=get_settings().followup_resolution,
+                         clean_reply=get_settings().clean_reply)
 
 
 @router.post("/chat/stream")
@@ -225,7 +226,8 @@ async def chat_stream(body: ChatRequest, request: Request):
     async def run():
         try:
             await run_rag(body.question.strip(), config, run_services, emit=queue.put_nowait, history=body.history, oracle=oracle,
-                         followup=body.followup and body.followup.model_dump(), followup_resolution=get_settings().followup_resolution)
+                         followup=body.followup and body.followup.model_dump(), followup_resolution=get_settings().followup_resolution,
+                         clean_reply=get_settings().clean_reply)
         finally:
             queue.put_nowait(None)  # tells the stream below that we are finished
 
