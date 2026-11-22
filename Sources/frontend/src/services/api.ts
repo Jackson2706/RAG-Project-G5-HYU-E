@@ -23,7 +23,9 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return body as T;
 }
 
-export const BACKEND_DOWN = "Cannot reach the HYU Compass backend at http://127.0.0.1:8000. Start it with ./start.sh in the Sources folder, then send the question again.";
+export const BACKEND_DOWN = import.meta.env.PROD
+  ? "Cannot reach the deployed HYU Compass backend. Check VITE_API_BASE_URL and the backend/CORS configuration."
+  : "Cannot reach the HYU Compass backend at http://127.0.0.1:8000. Start it with ./start.sh in the Sources folder, then send the question again.";
 
 /** FastAPI errors are a string, a list of field errors (request validation), or {message, errors: [...]} for an invalid configuration. */
 export function errorText(detail: unknown, status: number): string {
