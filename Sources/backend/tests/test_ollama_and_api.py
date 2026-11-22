@@ -69,10 +69,10 @@ async def test_ollama_http_error():
 async def test_groq_uses_openai_compatible_models_and_streaming():
     def handler(request: httpx.Request) -> httpx.Response:
         if request.url.path.endswith("/models"):
-            return httpx.Response(200, json={"data": [{"id": "llama-3.1-8b-instant"}]})
+            return httpx.Response(200, json={"data": [{"id": "qwen/qwen3.8-27b"}]})
         if request.url.path.endswith("/chat/completions"):
             body = json.loads(request.content)
-            assert body["model"] == "llama-3.1-8b-instant"
+            assert body["model"] == "qwen/qwen3.8-27b"
             assert body["stream"] is True
             content = [
                 'data: {"choices":[{"delta":{"content":"Groq "},"finish_reason":null}]}\n\n',
@@ -86,7 +86,7 @@ async def test_groq_uses_openai_compatible_models_and_streaming():
         "https://api.groq.com/openai/v1",
         api_key="test-key",
         provider="groq",
-        default_model="llama-3.1-8b-instant",
+        default_model="qwen/qwen3.8-27b",
         transport=httpx.MockTransport(handler),
     )
     model = await client.pick_model("", "")

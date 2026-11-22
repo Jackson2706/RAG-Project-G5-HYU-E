@@ -99,7 +99,7 @@ class Settings(BaseSettings):
         validation_alias=AliasChoices("GROQ_BASE_URL", "groq_base_url"),
     )
     groq_chat_model: str = Field(
-        default="llama-3.1-8b-instant",
+        default="qwen/qwen3.8-27b",
         validation_alias=AliasChoices("GROQ_CHAT_MODEL", "groq_chat_model"),
     )
 
