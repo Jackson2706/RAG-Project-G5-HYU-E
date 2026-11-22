@@ -62,7 +62,7 @@ jobs:
           fi
           GROQ_MODEL="${{ secrets.GROQ_CHAT_MODEL }}"
           if [ -z "$GROQ_MODEL" ]; then
-            GROQ_MODEL="openai/gpt-oss-20b"
+            GROQ_MODEL="llama-3.1-8b-instant"
           fi
 
           az containerapp update \
