@@ -1,7 +1,6 @@
-"""A small async client for the local Ollama server (GET /api/tags, POST /api/show, POST /api/chat).
+"""Local Ollama and cloud Groq chat client.
 
-One client is shared by the app and by the benchmark runner, for generation and for the auxiliary LLM
-calls (query rewriting, multi-query, HyDE, RankGPT).
+The existing OllamaClient name is kept as the internal interface used by the RAG pipeline.
 """
 
 from __future__ import annotations
@@ -33,17 +32,37 @@ def cache_key(model: dict, messages: list[dict], options: dict, think: str) -> s
 
 
 class OllamaClient:
-    def __init__(self, base_url: str, timeout: float = 120.0, transport: httpx.AsyncBaseTransport | None = None) -> None:
+    def __init__(self, base_url: str, timeout: float = 120.0, transport: httpx.AsyncBaseTransport | None = None,
+                 api_key: str | None = None, provider: str = "ollama", default_model: str = "") -> None:
         self.base_url = base_url
-        self.http = httpx.AsyncClient(base_url=base_url, timeout=httpx.Timeout(timeout, connect=5.0), transport=transport)
+        self.provider = provider
+        self.default_model = default_model
+        headers = {"Authorization": f"Bearer {api_key}"} if api_key else None
+        self.http = httpx.AsyncClient(base_url=base_url, headers=headers, timeout=httpx.Timeout(timeout, connect=5.0), transport=transport)
+
+    @classmethod
+    def from_settings(cls, settings) -> "OllamaClient":
+        provider = (settings.llm_provider or "ollama").lower()
+        if provider == "groq":
+            return cls(settings.groq_base_url, settings.ollama_timeout, api_key=settings.groq_api_key,
+                       provider="groq", default_model=settings.groq_chat_model)
+        return cls(settings.ollama_base_url, settings.ollama_timeout,
+                   provider="ollama", default_model=settings.ollama_chat_model)
 
     async def list_models(self) -> list[dict]:
         """Installed models: [{"name", "parameter_size", "capabilities"}]."""
         try:
-            response = await self.http.get("/api/tags")
+            response = await self.http.get("/models" if self.provider == "groq" else "/api/tags")
             response.raise_for_status()
         except httpx.HTTPError as exc:
-            raise OllamaError(f"Cannot reach Ollama at {self.base_url}. Start the Ollama app (or run: ollama serve) and send the question again.") from exc
+            service = "Groq" if self.provider == "groq" else "Ollama"
+            raise OllamaError(f"Cannot reach {service} at {self.base_url}. ({exc.__class__.__name__})") from exc
+        if self.provider == "groq":
+            return [
+                {"name": item["id"], "digest": None, "parameter_size": None,
+                 "quantization": None, "capabilities": ["completion"]}
+                for item in response.json().get("data", [])
+            ]
         return [
             {"name": m["name"], "digest": m.get("digest"), "parameter_size": m.get("details", {}).get("parameter_size"),
              "quantization": m.get("details", {}).get("quantization_level"), "capabilities": m.get("capabilities", [])}
@@ -53,6 +72,10 @@ class OllamaClient:
     async def model_identity(self, model: dict) -> dict[str, Any]:
         """What exactly is this model: tag, digest, size, quantization, context length, capabilities (for experiment records)."""
         identity = {k: model.get(k) for k in ("name", "digest", "parameter_size", "quantization", "capabilities")}
+        if self.provider == "groq":
+            identity["provider"] = "groq"
+            identity["context_length"] = None
+            return identity
         try:
             response = await self.http.post("/api/show", json={"model": model["name"]})
             response.raise_for_status()
@@ -68,17 +91,29 @@ class OllamaClient:
         """The requested installed model, else the default, else the first installed one."""
         models = await self.list_models()
         if not models:
+            if self.provider == "groq":
+                raise OllamaError("No Groq chat models are available.")
             raise OllamaError("No Ollama models are installed. Run: ollama pull qwen3:4b")
+        if self.provider == "groq" and not default:
+            default = self.default_model
+        if self.provider == "groq" and not requested:
+            requested = default
         for name in (requested, default):
             if name:
                 match = next((m for m in models if m["name"] == name), None)
                 if match is None:
+                    if self.provider == "groq":
+                        raise OllamaError(f"Groq model '{name}' is not available. Available: {', '.join(m['name'] for m in models)}")
                     raise OllamaError(f"Model '{name}' is not installed. Installed: {', '.join(m['name'] for m in models)}")
                 return match
         return models[0]
 
     async def chat_stream(self, model: dict, messages: list[dict], options: dict[str, Any], think: str = "off",
                           timeout: float | None = None, usage: dict | None = None, _no_cache: bool = False) -> AsyncIterator[str]:
+        if self.provider == "groq":
+            async for piece in self._groq_chat_stream(model, messages, options, timeout, usage):
+                yield piece
+            return
         """Yield the answer piece by piece.
 
         options: Ollama options, e.g. {"temperature": 0, "num_predict": 512, "num_ctx": 4096, "top_p": 0.9, "seed": 42}
@@ -148,6 +183,65 @@ class OllamaClient:
             raise OllamaError("Ollama did not answer in time (timeout).") from exc
         except httpx.TransportError as exc:
             raise OllamaError(f"Lost connection to Ollama at {self.base_url}.") from exc
+
+    async def _groq_chat_stream(self, model: dict, messages: list[dict], options: dict[str, Any],
+                                timeout: float | None = None, usage: dict | None = None) -> AsyncIterator[str]:
+        body: dict[str, Any] = {
+            "model": model["name"],
+            "messages": messages,
+            "stream": True,
+            "temperature": max(float(options.get("temperature", 0.2)), 1e-8),
+            "top_p": float(options.get("top_p", 0.9)),
+            "max_tokens": int(options.get("num_predict", 1024)),
+        }
+        if options.get("seed") is not None:
+            body["seed"] = int(options["seed"])
+        received_text = False
+        try:
+            request_timeout = httpx.Timeout(timeout, connect=5.0) if timeout else self.http.timeout
+            async with self.http.stream("POST", "/chat/completions", json=body, timeout=request_timeout) as response:
+                if response.status_code != 200:
+                    await response.aread()
+                    try:
+                        detail = response.json().get("error", {}).get("message")
+                    except Exception:
+                        detail = None
+                    raise OllamaError(f"Groq returned {response.status_code}: {detail or response.text[:200]}")
+                async for line in response.aiter_lines():
+                    line = line.strip()
+                    if not line:
+                        continue
+                    if not line.startswith("data:"):
+                        continue
+                    data = line[5:].strip()
+                    if data == "[DONE]":
+                        return
+                    try:
+                        chunk = json.loads(data)
+                    except json.JSONDecodeError:
+                        continue
+                    if "error" in chunk:
+                        raise OllamaError(f"Groq error: {chunk['error']}")
+                    choice = (chunk.get("choices") or [{}])[0]
+                    delta = choice.get("delta") or {}
+                    text = delta.get("content")
+                    if text:
+                        received_text = True
+                        yield text
+                    chunk_usage = chunk.get("x_groq", {}).get("usage") or chunk.get("usage")
+                    if usage is not None and chunk_usage:
+                        usage.update({
+                            "prompt_tokens": chunk_usage.get("prompt_tokens"),
+                            "completion_tokens": chunk_usage.get("completion_tokens"),
+                            "total_tokens": chunk_usage.get("total_tokens"),
+                            "done_reason": choice.get("finish_reason"),
+                        })
+            if not received_text:
+                raise OllamaError("Groq returned no answer text. Check the Groq model, key, and chat-completions access.")
+        except httpx.TimeoutException as exc:
+            raise OllamaError("Groq did not answer in time (timeout).") from exc
+        except httpx.TransportError as exc:
+            raise OllamaError(f"Lost connection to Groq at {self.base_url}.") from exc
 
     async def complete(self, model: dict, messages: list[dict], options: dict[str, Any], think: str = "off",
                        timeout: float | None = None) -> tuple[str, dict]:

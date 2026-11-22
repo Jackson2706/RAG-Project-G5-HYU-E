@@ -65,6 +65,37 @@ async def test_ollama_http_error():
         [p async for p in client.chat_stream({"name": "m", "capabilities": []}, [], {"num_predict": 10})]
 
 
+@pytest.mark.anyio
+async def test_groq_uses_openai_compatible_models_and_streaming():
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path.endswith("/models"):
+            return httpx.Response(200, json={"data": [{"id": "qwen/qwen3.8-27b"}]})
+        if request.url.path.endswith("/chat/completions"):
+            body = json.loads(request.content)
+            assert body["model"] == "qwen/qwen3.8-27b"
+            assert body["stream"] is True
+            content = [
+                'data: {"choices":[{"delta":{"content":"Groq "},"finish_reason":null}]}\n\n',
+                'data: {"choices":[{"delta":{"content":"works"},"finish_reason":"stop"}],"usage":{"prompt_tokens":10,"completion_tokens":2,"total_tokens":12}}\n\n',
+                "data: [DONE]\n\n",
+            ]
+            return httpx.Response(200, text="".join(content), headers={"content-type": "text/event-stream"})
+        return httpx.Response(404)
+
+    client = OllamaClient(
+        "https://api.groq.com/openai/v1",
+        api_key="test-key",
+        provider="groq",
+        default_model="qwen/qwen3.8-27b",
+        transport=httpx.MockTransport(handler),
+    )
+    model = await client.pick_model("", "")
+    usage = {}
+    pieces = [p async for p in client.chat_stream(model, [], {"temperature": 0.1, "top_p": 0.9, "num_predict": 100}, usage=usage)]
+    assert "".join(pieces) == "Groq works"
+    assert usage["total_tokens"] == 12
+
+
 # ------------------------------------------------------------------ API
 
 
@@ -86,6 +117,22 @@ def test_registry_endpoint(api):
     assert not next(m for m in stages["chunking"]["methods"] if m["method_id"] == "semantic")["implemented"]
     assert stages["dense_retrieval"]["methods"][0]["parameters"]["search_mode"]["advanced"]
     assert "citation_verification" not in stages and "response_guard" not in stages
+
+
+def test_azure_static_web_app_cors(api):
+    for origin in (
+        "https://calm-ground-0036c6b00.4.azurestaticapps.net",
+        "https://preview-123.azurestaticapps.net",
+    ):
+        response = api.options(
+            "/api/pipeline/registry",
+            headers={
+                "Origin": origin,
+                "Access-Control-Request-Method": "GET",
+            },
+        )
+        assert response.status_code == 200
+        assert response.headers["access-control-allow-origin"] == origin
 
 
 def test_config_validation_endpoint(api):

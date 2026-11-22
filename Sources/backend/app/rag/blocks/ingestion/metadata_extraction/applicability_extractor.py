@@ -668,7 +668,7 @@ class ApplicabilityExtractor(BaseMetadataExtractor):
         After the call, self.summary has the counts and LLM settings for the index manifest.
         """
         use_llm = self.params.get("llm_fallback", True)
-        model_name = self.params.get("model", "qwen3.5:4b")
+        model_name = self.params.get("model", "qwen/qwen3.8-27b")
         cache_path = cache_path or self.cache_path
         cache = _read_cache(cache_path)
         counts = {"llm_candidates": 0, "llm_called": 0, "llm_cache_hits": 0, "llm_accepted": 0,

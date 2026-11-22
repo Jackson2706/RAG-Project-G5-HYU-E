@@ -15,7 +15,7 @@ from app.config import get_settings, resolve_ingest_folder
 from app.database import DEFAULT_INDEX, Database
 from app.demo import TAGGED_METHODS, load_demo_cases, needs_oracle, oracle_for, public_view
 from app.ollama import OllamaError
-from app.rag.pipeline import run_ingestion, run_rag
+from app.rag.pipeline import run_ingestion, run_rag, run_snapshot_ingestion
 from app.rag.presets import presets_json
 from app.rag.registry import PIPELINE, ConfigError, registry_json, validate_config
 from app.rag.schemas import Services
@@ -42,7 +42,7 @@ class ChatRequest(BaseModel):
 
 
 class IngestRequest(BaseModel):
-    folder: str = Field(default="HYU/raw", description="Folder relative to DATA_DIR, e.g. 'HYU/raw', or 'sample_data' for the sample documents")
+    folder: str = Field(default="sample_data", description="Folder relative to DATA_DIR, or 'sample_data'")
     stages: StageChoices = Field(default_factory=dict, description="Offline methods and parameters (e.g. chunk size)")
 
 
@@ -106,10 +106,12 @@ def checked(stages: StageChoices) -> dict:
 async def health(request: Request):
     db = request.app.state.db
     status = db.check()
+    settings = get_settings()
     try:
         status["ollama"] = {"ok": True, "models": len(await request.app.state.ollama.list_models())}
     except OllamaError as exc:
         status["ollama"] = {"ok": False, "error": str(exc)}
+    status["ollama"]["provider"] = settings.llm_provider
     status["index"] = db.index_info() if status["mongodb"]["ok"] and status["qdrant"]["ok"] else None
     return status
 
@@ -176,7 +178,14 @@ async def ollama_models(request: Request):
         models = await request.app.state.ollama.list_models()
     except OllamaError as exc:
         raise HTTPException(503, str(exc)) from exc
-    return {"models": models, "default": get_settings().ollama_chat_model or (models[0]["name"] if models else None)}
+    settings = get_settings()
+    default = settings.groq_chat_model if settings.llm_provider == "groq" else settings.ollama_chat_model
+    return {"models": models, "default": default or (models[0]["name"] if models else None)}
+
+
+@router.get("/llm/models")
+async def llm_models(request: Request):
+    return await ollama_models(request)
 
 
 # ------------------------------------------------------------------------- documents
@@ -193,8 +202,10 @@ async def ingest(body: IngestRequest, request: Request):
     config = checked(body.stages)
     folder = resolve_ingest_folder(body.folder, get_settings().data_dir)
     if folder is None or not folder.is_dir():
-        raise HTTPException(400, f"'{body.folder}' is not a folder under the configured data directory")
+        raise HTTPException(400, f"Folder '{body.folder}' was not found under the configured data directory.")
     try:
+        if (folder / "documents.jsonl").is_file() and (folder / "SNAPSHOT.sha256").is_file():
+            return await asyncio.to_thread(run_snapshot_ingestion, folder.name, config, services(request))
         return await asyncio.to_thread(run_ingestion, folder, config, services(request))
     except (ValueError, FileNotFoundError) as exc:
         raise HTTPException(400, str(exc)) from exc

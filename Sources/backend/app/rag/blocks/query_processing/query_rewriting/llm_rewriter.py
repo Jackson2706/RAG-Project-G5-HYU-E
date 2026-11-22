@@ -19,7 +19,7 @@ class LLMQueryRewriter(BaseQueryRewriter):
 
     async def rewrite(self, question: str) -> RewrittenQuery:
         ollama = self.services.ollama
-        model = await ollama.pick_model(self.params["model"], self.services.settings.ollama_chat_model)
+        model = await ollama.pick_model(self.params["model"], ollama.default_model)
         messages = [{"role": "system", "content": INSTRUCTION}, {"role": "user", "content": question}]
         options = {"temperature": self.params["temperature"], "num_predict": self.params["max_tokens"], "num_ctx": 4096, "seed": 42}
         text, usage = await ollama.complete(model, messages, options)

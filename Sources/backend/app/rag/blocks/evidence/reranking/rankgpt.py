@@ -56,7 +56,7 @@ class RankGPTReranker(BaseReranker):
         if len(head) < 2:
             return evidence
         ollama = self.services.ollama
-        model = await ollama.pick_model(self.params["model"], self.services.settings.ollama_chat_model)
+        model = await ollama.pick_model(self.params["model"], ollama.default_model)
         passages = [" ".join(((f"{e.section}. " if e.section else "") + e.text).split()[: self.params["max_words"]]) for e in head]
         messages = build_prompt(query, passages)
         options = {"temperature": self.params["temperature"], "num_predict": self.params["max_tokens"], "num_ctx": 8192, "seed": 42}

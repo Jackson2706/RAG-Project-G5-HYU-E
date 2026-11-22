@@ -1,0 +1,12 @@
+.git
+.github
+.env
+Sources/.env
+Sources/backend/.env
+Sources/frontend/node_modules
+Sources/frontend/dist
+.run
+__pycache__
+*.pyc
+evaluation/datasets
+evaluation/results

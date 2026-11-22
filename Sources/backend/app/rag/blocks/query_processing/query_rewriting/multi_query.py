@@ -17,7 +17,7 @@ class MultiQueryRewriter(BaseQueryRewriter):
 
     async def rewrite(self, question: str) -> RewrittenQuery:
         ollama, n = self.services.ollama, self.params["num_queries"]
-        model = await ollama.pick_model(self.params["model"], self.services.settings.ollama_chat_model)
+        model = await ollama.pick_model(self.params["model"], ollama.default_model)
         instruction = (f"Write {n} different search queries that together cover the user's question. Use different wording or "
                        "focus in each. Keep every name, number, date, quoted phrase and negation exactly. "
                        "Do not answer the question. Write one query per line, without numbering or explanations.")  # fmt: skip

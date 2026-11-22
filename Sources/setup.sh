@@ -49,7 +49,10 @@ else
   die "Only one of .env and backend/.env exists. Both must hold the same MongoDB password; see .env.example and backend/.env.example."
 fi
 root_password=$(grep '^MONGO_ROOT_PASSWORD=' .env | cut -d= -f2-)
-grep -q ":$root_password@" backend/.env || warn "The password in backend/.env (MONGODB_URI) does not match MONGO_ROOT_PASSWORD in .env."
+if grep -q '^MONGODB_URI=' backend/.env; then
+  sed -i.bak -E "s#(mongodb://[^:]+:)[^@]+@#\\1${root_password}@#" backend/.env
+  rm -f backend/.env.bak
+fi
 
 step "Python packages (Conda environment '$ENV_NAME')"
 if conda env list | awk '{print $1}' | grep -qx "$ENV_NAME"; then
@@ -81,9 +84,9 @@ step "Document index"
 chunks=$(cd backend && conda run -n "$ENV_NAME" python -c \
   "from app.config import get_settings; from app.database import Database; print(Database.connect(get_settings()).chunks.count_documents({}))" 2>/dev/null | tail -1) || chunks=error
 case "$chunks" in
-  0) conda run -n "$ENV_NAME" --no-capture-output python scripts/ingest.py --path sample_data ;;
-  error) warn "Could not read the index. Check the logs above, then run: conda run -n $ENV_NAME python scripts/ingest.py --path sample_data" ;;
-  *) echo "Index already has $chunks chunks; not re-indexing. (To index your own files: conda run -n $ENV_NAME python scripts/ingest.py --path HYU/raw)" ;;
+  0) warn "No default index chunks found. Start the app, then use Configuration -> Ingest -> sample_data." ;;
+  error) warn "Could not read the index. Start the app and check MongoDB/Qdrant connectivity." ;;
+  *) echo "Index already has $chunks chunks; not re-indexing." ;;
 esac
 
 step "Setup complete"

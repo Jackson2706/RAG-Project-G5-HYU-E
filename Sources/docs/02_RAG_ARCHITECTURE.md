@@ -131,7 +131,7 @@ chunk 2:              t5 t6 t7 t8 t9 t10      ← t5 t6 appear twice (the overla
 ```
 
 Chunk size and overlap are **ingestion** settings: they only change after **re-indexing**
-(Configuration tab → Ingestion → *Re-index*, or, from `Sources/`, `python scripts/ingest.py --chunk-size 128 …`).
+(Configuration tab → Ingestion → *Re-index*; chunk settings are selected in the Configuration tab).
 
 **Embedding.** Texts with similar meaning get vectors pointing in similar directions. The **same**
 model must embed documents and questions, because each model has its own "coordinate system".

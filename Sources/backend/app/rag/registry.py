@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import inspect
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, Literal
 
 from app.rag.blocks.pipeline_block import PipelineBlock
@@ -253,7 +254,7 @@ PIPELINE: list[Stage] = [
                      "Rule-first student applicability tags, with a validated local-LLM fallback.", parameters={
                          "llm_fallback": Param("boolean", True, "LLM fallback", "Ask the auxiliary LLM only when rules find no constraints.",
                                                ui="toggle", scope="ingestion"),
-                         "model": Param("string", "qwen3.5:4b", "Auxiliary LLM", "Installed Ollama model used for unmatched chunks.",
+                         "model": Param("string", "qwen/qwen3.8-27b", "Cloud LLM", "Groq model used for unmatched chunks.",
                                         ui="ollama_model", scope="ingestion"),
                          "temperature": Param("float", 0.0, "Temperature", "0 = most repeatable output.", min=0, max=1, step=0.05,
                                               scope="ingestion", advanced=True),
@@ -605,7 +606,8 @@ def registry_json() -> dict[str, Any]:
             "implemented": any(m.implemented for m in stage.methods),
             "methods": [
                 {"method_id": m.method_id, "name": m.name, "description": m.description, "implemented": m.implemented,
-                 "class_name": m.cls.__name__, "file": inspect.getfile(m.cls).split("app/rag/blocks/")[-1],
+                 "class_name": m.cls.__name__,
+                 "file": str(Path(inspect.getfile(m.cls)).as_posix()).split("app/rag/blocks/", 1)[-1],
                  "parameters": {name: {"type": p.type, "default": p.default, "label": p.label, "description": p.description,
                                        "ui": p.ui, "min": p.min, "max": p.max, "step": p.step,
                                        "options": list(p.options) if p.options else None, "scope": p.scope, "advanced": p.advanced}

@@ -132,12 +132,9 @@ is refused with the `ollama pull …` command to run.
 **Ingestion** reads the documents, cuts them into chunks, turns every chunk into a vector and
 stores everything in MongoDB and Qdrant. Questions can only be answered after this step.
 
-To practise, use the five sample documents (from `hyu-compass/Sources/`):
-
-```bash
-conda activate RAG
-python scripts/ingest.py --path sample_data
-```
+To practise, start the app and open **Configuration → Ingestion**. Select `sample_data` and start
+the re-index action. The ingestion API reads the five documents under
+`Sources/backend/sample_data/` and writes their chunks to MongoDB and vectors to Qdrant.
 
 ✅ **Success looks like:**
 
@@ -153,15 +150,9 @@ Done: 5 documents, 23 chunks, 384-dimensional vectors.
 
 The first run downloads the embedding model (~130 MB) and takes longer.
 
-**Your real documents:** copy PDF, TXT, Markdown or HTML files into `Sources/data/HYU/raw/` (sub-folders are
-fine), then run:
-
-```bash
-python scripts/ingest.py --path HYU/raw
-```
-
-Ingestion **replaces** the whole index with the folder you give it. You can also change the chunk
-settings: `--chunk-size 128 --chunk-overlap 16`.
+**Your real documents:** copy PDF, TXT, Markdown or HTML files under `Sources/data/`, then use the
+Configuration tab's Ingestion action and select that folder relative to `Sources/data/`.
+Ingestion **replaces** the selected default index. Chunk settings can be changed in the Configuration tab.
 
 ## 7. Start the backend
 
@@ -228,7 +219,7 @@ conda activate RAG
 | `set MONGO_ROOT_USERNAME in .env` | `.env` is missing | `cp .env.example .env` (from `hyu-compass/Sources/`) |
 | `/api/health` → mongodb `Authentication failed` | passwords in `.env` and `backend/.env` differ | make them equal. If you changed the password *after* the first `docker compose up`, the old one is still stored in the volume: use the old one, or reset with `docker compose down -v` (deletes data) |
 | `/api/health` → mongodb or qdrant `Connection refused` | databases not started | `docker compose up -d` |
-| Chat: *"No documents are indexed yet"* | ingestion has not been run | `python scripts/ingest.py --path sample_data` |
+| Chat: *"No documents are indexed yet"* | ingestion has not been run | Open Configuration → Ingestion and re-index `sample_data` |
 | Chat: *"Cannot reach Ollama"* | Ollama is not running | open the Ollama app or run `ollama serve` |
 | Chat: *"No Ollama models are installed"* | no model downloaded | `ollama pull qwen3:4b` |
 | Chat: *"The model used all 'Max generated tokens' before answering"* | a thinking model (qwen3) spent the tokens on hidden reasoning | Configuration tab → **Generation** → **Max generated tokens** → 2048 (Thinking is *off* by default) |

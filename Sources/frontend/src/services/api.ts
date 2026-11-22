@@ -1,10 +1,20 @@
 // Every call the frontend makes to FastAPI (backend/app/api.py).
 import type { ClarifyMarker, ConfigError, DemoCase, Health, IndexInfo, IndexRevision, OllamaModel, Preset, StageChoices, StageDef, StreamEvent, Trace } from "@/types/api";
 
+const apiBase = (
+  (import.meta.env.VITE_API_BASE_URL as string | undefined)
+  ?? (import.meta.env.VITE_API_URL as string | undefined)
+  ?? ""
+).replace(/\/$/, "");
+const apiBaseMissing = !apiBase && import.meta.env.PROD;
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  if (apiBaseMissing) {
+    throw new Error("Frontend deployment is missing VITE_API_BASE_URL. Set it to the Azure Container App HTTPS URL, then redeploy Static Web Apps.");
+  }
   let res: Response;
   try {
-    res = await fetch(path, { ...init, headers: { "Content-Type": "application/json", ...init?.headers } });
+    res = await fetch(`${apiBase}${path}`, { ...init, headers: { "Content-Type": "application/json", ...init?.headers } });
   } catch {
     throw new Error(BACKEND_DOWN);
   }
@@ -13,7 +23,9 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return body as T;
 }
 
-export const BACKEND_DOWN = "Cannot reach the HYU Compass backend at http://127.0.0.1:8000. Start it with ./start.sh in the Sources folder, then send the question again.";
+export const BACKEND_DOWN = import.meta.env.PROD
+  ? "Cannot reach the deployed HYU Compass backend. Check VITE_API_BASE_URL and the backend/CORS configuration."
+  : "Cannot reach the HYU Compass backend at http://127.0.0.1:8000. Start it with ./start.sh in the Sources folder, then send the question again.";
 
 /** FastAPI errors are a string, a list of field errors (request validation), or {message, errors: [...]} for an invalid configuration. */
 export function errorText(detail: unknown, status: number): string {
@@ -60,9 +72,12 @@ export function parseEvents(buffer: string): { events: StreamEvent[]; rest: stri
  */
 export async function streamChat(question: string, stages: StageChoices, indexId: string, onEvent: (e: StreamEvent) => void, signal: AbortSignal,
   history: string[] = [], demoCaseId: string | null = null, followup: ClarifyMarker | null = null) {
+  if (apiBaseMissing) {
+    throw new Error("Frontend deployment is missing VITE_API_BASE_URL. Set it to the Azure Container App HTTPS URL, then redeploy Static Web Apps.");
+  }
   let res: Response;
   try {
-    res = await fetch("/api/chat/stream", {
+    res = await fetch(`${apiBase}/api/chat/stream`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ question, stages, index_id: indexId, history, demo_case_id: demoCaseId, followup }),
