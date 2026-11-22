@@ -75,3 +75,13 @@ jobs:
               "QDRANT_URL=secretref:qdrant-url" \
               "QDRANT_API_KEY=secretref:qdrant-api-key" \
               "CORS_ORIGINS=$AZURE_CORS"
+
+          az containerapp ingress cors enable \
+            --name hyu-compass-backend \
+            --resource-group hyu-compass \
+            --allowed-origins "https://calm-ground-0036c6b00.4.azurestaticapps.net" \
+            --allowed-methods "GET" "POST" "PUT" "DELETE" "OPTIONS" "PATCH" "HEAD" \
+            --allowed-headers "*" \
+            --expose-headers "*" \
+            --allow-credentials false \
+            --max-age 3600
