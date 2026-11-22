@@ -1,0 +1,1625 @@
+{
+ "student_type": [
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_tagged",
+   "title": "[안내] 2025-2학기 외국인 유학생 오리엔테이션 자료",
+   "pred": [
+    "degree_seeking",
+    "exchange",
+    "visiting"
+   ],
+   "ref": [],
+   "final": [],
+   "ev_pred": "Foreign Students",
+   "ev_ref": null,
+   "reason": "\"Foreign Students\" does not distinguish degree-seeking, exchange, or visiting students.",
+   "chunk": "0089f417"
+  },
+  {
+   "cause": "rule_wrong_value",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "！l Field Trip to Lotte World !",
+   "pred": [
+    "visiting"
+   ],
+   "ref": [
+    "degree_seeking"
+   ],
+   "final": [
+    "degree_seeking"
+   ],
+   "ev_pred": "Visiting students",
+   "ev_ref": "Degree Program",
+   "reason": "Eligibility is for \"Degree Program\" students, while \"Visiting students\" are explicitly ineligible.",
+   "chunk": "00a5e42f"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_tagged",
+   "title": "[창업지원단] 외국인 유학생 창업프로그램 모집",
+   "pred": [
+    "exchange",
+    "visiting"
+   ],
+   "ref": [],
+   "final": [],
+   "ev_pred": "All foreigners (international students)",
+   "ev_ref": null,
+   "reason": "\"All foreigners (international students)\" does not identify exchange or visiting status.",
+   "chunk": "15a5cf45"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_tagged",
+   "title": "[기타/홍보] 인도네시아 유학생 '서포터즈 프로그램' 모집",
+   "pred": [
+    "degree_seeking"
+   ],
+   "ref": [],
+   "final": [],
+   "ev_pred": "Indonesian university students in Korea",
+   "ev_ref": null,
+   "reason": "\"university students in Korea\" does not state that participants are degree-seeking.",
+   "chunk": "57f28e8a"
+  },
+  {
+   "cause": "reference_error",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "Job Announcement: Invitation for Instructors to Teach Mathematics in E",
+   "pred": [
+    "language_program"
+   ],
+   "ref": [],
+   "final": [
+    "language_program"
+   ],
+   "ev_pred": "Korean Language Program",
+   "ev_ref": null,
+   "reason": "The students are explicitly \"currently enrolled in the Korean Language Program\".",
+   "chunk": "b9e76b8c"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_tagged",
+   "title": "Available Support",
+   "pred": [
+    "language_program"
+   ],
+   "ref": [],
+   "final": [],
+   "ev_pred": "international students",
+   "ev_ref": null,
+   "reason": "\"international students\" does not identify Korean-language-program students.",
+   "chunk": "c5d940da"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_tagged",
+   "title": "[기타/홍보] ‘2025 나주 쪽빛 국제교류봉사단’ 유학생 참가자 모집 (~7/11)",
+   "pred": [
+    "exchange"
+   ],
+   "ref": [],
+   "final": [],
+   "ev_pred": "international youth",
+   "ev_ref": null,
+   "reason": "\"international youth\" describes nationality and age, not exchange-student status.",
+   "chunk": "d2b28584"
+  }
+ ],
+ "academic_status": [
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_tagged",
+   "title": "[안내] 2025-2학기 외국인 유학생 오리엔테이션 자료",
+   "pred": [],
+   "ref": [
+    "enrolled"
+   ],
+   "final": [
+    "enrolled"
+   ],
+   "ev_pred": null,
+   "ev_ref": "Freshmen",
+   "reason": "The guide is for \"25-2 Freshmen\" receiving student ID cards, which supports enrolled status.",
+   "chunk": "0089f417"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "！l Field Trip to Lotte World !",
+   "pred": [],
+   "ref": [
+    "enrolled"
+   ],
+   "final": [
+    "enrolled"
+   ],
+   "ev_pred": null,
+   "ev_ref": "Students who enrolled at HYU ERICA",
+   "reason": "The target is explicitly \"Students who enrolled at HYU ERICA\".",
+   "chunk": "00a5e42f"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "Outgoing Programs",
+   "pred": [],
+   "ref": [
+    "enrolled"
+   ],
+   "final": [
+    "enrolled"
+   ],
+   "ev_pred": null,
+   "ev_ref": "Undergraduate Student",
+   "reason": "The requirements describe current \"Undergraduate Student\" and \"Graduate Student\" records at Hanyang, supporting enrolled scholarship applicants.",
+   "chunk": "03fe761e"
+  },
+  {
+   "cause": "reference_error",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "Graduate Admission Guideline",
+   "pred": [
+    "applicant"
+   ],
+   "ref": [],
+   "final": [
+    "applicant"
+   ],
+   "ev_pred": "application",
+   "ev_ref": null,
+   "reason": "The heading is \"Graduate Admission Guideline\", so the admission-guide rule assigns applicant status.",
+   "chunk": "07035742"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_unconditioned",
+   "title": "General | [Sangnok-gu Public Health Center, Ansan] AIDS Testing Suppor",
+   "pred": [],
+   "ref": [
+    "enrolled"
+   ],
+   "final": [
+    "enrolled"
+   ],
+   "ev_pred": null,
+   "ev_ref": "International Students",
+   "reason": "The program is expressly \"for International Students\", supporting an enrolled-student audience.",
+   "chunk": "0f3ce3b1"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_unconditioned",
+   "title": "Self-financed Study Abroad Program",
+   "pred": [],
+   "ref": [
+    "enrolled"
+   ],
+   "final": [
+    "enrolled"
+   ],
+   "ev_pred": null,
+   "ev_ref": "the student",
+   "reason": "The program concerns \"Tuition at Hanyang University\" and credit-bearing study abroad by \"the student\", which supports enrolled status.",
+   "chunk": "1221ef6d"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_tagged",
+   "title": "[창업지원단] 외국인 유학생 창업프로그램 모집",
+   "pred": [],
+   "ref": [
+    "enrolled"
+   ],
+   "final": [
+    "enrolled"
+   ],
+   "ev_pred": null,
+   "ev_ref": "international students",
+   "reason": "The stated target is \"international students\", supporting enrolled status.",
+   "chunk": "15a5cf45"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_rejected",
+   "title": "Self-financed Study Abroad Program",
+   "pred": [],
+   "ref": [
+    "enrolled"
+   ],
+   "final": [
+    "enrolled"
+   ],
+   "ev_pred": null,
+   "ev_ref": "a student",
+   "reason": "Receiving transferable \"credits\" for one or two semesters of study abroad supports an enrolled student.",
+   "chunk": "15bdbb67"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_tagged",
+   "title": "[안내] 2026-1학기 외국인 유학생 오리엔테이션 자료",
+   "pred": [],
+   "ref": [
+    "enrolled"
+   ],
+   "final": [
+    "enrolled"
+   ],
+   "ev_pred": null,
+   "ev_ref": "Freshmen",
+   "reason": "The guide is for \"26-1 Freshmen\" receiving student ID cards, which supports enrolled status.",
+   "chunk": "1e322beb"
+  },
+  {
+   "cause": "rule_wrong_value",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "Graduate Admission Guideline",
+   "pred": [
+    "applicant"
+   ],
+   "ref": [
+    "admitted_not_enrolled"
+   ],
+   "final": [
+    "admitted_not_enrolled"
+   ],
+   "ev_pred": "applicants",
+   "ev_ref": "After Deposit\npayment",
+   "reason": "The \"After Deposit payment\" procedure sends a \"certificate of admission\" before enrollment, so it is an acceptance guide for admitted students.",
+   "chunk": "243af01a"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "HIEA",
+   "pred": [],
+   "ref": [
+    "enrolled"
+   ],
+   "final": [
+    "enrolled"
+   ],
+   "ev_pred": null,
+   "ev_ref": "Students who have valid TOPIK certificate",
+   "reason": "The HIEA qualifications use \"last semester\" GPA and discuss students already receiving university scholarships, supporting enrolled status.",
+   "chunk": "2cc953bb"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "2026 KOICA-Hanyang(ERICA) NEXT Fellowship",
+   "pred": [],
+   "ref": [
+    "applicant"
+   ],
+   "final": [
+    "applicant"
+   ],
+   "ev_pred": null,
+   "ev_ref": "An Applicant",
+   "reason": "The text expressly addresses \"An Applicant who passes the Document Screening\".",
+   "chunk": "2ecce70c"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_rejected",
+   "title": "Available Support",
+   "pred": [],
+   "ref": [
+    "enrolled"
+   ],
+   "final": [
+    "enrolled"
+   ],
+   "ev_pred": null,
+   "ev_ref": "International students at ERICA Campus",
+   "reason": "Eligibility is expressly for \"International students at ERICA Campus\", supporting enrolled status.",
+   "chunk": "3195c125"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_rejected",
+   "title": "[홍보] 전국학생 문화유산 외국어 해설 콘텐츠 대회",
+   "pred": [],
+   "ref": [
+    "enrolled"
+   ],
+   "final": [
+    "enrolled"
+   ],
+   "ev_pred": null,
+   "ev_ref": "university students",
+   "reason": "The qualification includes current \"university students\", supporting enrolled status.",
+   "chunk": "32311c60"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "2024 GKS-G Application Forms & Guidelines (University Track)",
+   "pred": [],
+   "ref": [
+    "applicant"
+   ],
+   "final": [
+    "applicant"
+   ],
+   "ev_pred": null,
+   "ev_ref": "General Graduate Program",
+   "reason": "The heading is \"2024 GKS-G Application Forms & Guidelines (University Track)\", so the admission-guide rule assigns applicant status.",
+   "chunk": "389b56c5"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "2023 GKS-G Application Forms & Guidelines (University Track)",
+   "pred": [],
+   "ref": [
+    "applicant"
+   ],
+   "final": [
+    "applicant"
+   ],
+   "ev_pred": null,
+   "ev_ref": "2023 GKS-G Available Departments",
+   "reason": "The heading is \"2023 GKS-G Application Forms & Guidelines (University Track)\", so the admission-guide rule assigns applicant status.",
+   "chunk": "395bcd0d"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_tagged",
+   "title": "Major Guidebook for International Students",
+   "pred": [],
+   "ref": [
+    "admitted_not_enrolled"
+   ],
+   "final": [
+    "admitted_not_enrolled"
+   ],
+   "ev_pred": null,
+   "ev_ref": "students\nadmitted through transcript-based rolling admission or regular admission\n“Na” group (initial successful applicants only",
+   "reason": "The benefit is explicitly for \"students admitted through transcript-based rolling admission or regular admission\" and \"initial successful applicants only\".",
+   "chunk": "3a5409dd"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_tagged",
+   "title": "[기타/홍보] 인도네시아 유학생 '서포터즈 프로그램' 모집",
+   "pred": [
+    "admitted_not_enrolled"
+   ],
+   "ref": [
+    "enrolled"
+   ],
+   "final": [
+    "enrolled"
+   ],
+   "ev_pred": "Indonesian university students aged 19-34 residing in Korea (Only 30 participants will be selected!)",
+   "ev_ref": "university students",
+   "reason": "Eligibility for current \"university students\" supports enrolled status, not admitted-but-not-enrolled status.",
+   "chunk": "3abfd991"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "HIEA",
+   "pred": [],
+   "ref": [
+    "enrolled"
+   ],
+   "final": [
+    "enrolled"
+   ],
+   "ev_pred": null,
+   "ev_ref": "Students who have valid TOPIK certificate",
+   "reason": "The HIEA qualifications use \"last semester\" GPA and discuss students already receiving university scholarships, supporting enrolled status.",
+   "chunk": "43605a3b"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_rejected",
+   "title": "[홍보] 롯데그룹 2025 상반기 롯데그룹 글로벌 채용 상담 부스 운영(3/4~3/6)",
+   "pred": [],
+   "ref": [
+    "enrolled"
+   ],
+   "final": [
+    "enrolled"
+   ],
+   "ev_pred": null,
+   "ev_ref": "international students",
+   "reason": "The internship fair is expressly \"for international students\", supporting an enrolled-student audience.",
+   "chunk": "4c68fecf"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "2023 GKS-G Application Forms & Guidelines (University Track)",
+   "pred": [],
+   "ref": [
+    "applicant"
+   ],
+   "final": [
+    "applicant"
+   ],
+   "ev_pred": null,
+   "ev_ref": "2023 GKS-G Available Departments",
+   "reason": "The heading is \"2023 GKS-G Application Forms & Guidelines (University Track)\", so the admission-guide rule assigns applicant status.",
+   "chunk": "5418f3fc"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_tagged",
+   "title": "[기타/홍보] 인도네시아 유학생 '서포터즈 프로그램' 모집",
+   "pred": [],
+   "ref": [
+    "enrolled"
+   ],
+   "final": [
+    "enrolled"
+   ],
+   "ev_pred": null,
+   "ev_ref": "university students",
+   "reason": "Eligibility for current \"university students\" supports enrolled status.",
+   "chunk": "57f28e8a"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "Visa",
+   "pred": [],
+   "ref": [
+    "enrolled"
+   ],
+   "final": [
+    "enrolled"
+   ],
+   "ev_pred": null,
+   "ev_ref": "Bachelor's",
+   "reason": "The permitted-hours table addresses current \"Bachelor's\" and \"Master's/Doctoral\" students, supporting enrolled status.",
+   "chunk": "5ae8204a"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "2023 GKS-G Application Forms & Guidelines (University Track)",
+   "pred": [],
+   "ref": [
+    "applicant"
+   ],
+   "final": [
+    "applicant"
+   ],
+   "ev_pred": null,
+   "ev_ref": "2023 GKS-G Available Departments",
+   "reason": "The heading is \"2023 GKS-G Application Forms & Guidelines (University Track)\", so the admission-guide rule assigns applicant status.",
+   "chunk": "5b7470b8"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_unconditioned",
+   "title": "2026 KOICA-Hanyang(ERICA) NEXT Fellowship",
+   "pred": [],
+   "ref": [
+    "applicant"
+   ],
+   "final": [
+    "applicant"
+   ],
+   "ev_pred": null,
+   "ev_ref": "Applicants must submit all required application documents",
+   "reason": "The procedure repeatedly addresses \"Applicants\" submitting documents and taking an interview.",
+   "chunk": "5b9281e6"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_tagged",
+   "title": "2021년도 1학기 외국인 학생 복학 신청 안내(서울캠퍼스)",
+   "pred": [
+    "graduating"
+   ],
+   "ref": [],
+   "final": [],
+   "ev_pred": "Students who graduated from Korea school and get diploma",
+   "ev_ref": null,
+   "reason": "\"Students who graduated ... and get diploma\" are already graduates, not students who are graduating.",
+   "chunk": "6132314f"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "2024 GKS-G Application Forms & Guidelines (University Track)",
+   "pred": [],
+   "ref": [
+    "applicant"
+   ],
+   "final": [
+    "applicant"
+   ],
+   "ev_pred": null,
+   "ev_ref": "2024 GKS-G Available Departments",
+   "reason": "The heading is \"2024 GKS-G Application Forms & Guidelines (University Track)\", so the admission-guide rule assigns applicant status.",
+   "chunk": "65f4e805"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "E",
+   "pred": [],
+   "ref": [
+    "enrolled"
+   ],
+   "final": [
+    "enrolled"
+   ],
+   "ev_pred": null,
+   "ev_ref": "international students",
+   "reason": "The course-registration rule addresses \"international students\" earning credits, supporting enrolled status.",
+   "chunk": "72b3f04d"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "2026 KOICA-Hanyang(ERICA) NEXT Fellowship",
+   "pred": [],
+   "ref": [
+    "applicant"
+   ],
+   "final": [
+    "applicant"
+   ],
+   "ev_pred": null,
+   "ev_ref": "Candidates",
+   "reason": "The eligibility section addresses \"Candidates\" and requires an official recommendation, supporting applicant status.",
+   "chunk": "76b86aee"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_rejected",
+   "title": "E&A",
+   "pred": [],
+   "ref": [
+    "enrolled"
+   ],
+   "final": [
+    "enrolled"
+   ],
+   "ev_pred": null,
+   "ev_ref": "International students",
+   "reason": "The campus recruiting event identifies \"International students\" as participant eligibility, supporting enrolled status.",
+   "chunk": "79928199"
+  },
+  {
+   "cause": "reference_error",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "2024 GKS-G Application Forms & Guidelines (University Track)",
+   "pred": [
+    "enrolled"
+   ],
+   "ref": [],
+   "final": [
+    "enrolled"
+   ],
+   "ev_pred": "enrolled students",
+   "ev_ref": null,
+   "reason": "The text explicitly reports \"currently enrolled students\" and \"GKS Scholars’ Enrolled Departments\".",
+   "chunk": "7a4a5126"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_unconditioned",
+   "title": "Psychological Counseling",
+   "pred": [],
+   "ref": [
+    "enrolled"
+   ],
+   "final": [
+    "enrolled"
+   ],
+   "ev_pred": null,
+   "ev_ref": "all international students",
+   "reason": "ERICA provides the service to \"all international students\" for life on campus, supporting enrolled status.",
+   "chunk": "7fc6be78"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_unconditioned",
+   "title": "Self-financed Study Abroad Program",
+   "pred": [],
+   "ref": [
+    "enrolled"
+   ],
+   "final": [
+    "enrolled"
+   ],
+   "ev_pred": null,
+   "ev_ref": "students",
+   "reason": "The \"credit transfer\" procedure through an affiliated department concerns students continuing an enrolled degree.",
+   "chunk": "88436282"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_unconditioned",
+   "title": "International Student Insurance",
+   "pred": [],
+   "ref": [
+    "enrolled"
+   ],
+   "final": [
+    "enrolled"
+   ],
+   "ev_pred": null,
+   "ev_ref": "student ID number",
+   "reason": "Access using a \"student ID number\" to claim university group-insurance benefits supports enrolled status.",
+   "chunk": "89983b29"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_unconditioned",
+   "title": "2026 KOICA-Hanyang(ERICA) NEXT Fellowship",
+   "pred": [],
+   "ref": [
+    "applicant"
+   ],
+   "final": [
+    "applicant"
+   ],
+   "ev_pred": null,
+   "ev_ref": "Application Package Submission",
+   "reason": "The \"Admission Timeline\" begins with \"Application Package Submission\", so it addresses applicants.",
+   "chunk": "8d05300f"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_unconditioned",
+   "title": "TOPIK",
+   "pred": [],
+   "ref": [
+    "enrolled"
+   ],
+   "final": [
+    "enrolled"
+   ],
+   "ev_pred": null,
+   "ev_ref": "after entering HYU",
+   "reason": "The exception says \"after entering HYU\", supporting an enrolled-student context.",
+   "chunk": "94c24d40"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_tagged",
+   "title": "Major Guidebook for International Students",
+   "pred": [],
+   "ref": [
+    "enrolled"
+   ],
+   "final": [
+    "enrolled"
+   ],
+   "ev_pred": null,
+   "ev_ref": "Students engage",
+   "reason": "Current curriculum participation is explicit in \"Students engage in empirical analysis\" and earn a certificate after completing courses.",
+   "chunk": "9748d1b4"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "2023 GKS-G Application Forms & Guidelines (University Track)",
+   "pred": [],
+   "ref": [
+    "applicant"
+   ],
+   "final": [
+    "applicant"
+   ],
+   "ev_pred": null,
+   "ev_ref": "2023 GKS-G Available Departments",
+   "reason": "The heading is \"2023 GKS-G Application Forms & Guidelines (University Track)\", so the admission-guide rule assigns applicant status.",
+   "chunk": "a477b52f"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "Visa",
+   "pred": [],
+   "ref": [
+    "enrolled"
+   ],
+   "final": [
+    "enrolled"
+   ],
+   "ev_pred": null,
+   "ev_ref": "students",
+   "reason": "The requirements address current \"English track students\" by undergraduate year or master's degree, supporting enrolled status.",
+   "chunk": "a5e9ec19"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_tagged",
+   "title": "2021년도 1학기 외국인 학생 복학 신청 안내(서울캠퍼스)",
+   "pred": [],
+   "ref": [
+    "leave_of_absence"
+   ],
+   "final": [
+    "leave_of_absence"
+   ],
+   "ev_pred": null,
+   "ev_ref": "re-\nregister",
+   "reason": "Repeated instructions to \"re-register\" identify students returning from leave of absence.",
+   "chunk": "adf5b764"
+  },
+  {
+   "cause": "rule_too_broad",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "Leave of Absence for 2026 Spring…",
+   "pred": [
+    "enrolled",
+    "leave_of_absence"
+   ],
+   "ref": [
+    "enrolled"
+   ],
+   "final": [
+    "enrolled"
+   ],
+   "ev_pred": "enrolled students",
+   "ev_ref": "for enrolled students",
+   "reason": "The notice is explicitly \"for enrolled students\" applying to take leave; leave-of-absence students are not the applicant group.",
+   "chunk": "b716b128"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_unconditioned",
+   "title": "Major Guidebook for International Students",
+   "pred": [],
+   "ref": [
+    "enrolled"
+   ],
+   "final": [
+    "enrolled"
+   ],
+   "ev_pred": null,
+   "ev_ref": "Students develop",
+   "reason": "The curriculum describes what current \"Students develop\" and \"Students engage\" in, supporting enrolled status.",
+   "chunk": "b93f3f53"
+  },
+  {
+   "cause": "reference_error",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "Job Announcement: Invitation for Instructors to Teach Mathematics in E",
+   "pred": [
+    "enrolled"
+   ],
+   "ref": [],
+   "final": [
+    "enrolled"
+   ],
+   "ev_pred": "currently enrolled",
+   "ev_ref": null,
+   "reason": "The student information says they are \"currently enrolled\".",
+   "chunk": "b9e76b8c"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_unconditioned",
+   "title": "2024 GKS-G Application Forms & Guidelines (University Track)",
+   "pred": [],
+   "ref": [
+    "applicant"
+   ],
+   "final": [
+    "applicant"
+   ],
+   "ev_pred": null,
+   "ev_ref": "Must submit a\nrecommendation\nletter",
+   "reason": "The heading is \"2024 GKS-G Application Forms & Guidelines (University Track)\", so the admission-guide rule assigns applicant status.",
+   "chunk": "be404aaa"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "2026 GKS-G Application Forms & Guidelines (University Track)",
+   "pred": [],
+   "ref": [
+    "applicant"
+   ],
+   "final": [
+    "applicant"
+   ],
+   "ev_pred": null,
+   "ev_ref": "2026 GKS-G Available Departments",
+   "reason": "The heading is \"2026 GKS-G Application Forms & Guidelines (University Track)\", so the admission-guide rule assigns applicant status.",
+   "chunk": "bea73139"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "2026 GKS-G Application Forms & Guidelines (University Track)",
+   "pred": [
+    "applicant"
+   ],
+   "ref": [
+    "admitted_not_enrolled",
+    "applicant"
+   ],
+   "final": [
+    "admitted_not_enrolled",
+    "applicant"
+   ],
+   "ev_pred": "application",
+   "ev_ref": "up to the time of application. In\naddition, they must submit their final academic transcript to the GKS Center,\nNIIED, by July 31, 2026, after acceptance",
+   "reason": "The chunk addresses requirements both \"up to the time of application\" and \"after acceptance\", covering applicants and admitted-not-enrolled students.",
+   "chunk": "c0446a1a"
+  },
+  {
+   "cause": "rule_too_broad",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "Return to School for 2025 Fall Semeste…",
+   "pred": [
+    "enrolled",
+    "leave_of_absence"
+   ],
+   "ref": [
+    "leave_of_absence"
+   ],
+   "final": [
+    "leave_of_absence"
+   ],
+   "ev_pred": "enrolled student",
+   "ev_ref": "took leave of absence",
+   "reason": "This return-to-school procedure addresses students who \"took leave of absence\"; the enrolled-student phrase only identifies a payment period.",
+   "chunk": "c0e0e7c0"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_rejected",
+   "title": "Self-financed Study Abroad Program",
+   "pred": [],
+   "ref": [
+    "enrolled"
+   ],
+   "final": [
+    "enrolled"
+   ],
+   "ev_pred": null,
+   "ev_ref": "International Students",
+   "reason": "The HY-in \"Credit Transfer Process\" for self-financed international students concerns students continuing an enrolled degree.",
+   "chunk": "c1e30214"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "HIEA",
+   "pred": [],
+   "ref": [
+    "enrolled"
+   ],
+   "final": [
+    "enrolled"
+   ],
+   "ev_pred": null,
+   "ev_ref": "Students who have valid TOPIK certificate",
+   "reason": "The HIEA qualifications use \"last semester\" GPA and tuition payment, supporting enrolled status.",
+   "chunk": "c31e7ebd"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_unconditioned",
+   "title": "[홍보] <한국관광공사 × 관광두레> 외국인 유학생 무료 팸투어 참가자 모집 – 남도 오감 웰니스 1박 2일 (11/11~12",
+   "pred": [],
+   "ref": [
+    "enrolled"
+   ],
+   "final": [
+    "enrolled"
+   ],
+   "ev_pred": null,
+   "ev_ref": "international students",
+   "reason": "The tour explicitly welcomes \"all international students\", supporting an enrolled-student audience.",
+   "chunk": "c3bcbe42"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_unconditioned",
+   "title": "Return to School for 2026 Spri…",
+   "pred": [],
+   "ref": [
+    "leave_of_absence"
+   ],
+   "final": [
+    "leave_of_absence"
+   ],
+   "ev_pred": null,
+   "ev_ref": "Returning International Students",
+   "reason": "The \"Returning International Students\" procedure is for students returning from leave of absence.",
+   "chunk": "c55dfbf9"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_tagged",
+   "title": "Available Support",
+   "pred": [],
+   "ref": [
+    "enrolled"
+   ],
+   "final": [
+    "enrolled"
+   ],
+   "ev_pred": null,
+   "ev_ref": "students attending the university",
+   "reason": "The program is for \"students attending the university\", supporting enrolled status.",
+   "chunk": "c5d940da"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "2024 GKS-G Application Forms & Guidelines (University Track)",
+   "pred": [],
+   "ref": [
+    "applicant"
+   ],
+   "final": [
+    "applicant"
+   ],
+   "ev_pred": null,
+   "ev_ref": "2024 GKS-G Available Departments",
+   "reason": "The heading is \"2024 GKS-G Application Forms & Guidelines (University Track)\", so the admission-guide rule assigns applicant status.",
+   "chunk": "c68a820a"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_unconditioned",
+   "title": "Outgoing Programs",
+   "pred": [],
+   "ref": [
+    "enrolled"
+   ],
+   "final": [
+    "enrolled"
+   ],
+   "ev_pred": null,
+   "ev_ref": "students",
+   "reason": "Students submitting coursework and credits through \"Student HY-in\" remain enrolled while completing study abroad and credit transfer.",
+   "chunk": "c9d7fb1f"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "2026 GKS-G Application Forms & Guidelines (University Track)",
+   "pred": [],
+   "ref": [
+    "applicant"
+   ],
+   "final": [
+    "applicant"
+   ],
+   "ev_pred": null,
+   "ev_ref": "2026 GKS-G Available Departments",
+   "reason": "The heading is \"2026 GKS-G Application Forms & Guidelines (University Track)\", so the admission-guide rule assigns applicant status.",
+   "chunk": "cd9fa84f"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_unconditioned",
+   "title": "R&D",
+   "pred": [],
+   "ref": [
+    "enrolled"
+   ],
+   "final": [
+    "enrolled"
+   ],
+   "ev_pred": null,
+   "ev_ref": "foreign students like you",
+   "reason": "The recruiting notice directly addresses \"foreign students like you\", supporting enrolled status.",
+   "chunk": "d16a3a0d"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_unconditioned",
+   "title": "2022 Hanyang Global Fair",
+   "pred": [],
+   "ref": [
+    "enrolled"
+   ],
+   "final": [
+    "enrolled"
+   ],
+   "ev_pred": null,
+   "ev_ref": "Student ID no",
+   "reason": "Requiring each participant's \"Student ID no\" supports enrolled status.",
+   "chunk": "d369cca1"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "2026 GKS-G Application Forms & Guidelines (University Track)",
+   "pred": [],
+   "ref": [
+    "applicant"
+   ],
+   "final": [
+    "applicant"
+   ],
+   "ev_pred": null,
+   "ev_ref": "2026 GKS-G Available Departments",
+   "reason": "The heading is \"2026 GKS-G Application Forms & Guidelines (University Track)\", so the admission-guide rule assigns applicant status.",
+   "chunk": "d5ebf2cd"
+  },
+  {
+   "cause": "rule_wrong_value",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "Undergraduate Admission Guideline",
+   "pred": [
+    "applicant"
+   ],
+   "ref": [
+    "admitted_not_enrolled"
+   ],
+   "final": [
+    "admitted_not_enrolled"
+   ],
+   "ev_pred": "application",
+   "ev_ref": "Successful candidates",
+   "reason": "The visa and additional-document procedure addresses \"Successful candidates\" receiving an admission certificate, so it is for admitted-not-enrolled students.",
+   "chunk": "d78cead4"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "2023 GKS-G Application Forms & Guidelines (University Track)",
+   "pred": [],
+   "ref": [
+    "applicant"
+   ],
+   "final": [
+    "applicant"
+   ],
+   "ev_pred": null,
+   "ev_ref": "2023 GKS-G Available Departments",
+   "reason": "The heading is \"2023 GKS-G Application Forms & Guidelines (University Track)\", so the admission-guide rule assigns applicant status.",
+   "chunk": "d9426401"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_tagged",
+   "title": "LG",
+   "pred": [],
+   "ref": [
+    "graduating"
+   ],
+   "final": [
+    "graduating"
+   ],
+   "ev_pred": null,
+   "ev_ref": "graduate-to-be",
+   "reason": "The job requirements explicitly include a \"graduate-to-be\", which maps to graduating.",
+   "chunk": "db023e48"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_rejected",
+   "title": "2024 GKS-G Application Forms & Guidelines (University Track)",
+   "pred": [],
+   "ref": [
+    "applicant"
+   ],
+   "final": [
+    "applicant"
+   ],
+   "ev_pred": null,
+   "ev_ref": "Submit official test\nscore",
+   "reason": "The heading is \"2024 GKS-G Application Forms & Guidelines (University Track)\", so the admission-guide rule assigns applicant status.",
+   "chunk": "dbea4215"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "2023 GKS-G Application Forms & Guidelines (University Track)",
+   "pred": [],
+   "ref": [
+    "applicant"
+   ],
+   "final": [
+    "applicant"
+   ],
+   "ev_pred": null,
+   "ev_ref": "2023 GKS-G Available Departments",
+   "reason": "The heading is \"2023 GKS-G Application Forms & Guidelines (University Track)\", so the admission-guide rule assigns applicant status.",
+   "chunk": "e01a0ee8"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_unconditioned",
+   "title": "Outgoing Programs",
+   "pred": [],
+   "ref": [
+    "enrolled"
+   ],
+   "final": [
+    "enrolled"
+   ],
+   "ev_pred": null,
+   "ev_ref": "Applicants",
+   "reason": "Exchange-program \"Applicants\" are current students applying for study abroad, so the applicable status is enrolled rather than admission applicant.",
+   "chunk": "e99d57af"
+  },
+  {
+   "cause": "rule_wrong_value",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "Leave of Absence for 2026 Spring…",
+   "pred": [
+    "leave_of_absence"
+   ],
+   "ref": [
+    "enrolled"
+   ],
+   "final": [
+    "enrolled"
+   ],
+   "ev_pred": "Leave of Absence",
+   "ev_ref": "currently in school",
+   "reason": "The notice is for international students \"currently in school\" who are applying to begin leave of absence.",
+   "chunk": "edc3bcf7"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "HIEA",
+   "pred": [],
+   "ref": [
+    "enrolled"
+   ],
+   "final": [
+    "enrolled"
+   ],
+   "ev_pred": null,
+   "ev_ref": "Students who have valid TOPIK certificate",
+   "reason": "The HIEA qualifications use \"last semester\" GPA and discuss students already receiving university scholarships, supporting enrolled status.",
+   "chunk": "eee87f40"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_unconditioned",
+   "title": "Available Support",
+   "pred": [],
+   "ref": [
+    "enrolled"
+   ],
+   "final": [
+    "enrolled"
+   ],
+   "ev_pred": null,
+   "ev_ref": "international students",
+   "reason": "The program supports \"international students\" adapting to life on the ERICA campus, supporting enrolled status.",
+   "chunk": "efc394e2"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_unconditioned",
+   "title": "International Student Insurance",
+   "pred": [],
+   "ref": [
+    "enrolled"
+   ],
+   "final": [
+    "enrolled"
+   ],
+   "ev_pred": null,
+   "ev_ref": "International Students",
+   "reason": "The insurance information is expressly for \"International Students\", supporting enrolled status.",
+   "chunk": "fb1d1943"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_unconditioned",
+   "title": "TOPIK",
+   "pred": [],
+   "ref": [
+    "enrolled"
+   ],
+   "final": [
+    "enrolled"
+   ],
+   "ev_pred": null,
+   "ev_ref": "after entering HYU",
+   "reason": "The exception says \"after entering HYU\", supporting an enrolled-student context.",
+   "chunk": "fe797438"
+  }
+ ],
+ "visa": [
+  {
+   "cause": "rule_too_broad",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "Visa",
+   "pred": [
+    "D-10",
+    "D-2"
+   ],
+   "ref": [
+    "D-10"
+   ],
+   "final": [
+    "D-10"
+   ],
+   "ev_pred": "D-10",
+   "ev_ref": "job seeker visa (D-10)",
+   "reason": "The provision is for applicants who changed to a \"job seeker visa (D-10)\"; D-2 is only the prior status.",
+   "chunk": "14cb8aaa"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_tagged",
+   "title": "[창업지원단] 외국인 유학생 창업프로그램 모집",
+   "pred": [
+    "D-10",
+    "D-2",
+    "D-4",
+    "other"
+   ],
+   "ref": [],
+   "final": [],
+   "ev_pred": "All foreigners (international students)",
+   "ev_ref": null,
+   "reason": "\"All foreigners (international students)\" supplies no textual support for any visa category.",
+   "chunk": "15a5cf45"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_tagged",
+   "title": "[기타/홍보] 인도네시아 유학생 '서포터즈 프로그램' 모집",
+   "pred": [
+    "D-2"
+   ],
+   "ref": [],
+   "final": [],
+   "ev_pred": "Indonesian university students aged 19-34 residing in Korea (Only 30 participants will be selected!)",
+   "ev_ref": null,
+   "reason": "\"residing in Korea\" supplies no textual support for a D-2 visa.",
+   "chunk": "3abfd991"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_rejected",
+   "title": "[취업/채용] 국내 취업 희망 외국인 참여자 모집(전문인력 분야)",
+   "pred": [],
+   "ref": [
+    "other"
+   ],
+   "final": [
+    "other"
+   ],
+   "ev_pred": null,
+   "ev_ref": "F-4 visa holders",
+   "reason": "The text explicitly includes \"F-4 visa holders\", which falls under the vocabulary value other.",
+   "chunk": "3c6ef13c"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_tagged",
+   "title": "[학적] 2022학년도 2학기 서울캠퍼스 외국인 유학생 복학신청 안내 (**보험기간, 한국거주자 잔고증명 기준 수정)",
+   "pred": [
+    "D-2"
+   ],
+   "ref": [
+    "D-4"
+   ],
+   "final": [
+    "D-4"
+   ],
+   "ev_pred": "Students who plan to apply for visa while in Korea and have a valid alien registration card must submit a certificate of balance issued by a korean bank",
+   "ev_ref": "d4 visa",
+   "reason": "The only stated visa category is \"d4 visa\" for students who completed the HYU IIE Korean course.",
+   "chunk": "79549099"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_tagged",
+   "title": "2021년도 1학기 외국인 학생 복학 신청 안내(서울캠퍼스)",
+   "pred": [
+    "other"
+   ],
+   "ref": [
+    "D-2",
+    "other"
+   ],
+   "final": [
+    "D-2",
+    "other"
+   ],
+   "ev_pred": "Students with F-Visa",
+   "ev_ref": "Students with F-Visa\nSince students who hold F-Visa do not need to issue D -2 Visa, please find the following information to re-\nregister.\n1) Log into HY-in(https://portal.hanyang.ac.kr/sso/lgin.do) → Apply for re-registration online\n2) Upload copy of your F-Visa(ARC)and certificate of pros and cons qualification from National Health\nInsurance Corporation\n3) ★★You must upload the attached file. If not, we cannot admit your application of re-registration★★\nlanguage level for admission) must submit a certificate of Korean language\nD. Insurance Document [Non-F visa holder(D2 visa applicant",
+   "reason": "The text separately addresses \"Students with F-Visa\" and \"D2 visa applicant\", supporting other and D-2.",
+   "chunk": "adf5b764"
+  },
+  {
+   "cause": "reference_error",
+   "method": "llm",
+   "bucket": "llm_tagged",
+   "title": "OASIS-4+",
+   "pred": [
+    "other"
+   ],
+   "ref": [],
+   "final": [
+    "other"
+   ],
+   "ev_pred": "D-9-1 visa",
+   "ev_ref": null,
+   "reason": "The text explicitly says completion earns points when applying for a \"D-9-1 visa\", which maps to other.",
+   "chunk": "aed8a8e6"
+  },
+  {
+   "cause": "reference_error",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "Return to School for 2025 Fall Semeste…",
+   "pred": [
+    "D-2"
+   ],
+   "ref": [
+    "D-2",
+    "D-4"
+   ],
+   "final": [
+    "D-2"
+   ],
+   "ev_pred": "D-2",
+   "ev_ref": "change from D -4 visa t o D -2 visa",
+   "reason": "The required outcome is a \"D-2 VISA\"; D-4 appears only as the prior status in a change to D-2.",
+   "chunk": "c0e0e7c0"
+  },
+  {
+   "cause": "rule_too_broad",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "Visa",
+   "pred": [
+    "D-2"
+   ],
+   "ref": [],
+   "final": [],
+   "ev_pred": null,
+   "ev_ref": null,
+   "reason": "\"job search activities\" and internships do not textually state a D-2 visa.",
+   "chunk": "dfc7b114"
+  }
+ ],
+ "english_track": [
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_tagged",
+   "title": "[창업지원단] 외국인 유학생 창업프로그램 모집",
+   "pred": [
+    "no"
+   ],
+   "ref": [],
+   "final": [],
+   "ev_pred": "All foreigners (international students)",
+   "ev_ref": null,
+   "reason": "\"All foreigners (international students)\" says nothing about English-track status.",
+   "chunk": "15a5cf45"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_tagged",
+   "title": "Available Support",
+   "pred": [
+    "no"
+   ],
+   "ref": [],
+   "final": [],
+   "ev_pred": "Both Korean and international students who are fluent in Korean can apply",
+   "ev_ref": null,
+   "reason": "Being \"fluent in Korean\" does not establish that a student is outside an English track.",
+   "chunk": "c5d940da"
+  }
+ ],
+ "year": [
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_tagged",
+   "title": "Major Guidebook for International Students",
+   "pred": [
+    "4"
+   ],
+   "ref": [],
+   "final": [],
+   "ev_pred": "four-year",
+   "ev_ref": null,
+   "reason": "\"four-year full scholarship\" describes scholarship duration, not undergraduate year 4.",
+   "chunk": "3a5409dd"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "Visa",
+   "pred": [
+    "1",
+    "2"
+   ],
+   "ref": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "final": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "ev_pred": "Year: Year 1-2",
+   "ev_ref": "Year: Year 1-2; Korean Language Proficiency Level: Level 3; Korean Language Proficiency Level: X; Start: No Restrictions; Permitted Hours / Weekdays: 10 hours; Permitted Hours / Weekends, School holidays: 10 hours\nUniversity Type: Bachelor's; Year: Year 1-2; Korean Language Proficiency Level: Level 3; Korean Language Proficiency Level: O; Start: No Restrictions; Permitted Hours / Weekdays: 30 hours; Permitted Hours / Weekends, School holidays: No Restrictions\nUniversity Type: Bachelor's; Year: Year 3-4",
+   "reason": "The table contains both \"Year 1-2\" and \"Year 3-4\", covering all four undergraduate years.",
+   "chunk": "5ae8204a"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "Visa",
+   "pred": [],
+   "ref": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "final": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "ev_pred": null,
+   "ev_ref": "Bachelor's degree 1~2 years; Test of Proficiency in Korean (TOPIK): Level 3 or higher; Korea Immigration and Integration Program (KIIP): Complete level 3 or higher, or score of 61 or higher in pre-assessment; King Sejong Institute Korean Language Course: Intermediate 1 or higher\nSort: Bachelor's degree 3~4 years",
+   "reason": "The text expressly includes \"Bachelor's degree 1~2 years\" and \"Bachelor's degree 3~4 years\", covering years 1 through 4.",
+   "chunk": "a5e9ec19"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_tagged",
+   "title": "Visa",
+   "pred": [
+    "1",
+    "2"
+   ],
+   "ref": [],
+   "final": [],
+   "ev_pred": "Up to 2 years",
+   "ev_ref": null,
+   "reason": "\"Up to 2 years\" describes an expiration duration, not undergraduate years 1 and 2.",
+   "chunk": "b36ab985"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_unconditioned",
+   "title": "Major Guidebook for International Students",
+   "pred": [],
+   "ref": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "final": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "ev_pred": null,
+   "ev_ref": "First year: Students develop foundational knowledge in international studies theories,\nincluding politics, international relations, and business administration, along with\nessential research methodologies for international issue analysis.\n• Second year: Students advance their analytical and critical interpretation capabilities\nin international studies subfields through theoretical understanding and practical\napplications across political science, economics, and business administration.\n• Third and fourth years",
+   "reason": "The curriculum explicitly lists \"First year\", \"Second year\", and \"Third and fourth years\".",
+   "chunk": "b93f3f53"
+  },
+  {
+   "cause": "llm_miss",
+   "method": "llm",
+   "bucket": "llm_tagged",
+   "title": "Available Support",
+   "pred": [
+    "1"
+   ],
+   "ref": [],
+   "final": [],
+   "ev_pred": "1 year",
+   "ev_ref": null,
+   "reason": "\"Program Duration ... 1 year\" is a duration, not undergraduate year 1.",
+   "chunk": "c5d940da"
+  }
+ ]
+}

@@ -5,7 +5,9 @@ on:
     branches:
       - main
     paths:
-      - "backend/**"
+      - "Sources/backend/**"
+      - "Sources/data/**"
+      - "Sources/scripts/**"
       - "Dockerfile.backend"
       - ".github/workflows/deploy-backend.yml"
   workflow_dispatch:
@@ -47,4 +49,19 @@ jobs:
           az containerapp update \
             --name hyu-compass-backend \
             --resource-group hyu-compass \
-            --image hyucompassacr.azurecr.io/hyu-compass-backend:${{ github.sha }}
+            --image hyucompassacr.azurecr.io/hyu-compass-backend:${{ github.sha }} \
+            --secrets \
+              mongodb-uri="${{ secrets.MONGODB_URI }}" \
+              groq-api-key="${{ secrets.GROQ_API_KEY }}" \
+              qdrant-url="${{ secrets.QDRANT_URL }}" \
+              qdrant-api-key="${{ secrets.QDRANT_API_KEY }}" \
+            --set-env-vars \
+              LLM_PROVIDER=groq \
+              GROQ_BASE_URL=https://api.groq.com/openai/v1 \
+              GROQ_CHAT_MODEL="${{ secrets.GROQ_CHAT_MODEL }}" \
+              GROQ_API_KEY=secretref:groq-api-key \
+              MONGODB_URI=secretref:mongodb-uri \
+              MONGODB_DB="${{ secrets.MONGODB_DB }}" \
+              QDRANT_URL=secretref:qdrant-url \
+              QDRANT_API_KEY=secretref:qdrant-api-key \
+              CORS_ORIGINS="${{ secrets.CORS_ORIGINS }}"

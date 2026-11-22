@@ -1,0 +1,464 @@
+{
+  "run_id": "dev-03",
+  "started_at": "2026-11-14T03:16:54.079631+00:00",
+  "argv": [
+    "--suite",
+    "hyu",
+    "--split",
+    "dev",
+    "--run-id",
+    "dev-03",
+    "--resume",
+    "--experiment",
+    "A0_AAES,A0b_AAES_SPEC_FIXED,B0_BASIC_DENSE_RAG,R16_PROMPTED_CONDITIONAL"
+  ],
+  "git": {
+    "commit": "85fd5ad9f8b4c4961fc7f9dca508d38244963ed3",
+    "dirty": true
+  },
+  "machine": {
+    "platform": "macOS-27.0.1-arm64-arm-64bit-Mach-O",
+    "machine": "arm64",
+    "processor": "arm",
+    "memory_bytes": 17179869184
+  },
+  "python": "3.13.12",
+  "ollama_version": "0.40.15",
+  "packages": {
+    "torch": "2.14.1",
+    "sentence-transformers": "6.1.0",
+    "transformers": "5.18.0",
+    "qdrant-client": "1.20.0",
+    "pymongo": "4.19.0",
+    "numpy": "2.5.3",
+    "pyyaml": "6.0.3"
+  },
+  "split": "dev",
+  "smoke": false,
+  "max_queries": null,
+  "configs": {
+    "offline": {
+      "datasets": [
+        "scifact",
+        "nfcorpus",
+        "arguana"
+      ],
+      "split": "test",
+      "depth": {
+        "documents": 100,
+        "chunks": 600
+      },
+      "experiments": [
+        {
+          "id": "PA_WHOLE_DOCUMENT",
+          "preset": "PROTOCOL_A_WHOLE_DOCUMENT",
+          "index": "whole_document",
+          "protocol": "A"
+        },
+        {
+          "id": "O0_SECTION_AWARE_256_32",
+          "preset": "O0_SECTION_AWARE_256_32",
+          "index": "o0",
+          "protocol": "B"
+        },
+        {
+          "id": "O1_FIXED_256_32",
+          "preset": "O1_FIXED_256_32",
+          "index": "o1",
+          "protocol": "B"
+        },
+        {
+          "id": "O2_NO_OVERLAP",
+          "preset": "O2_NO_OVERLAP",
+          "index": "o2",
+          "protocol": "B"
+        },
+        {
+          "id": "O3_SMALL_CHUNKS",
+          "preset": "O3_SMALL_CHUNKS",
+          "index": "o3",
+          "protocol": "B"
+        },
+        {
+          "id": "O4_LARGE_CHUNKS",
+          "preset": "O4_LARGE_CHUNKS",
+          "index": "o4",
+          "protocol": "B"
+        },
+        {
+          "id": "O5_RECURSIVE",
+          "preset": "O5_RECURSIVE",
+          "index": "o5",
+          "protocol": "B"
+        },
+        {
+          "id": "O6_ALTERNATIVE_EMBEDDING",
+          "preset": "O6_ALTERNATIVE_EMBEDDING",
+          "index": "o6",
+          "protocol": "B"
+        },
+        {
+          "id": "O7_EXACT_SEARCH",
+          "preset": "O7_EXACT_SEARCH",
+          "index": "hnsw",
+          "protocol": "B",
+          "latency_repeats": 3,
+          "store_chunks": true
+        },
+        {
+          "id": "O8_HNSW_ANN",
+          "preset": "O8_HNSW_ANN",
+          "index": "hnsw",
+          "protocol": "B",
+          "latency_repeats": 3,
+          "store_chunks": true,
+          "ann_reference": "O7_EXACT_SEARCH"
+        }
+      ]
+    },
+    "online": {
+      "datasets": [
+        "scifact",
+        "nfcorpus",
+        "arguana"
+      ],
+      "split": "test",
+      "index": "o0",
+      "depth": {
+        "documents": 100,
+        "chunks": 600,
+        "units_protocol_a": 100,
+        "rerank": 100
+      },
+      "llm_query_limit": 100,
+      "auxiliary_llm": "qwen3.5:4b",
+      "experiments": [
+        {
+          "id": "B0_BASIC_DENSE_RAG",
+          "preset": "B0_BASIC_DENSE_RAG",
+          "protocols": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "id": "R0_DENSE",
+          "same_as": "B0_BASIC_DENSE_RAG"
+        },
+        {
+          "id": "R1_BM25",
+          "preset": "R1_BM25",
+          "protocols": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "id": "R2_HYBRID_RRF",
+          "preset": "R2_HYBRID_RRF",
+          "protocols": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "id": "R2_HYBRID_RRF_MATCHED_BUDGET",
+          "preset": "R2_HYBRID_RRF",
+          "protocols": [
+            "B"
+          ],
+          "branch_depth_factor": 0.5
+        },
+        {
+          "id": "R3_COVERAGE_RERANK",
+          "preset": "R3_COVERAGE_RERANK",
+          "protocols": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "id": "R4_CROSS_ENCODER",
+          "preset": "R4_CROSS_ENCODER",
+          "protocols": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "id": "R5_HYBRID_CROSS_ENCODER",
+          "preset": "R5_HYBRID_CROSS_ENCODER",
+          "protocols": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "id": "R6_QUERY_REWRITING",
+          "preset": "R6_QUERY_REWRITING",
+          "protocols": [
+            "B"
+          ],
+          "llm": true
+        },
+        {
+          "id": "R7_MULTI_QUERY",
+          "preset": "R7_MULTI_QUERY",
+          "protocols": [
+            "B"
+          ],
+          "llm": true
+        },
+        {
+          "id": "R8_HYDE",
+          "preset": "R8_HYDE",
+          "protocols": [
+            "B"
+          ],
+          "llm": true
+        },
+        {
+          "id": "R9_PREFILTERING",
+          "not_applicable": "BEIR has no eligibility metadata; evaluated on the HYU metadata fixture instead"
+        },
+        {
+          "id": "R10_POSTFILTERING",
+          "not_applicable": "BEIR has no eligibility metadata; evaluated on the HYU metadata fixture instead"
+        },
+        {
+          "id": "R11_TOKEN_BUDGET_SELECTION",
+          "preset": "R11_TOKEN_BUDGET_SELECTION",
+          "protocols": [
+            "B"
+          ]
+        },
+        {
+          "id": "R12_SUFFICIENCY_GATE",
+          "preset": "R12_SUFFICIENCY_GATE",
+          "protocols": [
+            "B"
+          ]
+        },
+        {
+          "id": "R13_RANKGPT",
+          "preset": "R13_RANKGPT",
+          "protocols": [
+            "B"
+          ],
+          "llm": true,
+          "overrides": {
+            "reranking": {
+              "params": {
+                "rerank_depth": 20
+              }
+            }
+          }
+        },
+        {
+          "id": "R14_FULL_ADVANCED",
+          "preset": "R14_FULL_ADVANCED",
+          "protocols": [
+            "B"
+          ],
+          "llm": true
+        },
+        {
+          "id": "PROPOSED_APPROACH",
+          "not_applicable": "Reserved: the team has not defined its proposed approach yet"
+        }
+      ],
+      "fixture": {
+        "index": "hyu_samples",
+        "metadata_queries": "Sources/evaluation/fixtures/hyu_metadata_queries.jsonl",
+        "gate_questions": "Sources/data/HYU/labels/legacy/sample_questions.jsonl",
+        "candidate_cutoff": 2
+      }
+    },
+    "generation": {
+      "backbones": [
+        "llama2:7b",
+        "qwen3.5:4b"
+      ],
+      "generation": {
+        "temperature": 0.0,
+        "top_p": 0.9,
+        "top_k": 40,
+        "context_window": 4096,
+        "max_tokens": 512,
+        "seed": 42,
+        "thinking": "off",
+        "timeout_s": 600
+      },
+      "retrieval_preset": "B0_BASIC_DENSE_RAG",
+      "annotations": null,
+      "cases": {
+        "beir": {
+          "datasets": [
+            "scifact",
+            "nfcorpus",
+            "arguana"
+          ],
+          "per_dataset": 10
+        },
+        "hyu_fixture": "Sources/data/HYU/labels/legacy/sample_questions.jsonl"
+      }
+    },
+    "hyu": {
+      "index": null,
+      "generation": {
+        "model": "qwen3.5:4b",
+        "temperature": 0.0,
+        "seed": 42,
+        "thinking": "off"
+      },
+      "presets": [
+        "B0_BASIC_DENSE_RAG",
+        "R5_HYBRID_CROSS_ENCODER",
+        "R9S_SCOPE_PREFILTER",
+        "R15_SELF_QUERY",
+        "R16_PROMPTED_CONDITIONAL",
+        "G0_CLOSED_BOOK",
+        "G1_ORACLE_CONTEXT",
+        "A0_AAES",
+        "A1_AAES_HARD_FILTER",
+        "A2_AAES_ORACLE_PROFILE",
+        "A3_AAES_ALWAYS_CLARIFY",
+        "A4_QUESTION_ONLY_AMBIGUITY",
+        "A6_AAES_NO_TEMPORAL"
+      ],
+      "dev_only_presets": [
+        "A0b_AAES_SPEC_FIXED"
+      ],
+      "ours": "A0_AAES",
+      "baselines": [
+        "B0_BASIC_DENSE_RAG",
+        "R5_HYBRID_CROSS_ENCODER",
+        "R15_SELF_QUERY",
+        "R16_PROMPTED_CONDITIONAL"
+      ],
+      "best_baseline": "R15_SELF_QUERY",
+      "ablation": "A4_QUESTION_ONLY_AMBIGUITY",
+      "bootstrap_resamples": 10000,
+      "smoke_cases": 5
+    }
+  },
+  "labels_sha256": "5557a010cae9aee7948dc991b89e47cbb6c50d3c644212c92c8ff8bf2482f199  dev.jsonl\na622b05ee29dd67bddc534e267362aa221b10d0f6e98cfb1836cedb5e3790a48  test.jsonl\n",
+  "datasets": {
+    "scifact": {
+      "dataset": "scifact",
+      "url": "https://public.ukp.informatik.tu-darmstadt.de/thakur/BEIR/datasets/scifact.zip",
+      "md5": "5f7d1de60b170fc8027bb7898e2efca1",
+      "md5_verified": true,
+      "downloaded_at": "2026-11-01T05:49:35.698517+00:00",
+      "license": "CC BY-NC 2.0",
+      "splits": [
+        "train",
+        "test"
+      ]
+    },
+    "nfcorpus": {
+      "dataset": "nfcorpus",
+      "url": "https://public.ukp.informatik.tu-darmstadt.de/thakur/BEIR/datasets/nfcorpus.zip",
+      "md5": "a89dba18a62ef92f7d323ec890a0d38d",
+      "md5_verified": true,
+      "downloaded_at": "2026-11-01T05:49:40.726337+00:00",
+      "license": "CC BY-SA 4.0",
+      "splits": [
+        "train",
+        "dev",
+        "test"
+      ]
+    },
+    "arguana": {
+      "dataset": "arguana",
+      "url": "https://public.ukp.informatik.tu-darmstadt.de/thakur/BEIR/datasets/arguana.zip",
+      "md5": "8ad3e3c2a5867cdced806d6503f29b99",
+      "md5_verified": true,
+      "downloaded_at": "2026-11-01T05:49:44.178788+00:00",
+      "license": "CC BY-SA 4.0",
+      "splits": [
+        "test"
+      ]
+    }
+  },
+  "tasks": [
+    "hyu/dev/B0_BASIC_DENSE_RAG__-",
+    "hyu/dev/R16_PROMPTED_CONDITIONAL__-",
+    "hyu/dev/A0_AAES__-",
+    "hyu/dev/A0b_AAES_SPEC_FIXED__-"
+  ],
+  "sessions": [
+    {
+      "started_at": "2026-11-14T02:55:00.789330+00:00",
+      "argv": [
+        "--suite",
+        "hyu",
+        "--split",
+        "dev",
+        "--run-id",
+        "dev-03",
+        "--experiment",
+        "A0_AAES,A0b_AAES_SPEC_FIXED,B0_BASIC_DENSE_RAG,R16_PROMPTED_CONDITIONAL"
+      ],
+      "git": {
+        "commit": "3f394365093acf191caec055b18d69586d052522",
+        "dirty": false
+      },
+      "split": "dev",
+      "tasks": [
+        "hyu/dev/B0_BASIC_DENSE_RAG__-",
+        "hyu/dev/R16_PROMPTED_CONDITIONAL__-",
+        "hyu/dev/A0_AAES__-"
+      ]
+    },
+    {
+      "started_at": "2026-11-14T03:03:32.893857+00:00",
+      "argv": [
+        "--suite",
+        "hyu",
+        "--split",
+        "dev",
+        "--run-id",
+        "dev-03",
+        "--resume",
+        "--experiment",
+        "A0_AAES,A0b_AAES_SPEC_FIXED,B0_BASIC_DENSE_RAG,R16_PROMPTED_CONDITIONAL"
+      ],
+      "git": {
+        "commit": "3f394365093acf191caec055b18d69586d052522",
+        "dirty": true
+      },
+      "split": "dev",
+      "tasks": [
+        "hyu/dev/B0_BASIC_DENSE_RAG__-",
+        "hyu/dev/R16_PROMPTED_CONDITIONAL__-",
+        "hyu/dev/A0_AAES__-"
+      ]
+    },
+    {
+      "started_at": "2026-11-14T03:16:54.079631+00:00",
+      "argv": [
+        "--suite",
+        "hyu",
+        "--split",
+        "dev",
+        "--run-id",
+        "dev-03",
+        "--resume",
+        "--experiment",
+        "A0_AAES,A0b_AAES_SPEC_FIXED,B0_BASIC_DENSE_RAG,R16_PROMPTED_CONDITIONAL"
+      ],
+      "git": {
+        "commit": "85fd5ad9f8b4c4961fc7f9dca508d38244963ed3",
+        "dirty": true
+      },
+      "split": "dev",
+      "tasks": [
+        "hyu/dev/B0_BASIC_DENSE_RAG__-",
+        "hyu/dev/R16_PROMPTED_CONDITIONAL__-",
+        "hyu/dev/A0_AAES__-",
+        "hyu/dev/A0b_AAES_SPEC_FIXED__-"
+      ]
+    }
+  ]
+}

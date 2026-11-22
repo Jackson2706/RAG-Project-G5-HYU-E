@@ -1,0 +1,33 @@
+{
+  "agent_model": "gpt-6.1-sol",
+  "annotator": "codex:gpt-6.1-sol",
+  "prompt_sha256": "79ca1e069152ade52e03bc983d7fdab8536adbe1092837da230fac7b0e314997",
+  "input_sha256": "376ed82f900a73230bd8cd8f7b4cfd886d4c9c70c1240843236758873ae45a58",
+  "row_count": 90,
+  "timestamp": "2026-11-16T23:11:22.580318+00:00",
+  "counts_by_expected_behavior": {
+    "abstain": 9,
+    "conditional_answer": 56,
+    "answer": 9,
+    "clarify": 16
+  },
+  "excluded": 0,
+  "dependent_cases": 81,
+  "out_of_vocabulary_selector_cases": [
+    "DBUF072",
+    "DBUF068",
+    "DBUF040",
+    "DBUF075",
+    "DBUF042",
+    "DBUF037",
+    "DBUF073",
+    "DBUF074",
+    "DBUF041",
+    "DBUF070",
+    "DBUF036",
+    "DBUF069",
+    "DBUF038",
+    "DBUF071",
+    "DBUF039"
+  ]
+}

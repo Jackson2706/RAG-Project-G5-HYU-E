@@ -1,0 +1,8 @@
+[
+  {
+    "id": "test-0",
+    "url": "https://example.test/benefit",
+    "scenario": "I am a new applicant.",
+    "question": "When can I apply?"
+  }
+]

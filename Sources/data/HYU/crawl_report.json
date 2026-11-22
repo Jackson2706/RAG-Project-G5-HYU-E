@@ -1,0 +1,36 @@
+{
+  "lang_coverage_histogram": {
+    "0": 0,
+    "1": 1,
+    "2": 0,
+    "3": 2,
+    "4": 0,
+    "5": 2,
+    "6": 2,
+    "7": 2,
+    "8": 0,
+    "9": 48
+  },
+  "min_interval": 2.5,
+  "sites": {
+    "erica": {
+      "attachments_by_type": {},
+      "by_kind": {
+        "listing": 1,
+        "page": 4,
+        "robots": 1
+      },
+      "by_status": {
+        "200": 6
+      },
+      "documents": 57,
+      "requests": 6,
+      "skipped_deny": 0,
+      "skipped_no_english": 41,
+      "skipped_robots": 0
+    }
+  },
+  "user_agent": "HYU-Compass-CourseCrawler/0.1 (+https://github.com/Jackson2706/hyu-compass; student research project)",
+  "wall_time": 15.603088083007606,
+  "warnings": {}
+}

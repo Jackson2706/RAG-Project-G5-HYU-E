@@ -1,0 +1,787 @@
+{
+ "degree_level": [
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "2026 GKS-G Application Forms & Guidelines (University Track)",
+   "pred": [],
+   "ref": [
+    "doctoral",
+    "master"
+   ],
+   "final": [
+    "doctoral",
+    "master"
+   ],
+   "ev_pred": null,
+   "ev_ref": "GKS-G Application Forms & Guidelines",
+   "reason": "The heading identifies \"2026 GKS-G Application Forms & Guidelines (University Track)\", a graduate admission guide.",
+   "chunk": "0d1c03cc"
+  },
+  {
+   "cause": "reference_error",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "About ERICA",
+   "pred": [
+    "language_program"
+   ],
+   "ref": [],
+   "final": [
+    "language_program"
+   ],
+   "ev_pred": "Korean language program",
+   "ev_ref": null,
+   "reason": "The text explicitly includes \"Korean language program: 1,000+ students\".",
+   "chunk": "2989dba1"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "2021 GKS-G Application Forms & Guidelines",
+   "pred": [
+    "doctoral",
+    "master"
+   ],
+   "ref": [
+    "doctoral",
+    "master",
+    "non_degree"
+   ],
+   "final": [
+    "doctoral",
+    "master",
+    "non_degree"
+   ],
+   "ev_pred": "Master’s",
+   "ev_ref": "Certificate of Master’s degree or Master’s Diploma ( Original ); Column 3: ; Column 4: Application Documents: 12; Submission Status: Master’s degree Transcript ( Original ); Column 3: ; Column 4: Application Documents: 13; Submission Status: Certificate of Doctoral degree or Doctoral Diploma ( Original ) *Post-Doctoral Research Program applicants ONLY",
+   "reason": "The document list names \"Master’s degree\", \"Doctoral degree\", and \"Post-Doctoral Research Program applicants\".",
+   "chunk": "2cb33a32"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "2021 GKS-G Application Forms & Guidelines",
+   "pred": [],
+   "ref": [
+    "doctoral",
+    "master"
+   ],
+   "final": [
+    "doctoral",
+    "master"
+   ],
+   "ev_pred": null,
+   "ev_ref": "GKS-G Application Forms & Guidelines",
+   "reason": "The heading identifies \"2021 GKS-G Application Forms & Guidelines\", a graduate admission guide.",
+   "chunk": "40059834"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "2021 GKS-G Application Forms & Guidelines",
+   "pred": [],
+   "ref": [
+    "doctoral",
+    "master"
+   ],
+   "final": [
+    "doctoral",
+    "master"
+   ],
+   "ev_pred": null,
+   "ev_ref": "GKS scholars in the degree program",
+   "reason": "The text refers to \"2021 GKS Graduate Degree Scholars\" within the GKS-G guide.",
+   "chunk": "402a9b86"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "2023 GKS-G Application Forms & Guidelines (University Track)",
+   "pred": [],
+   "ref": [
+    "doctoral",
+    "master"
+   ],
+   "final": [
+    "doctoral",
+    "master"
+   ],
+   "ev_pred": null,
+   "ev_ref": "GKS-G Application Forms & Guidelines",
+   "reason": "The heading identifies \"2023 GKS-G Application Forms & Guidelines (University Track)\", a graduate admission guide.",
+   "chunk": "4a95e1b6"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "2024 GKS-G Application Forms & Guidelines (University Track)",
+   "pred": [],
+   "ref": [
+    "doctoral",
+    "master"
+   ],
+   "final": [
+    "doctoral",
+    "master"
+   ],
+   "ev_pred": null,
+   "ev_ref": "GKS-G Application Forms & Guidelines",
+   "reason": "The heading identifies \"2024 GKS-G Application Forms & Guidelines (University Track)\", a graduate admission guide.",
+   "chunk": "4f9e0055"
+  },
+  {
+   "cause": "rule_wrong_value",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "2021 GKS-G Application Forms & Guidelines",
+   "pred": [
+    "undergraduate"
+   ],
+   "ref": [
+    "doctoral",
+    "master"
+   ],
+   "final": [
+    "doctoral",
+    "master"
+   ],
+   "ev_pred": "undergraduate",
+   "ev_ref": "GKS-G Application Forms & Guidelines",
+   "reason": "The heading is \"2021 GKS-G Application Forms & Guidelines\"; \"completed your undergraduate program\" is only an example of prior study.",
+   "chunk": "50763c25"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "Graduate Admission Guideline",
+   "pred": [],
+   "ref": [
+    "doctoral",
+    "master"
+   ],
+   "final": [
+    "doctoral",
+    "master"
+   ],
+   "ev_pred": null,
+   "ev_ref": "Graduate Admission Guideline",
+   "reason": "The heading explicitly says \"Graduate Admission Guideline\".",
+   "chunk": "55d5f524"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "Available Support",
+   "pred": [
+    "undergraduate"
+   ],
+   "ref": [
+    "doctoral",
+    "master",
+    "undergraduate"
+   ],
+   "final": [
+    "doctoral",
+    "master",
+    "undergraduate"
+   ],
+   "ev_pred": "Undergraduate",
+   "ev_ref": "Undergraduate: Eligibility New (year 1) international undergraduate students Application Instructions Please read the e-mail notification sent to new students during the holidays.; Postgraduate: Eligibility New international postgraduate students",
+   "reason": "The text separately names \"international undergraduate students\" and \"international postgraduate students\".",
+   "chunk": "58fe37d1"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "2021 GKS-G Application Forms & Guidelines",
+   "pred": [],
+   "ref": [
+    "doctoral",
+    "master"
+   ],
+   "final": [
+    "doctoral",
+    "master"
+   ],
+   "ev_pred": null,
+   "ev_ref": "GKS-G Application Forms & Guidelines",
+   "reason": "The heading identifies \"2021 GKS-G Application Forms & Guidelines\", a graduate admission guide.",
+   "chunk": "6171d714"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "2024 GKS-G Application Forms & Guidelines (University Track)",
+   "pred": [
+    "doctoral",
+    "master"
+   ],
+   "ref": [
+    "doctoral",
+    "master",
+    "non_degree"
+   ],
+   "final": [
+    "doctoral",
+    "master",
+    "non_degree"
+   ],
+   "ev_pred": "Master's",
+   "ev_ref": "Master's ☐: Optional; Doctoral ☐: Optional; Research ☐: Optional",
+   "reason": "The form has separate columns for \"Master's\", \"Doctoral\", and \"Research\" applicants.",
+   "chunk": "70b480a1"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "2023 GKS-G Application Forms & Guidelines (University Track)",
+   "pred": [],
+   "ref": [
+    "doctoral",
+    "master"
+   ],
+   "final": [
+    "doctoral",
+    "master"
+   ],
+   "ev_pred": null,
+   "ev_ref": "GKS-G Application Forms & Guidelines",
+   "reason": "The heading identifies \"2023 GKS-G Application Forms & Guidelines (University Track)\", a graduate admission guide.",
+   "chunk": "74913e09"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "2026 GKS-G Application Forms & Guidelines (University Track)",
+   "pred": [],
+   "ref": [
+    "doctoral",
+    "master"
+   ],
+   "final": [
+    "doctoral",
+    "master"
+   ],
+   "ev_pred": null,
+   "ev_ref": "Application Guidelines for Graduate Degrees",
+   "reason": "The text explicitly says \"Application Guidelines for Graduate Degrees\".",
+   "chunk": "7d16078c"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "2024 GKS-G Application Forms & Guidelines (University Track)",
+   "pred": [],
+   "ref": [
+    "doctoral",
+    "master"
+   ],
+   "final": [
+    "doctoral",
+    "master"
+   ],
+   "ev_pred": null,
+   "ev_ref": "GKS-G Application Forms & Guidelines",
+   "reason": "The heading identifies \"2024 GKS-G Application Forms & Guidelines (University Track)\", a graduate admission guide.",
+   "chunk": "87b3e745"
+  },
+  {
+   "cause": "rule_too_broad",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "Graduate Admission Guideline",
+   "pred": [
+    "doctoral",
+    "master",
+    "undergraduate"
+   ],
+   "ref": [
+    "doctoral",
+    "master"
+   ],
+   "final": [
+    "doctoral",
+    "master"
+   ],
+   "ev_pred": "bachelor’s",
+   "ev_ref": "Master’s Degree",
+   "reason": "The \"Graduate Admission Guideline\" names \"Master’s Degree\" and \"Ph.D\"; the bachelor’s certificate is a prior-degree document.",
+   "chunk": "8c729219"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "2026 GKS-G Application Forms & Guidelines (University Track)",
+   "pred": [],
+   "ref": [
+    "doctoral",
+    "master"
+   ],
+   "final": [
+    "doctoral",
+    "master"
+   ],
+   "ev_pred": null,
+   "ev_ref": "GKS-G Application Forms & Guidelines",
+   "reason": "The heading identifies \"2026 GKS-G Application Forms & Guidelines (University Track)\", a graduate admission guide.",
+   "chunk": "9f21edf8"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "Part-time work permit Document guide",
+   "pred": [
+    "doctoral",
+    "undergraduate"
+   ],
+   "ref": [
+    "doctoral",
+    "language_program",
+    "master",
+    "undergraduate"
+   ],
+   "final": [
+    "doctoral",
+    "language_program",
+    "master",
+    "undergraduate"
+   ],
+   "ev_pred": "undergraduate students",
+   "ev_ref": "language training/undergraduate students, and 15 hours for masters/doctoral degree students",
+   "reason": "The text names \"language training/undergraduate students\" and \"masters/doctoral degree students\".",
+   "chunk": "aea0765d"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "2024 GKS-G Application Forms & Guidelines (University Track)",
+   "pred": [],
+   "ref": [
+    "doctoral",
+    "master"
+   ],
+   "final": [
+    "doctoral",
+    "master"
+   ],
+   "ev_pred": null,
+   "ev_ref": "GKS-G Application Forms & Guidelines",
+   "reason": "The heading identifies \"2024 GKS-G Application Forms & Guidelines (University Track)\", a graduate admission guide.",
+   "chunk": "af73cf3c"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "2026 GKS-G Application Forms & Guidelines (University Track)",
+   "pred": [],
+   "ref": [
+    "doctoral",
+    "master"
+   ],
+   "final": [
+    "doctoral",
+    "master"
+   ],
+   "ev_pred": null,
+   "ev_ref": "GKS-G Application Forms & Guidelines",
+   "reason": "The heading identifies \"2026 GKS-G Application Forms & Guidelines (University Track)\", a graduate admission guide.",
+   "chunk": "b1f8cb26"
+  },
+  {
+   "cause": "reference_error",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "Return to School for 2026 Fall Semeste…",
+   "pred": [
+    "doctoral",
+    "master"
+   ],
+   "ref": [],
+   "final": [
+    "doctoral",
+    "master"
+   ],
+   "ev_pred": "Graduate students",
+   "ev_ref": null,
+   "reason": "The text repeatedly addresses \"Graduate students\", which covers master’s and doctoral students.",
+   "chunk": "bb1b1423"
+  },
+  {
+   "cause": "rule_too_broad",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "2026 KOICA-Hanyang(ERICA) NEXT Fellowship",
+   "pred": [
+    "undergraduate"
+   ],
+   "ref": [],
+   "final": [],
+   "ev_pred": "Bachelor’s",
+   "ev_ref": null,
+   "reason": "The phrase \"Must hold a Bachelor’s degree\" states a prior qualification, not that the fellowship applies to undergraduate students.",
+   "chunk": "c40391e2"
+  },
+  {
+   "cause": "rule_too_broad",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "Partner Universities",
+   "pred": [
+    "doctoral",
+    "master"
+   ],
+   "ref": [],
+   "final": [],
+   "ev_pred": "Graduate School",
+   "ev_ref": null,
+   "reason": "\"ECE Paris Graduate School of Engineering\" is an institution name in a partner list, not a student applicability condition.",
+   "chunk": "d813550f"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "2024 GKS-G Application Forms & Guidelines (University Track)",
+   "pred": [],
+   "ref": [
+    "doctoral",
+    "master"
+   ],
+   "final": [
+    "doctoral",
+    "master"
+   ],
+   "ev_pred": null,
+   "ev_ref": "GKS-G Application Forms & Guidelines",
+   "reason": "The heading identifies \"2024 GKS-G Application Forms & Guidelines (University Track)\", a graduate admission guide.",
+   "chunk": "e1115cb5"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "Visa",
+   "pred": [
+    "undergraduate"
+   ],
+   "ref": [],
+   "final": [
+    "doctoral",
+    "master",
+    "undergraduate"
+   ],
+   "ev_pred": "bachelor's",
+   "ev_ref": null,
+   "reason": "Eligibility requires \"a bachelor's degree (including domestic associate's degree) or higher\", which covers bachelor’s, master’s, and doctoral degree holders.",
+   "chunk": "e727df3e"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "2021 GKS-G Application Forms & Guidelines",
+   "pred": [
+    "doctoral",
+    "master"
+   ],
+   "ref": [
+    "doctoral",
+    "master",
+    "non_degree"
+   ],
+   "final": [
+    "doctoral",
+    "master",
+    "non_degree"
+   ],
+   "ev_pred": "Master’s",
+   "ev_ref": "Desired Degree Program: ☐ Master’s ☐ Doctoral ☐ Research",
+   "reason": "The form offers \"Desired Degree Program: ☐ Master’s ☐ Doctoral ☐ Research\".",
+   "chunk": "e9dd2ca4"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "2023 GKS-G Application Forms & Guidelines (University Track)",
+   "pred": [],
+   "ref": [
+    "doctoral",
+    "master"
+   ],
+   "final": [
+    "doctoral",
+    "master"
+   ],
+   "ev_pred": null,
+   "ev_ref": "GKS-G Application Forms & Guidelines",
+   "reason": "The heading identifies \"2023 GKS-G Application Forms & Guidelines (University Track)\", a graduate admission guide.",
+   "chunk": "f42dc670"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "2026 GKS-G Application Forms & Guidelines (University Track)",
+   "pred": [],
+   "ref": [
+    "doctoral",
+    "master"
+   ],
+   "final": [
+    "doctoral",
+    "master"
+   ],
+   "ev_pred": null,
+   "ev_ref": "GKS-G Application Forms & Guidelines",
+   "reason": "The heading identifies \"2026 GKS-G Application Forms & Guidelines (University Track)\", a graduate admission guide.",
+   "chunk": "f75f9c0c"
+  }
+ ],
+ "visa": [
+  {
+   "cause": "reference_error",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "Visa",
+   "pred": [
+    "D-2"
+   ],
+   "ref": [],
+   "final": [
+    "D-2"
+   ],
+   "ev_pred": "D-2",
+   "ev_ref": null,
+   "reason": "The text applies the requirement to students who \"enter the country with a new D-2 visa\".",
+   "chunk": "15a057ce"
+  },
+  {
+   "cause": "rule_too_broad",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "Return to School for 2025 Fall Semeste…",
+   "pred": [
+    "D-2",
+    "D-4"
+   ],
+   "ref": [],
+   "final": [],
+   "ev_pred": "D-2",
+   "ev_ref": null,
+   "reason": "The phrase \"After taking D-2 or D-4 Visa, abusing VISA for asylum\" describes a country-management category, not the students to whom this return-to-school rule ",
+   "chunk": "1e7da5d9"
+  },
+  {
+   "cause": "reference_error",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "Visa",
+   "pred": [
+    "D-2"
+   ],
+   "ref": [],
+   "final": [
+    "D-2"
+   ],
+   "ev_pred": null,
+   "ev_ref": null,
+   "reason": "The heading explicitly says \"For-profit Research Activities of International Students (D-2)\".",
+   "chunk": "314edd8e"
+  },
+  {
+   "cause": "reference_error",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "Return to School for 2026 Spri…",
+   "pred": [
+    "D-2"
+   ],
+   "ref": [],
+   "final": [
+    "D-2"
+   ],
+   "ev_pred": "D-2",
+   "ev_ref": null,
+   "reason": "The visa guide explicitly addresses \"Students residing in Korea (D-2 visa applicants)\".",
+   "chunk": "3a554d5d"
+  },
+  {
+   "cause": "rule_too_broad",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "Graduate Admission Guideline",
+   "pred": [
+    "D-4"
+   ],
+   "ref": [],
+   "final": [],
+   "ev_pred": "D-4",
+   "ev_ref": null,
+   "reason": "The text merely directs questions \"Regarding online application, payment, refund, D-4 Visa\" to an office; it does not make D-4 an applicability condition.",
+   "chunk": "55d5f524"
+  },
+  {
+   "cause": "reference_error",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "Graduate Admission Guideline",
+   "pred": [
+    "D-2",
+    "D-4"
+   ],
+   "ref": [],
+   "final": [
+    "D-2",
+    "D-4"
+   ],
+   "ev_pred": "D-2",
+   "ev_ref": null,
+   "reason": "The text states that students cannot apply for \"Student(D-2) Visa\" and may receive a language-course \"(D-4)\" certificate of admission.",
+   "chunk": "8c729219"
+  },
+  {
+   "cause": "reference_error",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "[2026 Fall Semester] Undergraduate Acceptance Guideline",
+   "pred": [
+    "D-2"
+   ],
+   "ref": [],
+   "final": [
+    "D-2"
+   ],
+   "ev_pred": "D-2",
+   "ev_ref": null,
+   "reason": "The CoA section explicitly applies to students who \"need a student (D-2) visa\".",
+   "chunk": "a34a44d9"
+  },
+  {
+   "cause": "reference_error",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "Return to School for 2026 Fall Semeste…",
+   "pred": [
+    "D-4"
+   ],
+   "ref": [],
+   "final": [
+    "D-4"
+   ],
+   "ev_pred": "D-4",
+   "ev_ref": null,
+   "reason": "The required-document rule explicitly names \"Holders of F visas and D-4 visas\"; D-4 is the supported v1 value.",
+   "chunk": "bb1b1423"
+  }
+ ],
+ "student_type": [
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "TOPIK",
+   "pred": [],
+   "ref": [
+    "degree_seeking"
+   ],
+   "final": [
+    "degree_seeking"
+   ],
+   "ev_pred": null,
+   "ev_ref": "currently enrolled in a degree program",
+   "reason": "The requirement names students \"currently enrolled in a degree program\".",
+   "chunk": "1b7c289b"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "About ERICA",
+   "pred": [
+    "exchange",
+    "language_program"
+   ],
+   "ref": [],
+   "final": [
+    "degree_seeking",
+    "exchange",
+    "language_program"
+   ],
+   "ev_pred": "exchange students",
+   "ev_ref": null,
+   "reason": "The text lists \"Degree programs\", \"exchange students\", and a \"Korean language program\".",
+   "chunk": "2989dba1"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "Part-time work permit Document guide",
+   "pred": [
+    "degree_seeking"
+   ],
+   "ref": [],
+   "final": [
+    "degree_seeking",
+    "language_program"
+   ],
+   "ev_pred": "degree students",
+   "ev_ref": null,
+   "reason": "The text covers both \"language training\" students and \"undergraduate\" and \"masters/doctoral degree students\".",
+   "chunk": "aea0765d"
+  },
+  {
+   "cause": "reference_error",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "Outgoing Programs",
+   "pred": [
+    "exchange"
+   ],
+   "ref": [],
+   "final": [
+    "exchange"
+   ],
+   "ev_pred": null,
+   "ev_ref": null,
+   "reason": "The heading says \"Application and Exchange Process\" and the text requires an application to an \"overseas hosting university\".",
+   "chunk": "c2bdd37f"
+  },
+  {
+   "cause": "missing_rule",
+   "method": "rule",
+   "bucket": "rule_tagged",
+   "title": "Visa",
+   "pred": [],
+   "ref": [
+    "language_program"
+   ],
+   "final": [
+    "language_program"
+   ],
+   "ev_pred": null,
+   "ev_ref": "language school program",
+   "reason": "The transfer requirements demand a \"Certificate of Attendance or completion of language school program\" and language-school records.",
+   "chunk": "dc296e03"
+  }
+ ]
+}

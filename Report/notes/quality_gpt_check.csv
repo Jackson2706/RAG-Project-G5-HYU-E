@@ -1,0 +1,21 @@
+id,facts,wrong_group,conditions_match,asks_branch_attribute,right_referral,note
+D0021,correct; missing; missing,no,,,,
+D0037,missing; missing,no,,,,
+D0142,wrong; missing; missing,no,,,,
+D0045,,,,,no,
+D0161,,,,no,,
+D0254,missing,no,no,,,The reply asserts eligibility and omits the sole notice's campus and scope.
+D0159,,,,,no,
+D0230,missing; wrong; missing,yes,,,,Generalizes the enrolled-student procedure and substitutes IDs or admission letters for the enrollment certificate.
+D0215,missing,no,,,,Gives the 2026 amount and omits the March 1 effective date.
+D0110,,,,,no,
+D0036,correct; correct; correct,no,,,,
+D0073,,,,no,,
+D0046,wrong; missing,no,,,,
+D0157,,,,,no,The checklist points to gathering enrollment and tuition documents.
+D0225,,,,no,,
+D0028,missing; missing,no,,,,Identifies the correct file and omits the required posting date.
+D0069,wrong; missing,no,no,,,
+D0275,wrong,yes,,,,
+D0147,wrong; missing,no,,,,
+D0041,wrong; missing,no,,,,

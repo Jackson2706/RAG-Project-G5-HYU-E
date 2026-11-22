@@ -1,0 +1,90 @@
+{"mid": "S001", "gold": {"campus": "seoul"}}
+{"mid": "S002", "gold": {"visa": "D-2"}}
+{"mid": "S003", "gold": {}}
+{"mid": "S004", "gold": {"campus": "erica", "topik_level": "3"}}
+{"mid": "S005", "gold": {"academic_status": "enrolled"}}
+{"mid": "S006", "gold": {"degree_level": "master"}}
+{"mid": "S007", "gold": {"topik_level": "4"}}
+{"mid": "S008", "gold": {"topik_level": "4", "degree_level": "undergraduate", "campus": "erica"}}
+{"mid": "S009", "gold": {"topik_level": "2"}}
+{"mid": "S010", "gold": {"topik_level": "5"}}
+{"mid": "S011", "gold": {"topik_level": "6", "degree_level": "master"}}
+{"mid": "S012", "gold": {"topik_level": "1", "student_type": "exchange"}}
+{"mid": "S013", "gold": {"topik_level": "none", "degree_level": "undergraduate", "year": "1", "campus": "seoul"}}
+{"mid": "S014", "gold": {"year": "1"}}
+{"mid": "S015", "gold": {"year": "1", "degree_level": "undergraduate", "campus": "erica"}}
+{"mid": "S016", "gold": {"year": "1", "student_type": "degree_seeking"}}
+{"mid": "S017", "gold": {"year": "1", "visa": "D-2"}}
+{"mid": "S018", "gold": {"year": "1"}}
+{"mid": "S019", "gold": {"year": "3"}}
+{"mid": "S020", "gold": {"year": "3", "degree_level": "undergraduate", "campus": "seoul"}}
+{"mid": "S021", "gold": {"year": "3", "degree_level": "doctoral", "visa": "D-2"}}
+{"mid": "S022", "gold": {"year": "3", "english_track": "yes"}}
+{"mid": "S023", "gold": {"year": "3", "academic_status": "leave_of_absence"}}
+{"mid": "S024", "gold": {"year": "2", "campus": "erica"}}
+{"mid": "S025", "gold": {"year": "2", "degree_level": "master"}}
+{"mid": "S026", "gold": {"year": "4", "academic_status": "graduating"}}
+{"mid": "S027", "gold": {"year": "4", "degree_level": "undergraduate", "english_track": "yes"}}
+{"mid": "S028", "gold": {"campus": "erica"}}
+{"mid": "S029", "gold": {"campus": "erica", "student_type": "exchange"}}
+{"mid": "S030", "gold": {"campus": "erica", "degree_level": "doctoral"}}
+{"mid": "S031", "gold": {"campus": "erica", "visa": "D-2"}}
+{"mid": "S032", "gold": {"campus": "erica", "degree_level": "language_program", "student_type": "language_program"}}
+{"mid": "S033", "gold": {"visa": "D-4"}}
+{"mid": "S034", "gold": {"visa": "D-2"}}
+{"mid": "S035", "gold": {"visa": "D-2"}}
+{"mid": "S036", "gold": {"visa": "D-2-5"}}
+{"mid": "S037", "gold": {"visa": "D-10", "academic_status": "applicant"}}
+{"mid": "S038", "gold": {"student_type": "degree_seeking"}}
+{"mid": "S039", "gold": {}}
+{"mid": "S040", "gold": {}}
+{"mid": "S041", "gold": {}}
+{"mid": "S042", "gold": {"academic_status": "applicant"}}
+{"mid": "S043", "gold": {"student_type": "visiting"}}
+{"mid": "S044", "gold": {}}
+{"mid": "S045", "gold": {}}
+{"mid": "S046", "gold": {"academic_status": "applicant"}}
+{"mid": "S047", "gold": {"year": "2"}}
+{"mid": "S048", "gold": {}}
+{"mid": "S049", "gold": {}}
+{"mid": "S050", "gold": {"campus": "seoul"}}
+{"mid": "S051", "gold": {}}
+{"mid": "S052", "gold": {}}
+{"mid": "S053", "gold": {"degree_level": "undergraduate"}}
+{"mid": "S054", "gold": {}}
+{"mid": "S055", "gold": {}}
+{"mid": "S056", "gold": {}}
+{"mid": "S057", "gold": {"degree_level": "non_degree"}}
+{"mid": "S058", "gold": {"student_type": "visiting"}}
+{"mid": "S059", "gold": {"degree_level": "language_program", "student_type": "language_program", "visa": "D-4"}}
+{"mid": "S060", "gold": {"student_type": "degree_seeking", "degree_level": "doctoral", "campus": "seoul", "korean_standard": "pass"}}
+{"mid": "S061", "gold": {"visa": "other", "degree_level": "undergraduate", "korean_standard": "exempt"}}
+{"mid": "S062", "gold": {"visa": "D-2-8", "student_type": "exchange"}}
+{"mid": "S063", "gold": {"academic_status": "completed_coursework"}}
+{"mid": "S064", "gold": {"academic_status": "admitted_not_enrolled"}}
+{"mid": "S065", "gold": {"korean_standard": "pass"}}
+{"mid": "S066", "gold": {"korean_standard": "exempt", "english_track": "yes"}}
+{"mid": "S067", "gold": {"korean_standard": "fail"}}
+{"mid": "S068", "gold": {"english_track": "no", "degree_level": "master"}}
+{"mid": "S069", "gold": {"academic_status": "applicant", "degree_level": "master", "campus": "erica"}}
+{"mid": "S070", "gold": {"english_track": "no", "topik_level": "3"}}
+{"mid": "S071", "gold": {"korean_standard": "exempt", "academic_status": "enrolled", "english_track": "yes", "campus": "seoul"}}
+{"mid": "S072", "gold": {"year": "1", "degree_level": "undergraduate", "campus": "erica"}}
+{"mid": "S073", "gold": {"student_type": "exchange", "visa": "D-2-8"}}
+{"mid": "S074", "gold": {"campus": "erica", "degree_level": "master"}}
+{"mid": "S075", "gold": {"year": "3", "english_track": "yes"}}
+{"mid": "S076", "gold": {"topik_level": "4", "student_type": "degree_seeking", "degree_level": "undergraduate"}}
+{"mid": "S077", "gold": {"visa": "D-2"}}
+{"mid": "S078", "gold": {"academic_status": "admitted_not_enrolled", "degree_level": "undergraduate"}}
+{"mid": "S079", "gold": {"campus": "erica"}}
+{"mid": "S080", "gold": {"degree_level": "doctoral", "campus": "seoul", "academic_status": "leave_of_absence"}}
+{"mid": "S081", "gold": {"topik_level": "5", "degree_level": "master", "campus": "erica"}}
+{"mid": "S082", "gold": {"campus": "seoul", "degree_level": "undergraduate", "student_type": "degree_seeking"}}
+{"mid": "S083", "gold": {"campus": "seoul", "year": "2"}}
+{"mid": "S084", "gold": {"visa": "D-10"}}
+{"mid": "S085", "gold": {"academic_status": "graduating", "degree_level": "master"}}
+{"mid": "S086", "gold": {}}
+{"mid": "S087", "gold": {"student_type": "exchange"}}
+{"mid": "S088", "gold": {"korean_standard": "pass", "degree_level": "undergraduate", "english_track": "no"}}
+{"mid": "S089", "gold": {"degree_level": "non_degree", "campus": "erica"}}
+{"mid": "S090", "gold": {"korean_standard": "fail", "degree_level": "language_program", "student_type": "language_program", "visa": "D-4"}}

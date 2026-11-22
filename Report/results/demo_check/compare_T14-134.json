@@ -1,0 +1,98 @@
+{
+  "case": "T14-134",
+  "question": "Can I keep doing paid research after changing to D-10?",
+  "index": "hyu_20261110_97dc1269_r5",
+  "runs": [
+    {
+      "preset": "A0_AAES",
+      "demo_case": true,
+      "http": 200,
+      "seconds": 17.5,
+      "action": "CONDITIONAL",
+      "outcome": "insufficient_context",
+      "answer": "I could not find enough information in the indexed HYU documents to answer this question. Please check the official Hanyang University website or ask the relevant office.\n\n_Model note: The provided evidence blocks contain information regarding COVID-19 vaccination schedules and procedures for foreign residents aged 18 to 49, but they do not mention visa types (such as D-10), research activities, o",
+      "cited": [],
+      "trace_stages": [
+        "query_understanding",
+        "dense_retrieval",
+        "lexical_retrieval",
+        "hybrid_fusion",
+        "metadata_enrichment",
+        "reranking",
+        "evidence_selection",
+        "evidence_sufficiency",
+        "context_construction",
+        "generation"
+      ]
+    },
+    {
+      "preset": "B0_BASIC_DENSE_RAG",
+      "demo_case": true,
+      "http": 200,
+      "seconds": 7.1,
+      "action": null,
+      "outcome": "answered",
+      "answer": "The provided evidence does not explicitly state whether a student can continue paid research activities after changing their visa status from a full-time degree/exchange program (D-2) to a job seeker visa (D-10). It only lists requirements for obtaining permission to engage in part-time employment for D-10 holders and mentions that certain research activities require specific permits or are exempt",
+      "cited": [],
+      "trace_stages": [
+        "dense_retrieval",
+        "metadata_enrichment",
+        "evidence_selection",
+        "context_construction",
+        "generation"
+      ]
+    },
+    {
+      "preset": "R16_PROMPTED_CONDITIONAL",
+      "demo_case": true,
+      "http": 200,
+      "seconds": 7.0,
+      "action": null,
+      "outcome": "answered",
+      "answer": "Based on the provided evidence, there is **INSUFFICIENT_CONTEXT** because the text does not specify what happens to a student's ability to engage in paid research activities if they change their visa status from a full-time degree/exchange program (D-2) to a job seeker visa (D-10). While [E1] lists requirements for D-10 holders to engage in part-time employment, it does not explicitly address the ",
+      "cited": [
+        "Visa"
+      ],
+      "trace_stages": [
+        "dense_retrieval",
+        "lexical_retrieval",
+        "hybrid_fusion",
+        "metadata_enrichment",
+        "reranking",
+        "evidence_selection",
+        "context_construction",
+        "generation"
+      ]
+    },
+    {
+      "preset": "G1_ORACLE_CONTEXT",
+      "demo_case": false,
+      "http": 422,
+      "seconds": 0.0,
+      "action": null,
+      "outcome": null,
+      "answer": "{\"detail\":{\"message\":\"This configuration cannot run\",\"errors\":[{\"stage_id\":null,\"param\":null,\"message\":\"needs a labeled demo case: pick one in the demo-case list\"}]}}",
+      "cited": [],
+      "trace_stages": []
+    },
+    {
+      "preset": "G1_ORACLE_CONTEXT",
+      "demo_case": true,
+      "http": 200,
+      "seconds": 3.2,
+      "action": null,
+      "outcome": "answered",
+      "answer": "The provided evidence does not explicitly state whether you can continue doing paid research after changing to a D-10 visa. It mentions that the D-10 visa allows for part-time employment activities but excludes specific startup and high-tech internship visas, and lists requirements for obtaining this status. [E2]",
+      "cited": [
+        "Visa"
+      ],
+      "trace_stages": [
+        "dense_retrieval",
+        "metadata_enrichment",
+        "evidence_selection",
+        "context_construction",
+        "generation"
+      ]
+    }
+  ]
+}

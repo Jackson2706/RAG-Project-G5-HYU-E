@@ -1,0 +1,251 @@
+[
+ {
+  "qid": "T14-017",
+  "expected": "conditional_answer",
+  "branch_attributes": [
+   "campus"
+  ],
+  "A0_AAES": {
+   "action": "CLARIFY",
+   "reason": "different_procedures",
+   "branch_attributes": [
+    "campus",
+    "degree_level"
+   ],
+   "support": 3,
+   "details": null
+  },
+  "A0b_AAES_SPEC_FIXED": {
+   "action": "ANSWER",
+   "reason": "same_answer",
+   "branch_attributes": [
+    "campus",
+    "degree_level"
+   ],
+   "support": 2,
+   "details": {
+    "campus_candidate": true,
+    "a0_action": "CLARIFY",
+    "extractions": [
+     {
+      "evidence": [
+       "c0df53fd-278e-56d6-af25-2e7cf16c687f"
+      ],
+      "value": "NONE",
+      "group": -1
+     },
+     {
+      "evidence": [
+       "10a6d7dc-3bcb-56ce-a901-c3dd2250dc91",
+       "c0df53fd-278e-56d6-af25-2e7cf16c687f"
+      ],
+      "value": "Visit https://moaform.com/q/OfIsWX or OIA website/email.",
+      "group": 0
+     },
+     {
+      "evidence": [
+       "7fc6be78-01b5-5043-9e21-7b189464bbd9"
+      ],
+      "value": "NONE",
+      "group": -1
+     }
+    ],
+    "sufficiency_check": null
+   }
+  }
+ },
+ {
+  "qid": "T14-032",
+  "expected": "conditional_answer",
+  "branch_attributes": [
+   "campus"
+  ],
+  "A0_AAES": {
+   "action": "CLARIFY",
+   "reason": "many_branches",
+   "branch_attributes": [
+    "campus",
+    "degree_level",
+    "visa",
+    "academic_status"
+   ],
+   "support": 3,
+   "details": null
+  },
+  "A0b_AAES_SPEC_FIXED": {
+   "action": "ABSTAIN",
+   "reason": "insufficient",
+   "branch_attributes": [
+    "degree_level",
+    "visa",
+    "academic_status"
+   ],
+   "support": 3,
+   "details": {
+    "campus_candidate": false,
+    "a0_action": "CLARIFY",
+    "extractions": [],
+    "sufficiency_check": "no"
+   }
+  }
+ },
+ {
+  "qid": "T14-044",
+  "expected": "conditional_answer",
+  "branch_attributes": [
+   "campus"
+  ],
+  "A0_AAES": {
+   "action": "CLARIFY",
+   "reason": "different_procedures",
+   "branch_attributes": [
+    "campus"
+   ],
+   "support": 3,
+   "details": null
+  },
+  "A0b_AAES_SPEC_FIXED": {
+   "action": "ANSWER",
+   "reason": "no_branch",
+   "branch_attributes": [],
+   "support": 3,
+   "details": {
+    "campus_candidate": false,
+    "a0_action": "ANSWER",
+    "extractions": [],
+    "sufficiency_check": null
+   }
+  }
+ },
+ {
+  "qid": "T14-120",
+  "expected": "conditional_answer",
+  "branch_attributes": [
+   "campus"
+  ],
+  "A0_AAES": {
+   "action": "CLARIFY",
+   "reason": "many_branches",
+   "branch_attributes": [
+    "campus",
+    "degree_level",
+    "student_type",
+    "academic_status"
+   ],
+   "support": 3,
+   "details": null
+  },
+  "A0b_AAES_SPEC_FIXED": {
+   "action": "ABSTAIN",
+   "reason": "insufficient",
+   "branch_attributes": [
+    "degree_level",
+    "student_type",
+    "academic_status"
+   ],
+   "support": 3,
+   "details": {
+    "campus_candidate": false,
+    "a0_action": "CLARIFY",
+    "extractions": [],
+    "sufficiency_check": "no"
+   }
+  }
+ },
+ {
+  "qid": "T14-130",
+  "expected": "clarify",
+  "branch_attributes": [
+   "visa",
+   "degree_level",
+   "year",
+   "topik_level",
+   "english_track"
+  ],
+  "A0_AAES": {
+   "action": "ANSWER",
+   "reason": "no_branch",
+   "branch_attributes": [],
+   "support": 1,
+   "details": null
+  },
+  "A0b_AAES_SPEC_FIXED": {
+   "action": "ANSWER",
+   "reason": "no_branch",
+   "branch_attributes": [],
+   "support": 1,
+   "details": {
+    "campus_candidate": false,
+    "a0_action": "ANSWER",
+    "extractions": [],
+    "sufficiency_check": null
+   }
+  }
+ },
+ {
+  "qid": "T14-132",
+  "expected": "clarify",
+  "branch_attributes": [
+   "campus",
+   "academic_status"
+  ],
+  "A0_AAES": {
+   "action": "CONDITIONAL",
+   "reason": "few_branches",
+   "branch_attributes": [
+    "campus",
+    "academic_status"
+   ],
+   "support": 1,
+   "details": null
+  },
+  "A0b_AAES_SPEC_FIXED": {
+   "action": "ANSWER",
+   "reason": "same_answer",
+   "branch_attributes": [
+    "academic_status"
+   ],
+   "support": 1,
+   "details": {
+    "campus_candidate": false,
+    "a0_action": "CONDITIONAL",
+    "extractions": [
+     {
+      "evidence": [
+       "d474ac2d-ed5b-539a-8948-225d351174db"
+      ],
+      "value": "Group insurance rules apply to international students.",
+      "group": 0
+     }
+    ],
+    "sufficiency_check": null
+   }
+  }
+ },
+ {
+  "qid": "T14-209",
+  "expected": "conditional_answer",
+  "branch_attributes": [
+   "korean_standard"
+  ],
+  "A0_AAES": {
+   "action": "ABSTAIN",
+   "reason": "not_applicable",
+   "branch_attributes": [],
+   "support": 0,
+   "details": null
+  },
+  "A0b_AAES_SPEC_FIXED": {
+   "action": "ABSTAIN",
+   "reason": "not_applicable",
+   "branch_attributes": [],
+   "support": 0,
+   "details": {
+    "campus_candidate": false,
+    "a0_action": "ABSTAIN",
+    "extractions": [],
+    "sufficiency_check": null
+   }
+  }
+ }
+]

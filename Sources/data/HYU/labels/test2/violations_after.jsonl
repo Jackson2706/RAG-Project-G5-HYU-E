@@ -1,0 +1,47 @@
+{"case_id": "T2-014", "check": "unstated", "detail": "answer with gold evidence from both campuses while campus is unstated"}
+{"case_id": "T2-014", "check": "campus", "detail": "span 1486dc97 is erica but the profile campus is seoul"}
+{"case_id": "T2-014", "check": "campus", "detail": "span 1486dc97 is erica but the profile campus is seoul"}
+{"case_id": "T2-024", "check": "unstated", "detail": "answer with gold evidence from both campuses while campus is unstated"}
+{"case_id": "T2-024", "check": "campus", "detail": "span 0198f77b is erica but the profile campus is seoul"}
+{"case_id": "T2-026", "check": "facts", "detail": "4/9 content words in the gold spans: 2026-2: Sept 22-Dec 8, every Tuesday 18:30-20:00, small classes by level"}
+{"case_id": "T2-053", "check": "unstated", "detail": "answer with gold evidence from both campuses while campus is unstated"}
+{"case_id": "T2-053", "check": "campus", "detail": "span d66aa2f5 is erica but the profile campus is seoul"}
+{"case_id": "T2-059", "check": "facts", "detail": "0/5 content words in the gold spans: The notice does not say whether students on leave of absence must take it"}
+{"case_id": "T2-067", "check": "facts", "detail": "2/6 content words in the gold spans: An incoming exchange (non-degree) student is not an ERICA undergraduate, so does not qualify"}
+{"case_id": "T2-074", "check": "facts", "detail": "1/6 content words in the gold spans: The English pages do not state the tuition amount per semester"}
+{"case_id": "T2-075", "check": "facts", "detail": "0/5 content words in the gold spans: The snapshot does not list engineering professors or AI supervisors"}
+{"case_id": "T2-075", "check": "facts", "detail": "0/5 content words in the gold spans: Refer to the department / graduate school office"}
+{"case_id": "T2-078", "check": "facts", "detail": "0/5 content words in the gold spans: The snapshot has no off-campus studio rent prices"}
+{"case_id": "T2-078", "check": "facts", "detail": "0/2 content words in the gold spans: Refer to the Seoul OIA"}
+{"case_id": "T2-080", "check": "facts", "detail": "0/6 content words in the gold spans: The snapshot has no Seoul library hours (exam-period or otherwise)"}
+{"case_id": "T2-080", "check": "facts", "detail": "0/3 content words in the gold spans: Refer to the Seoul library"}
+{"case_id": "T2-081", "check": "facts", "detail": "0/5 content words in the gold spans: The snapshot does not state the minimum hourly wage"}
+{"case_id": "T2-081", "check": "facts", "detail": "0/4 content words in the gold spans: Refer to the OIA or the Ministry of Employment and Labor"}
+{"case_id": "T2-082", "check": "facts", "detail": "0/6 content words in the gold spans: The summer school page does not mention halal meals"}
+{"case_id": "T2-082", "check": "facts", "detail": "0/6 content words in the gold spans: Refer to the summer school office (www.hanyangsummer.com, +82-2-2220-2453)"}
+{"case_id": "T2-083", "check": "facts", "detail": "1/7 content words in the gold spans: Extending your stay (renewing the residence period) costs a KRW 60,000 processing fee"}
+{"case_id": "T2-083", "check": "facts", "detail": "1/6 content words in the gold spans: Re-issuing a lost or damaged residence card costs KRW 30,000"}
+{"case_id": "T2-088", "check": "facts", "detail": "0/4 content words in the gold spans: The snapshot has no Seoul-ERICA shuttle timetable"}
+{"case_id": "T2-088", "check": "facts", "detail": "0/4 content words in the gold spans: Refer to the OIA / campus transport information"}
+{"case_id": "T2-089", "check": "facts", "detail": "1/4 content words in the gold spans: The ERICA pages do not state the dormitory fee"}
+{"case_id": "T2-090", "check": "facts", "detail": "0/4 content words in the gold spans: The snapshot does not give the last bus time"}
+{"case_id": "T2-091", "check": "facts", "detail": "0/6 content words in the gold spans: The snapshot has no information on halal restaurants near ERICA"}
+{"case_id": "T2-091", "check": "facts", "detail": "0/2 content words in the gold spans: Refer to the ERICA OIA"}
+{"case_id": "T2-092", "check": "facts", "detail": "0/6 content words in the gold spans: The snapshot does not state how long a D-10 approval takes"}
+{"case_id": "T2-092", "check": "facts", "detail": "0/5 content words in the gold spans: Refer to the immigration office (1345 / HiKorea)"}
+{"case_id": "T2-093", "check": "facts", "detail": "0/4 content words in the gold spans: The snapshot has no scholarship for exchange students from Europe"}
+{"case_id": "T2-093", "check": "facts", "detail": "0/2 content words in the gold spans: Refer to the ERICA OIA"}
+{"case_id": "T2-096", "check": "facts", "detail": "0/7 content words in the gold spans: The snapshot does not state ERICA Korean language course fees"}
+{"case_id": "T2-096", "check": "facts", "detail": "0/5 content words in the gold spans: Refer to the Hanyang Institute of International Education (IIE) / ERICA OIA"}
+{"case_id": "T2-098", "check": "facts", "detail": "0/5 content words in the gold spans: The re-registration (return) period for 2027-1 is not published"}
+{"case_id": "T2-098", "check": "facts", "detail": "0/10 content words in the gold spans: The latest Seoul guide is for 2026-1 (January 5-16, 2026); refer to the Seoul OIA notice board"}
+{"case_id": "T2-100", "check": "facts", "detail": "0/8 content words in the gold spans: The snapshot does not give the next TOPIK test date or registration period"}
+{"case_id": "T2-100", "check": "facts", "detail": "0/4 content words in the gold spans: Refer to the official TOPIK website / OIA"}
+{"case_id": "T2-102", "check": "facts", "detail": "3/7 content words in the gold spans: 2026 GKS-G (university track at Hanyang): application period February 11, 2026 10:00 - March 3, 2026 17:00 KST"}
+{"case_id": "T2-104", "check": "facts", "detail": "0/6 content words in the gold spans: The snapshot has no Seoul HIEA application period for 2026-2"}
+{"case_id": "T2-104", "check": "facts", "detail": "0/8 content words in the gold spans: The latest Seoul HIEA guideline is for 2026-1 (March 10-24, 2026)"}
+{"case_id": "T2-106", "check": "facts", "detail": "0/5 content words in the gold spans: The leave-of-absence dates for 2027-1 are not published in the snapshot"}
+{"case_id": "T2-106", "check": "facts", "detail": "0/9 content words in the gold spans: The latest ERICA guideline is for 2026 Fall (July 6-17 and August 12-13, 2026)"}
+{"case_id": "T2-117", "check": "profile", "detail": "multi_session update in the history but no stale_update: true (11.7)"}
+{"case_id": "T2-119", "check": "facts", "detail": "0/5 content words in the gold spans: The question does not say what the student wants to apply for, so no evidence can be selected"}
+{"case_id": "T2-119", "check": "facts", "detail": "0/4 content words in the gold spans: Ask what they want to apply for, or refer to the ERICA OIA"}

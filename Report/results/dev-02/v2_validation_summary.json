@@ -1,0 +1,16 @@
+{
+ "n": 100,
+ "agreement": 0.93,
+ "kappa": 0.8989,
+ "annotator": "claude-code:claude-opus-5-5 (fresh subagent, blind to preset names, reply text only)",
+ "sample": "stratified by v2 label over unique dev-02 replies, seed 7",
+ "confusion_v2_x_annotator": {
+  "conditional_answer|conditional_answer": 16,
+  "abstain|abstain": 33,
+  "answer|answer": 36,
+  "clarify|clarify": 8,
+  "conditional_answer|answer": 5,
+  "conditional_answer|abstain": 1,
+  "answer|conditional_answer": 1
+ }
+}

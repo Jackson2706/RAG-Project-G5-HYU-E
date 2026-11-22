@@ -1,0 +1,437 @@
+{
+  "seed": 20261111,
+  "rows": [
+    {
+      "chunk_id": "06bbe27b-a7a3-5bab-b7ec-b4f228a9839a",
+      "attribute": "academic_status",
+      "predicted_side": "b",
+      "reference_side": "a"
+    },
+    {
+      "chunk_id": "06bbe27b-a7a3-5bab-b7ec-b4f228a9839a",
+      "attribute": "campus",
+      "predicted_side": "b",
+      "reference_side": "a"
+    },
+    {
+      "chunk_id": "0d1c03cc-dc41-52d3-bcd7-84ff72b4c329",
+      "attribute": "degree_level",
+      "predicted_side": "a",
+      "reference_side": "b"
+    },
+    {
+      "chunk_id": "15a057ce-e47a-5aa1-a3e8-d675090cb776",
+      "attribute": "visa",
+      "predicted_side": "b",
+      "reference_side": "a"
+    },
+    {
+      "chunk_id": "1b7c289b-ba46-5ac5-8a01-46f9df838dc5",
+      "attribute": "student_type",
+      "predicted_side": "b",
+      "reference_side": "a"
+    },
+    {
+      "chunk_id": "1b7c289b-ba46-5ac5-8a01-46f9df838dc5",
+      "attribute": "topik_level",
+      "predicted_side": "b",
+      "reference_side": "a"
+    },
+    {
+      "chunk_id": "1e7da5d9-175d-5af6-b33a-96a686836c18",
+      "attribute": "visa",
+      "predicted_side": "b",
+      "reference_side": "a"
+    },
+    {
+      "chunk_id": "1e7da5d9-175d-5af6-b33a-96a686836c18",
+      "attribute": "effective_term",
+      "predicted_side": "b",
+      "reference_side": "a"
+    },
+    {
+      "chunk_id": "213a7af3-98e6-53d1-9eee-f4da17cf5561",
+      "attribute": "topik_level",
+      "predicted_side": "b",
+      "reference_side": "a"
+    },
+    {
+      "chunk_id": "2989dba1-48c3-515a-8eab-273cd79e0f1a",
+      "attribute": "degree_level",
+      "predicted_side": "a",
+      "reference_side": "b"
+    },
+    {
+      "chunk_id": "2989dba1-48c3-515a-8eab-273cd79e0f1a",
+      "attribute": "student_type",
+      "predicted_side": "b",
+      "reference_side": "a"
+    },
+    {
+      "chunk_id": "2cb33a32-b42d-5d54-9f7a-38ef6f32dbb9",
+      "attribute": "degree_level",
+      "predicted_side": "a",
+      "reference_side": "b"
+    },
+    {
+      "chunk_id": "2d21a537-872d-5032-baa2-a53c83f1dfe7",
+      "attribute": "effective_term",
+      "predicted_side": "b",
+      "reference_side": "a"
+    },
+    {
+      "chunk_id": "314edd8e-4f2b-5885-ac43-38e23d54cdd3",
+      "attribute": "visa",
+      "predicted_side": "a",
+      "reference_side": "b"
+    },
+    {
+      "chunk_id": "314fa26b-273d-5f70-970f-dd5a00a39834",
+      "attribute": "academic_status",
+      "predicted_side": "a",
+      "reference_side": "b"
+    },
+    {
+      "chunk_id": "331beff7-8840-5665-8860-b71611095f3c",
+      "attribute": "academic_status",
+      "predicted_side": "a",
+      "reference_side": "b"
+    },
+    {
+      "chunk_id": "35dbb2a3-5e23-500e-87f2-57e1d1194eba",
+      "attribute": "academic_status",
+      "predicted_side": "b",
+      "reference_side": "a"
+    },
+    {
+      "chunk_id": "36b61526-347f-59ed-9823-a48042a138eb",
+      "attribute": "campus",
+      "predicted_side": "b",
+      "reference_side": "a"
+    },
+    {
+      "chunk_id": "36b61526-347f-59ed-9823-a48042a138eb",
+      "attribute": "scope",
+      "predicted_side": "b",
+      "reference_side": "a"
+    },
+    {
+      "chunk_id": "39fad4cf-904d-5d87-bb65-0969230db2e4",
+      "attribute": "academic_status",
+      "predicted_side": "b",
+      "reference_side": "a"
+    },
+    {
+      "chunk_id": "3a554d5d-af86-5c18-8e87-1e2baecef809",
+      "attribute": "visa",
+      "predicted_side": "b",
+      "reference_side": "a"
+    },
+    {
+      "chunk_id": "3a554d5d-af86-5c18-8e87-1e2baecef809",
+      "attribute": "effective_term",
+      "predicted_side": "a",
+      "reference_side": "b"
+    },
+    {
+      "chunk_id": "40059834-e07f-5b29-abe9-384101cbd885",
+      "attribute": "degree_level",
+      "predicted_side": "b",
+      "reference_side": "a"
+    },
+    {
+      "chunk_id": "402a9b86-986a-527e-9d7f-81d795fc7884",
+      "attribute": "degree_level",
+      "predicted_side": "b",
+      "reference_side": "a"
+    },
+    {
+      "chunk_id": "402a9b86-986a-527e-9d7f-81d795fc7884",
+      "attribute": "topik_level",
+      "predicted_side": "b",
+      "reference_side": "a"
+    },
+    {
+      "chunk_id": "4a95e1b6-0fe6-556a-a926-5b41aa13a1e8",
+      "attribute": "degree_level",
+      "predicted_side": "b",
+      "reference_side": "a"
+    },
+    {
+      "chunk_id": "4f9e0055-e449-544d-95db-a5845bcdf21a",
+      "attribute": "degree_level",
+      "predicted_side": "a",
+      "reference_side": "b"
+    },
+    {
+      "chunk_id": "50763c25-5962-560b-8e34-375ac4b937af",
+      "attribute": "degree_level",
+      "predicted_side": "a",
+      "reference_side": "b"
+    },
+    {
+      "chunk_id": "55d5f524-d74a-5d6f-87c9-a2902e03fda6",
+      "attribute": "degree_level",
+      "predicted_side": "b",
+      "reference_side": "a"
+    },
+    {
+      "chunk_id": "55d5f524-d74a-5d6f-87c9-a2902e03fda6",
+      "attribute": "visa",
+      "predicted_side": "b",
+      "reference_side": "a"
+    },
+    {
+      "chunk_id": "55d5f524-d74a-5d6f-87c9-a2902e03fda6",
+      "attribute": "korean_standard",
+      "predicted_side": "a",
+      "reference_side": "b"
+    },
+    {
+      "chunk_id": "58fe37d1-1128-569e-8abd-952a329a32aa",
+      "attribute": "degree_level",
+      "predicted_side": "b",
+      "reference_side": "a"
+    },
+    {
+      "chunk_id": "58fe37d1-1128-569e-8abd-952a329a32aa",
+      "attribute": "year",
+      "predicted_side": "a",
+      "reference_side": "b"
+    },
+    {
+      "chunk_id": "6171d714-3ecc-53dd-b626-3eab387c97de",
+      "attribute": "degree_level",
+      "predicted_side": "a",
+      "reference_side": "b"
+    },
+    {
+      "chunk_id": "70b480a1-81ac-5797-bdc9-9d03e2e0c01d",
+      "attribute": "degree_level",
+      "predicted_side": "a",
+      "reference_side": "b"
+    },
+    {
+      "chunk_id": "74913e09-3e08-5656-aca7-a6d0317d829c",
+      "attribute": "degree_level",
+      "predicted_side": "b",
+      "reference_side": "a"
+    },
+    {
+      "chunk_id": "77ce1f34-688c-55d4-8819-23cb8e97d125",
+      "attribute": "campus",
+      "predicted_side": "b",
+      "reference_side": "a"
+    },
+    {
+      "chunk_id": "77ce1f34-688c-55d4-8819-23cb8e97d125",
+      "attribute": "scope",
+      "predicted_side": "b",
+      "reference_side": "a"
+    },
+    {
+      "chunk_id": "7d16078c-c50b-583a-a26d-8f506848b04c",
+      "attribute": "degree_level",
+      "predicted_side": "a",
+      "reference_side": "b"
+    },
+    {
+      "chunk_id": "87b3e745-4e7e-56c5-818a-ecbbd5db8901",
+      "attribute": "degree_level",
+      "predicted_side": "a",
+      "reference_side": "b"
+    },
+    {
+      "chunk_id": "8c729219-430b-5d77-8230-16c17115660b",
+      "attribute": "degree_level",
+      "predicted_side": "a",
+      "reference_side": "b"
+    },
+    {
+      "chunk_id": "8c729219-430b-5d77-8230-16c17115660b",
+      "attribute": "visa",
+      "predicted_side": "b",
+      "reference_side": "a"
+    },
+    {
+      "chunk_id": "8c729219-430b-5d77-8230-16c17115660b",
+      "attribute": "korean_standard",
+      "predicted_side": "a",
+      "reference_side": "b"
+    },
+    {
+      "chunk_id": "9f21edf8-1761-51f7-933e-e4e7ed5a4381",
+      "attribute": "degree_level",
+      "predicted_side": "b",
+      "reference_side": "a"
+    },
+    {
+      "chunk_id": "a34a44d9-382b-5556-8e7e-be3b0fe23e39",
+      "attribute": "visa",
+      "predicted_side": "b",
+      "reference_side": "a"
+    },
+    {
+      "chunk_id": "a34a44d9-382b-5556-8e7e-be3b0fe23e39",
+      "attribute": "korean_standard",
+      "predicted_side": "b",
+      "reference_side": "a"
+    },
+    {
+      "chunk_id": "a34a44d9-382b-5556-8e7e-be3b0fe23e39",
+      "attribute": "campus",
+      "predicted_side": "b",
+      "reference_side": "a"
+    },
+    {
+      "chunk_id": "a34a44d9-382b-5556-8e7e-be3b0fe23e39",
+      "attribute": "scope",
+      "predicted_side": "b",
+      "reference_side": "a"
+    },
+    {
+      "chunk_id": "aea0765d-2704-5eaa-b0e6-96bc6d1fa24c",
+      "attribute": "degree_level",
+      "predicted_side": "a",
+      "reference_side": "b"
+    },
+    {
+      "chunk_id": "aea0765d-2704-5eaa-b0e6-96bc6d1fa24c",
+      "attribute": "student_type",
+      "predicted_side": "b",
+      "reference_side": "a"
+    },
+    {
+      "chunk_id": "af73cf3c-ce5b-58c6-8591-56bc1a66193a",
+      "attribute": "degree_level",
+      "predicted_side": "b",
+      "reference_side": "a"
+    },
+    {
+      "chunk_id": "b1f8cb26-d6fb-5aab-8111-dd39b8b8032c",
+      "attribute": "degree_level",
+      "predicted_side": "a",
+      "reference_side": "b"
+    },
+    {
+      "chunk_id": "bb1b1423-1636-5391-9ce5-5cc247a5200c",
+      "attribute": "degree_level",
+      "predicted_side": "a",
+      "reference_side": "b"
+    },
+    {
+      "chunk_id": "bb1b1423-1636-5391-9ce5-5cc247a5200c",
+      "attribute": "visa",
+      "predicted_side": "a",
+      "reference_side": "b"
+    },
+    {
+      "chunk_id": "bb1b1423-1636-5391-9ce5-5cc247a5200c",
+      "attribute": "effective_term",
+      "predicted_side": "a",
+      "reference_side": "b"
+    },
+    {
+      "chunk_id": "bd200082-c31c-546a-a52d-b2cca7ba5981",
+      "attribute": "year",
+      "predicted_side": "a",
+      "reference_side": "b"
+    },
+    {
+      "chunk_id": "c2bdd37f-d3e0-5b0f-9249-d030f7fe6294",
+      "attribute": "student_type",
+      "predicted_side": "a",
+      "reference_side": "b"
+    },
+    {
+      "chunk_id": "c40391e2-20fd-5750-9789-0e99a25ef097",
+      "attribute": "degree_level",
+      "predicted_side": "a",
+      "reference_side": "b"
+    },
+    {
+      "chunk_id": "c40391e2-20fd-5750-9789-0e99a25ef097",
+      "attribute": "academic_status",
+      "predicted_side": "a",
+      "reference_side": "b"
+    },
+    {
+      "chunk_id": "c40391e2-20fd-5750-9789-0e99a25ef097",
+      "attribute": "campus",
+      "predicted_side": "b",
+      "reference_side": "a"
+    },
+    {
+      "chunk_id": "d003211f-3cce-5f83-8013-5ce6631d5522",
+      "attribute": "campus",
+      "predicted_side": "b",
+      "reference_side": "a"
+    },
+    {
+      "chunk_id": "d474ac2d-ed5b-539a-8948-225d351174db",
+      "attribute": "effective_term",
+      "predicted_side": "b",
+      "reference_side": "a"
+    },
+    {
+      "chunk_id": "d813550f-49b5-5923-953c-9080a850740e",
+      "attribute": "degree_level",
+      "predicted_side": "b",
+      "reference_side": "a"
+    },
+    {
+      "chunk_id": "dc296e03-d483-54f0-a95b-afae3100a28e",
+      "attribute": "student_type",
+      "predicted_side": "a",
+      "reference_side": "b"
+    },
+    {
+      "chunk_id": "e1115cb5-c41e-5985-a9ae-d1d9eaf03fbe",
+      "attribute": "degree_level",
+      "predicted_side": "b",
+      "reference_side": "a"
+    },
+    {
+      "chunk_id": "e727df3e-52b0-5695-bb65-065dbbdd7100",
+      "attribute": "degree_level",
+      "predicted_side": "a",
+      "reference_side": "b"
+    },
+    {
+      "chunk_id": "e727df3e-52b0-5695-bb65-065dbbdd7100",
+      "attribute": "campus",
+      "predicted_side": "a",
+      "reference_side": "b"
+    },
+    {
+      "chunk_id": "e727df3e-52b0-5695-bb65-065dbbdd7100",
+      "attribute": "scope",
+      "predicted_side": "b",
+      "reference_side": "a"
+    },
+    {
+      "chunk_id": "e9dd2ca4-5b92-5475-a905-ea79493f8267",
+      "attribute": "degree_level",
+      "predicted_side": "a",
+      "reference_side": "b"
+    },
+    {
+      "chunk_id": "f245ff1a-09ae-5a87-908f-e6f7b2792612",
+      "attribute": "academic_status",
+      "predicted_side": "a",
+      "reference_side": "b"
+    },
+    {
+      "chunk_id": "f42dc670-c493-5f90-b72b-f4edce382a55",
+      "attribute": "degree_level",
+      "predicted_side": "b",
+      "reference_side": "a"
+    },
+    {
+      "chunk_id": "f75f9c0c-ab24-5990-b261-cc9503af7fed",
+      "attribute": "degree_level",
+      "predicted_side": "b",
+      "reference_side": "a"
+    }
+  ]
+}

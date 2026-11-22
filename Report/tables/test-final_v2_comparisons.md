@@ -1,0 +1,7 @@
+Source: `Report/results/test-final/hyu_test_v2_comparisons_paired.csv`
+
+| comparison | metric | diff | ci_low | ci_high | p | p_holm | cases | status |
+|---|---|---|---|---|---|---|---|---|
+| A0_AAES vs R15_SELF_QUERY: AER (conditional + temporal, both answered; 2 of 6 cases with inapplicable spans answered by both) | aer | 0.0 | 0.0 | 0.0 | 1.0 | 1.0 | 2 | N/A |
+| A0_AAES vs R15_SELF_QUERY: correctness, unconditional (non-inferiority 3 points) | correctness | N/A | N/A | N/A | N/A | N/A | N/A | NOT_COMPUTED: needs the validated LLM judge (Appendix F) |
+| A0_AAES vs A4_QUESTION_ONLY_AMBIGUITY: action macro-F1 | macro_f1 | -0.0659 | -0.1315 | 0.0049 | 0.1544 | 0.4632 | 121 | N/A |

@@ -1,0 +1,20 @@
+{
+ "files": {
+  "A": "labels_sol.jsonl",
+  "B": "labels_astra.jsonl",
+  "adjudicated_disagreements": "adjudicated_disagreements.jsonl"
+ },
+ "rows": 214,
+ "consensus": 187,
+ "third_model_adjudication": 27,
+ "expected_behavior": {
+  "conditional_answer": 60,
+  "answer": 126,
+  "abstain": 16,
+  "clarify": 12
+ },
+ "student_dependent": 72,
+ "excluded": 0,
+ "output_sha256": "bb3137540998b6703a5a4c1d985c2747adb4d431a8a7f494bc0db7504a132e9c",
+ "created_at": "2026-11-16T23:29:05.709786+00:00"
+}

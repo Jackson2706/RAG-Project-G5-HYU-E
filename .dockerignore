@@ -1,9 +1,10 @@
 .git
 .github
 .env
-backend/.env
-frontend/node_modules
-frontend/dist
+Sources/.env
+Sources/backend/.env
+Sources/frontend/node_modules
+Sources/frontend/dist
 .run
 __pycache__
 *.pyc

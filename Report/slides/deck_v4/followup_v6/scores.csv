@@ -1,0 +1,79 @@
+id,pid,system,user_turns,expect_refer,asked_first,reply_type,score,facts,wrong_group,conditions_match,right_referral
+V051,I01-g0,A0 reply_only (v6 fix),3,False,True,conditional_answer,0,['missing'],False,False,
+V060,I01-g0,AP reply_only (v6 fix),3,False,True,conditional_answer,0,['missing'],True,False,
+V055,I01-g1,A0 reply_only (v6 fix),3,False,True,answer,0,['missing'],False,,
+V004,I01-g1,AP reply_only (v6 fix),3,False,True,answer,0,['missing'],False,,
+V053,I01-g2,A0 reply_only (v6 fix),3,False,True,conditional_answer,0,['wrong'],True,False,
+V070,I01-g2,AP reply_only (v6 fix),3,False,True,conditional_answer,0,['wrong'],True,False,
+V034,I01-g3,A0 reply_only (v6 fix),3,False,True,answer,0,['wrong'],True,,
+V037,I01-g3,AP reply_only (v6 fix),3,False,True,answer,0,['wrong'],True,,
+V012,I02-g0,A0 reply_only (v6 fix),3,False,True,conditional_answer,1,['correct'],False,False,
+V054,I02-g0,AP reply_only (v6 fix),3,False,True,conditional_answer,1,['correct'],False,False,
+V064,I02-g1,A0 reply_only (v6 fix),2,False,True,abstain,0,,,,False
+V042,I02-g1,AP reply_only (v6 fix),2,False,True,abstain,0,,,,False
+V007,I02-g2,A0 reply_only (v6 fix),3,False,True,conditional_answer,0,['missing'],False,False,
+V016,I02-g2,AP reply_only (v6 fix),3,False,True,conditional_answer,0,['missing'],False,False,
+V001,I03-g0,A0 reply_only (v6 fix),2,False,True,abstain,0,,,,True
+V039,I03-g0,AP reply_only (v6 fix),2,False,True,abstain,0,,,,True
+V063,I03-g1,A0 reply_only (v6 fix),4,False,True,conditional_answer,0,['wrong'],True,False,
+V049,I03-g1,AP reply_only (v6 fix),2,False,True,conditional_answer,0,['missing'],True,False,
+V071,I03-g2,A0 reply_only (v6 fix),4,False,True,conditional_answer,0,['wrong'],True,False,
+V061,I03-g2,AP reply_only (v6 fix),2,False,True,conditional_answer,0,['missing'],False,False,
+V076,I03-g3,A0 reply_only (v6 fix),4,False,True,clarify,0,,,,
+V018,I03-g3,AP reply_only (v6 fix),2,False,True,abstain,0,,,,True
+V027,I06-g0,A0 reply_only (v6 fix),3,False,True,answer,2,['correct'],False,,
+V040,I06-g0,AP reply_only (v6 fix),3,False,True,answer,2,['correct'],False,,
+V062,I06-g1,A0 reply_only (v6 fix),2,False,True,abstain,0,,,,False
+V036,I06-g1,AP reply_only (v6 fix),2,False,True,abstain,0,,,,False
+V024,I07-g0,A0 reply_only (v6 fix),2,False,True,conditional_answer,0,['missing'],False,False,
+V045,I07-g0,AP reply_only (v6 fix),2,False,True,conditional_answer,0,['wrong'],True,False,
+V032,I07-g1,A0 reply_only (v6 fix),2,False,True,abstain,0,,,,False
+V038,I07-g1,AP reply_only (v6 fix),2,False,True,abstain,0,,,,False
+V025,I09-g0,A0 reply_only (v6 fix),2,False,True,answer,0,['correct'],True,,
+V078,I09-g0,AP reply_only (v6 fix),1,False,False,answer,0,['correct'],True,,
+V006,I10-g0,A0 reply_only (v6 fix),3,False,True,abstain,0,,,,False
+V066,I10-g0,AP reply_only (v6 fix),3,False,True,abstain,0,,,,False
+V014,I10-g1,A0 reply_only (v6 fix),2,True,True,conditional_answer,0,['missing'],False,False,
+V009,I10-g1,AP reply_only (v6 fix),2,True,True,conditional_answer,0,['missing'],False,False,
+V073,T14-015,A0 reply_only (v6 fix),3,False,True,answer,2,"['correct', 'correct']",False,,
+V011,T14-015,AP reply_only (v6 fix),2,False,True,answer,2,"['correct', 'correct']",False,,
+V068,T14-017,A0 reply_only (v6 fix),2,False,True,conditional_answer,0,"['missing', 'missing', 'missing']",False,False,
+V017,T14-017,AP reply_only (v6 fix),2,False,True,conditional_answer,0,"['missing', 'missing', 'missing']",False,False,
+V074,T14-032,A0 reply_only (v6 fix),3,False,True,conditional_answer,1,"['correct', 'missing', 'missing']",False,False,
+V048,T14-032,AP reply_only (v6 fix),3,False,True,conditional_answer,1,"['correct', 'missing', 'missing']",False,False,
+V059,T14-033,A0 reply_only (v6 fix),2,False,True,abstain,0,,,,False
+V022,T14-033,AP reply_only (v6 fix),2,False,True,abstain,0,,,,False
+V015,T14-042,A0 reply_only (v6 fix),3,False,True,abstain,0,,,,False
+V019,T14-042,AP reply_only (v6 fix),2,False,True,conditional_answer,1,"['correct', 'correct', 'missing']",False,False,
+V077,T14-044,A0 reply_only (v6 fix),2,False,True,answer,0,"['missing', 'missing', 'missing']",False,,
+V023,T14-044,AP reply_only (v6 fix),1,False,False,conditional_answer,1,"['correct', 'missing', 'missing']",False,False,
+V058,T14-053,A0 reply_only (v6 fix),2,False,True,answer,1,"['missing', 'correct', 'correct']",False,,
+V020,T14-053,AP reply_only (v6 fix),2,False,True,answer,0,"['wrong', 'correct', 'correct']",True,,
+V013,T14-082,A0 reply_only (v6 fix),4,True,True,clarify,0,,,,
+V002,T14-082,AP reply_only (v6 fix),4,True,True,clarify,0,,,,
+V052,T14-084,A0 reply_only (v6 fix),3,True,True,answer,0,"['wrong', 'wrong']",True,,
+V005,T14-084,AP reply_only (v6 fix),3,True,True,answer,0,"['wrong', 'wrong']",True,,
+V072,T14-105,A0 reply_only (v6 fix),2,False,True,conditional_answer,0,"['missing', 'missing', 'missing']",True,False,
+V021,T14-105,AP reply_only (v6 fix),2,False,True,conditional_answer,0,"['missing', 'missing', 'missing']",False,False,
+V029,T14-106,A0 reply_only (v6 fix),2,True,True,abstain,2,,,,True
+V046,T14-106,AP reply_only (v6 fix),2,True,True,abstain,2,,,,True
+V028,T14-107,A0 reply_only (v6 fix),2,False,True,conditional_answer,0,"['missing', 'missing', 'missing']",False,False,
+V044,T14-107,AP reply_only (v6 fix),2,False,True,conditional_answer,0,"['missing', 'missing', 'missing']",False,False,
+V003,T14-120,A0 reply_only (v6 fix),2,False,True,conditional_answer,0,"['missing', 'missing', 'missing']",False,False,
+V065,T14-120,AP reply_only (v6 fix),2,False,True,answer,0,"['missing', 'missing', 'missing']",False,,
+V043,T14-136,A0 reply_only (v6 fix),2,True,True,conditional_answer,0,"['missing', 'missing']",False,False,
+V047,T14-136,AP reply_only (v6 fix),2,True,True,conditional_answer,0,"['missing', 'missing']",False,False,
+V041,T14-154,A0 reply_only (v6 fix),2,False,True,answer,0,['missing'],False,,
+V010,T14-154,AP reply_only (v6 fix),1,False,False,answer,0,['missing'],False,,
+V026,T14-175,A0 reply_only (v6 fix),3,True,True,conditional_answer,1,['correct'],False,False,
+V033,T14-175,AP reply_only (v6 fix),3,True,True,conditional_answer,1,['correct'],False,False,
+V008,T14-176,A0 reply_only (v6 fix),2,True,True,abstain,2,,,,True
+V075,T14-176,AP reply_only (v6 fix),2,True,True,abstain,2,,,,True
+V067,T14-182,A0 reply_only (v6 fix),2,True,True,conditional_answer,0,['missing'],False,False,
+V056,T14-182,AP reply_only (v6 fix),2,True,True,conditional_answer,0,['missing'],False,False,
+V057,T14-187,A0 reply_only (v6 fix),4,True,True,clarify,0,,,,
+V030,T14-187,AP reply_only (v6 fix),4,True,True,clarify,0,,,,
+V035,T14-195,A0 reply_only (v6 fix),4,True,True,abstain,1,,,,False
+V050,T14-195,AP reply_only (v6 fix),4,True,True,abstain,1,,,,False
+V069,T14-203,A0 reply_only (v6 fix),2,False,True,conditional_answer,0,"['missing', 'missing']",False,False,
+V031,T14-203,AP reply_only (v6 fix),2,False,True,conditional_answer,0,"['missing', 'missing']",False,False,

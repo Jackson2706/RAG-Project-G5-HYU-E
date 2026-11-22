@@ -1,0 +1,45 @@
+{"seed": "P003", "skip": true, "why": "both chunks are bank-transfer boilerplate, same answer"}
+{"seed": "P006", "qid": "P006a", "question": "I want to come back from my leave of absence at ERICA this fall. What proof of Korean do I have to hand in?", "session_history": [], "form": "partly_stated", "gold_profile": {"campus": "erica", "degree_level": "undergraduate", "year": "2", "student_type": "degree_seeking", "visa": "D-2", "topik_level": "3", "english_track": "no", "academic_status": "leave_of_absence"}, "draft_type": "conditional_answer", "evidence_chunk_ids": ["5cfeda09-4064-5403-a0ac-25ef2fef81ea"], "skip": false}
+{"seed": "P009", "skip": true, "why": "different GKS years, no shared question"}
+{"seed": "P012", "qid": "P012a", "question": "I saw there's a job-matching program for foreigners who want to work in Korea after graduating. Can I join it, and what Korean level do they ask for?", "session_history": ["I'm on a D-2 student visa and I should graduate in August 2026."], "form": "earlier_turn", "gold_profile": {"campus": "seoul", "degree_level": "undergraduate", "year": "4", "student_type": "degree_seeking", "visa": "D-2", "topik_level": "4", "english_track": "no", "academic_status": "graduating"}, "draft_type": "answer", "evidence_chunk_ids": ["c32b178d-b1f5-5e0d-b10a-2800ced72d7f", "5892f2cb-7a62-5d88-bfab-c96acebd296e"], "skip": false}
+{"seed": "P015", "qid": "P015a", "question": "I passed TOPIK level 5 last month. Is there a scholarship I can get for that?", "session_history": [], "form": "missing", "gold_profile": {"campus": "seoul", "degree_level": "undergraduate", "year": "1", "student_type": "degree_seeking", "visa": "D-2", "topik_level": "5", "english_track": "no", "academic_status": "enrolled"}, "draft_type": "clarify", "evidence_chunk_ids": ["8c12398f-0039-5a25-aec0-9571dba32037", "651909c6-d45a-548b-b6a2-9a7ffcc86f07"], "skip": false}
+{"seed": "P018", "skip": true, "why": "GKS FAQ answer same for both groups"}
+{"seed": "P021", "qid": "P021a", "question": "If I take a semester off, am I allowed to stay in Korea or do I have to go home?", "session_history": [], "form": "missing", "gold_profile": {"campus": "erica", "degree_level": "undergraduate", "year": "2", "student_type": "degree_seeking", "visa": "D-2", "topik_level": "3", "english_track": "no", "academic_status": "enrolled"}, "draft_type": "clarify", "evidence_chunk_ids": ["0b3f9e9a-e4f8-5385-aba4-1583811b9121"], "skip": false}
+{"seed": "P024", "skip": true, "why": "TOPIK scholarship vs admission Korean standard, unrelated"}
+{"seed": "P027", "skip": true, "why": "return-to-school vs GKS notice, unrelated"}
+{"seed": "P030", "skip": true, "why": "same document-authentication rule for both"}
+{"seed": "P033", "skip": true, "why": "same GKS medical form, no difference"}
+{"seed": "P036", "qid": "P036a", "question": "I'd like to return in the fall and live in the dorm again. Is there something I need to do in advance so I don't lose my spot?", "session_history": ["I'm an undergrad at ERICA and I'm on leave of absence this semester."], "form": "earlier_turn", "gold_profile": {"campus": "erica", "degree_level": "undergraduate", "year": "3", "student_type": "degree_seeking", "visa": "D-2", "topik_level": "4", "english_track": "no", "academic_status": "leave_of_absence"}, "draft_type": "answer", "evidence_chunk_ids": ["0efb0a25-c5b8-5af4-b476-a76a6f2190c9"], "skip": false}
+{"seed": "P039", "skip": true, "why": "different scholarship programs' document lists"}
+{"seed": "P042", "qid": "P042a", "question": "I'm at ERICA and might need more time off. What's the maximum total leave I can take, and how many times?", "session_history": [], "form": "partly_stated", "gold_profile": {"campus": "erica", "degree_level": "master", "year": "1", "student_type": "degree_seeking", "visa": "D-2", "topik_level": "none", "english_track": "no", "academic_status": "enrolled"}, "draft_type": "conditional_answer", "evidence_chunk_ids": ["55287800-a251-50d1-b7a0-1d81bde0ea8f", "81007e83-121c-5f8d-b9a8-654556df5176"], "skip": false}
+{"seed": "P045", "skip": true, "why": "same fellowship form, tags misleading"}
+{"seed": "P048", "skip": true, "why": "company job posts, not student rules"}
+{"seed": "P051", "skip": true, "why": "KOICA form vs GKS contacts, unrelated"}
+{"seed": "P054", "skip": true, "why": "company job posts, not student rules"}
+{"seed": "P057", "skip": true, "why": "outgoing exchange vs entry report, different topics"}
+{"seed": "P060", "skip": true, "why": "same department page, answer does not differ"}
+{"seed": "P063", "qid": "P063a", "question": "My visa ran out while I was back home. How do I get a new certificate of admission so I can come back to the Seoul campus?", "session_history": [], "form": "missing", "gold_profile": {"campus": "seoul", "degree_level": "undergraduate", "year": "2", "student_type": "degree_seeking", "visa": "D-2", "topik_level": "3", "english_track": "no", "academic_status": "enrolled"}, "draft_type": "clarify", "evidence_chunk_ids": ["b0a6fcca-5507-57e7-8065-2cb67e12be87", "76015301-1662-5f4f-b3be-28a3ab454f35"], "skip": false}
+{"seed": "P066", "skip": true, "why": "company job posts, not student rules"}
+{"seed": "P069", "qid": "P069a", "question": "Where do I apply for the certificate of admission I need for my student visa?", "session_history": ["I just got admitted to a degree program at the Seoul campus for the spring semester."], "form": "earlier_turn", "gold_profile": {"campus": "seoul", "degree_level": "master", "year": "1", "student_type": "degree_seeking", "visa": "other", "topik_level": "none", "english_track": "yes", "academic_status": "admitted_not_enrolled"}, "draft_type": "answer", "evidence_chunk_ids": ["480fb670-fd3f-530f-a985-06ba6aca9d29"], "skip": false}
+{"seed": "P072", "skip": true, "why": "HIEA vs return-to-school insurance, unrelated"}
+{"seed": "P075", "skip": true, "why": "return-to-school vs TOPIK scholarship, unrelated"}
+{"seed": "P078", "skip": true, "why": "return-to-school vs TOPIK scholarship, unrelated"}
+{"seed": "P081", "skip": true, "why": "GKS TOPIK rule vs TOPIK scholarship, unrelated"}
+{"seed": "P084", "skip": true, "why": "GKS TOPIK rule vs TOPIK scholarship, unrelated"}
+{"seed": "P087", "skip": true, "why": "TOPIK scholarship vs GKS FAQ, unrelated"}
+{"seed": "P090", "skip": true, "why": "student supporter recruit vs dorm, unrelated"}
+{"seed": "P093", "skip": true, "why": "HIEA vs graduate Korean test, unrelated"}
+{"seed": "P096", "skip": true, "why": "GKS FAQ vs HIEA, unrelated"}
+{"seed": "P099", "skip": true, "why": "GKS language exemption vs TOPIK scholarship, unrelated"}
+{"seed": "P102", "skip": true, "why": "GKS form vs exchange credit transfer, unrelated"}
+{"seed": "P105", "skip": true, "why": "TOPIK scholarship vs GKS FAQ, unrelated"}
+{"seed": "P108", "skip": true, "why": "GKS period vs TOPIK scholarship, unrelated"}
+{"seed": "P111", "skip": true, "why": "company recruiting events, not student rules"}
+{"seed": "P114", "skip": true, "why": "GKS period vs TOPIK scholarship, unrelated"}
+{"seed": "P117", "skip": true, "why": "TOPIK scholarship vs study abroad eligibility, unrelated"}
+{"seed": "P120", "skip": true, "why": "GKS vs Samsung scholarship, unrelated"}
+{"seed": "P123", "skip": true, "why": "GKS submission vs visa documents, unrelated"}
+{"seed": "P126", "skip": true, "why": "GKS contacts vs satisfaction survey, unrelated"}
+{"seed": "P129", "skip": true, "why": "culture event vs GKS department list"}
+{"seed": "P132", "skip": true, "why": "research program vs GKS department list"}
+{"seed": "P135", "skip": true, "why": "first chunk is only a URL"}

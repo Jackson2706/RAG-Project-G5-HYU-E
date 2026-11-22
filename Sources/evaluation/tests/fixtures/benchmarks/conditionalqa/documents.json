@@ -1,0 +1,12 @@
+[
+  {
+    "title": "Benefit",
+    "url": "https://example.test/benefit",
+    "contents": ["<h2>A</h2>", "<p>x</p>", "<h2>B</h2>", "<li>y</li>"]
+  },
+  {
+    "title": "Other",
+    "url": "https://example.test/other",
+    "contents": ["<h1>Overview</h1>", "<p>Introduction</p>"]
+  }
+]

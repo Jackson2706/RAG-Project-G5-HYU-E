@@ -1,0 +1,11 @@
+experiment,model,digest,quantization,parameter_size,group,status,cases,failed,answered_rate,abstention_rate,marker_validity_mean,answers_citing_a_source_rate,invalid_markers_total,generation_ms_p50,generation_ms_p95,first_token_ms_p50,output_tokens_mean,prompt_tokens_mean,annotated_cases,correctness,relevance,completeness,grounding_support,citation_precision,citation_coverage,exact_match,token_f1
+GEN_llama2:7b,llama2:7b,78e26419b446,Q4_0,7B,arguana,COMPLETED,10,0,0.7,0.3,1.0,0.5,0,22753.75,35982.975,11815.9,171.3,1178.6,0,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A
+GEN_llama2:7b,llama2:7b,78e26419b446,Q4_0,7B,hyu_fixture,COMPLETED,14,0,0.6429,0.3571,1.0,0.6429,0,11763.45,16512.425,3928.45,107.5,416.8571,0,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A
+GEN_llama2:7b,llama2:7b,78e26419b446,Q4_0,7B,nfcorpus,COMPLETED,10,0,0.6,0.4,1.0,0.6,0,19830.85,50307.29,9447.55,203.9,957.5,0,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A
+GEN_llama2:7b,llama2:7b,78e26419b446,Q4_0,7B,scifact,COMPLETED,10,0,0.2,0.8,1.0,0.4,0,17327.25,19722.615,8301.8,125.1,983.5,0,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A
+GEN_llama2:7b,llama2:7b,78e26419b446,Q4_0,7B,ALL,COMPLETED,44,0,0.5455,0.4545,1.0,0.5455,0,16737.15,37133.925,8174.4,147.9091,841.6364,0,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A
+GEN_qwen3.5:4b,qwen3.5:4b,7f3251fa6878,nvfp4,,arguana,COMPLETED,10,0,1.0,0.0,1.0,1.0,0,11753.4,21593.185,11729.1,155.8,1035.3,0,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A
+GEN_qwen3.5:4b,qwen3.5:4b,7f3251fa6878,nvfp4,,hyu_fixture,COMPLETED,14,0,0.8571,0.1429,1.0,0.8571,0,2557.7,3936.325,2545.05,30.7857,360.3571,0,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A
+GEN_qwen3.5:4b,qwen3.5:4b,7f3251fa6878,nvfp4,,nfcorpus,COMPLETED,10,0,0.6,0.4,1.0,0.7,0,8963.75,19147.09,8933.7,112.3,794.0,0,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A
+GEN_qwen3.5:4b,qwen3.5:4b,7f3251fa6878,nvfp4,,scifact,COMPLETED,10,0,0.8,0.2,1.0,0.9,0,11272.3,18977.175,11242.7,105.8,815.7,0,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A
+GEN_qwen3.5:4b,qwen3.5:4b,7f3251fa6878,nvfp4,,ALL,COMPLETED,44,0,0.8182,0.1818,1.0,0.8636,0,8123.1,19174.63,8096.0,94.7727,715.7955,0,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A

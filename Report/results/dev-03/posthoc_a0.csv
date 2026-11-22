@@ -1,0 +1,10 @@
+count,value
+A0 CLARIFY,21
+A0 CLARIFY asks for campus,13
+A0 CLARIFY asks for academic status,4
+A0 CLARIFY asks for degree level,3
+A0 CLARIFY asks for visa,1
+A0 CLARIFY on cases labelled abstain,9
+cases labelled abstain,19
+cases that need branching (labelled conditional_answer or clarify),7
+cases,47

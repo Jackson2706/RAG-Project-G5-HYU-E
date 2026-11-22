@@ -1,0 +1,67 @@
+{
+ "items": 100,
+ "second_judge": "claude-code:claude-sonnet-5-5",
+ "kappa": {
+  "facts (per fact)": {
+   "kappa": 0.858751481627815,
+   "pairs": 130,
+   "agreement": 0.9153846153846154
+  },
+  "wrong_group": {
+   "kappa": 0.8541114058355438,
+   "pairs": 55,
+   "agreement": 0.9636363636363636
+  },
+  "all cited sentences supported": {
+   "kappa": 0.6562874251497005,
+   "pairs": 41,
+   "agreement": 0.8292682926829268
+  },
+  "right_referral": {
+   "kappa": 0.7906976744186047,
+   "pairs": 30,
+   "agreement": 0.9
+  },
+  "asks_branch_attribute": {
+   "kappa": 1.0,
+   "pairs": 15,
+   "agreement": 1.0
+  },
+  "conditions_match": {
+   "kappa": 1.0,
+   "pairs": 10,
+   "agreement": 1.0
+  }
+ },
+ "third_judge_gpt": {
+  "judge": "GPT-6.1 in ChatGPT, max thinking",
+  "items": 20,
+  "fields": {
+   "facts (per fact)": {
+    "kappa": 0.6785714285714285,
+    "agreement": 0.8148148148148148,
+    "pairs": 27
+   },
+   "wrong_group": {
+    "kappa": 1.0,
+    "agreement": 1.0,
+    "pairs": 13
+   },
+   "right_referral": {
+    "kappa": 0.0,
+    "agreement": 0.75,
+    "pairs": 4
+   },
+   "asks_branch_attribute": {
+    "kappa": 1.0,
+    "agreement": 1.0,
+    "pairs": 3
+   },
+   "conditions_match": {
+    "kappa": 1.0,
+    "agreement": 1.0,
+    "pairs": 2
+   }
+  }
+ }
+}

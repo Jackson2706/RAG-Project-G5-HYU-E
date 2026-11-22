@@ -1,0 +1,177 @@
+{
+  "run": "heldout-test3,heldout-test2",
+  "splits": [
+    "test3",
+    "test2"
+  ],
+  "ours": "AP_RRRL",
+  "presets": [
+    "A0_AAES",
+    "AP_BBBB",
+    "AP_RRRL",
+    "B0_BASIC_DENSE_RAG",
+    "G1_ORACLE_CONTEXT",
+    "R15_SELF_QUERY",
+    "R16_PROMPTED_CONDITIONAL"
+  ],
+  "annotation": "LLM-annotated; claims are relative comparisons only",
+  "bootstrap": {
+    "resamples": 10000,
+    "seed": 0,
+    "confidence": 0.95
+  },
+  "rate_denominators": "kept/needed; acceptable, unneeded and wrong referrals/all cases in slice",
+  "cases": 215,
+  "student_dependent_cases": 70,
+  "needed_dependent_cases": 66,
+  "cases_by_split": {
+    "test3": 140,
+    "test2": 75
+  },
+  "dropped_unbalanced": [],
+  "hypotheses": {
+    "H1": {
+      "baseline_preset": "A0_AAES",
+      "metric": "acceptable",
+      "cases": 215,
+      "ours": 0.3953488372093023,
+      "baseline": 0.3116279069767442,
+      "difference": 0.08372093023255811,
+      "ci_low": 0.04186046511627907,
+      "ci_high": 0.12558139534883722,
+      "ours_only": 20,
+      "baseline_only": 2,
+      "mcnemar_p": 6.0558319091796875e-05,
+      "mcnemar_alternative": "greater",
+      "p_holm": 0.00012111663818359375,
+      "decision": "superior"
+    },
+    "H2": {
+      "baseline_preset": "A0_AAES",
+      "metric": "kept",
+      "cases": 66,
+      "ours": 0.696969696969697,
+      "baseline": 0.7272727272727273,
+      "difference": -0.030303030303030276,
+      "ci_low": -0.07575757575757576,
+      "ci_high": 0.0,
+      "ours_only": 0,
+      "baseline_only": 2,
+      "mcnemar_p": 0.5,
+      "mcnemar_alternative": "two-sided",
+      "p_holm": 0.5,
+      "decision": "non_inferior"
+    },
+    "H3": {
+      "baseline_preset": "R16_PROMPTED_CONDITIONAL",
+      "metric": "acceptable",
+      "cases": 70,
+      "ours": 0.6714285714285714,
+      "baseline": 0.2,
+      "difference": 0.47142857142857136,
+      "ci_low": 0.32857142857142857,
+      "ci_high": 0.6142857142857143,
+      "ours_only": 38,
+      "baseline_only": 5,
+      "mcnemar_p": 1.2497548596002162e-07,
+      "mcnemar_alternative": "greater",
+      "p_holm": 3.7492645788006485e-07,
+      "decision": "superior"
+    }
+  },
+  "secondary": [
+    {
+      "baseline_preset": "A0_AAES",
+      "metric": "unneeded",
+      "cases": 215,
+      "ours": 0.413953488372093,
+      "baseline": 0.5162790697674419,
+      "difference": -0.10232558139534886,
+      "ci_low": -0.14418604651162792,
+      "ci_high": -0.06511627906976744,
+      "ours_only": 0,
+      "baseline_only": 22,
+      "mcnemar_p": 4.76837158203125e-07,
+      "mcnemar_alternative": "two-sided",
+      "ours_median": false,
+      "baseline_median": true
+    },
+    {
+      "baseline_preset": "A0_AAES",
+      "metric": "wrong_referral",
+      "cases": 215,
+      "ours": 0.15348837209302327,
+      "baseline": 0.14418604651162792,
+      "difference": 0.009302325581395349,
+      "ci_low": 0.0,
+      "ci_high": 0.023255813953488372,
+      "ours_only": 2,
+      "baseline_only": 0,
+      "mcnemar_p": 0.5,
+      "mcnemar_alternative": "two-sided",
+      "ours_median": false,
+      "baseline_median": false
+    },
+    {
+      "baseline_preset": "A0_AAES",
+      "metric": "seconds",
+      "cases": 215,
+      "ours": 10.975672093023256,
+      "baseline": 0.9303460465116279,
+      "difference": 10.045326046511628,
+      "ci_low": 9.044033023255814,
+      "ci_high": 11.121237209302326,
+      "ours_median": 8.8162,
+      "baseline_median": 0.3638
+    },
+    {
+      "baseline_preset": "R16_PROMPTED_CONDITIONAL",
+      "metric": "unneeded",
+      "cases": 215,
+      "ours": 0.413953488372093,
+      "baseline": 0.018604651162790697,
+      "difference": 0.3953488372093023,
+      "ci_low": 0.3302325581395349,
+      "ci_high": 0.4604651162790698,
+      "ours_only": 85,
+      "baseline_only": 0,
+      "mcnemar_p": 5.169878828456423e-26,
+      "mcnemar_alternative": "two-sided",
+      "ours_median": false,
+      "baseline_median": false
+    },
+    {
+      "baseline_preset": "R16_PROMPTED_CONDITIONAL",
+      "metric": "wrong_referral",
+      "cases": 215,
+      "ours": 0.15348837209302327,
+      "baseline": 0.13488372093023257,
+      "difference": 0.018604651162790697,
+      "ci_low": -0.04186046511627907,
+      "ci_high": 0.07906976744186046,
+      "ours_only": 25,
+      "baseline_only": 21,
+      "mcnemar_p": 0.6587380770236564,
+      "mcnemar_alternative": "two-sided",
+      "ours_median": false,
+      "baseline_median": false
+    },
+    {
+      "baseline_preset": "R16_PROMPTED_CONDITIONAL",
+      "metric": "seconds",
+      "cases": 215,
+      "ours": 10.975672093023256,
+      "baseline": 11.96818976744186,
+      "difference": -0.992517674418604,
+      "ci_low": -2.235724186046512,
+      "ci_high": 0.23457023255813947,
+      "ours_median": 8.8162,
+      "baseline_median": 10.228399999999999
+    }
+  ],
+  "decision_rules": {
+    "H1_H3": "positive difference and one-sided McNemar Holm p < 0.05",
+    "H2": "paired bootstrap 95% lower bound > -0.10; undefined without needed cases",
+    "H2_p": "McNemar tests equality, not the -0.10 margin; its two-sided p is descriptive. Holm values cover H1-H3; H2's decision uses the specified CI rule."
+  }
+}

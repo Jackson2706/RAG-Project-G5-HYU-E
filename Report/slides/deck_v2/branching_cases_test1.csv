@@ -1,0 +1,16 @@
+case,expected,baselines,all_five_flat,A0,A3,A0_v3_conditions_match,A0_v3_asks_branch_attribute,A0_v3_wrong_group,qualifies
+T14-009,conditional_answer,answer;answer;answer;answer;conditional_answer,False,conditional_answer,clarify,False,,False,False
+T14-014,clarify,answer;answer;answer;answer;answer,True,conditional_answer,clarify,False,,False,True
+T14-018,conditional_answer,answer;answer;answer;answer;answer,True,clarify,clarify,,True,,True
+T14-041,conditional_answer,answer;answer;answer;answer;answer,True,clarify,clarify,,False,,True
+T14-051,clarify,answer;answer;answer;answer;answer,True,clarify,clarify,,True,,True
+T14-069,conditional_answer,answer;answer;answer;answer;answer,True,abstain,abstain,,,,False
+T14-083,conditional_answer,answer;answer;answer;answer;answer,True,abstain,abstain,,,,False
+T14-088,clarify,answer;answer;answer;answer;answer,True,clarify,clarify,,True,,True
+T14-091,clarify,answer;answer;answer;answer;answer,True,conditional_answer,clarify,False,,True,True
+T14-094,clarify,answer;answer;answer;answer;answer,True,answer,answer,,,False,False
+T14-114,conditional_answer,abstain;abstain;answer;abstain;abstain,False,conditional_answer,clarify,True,,False,False
+T14-117,conditional_answer,answer;answer;answer;answer;answer,True,answer,answer,,,False,False
+T14-121,clarify,answer;answer;answer;answer;abstain,False,conditional_answer,clarify,False,,False,False
+T14-124,conditional_answer,abstain;abstain;abstain;answer;abstain,False,clarify,clarify,,False,,False
+T14-224,conditional_answer,answer;answer;answer;abstain;conditional_answer,False,abstain,clarify,,,,False

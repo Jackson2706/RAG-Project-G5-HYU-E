@@ -1,0 +1,76 @@
+{
+  "annotation": "LLM-annotated; claims are relative comparisons only",
+  "gold": true,
+  "bootstrap": {
+    "resamples": 10000,
+    "seed": 0,
+    "unit": "case",
+    "confidence": 0.95
+  },
+  "definitions": {
+    "facts_covered": "correct/required facts",
+    "wrong_fact_rate": "replies with >=1 wrong fact/answered replies",
+    "wrong_group_rate": "wrong-group replies/answered replies",
+    "citation_support": "supported/cited sentences",
+    "bootstrap_ratios": "resample all cases together; redraw zero-denominator samples; undefined rates stay null"
+  },
+  "prompt_sha256": "3541b5db89608e1bb3df8936cd9f187b5ab963071ede2ddba0b0290d1803c5ca",
+  "items_sha256": "793de58a1128349e2e714e2655a4f78f8518b4194c3133bdc729af18ebd9637e",
+  "key_sha256": "bd53d2e1ec04a3f12b222421a09d1cf599b8adf53268e30c3dd23d830f72a439",
+  "judgments_sha256": "1976ad69f9ca23d9bfea8a8b2fbb61e6ed6eb1943fd0814169a7ced9569f5660",
+  "judgment_parts_sha256": {
+    "judgments_gold_01.jsonl": "fab823b7d39e58dbcfc7667c0204eb6a8ef2fed69ecac3e6770d67ade8095829",
+    "judgments_gold_02.jsonl": "ee0c4bfd7566d2bdb31cc13c2d0424edf1a4bd71fa0b4516a0fe1f7b7cf9a324",
+    "judgments_gold_03.jsonl": "9d7ddc77fc7ae08560fb74a18014a7ee4cd25dd2369bda7546cf79f94ab2e713",
+    "judgments_gold_04.jsonl": "a04a5df11c9ed3f2bb540e51a92ff3078637551780c3c66d731dec147e18390b",
+    "judgments_gold_05.jsonl": "eada706b237d1c587bd6d74493ba1d6775049f7a8edbcc52b0738ce68273c231"
+  },
+  "scores": [
+    {
+      "preset": "G1_ORACLE_CONTEXT",
+      "slice": "all",
+      "cases": 171,
+      "required_facts": 414,
+      "correct_facts": 252,
+      "wrong_fact_replies": 23,
+      "wrong_group_replies": 31,
+      "cited_sentences": 337,
+      "supported_sentences": 282,
+      "facts_covered": 0.6086956521739131,
+      "facts_covered_ci_low": 0.5592417061611374,
+      "facts_covered_ci_high": 0.6585395168855535,
+      "wrong_fact_rate": 0.13450292397660818,
+      "wrong_fact_rate_ci_low": 0.08771929824561403,
+      "wrong_fact_rate_ci_high": 0.1871345029239766,
+      "wrong_group_rate": 0.18128654970760233,
+      "wrong_group_rate_ci_low": 0.12280701754385964,
+      "wrong_group_rate_ci_high": 0.23976608187134502,
+      "citation_support": 0.8367952522255193,
+      "citation_support_ci_low": 0.7843137254901961,
+      "citation_support_ci_high": 0.8837227081999858
+    },
+    {
+      "preset": "G1_ORACLE_CONTEXT",
+      "slice": "student_dependent",
+      "cases": 57,
+      "required_facts": 157,
+      "correct_facts": 85,
+      "wrong_fact_replies": 13,
+      "wrong_group_replies": 29,
+      "cited_sentences": 111,
+      "supported_sentences": 86,
+      "facts_covered": 0.5414012738853503,
+      "facts_covered_ci_low": 0.4605162253793994,
+      "facts_covered_ci_high": 0.6211180124223602,
+      "wrong_fact_rate": 0.22807017543859648,
+      "wrong_fact_rate_ci_low": 0.12280701754385964,
+      "wrong_fact_rate_ci_high": 0.3333333333333333,
+      "wrong_group_rate": 0.5087719298245614,
+      "wrong_group_rate_ci_low": 0.38596491228070173,
+      "wrong_group_rate_ci_high": 0.631578947368421,
+      "citation_support": 0.7747747747747747,
+      "citation_support_ci_low": 0.6635514018691588,
+      "citation_support_ci_high": 0.8692307692307693
+    }
+  ]
+}

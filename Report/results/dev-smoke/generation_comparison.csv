@@ -1,0 +1,11 @@
+experiment,model,digest,quantization,parameter_size,group,status,cases,failed,answered_rate,abstention_rate,marker_validity_mean,answers_citing_a_source_rate,invalid_markers_total,generation_ms_p50,generation_ms_p95,first_token_ms_p50,output_tokens_mean,prompt_tokens_mean,annotated_cases,correctness,relevance,completeness,grounding_support,citation_precision,citation_coverage,exact_match,token_f1
+GEN_llama2:7b,llama2:7b,78e26419b446,Q4_0,7B,arguana,COMPLETED,1,0,1.0,0.0,1.0,1.0,0,31105.6,31105.6,7362.7,413.0,1068.0,0,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A
+GEN_llama2:7b,llama2:7b,78e26419b446,Q4_0,7B,hyu_fixture,COMPLETED,2,0,1.0,0.0,1.0,1.0,0,9268.7,11080.31,3177.1,112.0,454.5,0,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A
+GEN_llama2:7b,llama2:7b,78e26419b446,Q4_0,7B,nfcorpus,COMPLETED,1,0,0.0,1.0,N/A,0.0,0,9971.0,9971.0,5988.5,74.0,857.0,0,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A
+GEN_llama2:7b,llama2:7b,78e26419b446,Q4_0,7B,scifact,COMPLETED,1,0,1.0,0.0,N/A,0.0,0,22806.0,22806.0,17371.2,96.0,1021.0,0,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A
+GEN_llama2:7b,llama2:7b,78e26419b446,Q4_0,7B,ALL,COMPLETED,5,0,0.8,0.2,1.0,0.6,0,11281.6,29445.68,5988.5,161.4,771.0,0,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A
+GEN_qwen3.5:4b,qwen3.5:4b,7f3251fa6878,nvfp4,,arguana,COMPLETED,1,0,1.0,0.0,1.0,1.0,0,12747.1,12747.1,12735.3,215.0,936.0,0,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A
+GEN_qwen3.5:4b,qwen3.5:4b,7f3251fa6878,nvfp4,,hyu_fixture,COMPLETED,2,0,1.0,0.0,1.0,1.0,0,2329.7,2506.91,2317.7,18.0,396.5,0,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A
+GEN_qwen3.5:4b,qwen3.5:4b,7f3251fa6878,nvfp4,,nfcorpus,COMPLETED,1,0,0.0,1.0,N/A,0.0,0,5243.5,5243.5,5227.8,40.0,713.0,0,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A
+GEN_qwen3.5:4b,qwen3.5:4b,7f3251fa6878,nvfp4,,scifact,COMPLETED,1,0,1.0,0.0,1.0,1.0,0,11838.3,11838.3,11764.1,116.0,842.0,0,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A
+GEN_qwen3.5:4b,qwen3.5:4b,7f3251fa6878,nvfp4,,ALL,COMPLETED,5,0,0.8,0.2,1.0,0.8,0,5243.5,12565.34,5227.8,81.4,656.8,0,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A

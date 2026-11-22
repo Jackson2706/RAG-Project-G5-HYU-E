@@ -1,0 +1,11 @@
+# annot_B part 1 notes (claude-code:claude-sonnet-5-5)
+- T2-002/003/009/017/019/035/049: campus unstated, campuses give different values, so campus branch (conditional_answer).
+- T2-019: Seoul stats table garbled and undated; ERICA figures 2023/2024; treated as campus branch.
+- T2-036/037/038: both campuses say yes or only ERICA has details; answer, other-campus span as inapplicable.
+- T2-040: ERICA group-visa steps only in an unreadable attachment; partial (notice-each-semester fact supported) so abstain.
+- T2-042: no Seoul comparison in the snapshot; answered with ERICA's own claims.
+- T2-048: open "Can I get a scholarship?" with several splitting attributes; clarify on campus.
+- T2-055: exchange student TOPIK rule not in snapshot; partial/abstain, clarify acceptable.
+- T2-059: leave-of-absence status not covered by the "enrolled" notice; partial/abstain.
+- T2-060: only GKS-G (graduate) exists; answer with criteria, clarify acceptable.
+- T2-054: only 2021-2022 entry-report notices exist; treated as stable rule.

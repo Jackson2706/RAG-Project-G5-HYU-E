@@ -1,0 +1,35 @@
+{
+  "beir_split": "test",
+  "orig_split": "dev",
+  "source_checksums": {
+    "beir_md5": "5f7d1de60b170fc8027bb7898e2efca1",
+    "scifact_original_md5": "cb7da4d8609e30f2c7483b61aa447f7e"
+  },
+  "n_beir_queries": 300,
+  "n_orig_claims": 300,
+  "n_id_matched": 300,
+  "unmatched_ids": [],
+  "n_text_equal": 300,
+  "text_mismatch_examples": [],
+  "label_counts": {
+    "SUPPORT": 124,
+    "CONTRADICT": 64,
+    "NEI": 112,
+    "MIXED": 0
+  },
+  "qrels_vs_evidence": {
+    "equal": 175,
+    "superset": 125,
+    "subset": 0,
+    "other": 0
+  },
+  "n_nei_with_qrels": 112,
+  "n_qrels_equal_cited": 300,
+  "orig_claims_missing_from_beir": 0,
+  "orig_claims_missing_from_beir_by_label": {
+    "SUPPORT": 0,
+    "CONTRADICT": 0,
+    "NEI": 0,
+    "MIXED": 0
+  }
+}

@@ -1,0 +1,196 @@
+[
+  {
+    "persona_id": "persona-01",
+    "name": "Seoul English-track undergraduate applicant",
+    "description": "An English-track applicant checking admission requirements before receiving a student visa.",
+    "gold_profile": {
+      "campus": "seoul",
+      "degree_level": "undergraduate",
+      "year": "1",
+      "student_type": "degree_seeking",
+      "visa": "other",
+      "topik_level": "none",
+      "english_track": "yes",
+      "academic_status": "applicant",
+      "korean_standard": "exempt"
+    }
+  },
+  {
+    "persona_id": "persona-02",
+    "name": "ERICA admitted English-track undergraduate",
+    "description": "An admitted student who has not met the Korean standard and needs D-2 visa guidance.",
+    "gold_profile": {
+      "campus": "erica",
+      "degree_level": "undergraduate",
+      "year": "1",
+      "student_type": "degree_seeking",
+      "visa": "D-2",
+      "topik_level": "1",
+      "english_track": "yes",
+      "academic_status": "admitted_not_enrolled",
+      "korean_standard": "fail"
+    },
+    "updates": [
+      {
+        "attribute": "korean_standard",
+        "from": "fail",
+        "to": "pass",
+        "why": "The student passes the university Korean test after admission."
+      }
+    ]
+  },
+  {
+    "persona_id": "persona-03",
+    "name": "ERICA D-4 language student",
+    "description": "An enrolled language student preparing to change from a D-4 visa to a D-2 visa.",
+    "gold_profile": {
+      "campus": "erica",
+      "degree_level": "language_program",
+      "student_type": "language_program",
+      "visa": "D-4",
+      "topik_level": "2",
+      "english_track": "no",
+      "academic_status": "enrolled",
+      "korean_standard": "fail"
+    },
+    "updates": [
+      {
+        "attribute": "visa",
+        "from": "D-4",
+        "to": "D-2",
+        "why": "The student enters a degree program and receives a D-2 visa."
+      }
+    ]
+  },
+  {
+    "persona_id": "persona-04",
+    "name": "ERICA second-year degree student",
+    "description": "A second-year undergraduate asking about D-2 work and enrollment procedures.",
+    "gold_profile": {
+      "campus": "erica",
+      "degree_level": "undergraduate",
+      "year": "2",
+      "student_type": "degree_seeking",
+      "visa": "D-2",
+      "topik_level": "3",
+      "english_track": "no",
+      "academic_status": "enrolled",
+      "korean_standard": "pass"
+    }
+  },
+  {
+    "persona_id": "persona-05",
+    "name": "ERICA master's graduate job seeker",
+    "description": "A master's student with completed coursework asking about D-10 visa status.",
+    "gold_profile": {
+      "campus": "erica",
+      "degree_level": "master",
+      "student_type": "degree_seeking",
+      "visa": "D-10",
+      "topik_level": "4",
+      "english_track": "no",
+      "academic_status": "completed_coursework",
+      "korean_standard": "pass"
+    }
+  },
+  {
+    "persona_id": "persona-06",
+    "name": "Seoul doctoral coursework student",
+    "description": "An enrolled doctoral student nearing the end of coursework on a D-2-5 visa.",
+    "gold_profile": {
+      "campus": "seoul",
+      "degree_level": "doctoral",
+      "student_type": "degree_seeking",
+      "visa": "D-2-5",
+      "topik_level": "5",
+      "english_track": "no",
+      "academic_status": "enrolled",
+      "korean_standard": "pass"
+    },
+    "updates": [
+      {
+        "attribute": "academic_status",
+        "from": "enrolled",
+        "to": "completed_coursework",
+        "why": "The student finishes the required doctoral coursework."
+      }
+    ]
+  },
+  {
+    "persona_id": "persona-07",
+    "name": "Seoul third-year exchange student",
+    "description": "An English-track exchange student in the third undergraduate year with no TOPIK score.",
+    "gold_profile": {
+      "campus": "seoul",
+      "degree_level": "undergraduate",
+      "year": "3",
+      "student_type": "exchange",
+      "visa": "D-2-8",
+      "topik_level": "none",
+      "english_track": "yes",
+      "academic_status": "enrolled",
+      "korean_standard": "exempt"
+    }
+  },
+  {
+    "persona_id": "persona-08",
+    "name": "Seoul fourth-year student on leave",
+    "description": "A Seoul degree-seeking undergraduate in year 4 who is on a leave of absence and plans to return.",
+    "gold_profile": {
+      "campus": "seoul",
+      "degree_level": "undergraduate",
+      "year": "4",
+      "student_type": "degree_seeking",
+      "visa": "D-2",
+      "topik_level": "4",
+      "english_track": "no",
+      "academic_status": "leave_of_absence",
+      "korean_standard": "pass"
+    }
+  },
+  {
+    "persona_id": "persona-09",
+    "name": "ERICA English-track non-degree exchange student",
+    "description": "A non-degree exchange student with no TOPIK score asking about campus services.",
+    "gold_profile": {
+      "campus": "erica",
+      "degree_level": "non_degree",
+      "student_type": "exchange",
+      "visa": "D-2-8",
+      "topik_level": "none",
+      "english_track": "yes",
+      "academic_status": "enrolled",
+      "korean_standard": "exempt"
+    }
+  },
+  {
+    "persona_id": "persona-10",
+    "name": "Seoul one-semester visiting student",
+    "description": "A non-degree visiting student at the Seoul campus for one semester, studying in English.",
+    "gold_profile": {
+      "campus": "seoul",
+      "degree_level": "non_degree",
+      "student_type": "visiting",
+      "visa": "D-2-8",
+      "topik_level": "none",
+      "english_track": "yes",
+      "academic_status": "enrolled",
+      "korean_standard": "exempt"
+    }
+  },
+  {
+    "persona_id": "persona-11",
+    "name": "ERICA doctoral student about to graduate",
+    "description": "A graduating doctoral student asking how D-10 rules apply after study at ERICA.",
+    "gold_profile": {
+      "campus": "erica",
+      "degree_level": "doctoral",
+      "student_type": "degree_seeking",
+      "visa": "D-2",
+      "topik_level": "6",
+      "english_track": "no",
+      "academic_status": "graduating",
+      "korean_standard": "pass"
+    }
+  }
+]

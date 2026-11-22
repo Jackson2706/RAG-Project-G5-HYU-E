@@ -1,0 +1,6 @@
+{
+ "messages": 90,
+ "exact_profile_agreement": 0.967,
+ "attribute_value_agreement": 0.973,
+ "disagreements": 3
+}

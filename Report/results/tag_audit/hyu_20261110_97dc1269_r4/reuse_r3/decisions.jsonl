@@ -1,0 +1,17 @@
+{"chunk_id":"0089f417-c00e-50d3-b644-fa9409e8400c","attribute":"year","decision":"b","reason":"\"For 25-2 Freshmen\" supports year 1."}
+{"chunk_id":"017874bc-8b45-5592-94a6-9b8866435212","attribute":"academic_status","decision":"a","reason":"\"those who complete Hanyang IIE's Korean Course on Feb 14 and reside in Korea\" does not state leave-of-absence status."}
+{"chunk_id":"1e322beb-a1d4-51bb-a890-c5f8225c2f20","attribute":"year","decision":"a","reason":"\"For 26-1 Freshmen\" supports year 1."}
+{"chunk_id":"35ba58a6-40cc-5aff-ae97-a53a055dfbbf","attribute":"degree_level","decision":"a","reason":"\"university level (or higher) students\" covers undergraduate, master's, and doctoral levels."}
+{"chunk_id":"3a5409dd-1115-516c-bf82-bf86a4c04ddc","attribute":"degree_level","decision":"a","reason":"The \"four-year full scholarship\" and students \"admitted through transcript-based rolling admission or regular admission\" support undergraduate level."}
+{"chunk_id":"3abfd991-d733-5be2-874e-57e853ae1dc2","attribute":"degree_level","decision":"a","reason":"\"Indonesian university students\" does not state a specific undergraduate, master's, or doctoral level."}
+{"chunk_id":"4310d233-8228-5cea-9330-4624fc09bcd9","attribute":"academic_status","decision":"a","reason":"\"Admission Results for International Students\" with \"Undergraduate\\nGraduate\" does not state that the students were admitted."}
+{"chunk_id":"5509ff4d-53a8-56c7-b22d-258c6213f6cf","attribute":"visa","decision":"a","reason":"The chunk addresses both \"D-2 VISA\" and students who \"change from D-4 visa to D-2 visa\"."}
+{"chunk_id":"57f28e8a-a3a8-5580-a6dc-74b0b117fcc1","attribute":"degree_level","decision":"b","reason":"\"Indonesian university students\" does not state a specific undergraduate, master's, or doctoral level."}
+{"chunk_id":"6132314f-4067-5c74-892c-461a6bd147e8","attribute":"academic_status","decision":"a","reason":"\"Students who graduated from Korea school and get diploma\" does not state leave-of-absence status."}
+{"chunk_id":"79549099-04bb-5030-99a1-20334245215e","attribute":"visa","decision":"b","reason":"\"Students who completed HYU IIE Korean course(d4 visa)\" explicitly supports D-4."}
+{"chunk_id":"79549099-04bb-5030-99a1-20334245215e","attribute":"academic_status","decision":"b","reason":"\"Students who plan to apply for visa while in Korea\" does not state leave-of-absence status."}
+{"chunk_id":"7c5c4a77-87ed-584d-88c0-efcf2f46a7b4","attribute":"visa","decision":"b","reason":"The chunk addresses both \"D-2 visa application\" and a \"change from D-4 to D-2\"."}
+{"chunk_id":"86304bda-3584-5907-86f4-a197e1e0aacf","attribute":"degree_level","decision":"a","reason":"\"University graduates or higher\" supports undergraduate, master's, and doctoral degree levels."}
+{"chunk_id":"adf5b764-7e3c-5403-bc89-fde68599cd94","attribute":"visa","decision":"a","reason":"The chunk addresses both \"Students with F-Visa\" and a \"D2 visa applicant\"."}
+{"chunk_id":"bdf66eac-8dd0-5137-a7b3-a189a9345aee","attribute":"academic_status","decision":"a","reason":"\"Student who paid insurance fees before taking a leave of absence\" explicitly states leave-of-absence status."}
+{"chunk_id":"d2942500-54f9-5305-8add-322e5056d740","attribute":"visa","decision":"a","reason":"\"F-4 visa holders\" explicitly supports the other-visa value."}

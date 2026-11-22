@@ -1,0 +1,16 @@
+{
+  "agent_model": "gpt-6.1-sol",
+  "annotator": "codex:gpt-6.1-sol",
+  "prompt_sha256": "79ca1e069152ade52e03bc983d7fdab8536adbe1092837da230fac7b0e314997",
+  "input_sha256": "674aa46dedcdcd0a1661cc8bb397d8a074084c49e18e01dfe105075ced490280",
+  "row_count": 24,
+  "timestamp": "2026-11-16T23:23:15.434808+00:00",
+  "counts_by_expected_behavior": {
+    "conditional_answer": 16,
+    "answer": 1,
+    "abstain": 1,
+    "clarify": 6
+  },
+  "excluded": 0,
+  "dependent_cases": 22
+}

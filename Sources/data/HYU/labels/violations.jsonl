@@ -1,0 +1,123 @@
+{"case_id": "T14-002", "check": "facts", "detail": "0/9 content words in the gold spans: the English snapshot links to the undergraduate admission guide but does not contain the application-document list"}
+{"case_id": "T14-003", "check": "term", "detail": "question names ['2026'] but no gold span or its document shows that year"}
+{"case_id": "T14-004", "check": "facts", "detail": "0/8 content words in the gold spans: the snapshot does not state whether a scholarship can be submitted with the bachelor's admission application"}
+{"case_id": "T14-004", "check": "facts", "detail": "2/6 content words in the gold spans: the available HIEA material is for students already enrolled at Seoul"}
+{"case_id": "T14-008", "check": "facts", "detail": "0/8 content words in the gold spans: the English snapshot does not state the current TOPIK admission requirement for an English-track bachelor's"}
+{"case_id": "T14-008", "check": "facts", "detail": "0/6 content words in the gold spans: the student should verify the current undergraduate admission guide"}
+{"case_id": "T14-011", "check": "facts", "detail": "0/4 content words in the gold spans: the snapshot includes a last-session notice"}
+{"case_id": "T14-016", "check": "facts", "detail": "2/6 content words in the gold spans: the listed telephone range is +82-2-2220-2453 through 2460"}
+{"case_id": "T14-019", "check": "facts", "detail": "3/7 content words in the gold spans: the notice provides a compulsory-education course link but not the course contents in English"}
+{"case_id": "T14-024", "check": "facts", "detail": "2/5 content words in the gold spans: international students are directed to review it for prevention and response"}
+{"case_id": "T14-027", "check": "facts", "detail": "2/6 content words in the gold spans: eligible students used the Google Form and places were first-come, first-served"}
+{"case_id": "T14-033", "check": "facts", "detail": "2/6 content words in the gold spans: the return application is an online form that is completed and saved"}
+{"case_id": "T14-034", "check": "facts", "detail": "0/2 content words in the gold spans: the stated premium is 25,000 won"}
+{"case_id": "T14-037", "check": "facts", "detail": "3/9 content words in the gold spans: the OIA counseling page invites international students and describes individual, group, and testing support"}
+{"case_id": "T14-037", "check": "facts", "detail": "0/7 content words in the gold spans: the English page does not explicitly state whether students on leave are eligible"}
+{"case_id": "T14-038", "check": "facts", "detail": "3/7 content words in the gold spans: ERICA lists February 12–13 as a similarly restricted second round"}
+{"case_id": "T14-038", "check": "facts", "detail": "2/7 content words in the gold spans: there is no general extra period for everyone who missed the first round"}
+{"case_id": "T14-041", "check": "facts", "detail": "3/7 content words in the gold spans: Seoul HISS offers up to three English-taught courses from more than 130 options"}
+{"case_id": "T14-046", "check": "facts", "detail": "2/7 content words in the gold spans: the snapshot does not show an equivalent monthly program for non-degree visiting students"}
+{"case_id": "T14-047", "check": "facts", "detail": "1/6 content words in the gold spans: students should verify the stamp before participating or paying"}
+{"case_id": "T14-053", "check": "facts", "detail": "2/5 content words in the gold spans: additional documents may be required for particular circumstances"}
+{"case_id": "T14-054", "check": "facts", "detail": "1/4 content words in the gold spans: both list weekday hours of 09:00 to 16:00"}
+{"case_id": "T14-062", "check": "facts", "detail": "4/9 content words in the gold spans: HIEA offers 30 to 100 percent of one semester's tuition and has different GPA requirements for undergraduate and graduat"}
+{"case_id": "T14-065", "check": "facts", "detail": "2/9 content words in the gold spans: the current semester's group-registration dates and submission steps are not present in the English snapshot"}
+{"case_id": "T14-066", "check": "facts", "detail": "2/10 content words in the gold spans: separate permission for part-time work has additional degree, timing, language, and work-history conditions"}
+{"case_id": "T14-067", "check": "facts", "detail": "1/5 content words in the gold spans: the notice does not explicitly confirm completed-coursework eligibility"}
+{"case_id": "T14-076", "check": "facts", "detail": "3/8 content words in the gold spans: recent Korean-university graduates with qualifying Korean proficiency can receive a points-system exemption"}
+{"case_id": "T14-078", "check": "facts", "detail": "3/8 content words in the gold spans: the English snapshot does not state the post-graduation National Health Insurance transition"}
+{"case_id": "T14-078", "check": "facts", "detail": "3/9 content words in the gold spans: the student must confirm the effect of graduation and any visa change with the National Health Insurance Corporation"}
+{"case_id": "T14-081", "check": "facts", "detail": "0/9 content words in the gold spans: the English snapshot does not contain the current undergraduate admission language requirements by track"}
+{"case_id": "T14-081", "check": "facts", "detail": "0/8 content words in the gold spans: post-enrollment scholarship and re-registration language rules cannot be used as admission rules"}
+{"case_id": "T14-083", "check": "facts", "detail": "1/6 content words in the gold spans: the English snapshot does not establish the ERICA admission-guide route"}
+{"case_id": "T14-083", "check": "facts", "detail": "1/7 content words in the gold spans: campus and degree level are needed to select the current guide"}
+{"case_id": "T14-084", "check": "facts", "detail": "0/9 content words in the gold spans: the English snapshot does not state whether an English-track admission applicant may apply without TOPIK"}
+{"case_id": "T14-084", "check": "facts", "detail": "0/6 content words in the gold spans: scholarship language substitutions do not establish admission eligibility"}
+{"case_id": "T14-086", "check": "facts", "detail": "3/8 content words in the gold spans: Seoul has separate acceptance guides for Korean-standard pass or exemption and fail"}
+{"case_id": "T14-088", "check": "facts", "detail": "2/5 content words in the gold spans: a permit and other eligibility conditions still apply"}
+{"case_id": "T14-089", "check": "facts", "detail": "1/9 content words in the gold spans: the document route changes after regular coursework is completed for thesis preparation"}
+{"case_id": "T14-089", "check": "facts", "detail": "0/7 content words in the gold spans: the English snapshot does not provide the complete thesis-preparation extension checklist"}
+{"case_id": "T14-092", "check": "facts", "detail": "2/6 content words in the gold spans: they must be affiliated with a listed science-and-technology institute or a K-STAR visa-track university"}
+{"case_id": "T14-092", "check": "facts", "detail": "1/4 content words in the gold spans: the program is not open to international students generally"}
+{"case_id": "T14-093", "check": "facts", "detail": "2/5 content words in the gold spans: the snapshot provides both DOCX and PDF attachments"}
+{"case_id": "T14-096", "check": "facts", "detail": "5/11 content words in the gold spans: HIEA requires students admitted through specified international degree-admission routes and current attendance for more "}
+{"case_id": "T14-101", "check": "facts", "detail": "0/6 content words in the gold spans: next spring is 2027 spring relative to the case date"}
+{"case_id": "T14-101", "check": "facts", "detail": "0/8 content words in the gold spans: the snapshot contains a 2026 spring re-registration guide but no 2027 spring application"}
+{"case_id": "T14-101", "check": "facts", "detail": "0/6 content words in the gold spans: the student should wait for or request the current campus OIA notice"}
+{"case_id": "T14-102", "check": "facts", "detail": "3/7 content words in the gold spans: a normal enrolled-student D-2 extension is not the applicable route while on leave"}
+{"case_id": "T14-103", "check": "facts", "detail": "3/7 content words in the gold spans: the enrolled-student part-time route therefore does not apply during leave"}
+{"case_id": "T14-105", "check": "facts", "detail": "3/7 content words in the gold spans: the 2026 Seoul TOPIK scholarship notice also excludes students on leave"}
+{"case_id": "T14-105", "check": "facts", "detail": "1/3 content words in the gold spans: other scholarships may have separate rules"}
+{"case_id": "T14-106", "check": "facts", "detail": "2/5 content words in the gold spans: premiums remain due for an absence shorter than one month"}
+{"case_id": "T14-106", "check": "facts", "detail": "2/8 content words in the gold spans: Hanyang private insurance is separate and the snapshot does not state continuing leave-abroad coverage"}
+{"case_id": "T14-108", "check": "facts", "detail": "1/7 content words in the gold spans: summer permits up to three courses and includes research opportunities"}
+{"case_id": "T14-108", "check": "facts", "detail": "2/5 content words in the gold spans: winter offers two selectable two-week sessions"}
+{"case_id": "T14-109", "check": "facts", "detail": "0/6 content words in the gold spans: visa must be known to determine the applicable timing or exception"}
+{"case_id": "T14-110", "check": "facts", "detail": "1/6 content words in the gold spans: the page permits qualifying D-2 students who obtain university confirmation and advance permission"}
+{"case_id": "T14-110", "check": "facts", "detail": "1/5 content words in the gold spans: the hours table does not explicitly map a non-degree visiting student to a row"}
+{"case_id": "T14-112", "check": "facts", "detail": "4/12 content words in the gold spans: summer and winter schools advertise separate program scholarships, which do not establish funding for a regular visiting"}
+{"case_id": "T14-113", "check": "facts", "detail": "1/11 content words in the gold spans: the English snapshot does not provide a complete initial D-2 visa application procedure for newly admitted ERICA student"}
+{"case_id": "T14-113", "check": "facts", "detail": "2/12 content words in the gold spans: the student must obtain the current visa documents from ERICA OIA and follow the Korean embassy or immigration instructi"}
+{"case_id": "T14-113", "check": "facts", "detail": "0/9 content words in the gold spans: alien-registration instructions apply only after entry and do not answer initial visa issuance"}
+{"case_id": "T14-114", "check": "facts", "detail": "4/9 content words in the gold spans: the TOPIK Scholarship requires an improved TOPIK level and excludes students who do not meet its current-student conditi"}
+{"case_id": "T14-119", "check": "facts", "detail": "1/5 content words in the gold spans: The ERICA page does not say whether language-program students are eligible"}
+{"case_id": "T14-124", "check": "branches", "detail": "conditional_answer on ['year', 'degree_level'] without branch marks: branch count unknown"}
+{"case_id": "T14-125", "check": "facts", "detail": "3/8 content words in the gold spans: D-10 holders may work part time only under the special D-10 provisions"}
+{"case_id": "T14-138", "check": "facts", "detail": "2/7 content words in the gold spans: The only dated undergraduate guideline in the snapshot is Spring 2021, which is outdated"}
+{"case_id": "T14-145", "check": "term", "detail": "question names ['2025'] but no gold span or its document shows that year"}
+{"case_id": "T14-148", "check": "facts", "detail": "0/8 content words in the gold spans: The latest Seoul re-registration notice in the snapshot is for 2026-1 (January 2026)"}
+{"case_id": "T14-148", "check": "facts", "detail": "0/5 content words in the gold spans: No 2026-2 return-to-school notice for Seoul is available"}
+{"case_id": "T14-151", "check": "facts", "detail": "1/9 content words in the gold spans: The 2021 notice is superseded by later entry-report notices (2022); its 2021-09-22 deadline has passed"}
+{"case_id": "T14-151", "check": "term", "detail": "question names ['2021'] but no gold span or its document shows that year"}
+{"case_id": "T14-153", "check": "facts", "detail": "0/9 content words in the gold spans: The latest psychological health test notice is from March 2026 (2026-1); no notice for 2026-2 is available"}
+{"case_id": "T14-155", "check": "facts", "detail": "2/8 content words in the gold spans: The only ERICA dormitory notice in the snapshot is the 2025 spring application (outdated)"}
+{"case_id": "T14-156", "check": "facts", "detail": "0/7 content words in the gold spans: The only ERICA group visa notice in the snapshot is from August 2025"}
+{"case_id": "T14-156", "check": "facts", "detail": "0/6 content words in the gold spans: No 2026-2 ERICA group visa notice is available"}
+{"case_id": "T14-157", "check": "facts", "detail": "2/8 content words in the gold spans: Apply on HY-in; rounds were 6-17 July and 12-13 August 2026"}
+{"case_id": "T14-160", "check": "facts", "detail": "4/9 content words in the gold spans: The Everland trip (10 November, announced October 2024) was for ERICA exchange and visiting students"}
+{"case_id": "T14-160", "check": "facts", "detail": "2/7 content words in the gold spans: The Lotte World trip was for degree-program students and excluded exchange and visiting students"}
+{"case_id": "T14-162", "check": "facts", "detail": "0/7 content words in the gold spans: The snapshot does not say which partner universities accept first-year exchange applicants"}
+{"case_id": "T14-165", "check": "facts", "detail": "0/7 content words in the gold spans: The snapshot has no information on the status of your personal group visa application"}
+{"case_id": "T14-166", "check": "facts", "detail": "0/7 content words in the gold spans: The Samsung MX recruitment notice does not say whether flights to Korea are paid"}
+{"case_id": "T14-167", "check": "facts", "detail": "0/8 content words in the gold spans: Which major has the friendliest professors is a subjective question that official pages do not answer"}
+{"case_id": "T14-168", "check": "facts", "detail": "0/8 content words in the gold spans: The partner university list gives names and regions only, not laboratories or research areas"}
+{"case_id": "T14-170", "check": "facts", "detail": "0/4 content words in the gold spans: The assistant cannot make bookings"}
+{"case_id": "T14-172", "check": "facts", "detail": "0/4 content words in the gold spans: The snapshot does not recommend dissertation supervisors"}
+{"case_id": "T14-173", "check": "facts", "detail": "0/8 content words in the gold spans: The 2023 Global Talent Fair page has only a title, with no company list"}
+{"case_id": "T14-174", "check": "facts", "detail": "0/6 content words in the gold spans: The snapshot has no rule on NHI exemption for one-semester exchange students in 2025"}
+{"case_id": "T14-175", "check": "facts", "detail": "0/6 content words in the gold spans: The snapshot does not list documents for disputing a 2025 NHI bill"}
+{"case_id": "T14-176", "check": "facts", "detail": "0/7 content words in the gold spans: The snapshot cannot show whether your re-entry permit was approved"}
+{"case_id": "T14-178", "check": "facts", "detail": "0/6 content words in the gold spans: Credit recognition is decided by the home university, and the snapshot does not describe it"}
+{"case_id": "T14-179", "check": "facts", "detail": "0/6 content words in the gold spans: The snapshot has no Seoul outgoing exchange program information"}
+{"case_id": "T14-180", "check": "facts", "detail": "0/6 content words in the gold spans: The snapshot does not say whether students on leave paid NHI throughout 2025"}
+{"case_id": "T14-181", "check": "facts", "detail": "0/8 content words in the gold spans: The snapshot cannot show the live status of your residence card extension"}
+{"case_id": "T14-182", "check": "facts", "detail": "0/6 content words in the gold spans: The assistant cannot cancel your re-entry permit application"}
+{"case_id": "T14-183", "check": "facts", "detail": "0/7 content words in the gold spans: The snapshot has no information on how leave affects hiring after graduation"}
+{"case_id": "T14-184", "check": "facts", "detail": "0/8 content words in the gold spans: The snapshot does not list partner schools offering one-semester English-taught visits"}
+{"case_id": "T14-186", "check": "facts", "detail": "0/5 content words in the gold spans: The receipt-printing steps are only in an attachment that has no text in the snapshot"}
+{"case_id": "T14-186", "check": "term", "detail": "question names ['2025'] but no gold span or its document shows that year"}
+{"case_id": "T14-187", "check": "facts", "detail": "0/6 content words in the gold spans: The snapshot cannot show your personal re-entry permission"}
+{"case_id": "T14-188", "check": "facts", "detail": "0/6 content words in the gold spans: The assistant cannot renew a residence card on your behalf"}
+{"case_id": "T14-189", "check": "facts", "detail": "0/9 content words in the gold spans: The International Winter School page does not say whether a dorm room with a friend is guaranteed"}
+{"case_id": "T14-190", "check": "facts", "detail": "0/7 content words in the gold spans: The only 2023 talent fair page is a Seoul title-only notice"}
+{"case_id": "T14-192", "check": "facts", "detail": "0/6 content words in the gold spans: The snapshot cannot show whether your D-2 visa has been issued"}
+{"case_id": "T14-193", "check": "facts", "detail": "0/7 content words in the gold spans: The snapshot does not say which partner universities accept students from a Korean language program"}
+{"case_id": "T14-195", "check": "facts", "detail": "0/7 content words in the gold spans: Approval of a D-4 to D-2 change is decided by immigration, and the snapshot does not state any approval guarantee"}
+{"case_id": "T14-197", "check": "facts", "detail": "0/8 content words in the gold spans: The snapshot cannot show whether your part-time work permit was approved"}
+{"case_id": "T14-200", "check": "facts", "detail": "0/4 content words in the gold spans: The assistant cannot submit applications"}
+{"case_id": "T14-201", "check": "facts", "detail": "0/7 content words in the gold spans: Which partner university is best is a subjective choice that official pages do not rank"}
+{"case_id": "T14-202", "check": "term", "detail": "question names ['2025'] but no gold span or its document shows that year"}
+{"case_id": "T14-203", "check": "facts", "detail": "2/5 content words in the gold spans: The assistant cannot change your registration record"}
+{"case_id": "T14-204", "check": "facts", "detail": "0/5 content words in the gold spans: The Hanmille page does not say mentors are matched by language"}
+{"case_id": "T14-205", "check": "facts", "detail": "0/8 content words in the gold spans: The snapshot has no list of employers or visa sponsorship for the 2023 talent fair"}
+{"case_id": "T14-207", "check": "facts", "detail": "0/5 content words in the gold spans: No official page can promise that a company will hire a student"}
+{"case_id": "T14-208", "check": "facts", "detail": "0/8 content words in the gold spans: The snapshot does not list the language documents an English-track undergraduate applicant must upload"}
+{"case_id": "T14-210", "check": "profile", "detail": "multi_session update in the history but no stale_update: true (11.7)"}
+{"case_id": "T14-211", "check": "profile", "detail": "multi_session update in the history but no stale_update: true (11.7)"}
+{"case_id": "T14-219", "check": "facts", "detail": "4/9 content words in the gold spans: A fee-paying visiting student applies through the Visiting Student Program, not the Student Exchange Program (for studen"}
+{"case_id": "T14-221", "check": "profile", "detail": "multi_session update in the history but no stale_update: true (11.7)"}
+{"case_id": "T14-223", "check": "profile", "detail": "multi_session update in the history but no stale_update: true (11.7)"}
+{"case_id": "T14-224", "check": "profile", "detail": "multi_session update in the history but no stale_update: true (11.7)"}
+{"case_id": "T14-227", "check": "facts", "detail": "3/8 content words in the gold spans: D-10 holders may work part time only under the special D-10 provisions"}
+{"case_id": "T14-227", "check": "profile", "detail": "multi_session update in the history but no stale_update: true (11.7)"}
+{"case_id": "T14-230", "check": "profile", "detail": "multi_session update in the history but no stale_update: true (11.7)"}

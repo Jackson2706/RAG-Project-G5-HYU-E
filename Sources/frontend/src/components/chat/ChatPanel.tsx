@@ -1,0 +1,145 @@
+import { ArrowUp, CircleHelp, Columns3, Compass, Eraser, Plus, Square } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+
+import { ComparePicker } from "@/components/chat/CompareView";
+import { HelpPanel } from "@/components/chat/HelpPanel";
+import { MessageItem } from "@/components/chat/MessageItem";
+import { Button } from "@/components/ui/primitives";
+import { storage } from "@/lib/utils";
+import type { ChatState } from "@/hooks/useChat";
+import type { DemoCase, Preset, Trace } from "@/types/api";
+
+/** What AAES step 1 knows about the student in this trace: "campus Seoul (remembered)". Empty for presets without a profile. */
+export function knownDetails(trace: Trace | undefined): string[] {
+  const stage = trace?.stages?.find((st) => st.stage_id === "query_understanding");
+  const profile = ((stage?.output ?? {}) as { profile?: Record<string, { values: string[]; status: string }> }).profile ?? {};
+  return Object.entries(profile).filter(([, e]) => ["stated", "remembered", "stale"].includes(e.status) && e.values.length)
+    .map(([a, e]) => `${a.replace("_", " ")} ${e.values.join("/")} (${e.status})`);
+}
+
+const MAX_CHARS = 2000; // the backend refuses longer questions (api.py ChatRequest)
+const EXAMPLES = [
+  "How many credits can a first-year student register for?",
+  "What documents do I need for the need-based scholarship?",
+  "How do I apply for a dormitory at the ERICA campus?",
+  "Where can I find orientation information?",
+];
+
+export function ChatPanel({ chat, onSend, blockedReason, onInspect, presets, compare, onCompare, demoCases = [], demo = null, onDemo = () => {} }: {
+  chat: ChatState; onSend: (q: string) => void; blockedReason: string | null; onInspect: (requestId: string) => void;
+  presets: Preset[]; compare: string[] | null; onCompare: (ids: string[] | null) => void; // null = compare mode off
+  demoCases?: DemoCase[]; demo?: DemoCase | null; onDemo?: (c: DemoCase | null) => void; // labeled dev cases (P8D T37)
+}) {
+  const [text, setText] = useState("");
+  const [help, setHelp] = useState(() => !storage.get<boolean>("hyu-compass:help-closed", false)); // shown until a user closes it
+  const [notice, setNotice] = useState<string | null>(null);
+  const showHelp = (open: boolean) => { setHelp(open); storage.set("hyu-compass:help-closed", !open); };
+  const scroller = useRef<HTMLDivElement>(null);
+  const input = useRef<HTMLTextAreaElement>(null);
+  const last = chat.messages[chat.messages.length - 1];
+  const lastTrace = [...chat.messages].reverse().find((m) => m.trace)?.trace;
+  const known = chat.remembered?.length ? knownDetails(lastTrace) : [];
+
+  useEffect(() => { scroller.current?.scrollTo({ top: scroller.current.scrollHeight }); }, [chat.messages.length, last?.content]);
+  useEffect(() => {
+    if (!input.current) return;
+    input.current.style.height = "auto";
+    input.current.style.height = `${Math.min(input.current.scrollHeight, 200)}px`;
+  }, [text]);
+
+  const tooLong = text.length > MAX_CHARS ? `Your question is ${text.length.toLocaleString()} characters; the limit is 2,000. Shorten it to send it.` : null;
+  const problem = blockedReason ?? tooLong ?? notice;
+
+  const submit = (q = text) => {
+    if (q.length > MAX_CHARS) return;
+    if (!q.trim()) { setNotice("The question is empty. Type a question first."); return; }
+    if (chat.busy || blockedReason) return;
+    setNotice(null);
+    onSend(q.trim());
+    setText("");
+  };
+
+  return (
+    <div className="flex h-full flex-col">
+      <div className="flex items-center justify-between gap-2 border-b border-border px-3 py-2">
+        <h2 className="text-sm font-semibold">{compare ? "Compare presets" : "Chat"}</h2>
+        <div className="flex gap-1.5">
+          <Button size="sm" onClick={() => onCompare(compare ? null : [])} disabled={chat.busy} aria-pressed={!!compare} aria-label="Compare mode">
+            <Columns3 className="h-3.5 w-3.5" /><span className="hidden sm:inline">{compare ? "Exit compare" : "Compare"}</span>
+          </Button>
+          <Button size="sm" onClick={() => showHelp(!help)} aria-pressed={help} aria-label="Help">
+            <CircleHelp className="h-3.5 w-3.5" /><span className="hidden sm:inline">Help</span>
+          </Button>
+          <Button size="sm" onClick={chat.forget} disabled={chat.busy || chat.remembered.length === 0} aria-label="Forget my details"
+                  title={chat.remembered.length ? `Stop using ${chat.remembered.length} earlier message(s) about you` : "Nothing remembered yet"}>
+            <Eraser className="h-3.5 w-3.5" /><span className="hidden sm:inline">Forget my details</span>
+          </Button>
+          <Button size="sm" onClick={chat.reset} disabled={chat.busy} aria-label="New conversation">
+            <Plus className="h-3.5 w-3.5" /><span className="hidden sm:inline">New conversation</span>
+          </Button>
+        </div>
+      </div>
+      {compare && <ComparePicker presets={presets} chosen={compare} onChange={onCompare} hasDemo={!!demo} />}
+      {demoCases.length > 0 && (
+        <div className="flex items-center gap-2 border-b border-border px-3 py-2 text-sm">
+          <label htmlFor="demo-case" className="text-xs font-semibold text-muted-foreground">Demo case</label>
+          <select id="demo-case" className="min-w-0 flex-1 rounded-md border border-border bg-card px-2 py-1 text-sm" value={demo?.case_id ?? ""}
+                  onChange={(e) => { const c = demoCases.find((d) => d.case_id === e.target.value) ?? null; onDemo(c); if (c) setText(c.question); }}>
+            <option value="">None (free question)</option>
+            {demoCases.map((c) => <option key={c.case_id} value={c.case_id}>{c.case_id} · {c.slice} · {c.question.slice(0, 60)}</option>)}
+          </select>
+          {demo && demo.history.length > 0 && <span className="hidden text-[11px] text-muted-foreground sm:inline">+{demo.history.length} earlier turn(s)</span>}
+        </div>
+      )}
+
+      <div ref={scroller} className="min-h-0 flex-1 overflow-y-auto" aria-live="polite">
+        <div className={`mx-auto flex flex-col gap-6 px-4 py-6 ${compare ? "max-w-6xl" : "max-w-3xl"}`}>
+          {help && <HelpPanel onClose={() => showHelp(false)} onExample={(q) => submit(q)} disabled={chat.busy || !!blockedReason} />}
+          {help && chat.messages.length === 0 ? null : chat.messages.length === 0 ? (
+            <div className="flex flex-col items-center gap-5 pt-[8vh] text-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent"><Compass className="h-6 w-6 text-primary" /></div>
+              <div>
+                <h1 className="text-2xl font-semibold tracking-tight">How can I help you find your way?</h1>
+                <p className="mt-1 text-sm text-muted-foreground">Answers come only from the indexed HYU documents, with sources.</p>
+              </div>
+              <div className="grid w-full gap-2 sm:grid-cols-2">
+                {EXAMPLES.map((q) => (
+                  <button key={q} type="button" onClick={() => submit(q)} disabled={chat.busy || !!blockedReason}
+                          className="rounded-xl border border-border bg-card px-3.5 py-3 text-left text-sm transition-colors hover:bg-muted disabled:opacity-50">{q}</button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            chat.messages.map((m) => <MessageItem key={m.id} message={m} onInspect={onInspect} />)
+          )}
+        </div>
+      </div>
+
+      {known.length > 0 && (
+        <p data-testid="remembered-profile" className="border-t border-border px-4 pt-2 text-center text-[11.5px] text-muted-foreground">
+          Remembered about you: <span className="font-medium text-foreground">{known.join(" · ")}</span> — Forget my details clears it.
+        </p>
+      )}
+      <form className="border-t border-border px-4 pb-4 pt-3" onSubmit={(e) => { e.preventDefault(); submit(); }}>
+        <div className="mx-auto flex max-w-3xl items-end gap-2 rounded-2xl border border-border bg-card px-3 py-2 focus-within:ring-2 focus-within:ring-ring/30">
+          <label htmlFor="chat-input" className="sr-only">Ask a question</label>
+          <textarea id="chat-input" ref={input} rows={1} value={text}
+                    placeholder="Ask about orientation, registration, scholarships…"
+                    className="max-h-[200px] flex-1 resize-none bg-transparent py-1 text-[15px] outline-none placeholder:text-muted-foreground focus-visible:outline-none"
+                    onChange={(e) => { setText(e.target.value); setNotice(null); }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); submit(); }
+                    }} />
+          {chat.busy ? (
+            <Button variant="primary" size="icon" aria-label="Stop" onClick={chat.cancel} className="rounded-full"><Square className="h-3.5 w-3.5" /></Button>
+          ) : (
+            <Button type="submit" variant="primary" size="icon" aria-label="Send" disabled={text.length > MAX_CHARS || !!blockedReason} className="rounded-full"><ArrowUp className="h-4 w-4" /></Button>
+          )}
+        </div>
+        <p role={problem ? "alert" : undefined} className={`mt-1.5 text-center text-[11px] ${problem ? "text-danger" : "text-muted-foreground"}`}>
+          {problem ?? `Enter to send · Shift+Enter for a new line · Check the sources — answers can be wrong.${text.length > MAX_CHARS * 0.9 ? ` · ${text.length}/${MAX_CHARS} characters` : ""}`}
+        </p>
+      </form>
+    </div>
+  );
+}

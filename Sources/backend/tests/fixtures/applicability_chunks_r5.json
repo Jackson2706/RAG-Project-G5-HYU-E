@@ -1,0 +1,206 @@
+[
+ {
+  "case_id": "S01",
+  "chunk_id": "0d1c03cc-dc41-52d3-bcd7-84ff72b4c329",
+  "note": "GKS-G guide chunk with no degree words: inherits master + doctoral from the guide title.",
+  "chunk": {
+   "doc_id": "62f5c681-881a-5192-823e-d41d8238d320",
+   "site": "seoul",
+   "title": "2026 GKS-G Application Forms & Guidelines (University Track)",
+   "post_date": "2026-02-03",
+   "heading_path": [
+    "2026 GKS-G Application Forms & Guidelines (University Track)"
+   ],
+   "kind": null,
+   "text": "Embassy of the\nRepublic of Korea\nin Nicaragua\n505-2267-6777 505-2254-8131 [email]\n43\nNo. Country/Region Office Phone Fax E-mail\n101 Niger\nEmbassy of the\nRepublic of Korea\nin Cote d'Ivoire\n225-2248-6701;\n6703 225-2248-6757 [email]\n102 Nigeria\nEmbassy of the\nRepublic of Korea\nin Nigeria\n234-9- 461-2701 234-9- 461-2702 [email]\n103 Norway\nEmbassy of the\nRepublic of Korea\nin Norway\n47-2254-7090 47-2256-1411 [email]\n104 Oman\nEmbassy of the\nRepublic of Korea\nin Oman\n968-2469-1490~2 968-2469-1495 [email]\n105 Pakistan\nEmbassy of the\nRepublic of Korea\nin Pakistan\n92-51-227-\n9380~1; 5~7 92-51-227-9391 [email]\n106 Palestine Korean Mission in Palestine 972-2-240-2846~7 972-2-240-2848 [email]\n107 Panama\nEmbassy of the\nRepublic of Korea\nin Panama\n507-264-8203;\n8360 507-264-8825 [email]\n108 Paraguay\nEmbassy of the\nRepublic of Korea\nin Paraguay\n595-21-605-606;\n401; 419 595-21-601-376 [email]\n109 Peru\nEmbassy of the\nRepublic of Korea\nin Peru\n51-1-632-5000 51-1-632-",
+   "superseded_by": null
+  }
+ },
+ {
+  "case_id": "S02",
+  "chunk_id": "50763c25-5962-560b-8e34-375ac4b937af",
+  "note": "GKS-G guide: 'completed your undergraduate program' is a prior qualification; degree stays master + doctoral.",
+  "chunk": {
+   "doc_id": "f81fb756-9921-505c-a297-204ecff067be",
+   "site": "seoul",
+   "title": "2021 GKS-G Application Forms & Guidelines",
+   "post_date": "2021-02-23",
+   "heading_path": [
+    "2021 GKS-G Application Forms & Guidelines"
+   ],
+   "kind": null,
+   "text": "What should I put in the section of GPA on the Application Form?\nA10\nPlease put your GPA or score percentile for each semester. If you have completed\nyour undergraduate program with 8 semesters for 4 years, fill in the blanks with\nyour GPA or score percentile for each semester.\nWrite your GPA or score you have received in front of the slash (/) and write a full\nGPA or full marks behind the slash (/).\nFor example, if your GPA is 3.5 out of 4.5, you must indicate it as 3.5/4.5. If your\npercentage is 85 out of 100, indicate it as 85/100.\nIf you had completed more than three semesters per year, you may add additional\ncolumns to the term or semester section.\nQ11\nHow many recommendation letters should I submit? For embassy track applicants,\nwe must submit one original and three copies. How do we make copies of the\nsealed recommendation letters?\nA11\nNIIED requires applicants to get recommendation letters from TWO different\nrecommenders.\nFor embassy track applicants, as recommendation letters cannot be opened by the\napplicant, you should ask each of your recommender to first write one original\nrecommendation letter. Each recommender should make three identical copies of\nthe original recommendation letter, sign each letter, and seal them all together in\nan envelope and sign across the back flap of the envelope. Thus, a sealed envelope\ncontaining 4 identical recommendation letters should be submitted per\nrecommender.\nFor university track applicants, you should collect one original recommendation\nletter from each recommender.\nQ12\nI",
+   "superseded_by": null
+  }
+ },
+ {
+  "case_id": "S03",
+  "chunk_id": "8c729219-430b-5d77-8230-16c17115660b",
+  "note": "Graduate Admission Guideline: bachelor's certificates are prior qualifications; master + doctoral only.",
+  "chunk": {
+   "doc_id": "2c3543ee-72f6-52f2-8454-aa5fed034546",
+   "site": "seoul",
+   "title": "Graduate Admission Guideline",
+   "post_date": "2021-02-24",
+   "heading_path": [
+    "Graduate Admission Guideline"
+   ],
+   "kind": null,
+   "text": ". Ph.D\n※ If you did not submit one of the original documents below, please submit it by Feb 26th, 2021.\n(Except for those applicants who submitted the copy of documents with a certificate stamp from OIA)\n※ Note → If you do not submit the documents, admission will be cancelled even though you are enrolled.\nMaster’s\nDegree\nThose who graduated in\nChina\nA copy of online CDGDC Certificate of bachelor’s degree (Chinese) and Consul’s\nConfirmation of a bachelor’s degree (English)\nThose who graduated in\nKorea An original copy of a Degree certificate\nThose who graduated in\nother countries Apostille or Consul’s Confirmation (Korean or English)\nOfficial\nTranscript\nof Master’s\nDegree\nThose who graduated in\noverseas countries Apostille or Consul’s Confirmation (Korean or English)\nThose who graduated in\nKorea An original copy of transcript\n2. Those who satisfy\nKorean standards\nLEAVE OF ABSENCE\n(1) Those students who do not satisfy Korean standard should take a leave of absence after tuition payment. If not, the\ntuition fee will not be saved.\n(2) Students who do not satisfy Korean standards cannot apply for Student(D-2) Visa as they should take a leave of absence.\n(3) Those who applied for Hanyang Univ. IIE can receive a certificate of admission for language training course(D-4) from IIE.\n(4) Students can re-register during the re-registration period if they satisfy Korean standards.\n(re-registration application period: January – spring semester, July – fall semester)\n(5) Please check with your",
+   "superseded_by": null
+  }
+ },
+ {
+  "case_id": "S04",
+  "chunk_id": "55d5f524-d74a-5d6f-87c9-a2902e03fda6",
+  "note": "Graduate Admission Guideline contact block: inherits master + doctoral; 'Regarding ... D-4 Visa, please contact' is not a visa condition.",
+  "chunk": {
+   "doc_id": "2c3543ee-72f6-52f2-8454-aa5fed034546",
+   "site": "seoul",
+   "title": "Graduate Admission Guideline",
+   "post_date": "2021-02-24",
+   "heading_path": [
+    "Graduate Admission Guideline"
+   ],
+   "kind": null,
+   "text": "yang.ac.kr http://ericaiie.hanyang.ac.kr/\nInquiry\n(Chinese) +82-2-2220-1976, 1977\n[email]\n(Japanese) +82-2-2220-1976, 1977\n(English) +82-2-2220-1666\n[email]\n(Chinese) +82-31-400-5847\n(English) +82-31-400-5842\n[email]\nNote\n- Regarding online application, payment, refund, D-4 Visa, please contact above Office of IIE.\n- Those who plan to submit Certificates of Satisfying Korean Standards also can apply for IIE classes.\nIf you submit Certificate of Satisfying Korean Standard, your application for IIE will be cancelled automatically.\n- If you are currently taking courses at IIE of Hanyang University, please re-enroll during student enrollment period.\nApplication For IIE\n1. Those who do not satisfy\nKorean standards\nDORM APPLICATION (SEOUL) 1. Those who do not satisfy\nKorean standards\n• Registration is assigned on a first come first served basis.\n• Only use Internet Explorer\n• If you have friends who you want to live together, please choose the same building and room.\n(Not possible when the room is full.)\n• You can only apply for dorms once. You can’t change your choice after you finish your application.\n• Prior to application, check the preferred dorm buildings and room type beforehand. Please apply promptly\nduring the application period.\n• You can check the dorm building, room type, location, fee from http:/",
+   "superseded_by": null
+  }
+ },
+ {
+  "case_id": "S05",
+  "chunk_id": "18324c37-2e9c-502d-84db-e67cca68af98",
+  "note": "Undergraduate Admission Guideline: undergraduate; 'Regarding Language Study Visa(D-4) ... please contact' is not a visa condition.",
+  "chunk": {
+   "doc_id": "f7e470ae-cdd0-5a7d-aef7-1663f0186a38",
+   "site": "seoul",
+   "title": "Undergraduate Admission Guideline",
+   "post_date": "2021-02-24",
+   "heading_path": [
+    "Undergraduate Admission Guideline"
+   ],
+   "kind": null,
+   "text": "do not satisfy Korean standards, those who pass Korean Language Test,\nplease go to page 29, which is for those who satisfy Korean standards.\n6) Those who additionally submit documents that satisfy Korean standards (like passing Korean\nLanguage Test ) after the admission result announcement date (Dec 4th, 2020), the Korean\nresult on the result announcement website will not be changed to “PASS.”\nKorean Standard\nThose who do not satisfy\nKorean standards\nMAIN SCEHDULE FOR THOSE WHO DO NOT SATISFY\nKOREAN STANDARDS\nNo Main Schedule Date(Year/Month/Day) Note\n1 1st Submission Deadline for Certificate of Satisfying Korean Standards By Dec 24th 2020, 23:59 1. TOPIK Level 4 or Higher2. Hanyang Univ. IIE level 4\n2 Hanyang Korean Language Test as a Replacement of TOPIK - Orientation and trial examination: Dec. 29th, 2020- Real Test : Dec 31st 2021 Refer to the page no.8\n3 Deposit Payment for Degree Program Jan 4th ~ Jan 15th 2021 Pay with virtual accounts\n4 Application Period of Hanyang Univ. Institute of International Education (IIE) Jan 4th ~ Jan 8th 2021 Regarding Language Study Visa(D-4) and IIE Course payment, please contact the Office of IIE\n5 Dorm Application for SEOUL Campus Jan. 4th 11:00 ~ Jan. 6th 12:00, 2021 Online application\n6 Student ID Number Jan. 2021 To be announced by email\n7 2nd Submission Deadline for Certificate of Satisfying Korean Standards By Feb. 3rd 1. TOPIK Level 4 or Higher\n8 Tuition Payment for Degree Program Feb 3rd ~ Feb 15th 2021 Pay with virtual accounts\n9 Application",
+   "superseded_by": null
+  }
+ },
+ {
+  "case_id": "S06",
+  "chunk_id": "c40391e2-20fd-5750-9789-0e99a25ef097",
+  "note": "Fellowship (not an admission guide): 'Must hold a Bachelor's degree' is a prior qualification, no degree level.",
+  "chunk": {
+   "doc_id": "19c9a598-ec0a-5bf5-bbbe-5a0a4470fea8",
+   "site": "seoul",
+   "title": "2026 KOICA-Hanyang(ERICA) NEXT Fellowship",
+   "post_date": "2026-03-10",
+   "heading_path": [
+    "2026 KOICA-Hanyang(ERICA) NEXT Fellowship"
+   ],
+   "kind": null,
+   "text": "differ. The degree will be conferred in\naccordance with the degree title indicated in the PI. (For KOICA certificates, the program title will be\nincluded.)\nⅠ. PROGRAM OVERVIEW\n4\n▣ Objectives :\n1) To foster leaders in industry-ready engineering.\n2) To cultivate students capable of leading Digital Transformation in AI Digital Convergence.\n▣ Training Institute: Hanyang University ERICA\n▣ Number of Participants: 15\n▣ KOICA-designated countries: 13 (India, Egypt, Bangladesh, Mongolia, Vietnam,\nPhilippines, Nepal, Myanmar, Sri Lanka, Indonesia, Uzbekistan, Cambodia, Pakistan)\n▣ Candidate Qualifications (Eligibility):\nApplicants must meet all the following criteria to be eligible for the program:\n1. Nationality & Family Background\no Must be a citizen of one of the 13 KOICA-designated countries\no Both the applicant and their parents must hold non-Korean nationality.\n2. Academic Requirements\no Degree: Must hold a Bachelor’s degree (or be expected to graduate by Summer 2026).\no Field of Study: Bachelor's degree in Electrical & Electronic Engineering, AI, Digital\nConvergence, Robotics, or Smart City-related fields (including Architecture and Civil\nEngineering with an IT/AI focus).\no Competency: Possess foundational knowledge in AI-related contents and a strong\ndedication to academic research.\n3. Language Proficiency\no Proficiency in either English or Korean (sufficient for academic coursework, research, and\ncommunication).\n4. Official Recommendation\no Must be officially recommended by the last attended university (e.g., a formal\nrecommendation letter from a supervising professor or department head).\n5",
+   "superseded_by": null
+  }
+ },
+ {
+  "case_id": "S07",
+  "chunk_id": "d813550f-49b5-5923-953c-9080a850740e",
+  "note": "Partner list: 'ECE Paris Graduate School of Engineering' is an institution name, no degree level.",
+  "chunk": {
+   "doc_id": "da4de15e-1ed4-53f4-919e-9104db2e45f7",
+   "site": "erica",
+   "title": "Partner Universities",
+   "post_date": null,
+   "heading_path": [
+    "Total 510 Partners in the World"
+   ],
+   "kind": null,
+   "text": "Region: Europe; Country: France; City: Paris; Partner University/Institution Name: ECE Paris Graduate School of Engineering\nRegion: Europe; Country: France; City: Paris; Partner University/Institution Name: CESI\nRegion: Europe; Country: France; City: Paris; Partner University/Institution Name: ISC Paris\nRegion: Europe; Country: France; City: Paris; Partner University/Institution Name: University Paris 8\nRegion: Europe; Country: France; City: Nantes; Partner University/Institution Name: Audencia Business School\nRegion: Europe; Country: France; City: Montpellier; Partner University/Institution Name: University of Montpellier\nRegion: Europe; Country: France; City: Montpellier; Partner University/Institution Name: Montpellier Business School\nRegion: Europe; Country: France; City: Marseille; Partner University/Institution Name: KEDGE Business School\nRegion: Europe; Country: France; City: Lyon; Partner University/Institution Name: University Catholique de Lyon\nRegion: Europe; Country: France; City: Lorient cedex; Partner University/Institution Name: Universite Bretagne SUD\nRegion: Europe; Country: France; City: Lille; Partner University/Institution Name: EDHEC Business School\nRegion: Europe; Country: France; City: Courbevoie; Partner University/Institution Name: Pole Universitaire Leonard De Vinci\nRegion: Europe; Country: France; City: Compiegne; Partner University/Institution Name: University of Technology of Compiegne",
+   "superseded_by": null
+  }
+ },
+ {
+  "case_id": "S08",
+  "chunk_id": "1b7c289b-ba46-5ac5-8a01-46f9df838dc5",
+  "note": "'students currently enrolled in a degree program' -> degree_seeking.",
+  "chunk": {
+   "doc_id": "249bb3fa-4a26-5d11-b532-a4fe29d53892",
+   "site": "seoul",
+   "title": "TOPIK",
+   "post_date": "2023-06-15",
+   "heading_path": [
+    "TOPIK"
+   ],
+   "kind": null,
+   "text": "Attachment: [English]Announcement on applying for TOPIK Scholarship for the 1st semester of 2023.pdf\nAnnouncement on applying for TOPIK Scholarship for the 1\nst\nsemester of 2023\n● Application Requirements: International students currently enrolled in a degree program at the\nSeoul Campus, Hanyang University. (Those who are in leave of absence, completed studies but\nhaven’t graduated, extended studies, or enrolled in Language institute program cannot apply)\n* KGSP scholarships are not available for application (Students whose scholarships have been terminated\nby the NIIED will be granted an exemption.)\n● Application Period: From June 23, 2023 (Fri) to July 2, 2023 (Sun), 23:59 KST\n● Application Criteria: The student who acquired Level 5 or 6 in the 86th, 87th or 88th TOPIK.\n* If you acquire d Level 5 or higher in among 86th, 87th and 88th TOPIK, submit only the\nhighest level. (scholarship will be paid only once)\n* Applicants are ineligible to apply for this scholarship based on TOPIK IBT or Speaking score reports.\n● Benefits\nUndergraduate Graduate\nYear 1, 2 / 1, 2 term KRW 500,000 KRW 500,000\nYear 3, 4 / 3, 4 term KRW 300,000 KRW 300,000\n※ Undergraduate: 2 times maximum (Duplicate application with the same level is not allowed. If\nyou apply for the first scholarship with TOPIK level 6, cannot apply for the second scholarship)\n※ Graduate: 1 time maximum\n※ Selection based on effective semesters\n●",
+   "superseded_by": null
+  }
+ },
+ {
+  "case_id": "S09",
+  "chunk_id": "aea0765d-2704-5eaa-b0e6-96bc6d1fa24c",
+  "note": "'language training/undergraduate students' and 'masters/doctoral degree students' -> language_program + degree_seeking.",
+  "chunk": {
+   "doc_id": "875b576b-d16a-587a-a04a-6f0614e3d761",
+   "site": "seoul",
+   "title": "Part-time work permit Document guide",
+   "post_date": "2025-10-15",
+   "heading_path": [
+    "Part-time work permit Document guide"
+   ],
+   "kind": null,
+   "text": "higher\n- In case the Korean language proficiency standard is not fulfilled, the number of allowed work hours\nis limited to 10 hours for language training/undergraduate students, and 15 hours for\nmasters/doctoral degree students\n※ Both students and employers may be subject to punishment if working before obtaining a part-time\nwork permit. (Employment activities are allowed only at a permitted workplace)\nMM/DD/YYYY\nTO: Chief of ◌◌ Immigration (branch) Office\nConfirmation by\nUniversity\nOfficer\nUniversity\nName (Seal/Signature)IEQAS YES □ NO □Position\n(Tel no.)",
+   "superseded_by": null
+  }
+ },
+ {
+  "case_id": "S10",
+  "chunk_id": "dc296e03-d483-54f0-a95b-afae3100a28e",
+  "note": "'completion of language school program' -> language_program.",
+  "chunk": {
+   "doc_id": "a5054e10-1938-5145-beab-5d98b6bbc03d",
+   "site": "erica",
+   "title": "Visa",
+   "post_date": null,
+   "heading_path": [
+    "When transferring from a general training/studying Korean language (D-4) visa to a full-time degree/exchange program (D-2) visa"
+   ],
+   "kind": null,
+   "text": "Universally Required Documents: 1. Integrated application form x1 2. Passport and passport copy x1 3. Alien Registration Card (original) 4. Photo x1 (white background, 3.5*4.5cm) Photo Specifications 5. Standard Admissions Letter 6. Tuition Payment Receipt (Certification of Payment) 7. Certificate of Attendance or completion of language school program (International Education Institute) 8. Attendance and transcript for all courses at the Language School (Hanyang International Education Center) 9. Proof of Residence (real estate contract, confirmation of residence, confirmation of dormitory occupancy, etc.) 10. Visa processing fee; KRW 130,000\nFor Applicable Students Only: 1. Bank account balance statement Applicants with a language school attendance rate of less than 70%: KRW 20 million (if the student’s language school belongs to the university, statement must show KRW 10 million) 2. Statement Applicants with a language school attendance rate of less than 70%",
+   "superseded_by": null
+  }
+ },
+ {
+  "case_id": "S11",
+  "chunk_id": "1e7da5d9-175d-5af6-b33a-96a686836c18",
+  "note": "'After taking D-2 or D-4 Visa, abusing VISA for asylum' is a warning about misuse, not a visa condition.",
+  "chunk": {
+   "doc_id": "cf89bbce-20f7-5fd8-b7f7-6bb951a87d30",
+   "site": "erica",
+   "title": "Return to School for 2025 Fall Semeste…",
+   "post_date": "2025-06-16",
+   "heading_path": [
+    "Return to School for 2025 Fall Semeste…"
+   ],
+   "kind": null,
+   "text": ", Sri Lanka, East Timor, Kyrgyzstan, Laos, Nigeria, South\nAfrica, Belarus, Mozambique, Moldova, Azerbaijan, Angola, Ethiopia, Ukraine, Zimbabwe, Kazakhstan,\nDemocratic Republic of the Congo, Kenya, Papua New Guinea, Tajikistan, Peru (35 countries in total)\n3. A certificate of graduation\n1) Documents of Apostille certification\n2) Graduation certificate (confirmed by Korean consulate in the country where the school belongs or the\nconsular office of the Korean diplomatic mission in Korea)\n3) Chinese student\n- Graduated from Regular high school: online CHSI certificate of high school graduation\n- Graduated from non-regular high school: choose 1 of the below\n① Issued from high school with the Ministry of Education and Consul’s confirmation\n② Issued from the Ministry of Education with Consul’s confirmation\n- Graduated from Technical high school:\nGraduation certificate issued by the respective school (Official verification from the Ministry of Human\nResources and Social Security website (http://www.mohrss.gov.cn/) and verification from the Korean\nconsulate required)\n** But, for students who graduated from school in Korea and got diploma, don’t need confirmation\n(Minister notified country) Countries with many illegal stays in the Ministry of Justice's notice\n- 21 notified country: Ghana, Nigeria, Nepal, Myanmar, Bangladesh, Vietnam, Mongolia, Sri Lanka,\nUzbekistan, Ukraine, Iran, Egypt, India, Indonesia, china, Kazakhstan, Kyrgyzstan, Thailand, Pakistan,\nPeru, Philippine\n- 5 countries subject to intensive management (After ta king D-2 or D -4 Visa, abus ing VISA for asylum",
+   "superseded_by": null
+  }
+ },
+ {
+  "case_id": "S12",
+  "chunk_id": "2989dba1-48c3-515a-8eab-273cd79e0f1a",
+  "note": "'Degree programs: 2,500+ students; ... exchange ...; Korean language program' -> all three student types.",
+  "chunk": {
+   "doc_id": "b6cb0251-1832-56d9-8e61-9f6e617e03ef",
+   "site": "erica",
+   "title": "About ERICA",
+   "post_date": null,
+   "heading_path": [
+    "ERICA International Student Status"
+   ],
+   "kind": null,
+   "text": "Hanyang University ERICA has more than 4,500 international students. (as of July 2023)\nDegree programs: 2,500+ students; Invited/visiting exchange students: 500+ students; International summer school: 500+ students; Korean language program: 1,000+ students",
+   "superseded_by": null
+  }
+ }
+]

@@ -1,0 +1,7 @@
+preset,slice,cases,action_accuracy,acceptable_rate,macro_f1,clarify_precision,clarify_recall,unnecessary_clarification_rate,gate_fpr,gate_fnr,applicable_recall@5,applicable_recall@10,intrusion@5,aer,outdated,unknown_caveat_rate,p50_ms,p95_ms,answered_rate,uncited_answer_rate,llm_calls
+AP_RRRL,all,47,0.2979,0.383,0.2533,0.0,0.0,0.4,0.1905,0.5769,0.4712,0.5331,0.0,0.0,0.3333,0.8,195.3,254.2,0.3191,0.0,1.4043
+AP_RRRL,conditional,12,0.1667,0.3333,0.125,0.0,0.0,0.6667,0.25,0.75,0.2167,0.3167,0.0,0.0,N/A,0.6667,199.8,211.3,0.25,0.0,1.3333
+AP_RRRL,multi_session,4,0.5,0.5,0.2222,N/A,N/A,0.0,0.0,1.0,0.1667,0.1667,0.0,N/A,N/A,N/A,192.4,216.7,0.0,N/A,1.0
+AP_RRRL,negative,10,0.3,0.3,0.125,0.0,N/A,0.6,0.1111,1.0,0.5,0.5,N/A,N/A,N/A,0.0,202.6,254.2,0.1,0.0,1.2
+AP_RRRL,temporal,5,0.4,0.4,0.1905,N/A,N/A,0.0,N/A,0.2,0.8,0.8,N/A,N/A,0.3333,0.75,195.3,276.5,0.8,0.0,1.8
+AP_RRRL,unconditional,16,0.3125,0.4375,0.2786,0.0,N/A,0.3077,0.5,0.5714,0.5827,0.6557,N/A,N/A,N/A,1.0,195.9,5522.5,0.4375,0.0,1.5625

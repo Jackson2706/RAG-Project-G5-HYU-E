@@ -1,0 +1,11 @@
+HYU Compass demo preflight  2026-11-21 13:30:29 KST  commit 679ff13
+PASS  Docker: MongoDB container running
+PASS  Docker: Qdrant container running
+PASS  Backend up and reaches MongoDB + Qdrant (http://127.0.0.1:8000/api/health)
+PASS  Ollama running with qwen3.5:4b
+PASS  Index hyu_20261110_97dc1269_r5 present
+PASS  Frontend up (http://127.0.0.1:5173)
+PASS  Warm-up B0_BASIC_DENSE_RAG: B0 — Basic Dense RAG: answered, 9.0 s
+PASS  Warm-up R16_PROMPTED_CONDITIONAL: R16 — Prompted conditional answering: answered, 11.4 s
+PASS  Warm-up AP_RRRL: AAES+ (RRRL): CONDITIONAL, 16.0 s
+ALL PASS

@@ -1,6 +1,8 @@
 # Secrets and local settings (copy from the *.env.example files)
+# Any .env anywhere (public repo); .env.example files stay tracked
 .env
-backend/.env
+Sources/.env
+Sources/backend/.env
 
 # Python
 __pycache__/
@@ -13,12 +15,16 @@ __pycache__/
 venv/
 
 # Embedded Qdrant data (only when QDRANT_PATH is used instead of Docker)
-backend/qdrant_data/
+Sources/backend/qdrant_data/
 
 # Frontend
-frontend/node_modules/
-frontend/dist/
-frontend/*.tsbuildinfo
+Sources/frontend/node_modules/
+Sources/frontend/dist/
+Sources/frontend/*.tsbuildinfo
+node_modules/
+dist/
+*.tsbuildinfo
+.vite/
 
 # Logs, OS and editor files
 .run/
@@ -28,7 +34,32 @@ frontend/*.tsbuildinfo
 .vscode/
 .claude
 
-# Benchmark data and bulky per-query results (re-created by python -m evaluation.runner)
-evaluation/datasets/
-evaluation/results/*/raw/
-evaluation/results/smoke/
+# Crawled and benchmark data, report inputs, and bulky per-query results
+Sources/data/HYU/raw/
+Sources/data/HYU/extracted/
+Sources/data/benchmarks/*/*
+!Sources/data/benchmarks/*/SOURCE.md
+Report/results/*/raw/
+Report/results/smoke*/
+Report/course/
+
+# LLM tag cache (T09)
+Sources/data/HYU/cache/
+
+# personal writing sample for the Humanizer skill; public repo (A32)
+Report/voice_sample.md
+
+# Deck v4 intermediate inputs (untracked in v5 Phase 1; see Report/slides/deck_v4/CLEANUP.md)
+Report/slides/deck_v4/questions/label_input*.jsonl
+Report/slides/deck_v4/questions/verification_input_*.jsonl
+Report/slides/deck_v4/questions/drafts/*_in_*.jsonl
+Report/slides/deck_v4/questions/seeds.jsonl
+Report/slides/deck_v4/questions/bundles.jsonl
+Report/slides/deck_v4/questions/selection_reserve.jsonl
+Report/slides/deck_v4/questions/prepared_*.jsonl
+Report/slides/deck_v4/followup/runs.jsonl
+Report/slides/deck_v4/followup/judge/items.jsonl
+Report/slides/deck_v4/followup_v6/runs.jsonl
+Report/slides/deck_v4/followup_v6/judge/items.jsonl
+# Deck v5 held-out blind judge items (the key, the command and its tests are committed)
+Report/slides/deck_v4/heldout/judge/items*.jsonl
