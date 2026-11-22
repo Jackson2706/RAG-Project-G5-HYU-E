@@ -22,6 +22,14 @@ def needs_oracle(stages: dict) -> bool:
     return any((choice or {}).get("method") in ORACLE_METHODS for choice in stages.values())
 
 
+TAGGED_METHODS = ("applicability_reranker", "applicability_sufficiency", "applicability_sufficiency_spec", "applicability_guard")
+
+
+def needs_tags(stages: dict) -> bool:
+    """AAES methods read the chunks' applicability tags, so they need the tagged HYU index."""
+    return any((choice or {}).get("method") in TAGGED_METHODS for choice in stages.values())
+
+
 def load_demo_cases(path: Path | None = None) -> list[dict]:
     """The demo cases; [] if the file does not exist yet (before the G4 freeze). A test case is refused."""
     path = path or DEMO_PATH

@@ -5,6 +5,7 @@ from __future__ import annotations
 import pytest
 from fastapi.testclient import TestClient
 
+from app.config import get_settings
 from app.main import create_app
 from app.rag.applicability import ChunkCondition
 from app.rag.aaes import UNKNOWN_CAVEAT
@@ -38,6 +39,8 @@ def test_aaes_presets_are_listed_with_their_group(api):
     for preset_id in AAES_PRESETS:
         assert presets[preset_id]["enabled"] and presets[preset_id]["errors"] == []
         assert presets[preset_id]["group"] in ("Ours (AAES)", "Ablations") and presets[preset_id]["description"]
+        assert presets[preset_id]["index_id"] == get_settings().hyu_index_id  # the UI switches to the tagged index
+    assert presets["B0_BASIC_DENSE_RAG"]["index_id"] is None
 
 
 def test_aaes_needs_a_tagged_index(api, corpus):

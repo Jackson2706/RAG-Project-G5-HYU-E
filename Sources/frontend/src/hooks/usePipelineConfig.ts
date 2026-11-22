@@ -99,11 +99,14 @@ export function usePipelineConfig() {
 
   /** Load a preset's validated configuration into every stage (offline stages too: they show what re-indexing would build). */
   const applyPreset = useCallback((presetId: string | null) => {
-    const config = presetId === CUSTOM ? storage.get<StageChoices | null>(CUSTOM_KEY, null) : presets.find((p) => p.id === presetId)?.config;
-    if (presetId && config) setChoices(restore(stages, config));
-    setMeta((m) => ({ ...m, presetId }));
+    const preset = presets.find((p) => p.id === presetId);
+    const config = presetId === CUSTOM ? storage.get<StageChoices | null>(CUSTOM_KEY, null) : preset?.config;
+    // AAES presets need the tagged index: switch to it (and its offline settings) when it is built
+    const index = indexes.find((i) => i.index_id === preset?.index_id);
+    if (presetId && config) setChoices(restore(stages, { ...config, ...index?.manifest?.config }));
+    setMeta((m) => ({ ...m, presetId, indexId: index?.index_id ?? m.indexId }));
     setModified(false);
-  }, [presets, stages]);
+  }, [presets, stages, indexes]);
 
   const saveCustom = useCallback(() => {
     if (choices) storage.set(CUSTOM_KEY, choices);

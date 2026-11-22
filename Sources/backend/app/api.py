@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field
 
 from app.config import get_settings, resolve_ingest_folder
 from app.database import DEFAULT_INDEX, Database
-from app.demo import load_demo_cases, needs_oracle, oracle_for, public_view
+from app.demo import TAGGED_METHODS, load_demo_cases, needs_oracle, oracle_for, public_view
 from app.ollama import OllamaError
 from app.rag.pipeline import run_ingestion, run_rag
 from app.rag.presets import presets_json
@@ -71,10 +71,10 @@ async def check_runnable(request: Request, config: dict, index_id: str) -> None:
     if built_with and built_with != config["embedding"]["method"]:
         errors.append({"stage_id": "embedding", "param": None, "message": f"Index '{index_id}' was built with the '{built_with}' embedding; "
                        f"select it (vectors of different models cannot be compared)"})  # fmt: skip
-    tagged = [s.stage_id for s in PIPELINE if config[s.stage_id]["method"] in ("applicability_reranker", "applicability_sufficiency", "applicability_sufficiency_spec", "applicability_guard")]
+    tagged = [s.stage_id for s in PIPELINE if config[s.stage_id]["method"] in TAGGED_METHODS]
     if tagged and not (manifest or {}).get("applicability"):
         errors.append({"stage_id": tagged[0], "param": None, "message": f"Index '{index_id}' has no applicability tags. AAES needs the "
-                       f"tagged HYU index ('{get_settings().hyu_index_id}')."})  # fmt: skip
+                       f"tagged HYU index ('{get_settings().hyu_index_id}'): pick it in the Configuration tab (Index to search)."})  # fmt: skip
     wanted = {(s.stage_id, name, config[s.stage_id]["params"][name]) for s in PIPELINE for m in s.methods
               if config[s.stage_id]["method"] == m.method_id for name, p in m.parameters.items()
               if p.ui == "ollama_model" and config[s.stage_id]["params"].get(name)}  # fmt: skip

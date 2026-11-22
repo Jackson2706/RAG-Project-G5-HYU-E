@@ -138,6 +138,7 @@ export interface Preset {
   config: StageChoices | null; // complete validated configuration (null if disabled or invalid)
   errors: ConfigError[];
   needs_demo_case?: boolean; // oracle presets (G1, A2) run only with a labeled demo case
+  index_id?: string | null; // AAES presets: the tagged HYU index they must search
 }
 
 /** A labeled dev case for the demo (GET /api/demo/cases); never a test case. */

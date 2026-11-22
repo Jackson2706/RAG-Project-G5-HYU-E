@@ -14,7 +14,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from app.demo import needs_oracle
+from app.config import get_settings
+from app.demo import needs_oracle, needs_tags
 from app.rag.registry import ConfigError, validate_config
 
 OFF = {"method": None}
@@ -195,7 +196,8 @@ def presets_json() -> list[dict[str, Any]]:
     for p in PRESETS:
         entry = {k: p[k] for k in ("id", "kind", "name", "description")} | {"enabled": p.get("enabled", True), "stages": p["stages"],
                                                                            "group": p.get("group"),
-                                                                           "needs_demo_case": needs_oracle(p["stages"])}  # G1, A2
+                                                                           "needs_demo_case": needs_oracle(p["stages"]),  # G1, A2
+                                                                           "index_id": get_settings().hyu_index_id if needs_tags(p["stages"]) else None}  # AAES
         try:
             entry["config"] = preset_config(p["id"]) if entry["enabled"] else None
             entry["errors"] = [] if entry["enabled"] else [{"stage_id": None, "param": None, "message": p.get("disabled_reason", "not available")}]
