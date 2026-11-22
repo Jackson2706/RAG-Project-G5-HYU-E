@@ -6,8 +6,12 @@ const apiBase = (
   ?? (import.meta.env.VITE_API_URL as string | undefined)
   ?? ""
 ).replace(/\/$/, "");
+const apiBaseMissing = !apiBase && import.meta.env.PROD;
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  if (apiBaseMissing) {
+    throw new Error("Frontend deployment is missing VITE_API_BASE_URL. Set it to the Azure Container App HTTPS URL, then redeploy Static Web Apps.");
+  }
   let res: Response;
   try {
     res = await fetch(`${apiBase}${path}`, { ...init, headers: { "Content-Type": "application/json", ...init?.headers } });
@@ -66,6 +70,9 @@ export function parseEvents(buffer: string): { events: StreamEvent[]; rest: stri
  */
 export async function streamChat(question: string, stages: StageChoices, indexId: string, onEvent: (e: StreamEvent) => void, signal: AbortSignal,
   history: string[] = [], demoCaseId: string | null = null, followup: ClarifyMarker | null = null) {
+  if (apiBaseMissing) {
+    throw new Error("Frontend deployment is missing VITE_API_BASE_URL. Set it to the Azure Container App HTTPS URL, then redeploy Static Web Apps.");
+  }
   let res: Response;
   try {
     res = await fetch(`${apiBase}/api/chat/stream`, {

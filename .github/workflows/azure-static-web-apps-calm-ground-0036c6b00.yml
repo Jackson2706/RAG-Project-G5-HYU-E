@@ -6,12 +6,14 @@ on:
       - main
     paths:
       - "Sources/frontend/**"
+      - ".github/workflows/azure-static-web-apps-calm-ground-0036c6b00.yml"
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
       - main
     paths:
       - "Sources/frontend/**"
+      - ".github/workflows/azure-static-web-apps-calm-ground-0036c6b00.yml"
 
 jobs:
   build_and_deploy_job:
@@ -50,7 +52,7 @@ jobs:
           github_id_token: ${{ steps.idtoken.outputs.result }}
           ###### End of Repository/Build Configurations ######
         env:
-          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL || secrets.VITE_API_URL }}
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
