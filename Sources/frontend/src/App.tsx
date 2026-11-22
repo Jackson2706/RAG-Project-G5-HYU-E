@@ -41,7 +41,8 @@ export default function App() {
     setTab("execution"); // watch the stages run
     if (compare) {
       const chosen = compare.map((id) => config.presets.find((p) => p.id === id)!).filter((p) => p?.config);
-      void chat.sendCompare(question, chosen.map((p) => ({ id: p.id, name: p.name, config: p.config! })), config.indexId, demo);
+      void chat.sendCompare(question, chosen.map((p) => ({ id: p.id, name: p.name, config: p.config! })),
+        chosen.find((p) => p.index_id)?.index_id ?? config.indexId, demo); // one index for all columns: AAES needs the tagged one
       return;
     }
     void chat.send(question, config.choices!, config.indexId, demo); // the exact methods + parameters (and index) for this request
