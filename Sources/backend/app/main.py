@@ -36,7 +36,13 @@ def create_app(db: Database | None = None, ollama: OllamaClient | None = None) -
         await app.state.ollama.http.aclose()
 
     app = FastAPI(title="HYU Compass API", lifespan=lifespan)
-    app.add_middleware(CORSMiddleware, allow_origins=settings.cors_origins, allow_methods=["*"], allow_headers=["*"])
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.cors_origins,
+        allow_origin_regex=r"https://.*\.azurestaticapps\.net",
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
     app.include_router(router)
     return app
 

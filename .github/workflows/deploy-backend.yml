@@ -44,6 +44,8 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Update Azure Container App
+        env:
+          CORS_ORIGINS: ${{ secrets.CORS_ORIGINS }}
         run: |
           az containerapp secret set \
             --name hyu-compass-backend \
@@ -53,6 +55,11 @@ jobs:
               groq-api-key="${{ secrets.GROQ_API_KEY }}" \
               qdrant-url="${{ secrets.QDRANT_URL }}" \
               qdrant-api-key="${{ secrets.QDRANT_API_KEY }}"
+
+          AZURE_CORS="https://calm-ground-0036c6b00.4.azurestaticapps.net"
+          if [ -n "$CORS_ORIGINS" ]; then
+            AZURE_CORS="$AZURE_CORS,$CORS_ORIGINS"
+          fi
 
           az containerapp update \
             --name hyu-compass-backend \
@@ -67,4 +74,4 @@ jobs:
               "MONGODB_DB=${{ secrets.MONGODB_DB }}" \
               "QDRANT_URL=secretref:qdrant-url" \
               "QDRANT_API_KEY=secretref:qdrant-api-key" \
-              "CORS_ORIGINS=${{ secrets.CORS_ORIGINS }}"
+              "CORS_ORIGINS=$AZURE_CORS"

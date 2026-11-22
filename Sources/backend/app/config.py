@@ -116,7 +116,11 @@ class Settings(BaseSettings):
 
     data_dir: Path = DATA_DIR
     cors_origins: list[str] = Field(
-        default=["http://127.0.0.1:5173", "http://localhost:5173"],
+        default=[
+            "http://127.0.0.1:5173",
+            "http://localhost:5173",
+            "https://calm-ground-0036c6b00.4.azurestaticapps.net",
+        ],
         validation_alias=AliasChoices("CORS_ORIGINS", "cors_origins"),
     )
 

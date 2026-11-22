@@ -118,6 +118,22 @@ def test_registry_endpoint(api):
     assert "citation_verification" not in stages and "response_guard" not in stages
 
 
+def test_azure_static_web_app_cors(api):
+    for origin in (
+        "https://calm-ground-0036c6b00.4.azurestaticapps.net",
+        "https://preview-123.azurestaticapps.net",
+    ):
+        response = api.options(
+            "/api/pipeline/registry",
+            headers={
+                "Origin": origin,
+                "Access-Control-Request-Method": "GET",
+            },
+        )
+        assert response.status_code == 200
+        assert response.headers["access-control-allow-origin"] == origin
+
+
 def test_config_validation_endpoint(api):
     bad = api.post("/api/pipeline/config/validate", json={"dense_retrieval": {"method": "qdrant_cosine", "params": {"top_k": 5000}}}).json()
     assert not bad["valid"] and bad["errors"][0] == {"stage_id": "dense_retrieval", "param": "top_k", "message": "Top K must be at most 1000"}
