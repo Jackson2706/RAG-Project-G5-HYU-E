@@ -94,6 +94,10 @@ class OllamaClient:
             if self.provider == "groq":
                 raise OllamaError("No Groq chat models are available.")
             raise OllamaError("No Ollama models are installed. Run: ollama pull qwen3:4b")
+        if self.provider == "groq" and not default:
+            default = self.default_model
+        if self.provider == "groq" and not requested:
+            requested = default
         for name in (requested, default):
             if name:
                 match = next((m for m in models if m["name"] == name), None)
@@ -192,6 +196,7 @@ class OllamaClient:
         }
         if options.get("seed") is not None:
             body["seed"] = int(options["seed"])
+        received_text = False
         try:
             request_timeout = httpx.Timeout(timeout, connect=5.0) if timeout else self.http.timeout
             async with self.http.stream("POST", "/chat/completions", json=body, timeout=request_timeout) as response:
@@ -221,6 +226,7 @@ class OllamaClient:
                     delta = choice.get("delta") or {}
                     text = delta.get("content")
                     if text:
+                        received_text = True
                         yield text
                     chunk_usage = chunk.get("x_groq", {}).get("usage") or chunk.get("usage")
                     if usage is not None and chunk_usage:
@@ -230,6 +236,8 @@ class OllamaClient:
                             "total_tokens": chunk_usage.get("total_tokens"),
                             "done_reason": choice.get("finish_reason"),
                         })
+            if not received_text:
+                raise OllamaError("Groq returned no answer text. Check the Groq model, key, and chat-completions access.")
         except httpx.TimeoutException as exc:
             raise OllamaError("Groq did not answer in time (timeout).") from exc
         except httpx.TransportError as exc:

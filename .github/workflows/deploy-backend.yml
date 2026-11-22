@@ -60,6 +60,10 @@ jobs:
           if [ -n "$CORS_ORIGINS" ]; then
             AZURE_CORS="$AZURE_CORS,$CORS_ORIGINS"
           fi
+          GROQ_MODEL="${{ secrets.GROQ_CHAT_MODEL }}"
+          if [ -z "$GROQ_MODEL" ]; then
+            GROQ_MODEL="openai/gpt-oss-20b"
+          fi
 
           az containerapp update \
             --name hyu-compass-backend \
@@ -68,7 +72,7 @@ jobs:
             --set-env-vars \
               "LLM_PROVIDER=groq" \
               "GROQ_BASE_URL=https://api.groq.com/openai/v1" \
-              "GROQ_CHAT_MODEL=${{ secrets.GROQ_CHAT_MODEL }}" \
+              "GROQ_CHAT_MODEL=$GROQ_MODEL" \
               "GROQ_API_KEY=secretref:groq-api-key" \
               "MONGODB_URI=secretref:mongodb-uri" \
               "MONGODB_DB=${{ secrets.MONGODB_DB }}" \

@@ -86,9 +86,10 @@ async def test_groq_uses_openai_compatible_models_and_streaming():
         "https://api.groq.com/openai/v1",
         api_key="test-key",
         provider="groq",
+        default_model="openai/gpt-oss-20b",
         transport=httpx.MockTransport(handler),
     )
-    model = await client.pick_model("", "openai/gpt-oss-20b")
+    model = await client.pick_model("", "")
     usage = {}
     pieces = [p async for p in client.chat_stream(model, [], {"temperature": 0.1, "top_p": 0.9, "num_predict": 100}, usage=usage)]
     assert "".join(pieces) == "Groq works"
