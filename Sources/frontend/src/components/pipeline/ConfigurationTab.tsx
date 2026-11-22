@@ -40,10 +40,10 @@ function Reindex({ config, system }: { config: PipelineConfigState; system: Syst
       </p>
       {differs && <p className="text-warning">The ingestion settings below differ from the current index. Re-index to apply them.</p>}
       <div className="flex flex-wrap gap-1.5">
-        {["HYU/snapshots/hyu-20261110-97dc1269", "sample_data"].map((folder) => (
+        {["raw", "sample_data"].map((folder) => (
           <Button key={folder} size="sm" disabled={!!running || !config.valid} onClick={() => void run(folder)}>
             {running === folder ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
-            Re-index {folder === "sample_data" ? "the sample documents" : "the frozen HYU snapshot"}
+            Re-index {folder === "sample_data" ? "the sample documents" : "data/raw"}
           </Button>
         ))}
       </div>

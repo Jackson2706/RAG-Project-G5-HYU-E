@@ -136,10 +136,10 @@ jobs:
           print(json.dumps({"health": health, "documents": documents}, indent=2))
           index = health.get("index") or {}
           if index.get("documents") != 4:
-              print(f"Expected 4 documents, got {index.get(\"documents\")}", file=sys.stderr)
+              print("Expected 4 documents, got " + str(index.get("documents")), file=sys.stderr)
               sys.exit(1)
           if index.get("chunks") not in (211,):
-              print(f"Expected 211 chunks, got {index.get(\"chunks\")}", file=sys.stderr)
+              print("Expected 211 chunks, got " + str(index.get("chunks")), file=sys.stderr)
               sys.exit(1)
           if not health["mongodb"]["ok"] or not health["qdrant"]["ok"]:
               print("MongoDB or Qdrant health check failed", file=sys.stderr)
