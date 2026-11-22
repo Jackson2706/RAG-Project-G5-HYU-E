@@ -45,7 +45,7 @@ jobs:
 
       - name: Update Azure Container App
         env:
-          CORS_ORIGINS: ${{ secrets.CORS_ORIGINS }}
+          MONGODB_DB: ${{ secrets.MONGODB_DB }}
         run: |
           az containerapp secret set \
             --name hyu-compass-backend \
@@ -56,14 +56,15 @@ jobs:
               qdrant-url="${{ secrets.QDRANT_URL }}" \
               qdrant-api-key="${{ secrets.QDRANT_API_KEY }}"
 
-          AZURE_CORS="https://calm-ground-0036c6b00.4.azurestaticapps.net"
-          if [ -n "$CORS_ORIGINS" ]; then
-            AZURE_CORS="$AZURE_CORS,$CORS_ORIGINS"
-          fi
           GROQ_MODEL="${{ secrets.GROQ_CHAT_MODEL }}"
           if [ -z "$GROQ_MODEL" ]; then
             GROQ_MODEL="qwen/qwen3.8-27b"
           fi
+
+          az containerapp update \
+            --name hyu-compass-backend \
+            --resource-group hyu-compass \
+            --remove-env-vars CORS_ORIGINS
 
           az containerapp update \
             --name hyu-compass-backend \
@@ -75,16 +76,72 @@ jobs:
               "GROQ_CHAT_MODEL=$GROQ_MODEL" \
               "GROQ_API_KEY=secretref:groq-api-key" \
               "MONGODB_URI=secretref:mongodb-uri" \
-              "MONGODB_DB=${{ secrets.MONGODB_DB }}" \
+              "MONGODB_DB=$MONGODB_DB" \
               "QDRANT_URL=secretref:qdrant-url" \
-              "QDRANT_API_KEY=secretref:qdrant-api-key" \
-              "CORS_ORIGINS=$AZURE_CORS"
+              "QDRANT_API_KEY=secretref:qdrant-api-key"
 
-          az containerapp ingress cors enable \
+          az containerapp ingress cors disable \
+            --name hyu-compass-backend \
+            --resource-group hyu-compass
+
+          az containerapp ingress cors show \
+            --name hyu-compass-backend \
+            --resource-group hyu-compass
+
+          BACKEND_URL="https://$(az containerapp show \
             --name hyu-compass-backend \
             --resource-group hyu-compass \
-            --allowed-origins "https://calm-ground-0036c6b00.4.azurestaticapps.net" \
-            --allowed-methods "GET" "POST" "PUT" "DELETE" "OPTIONS" "PATCH" "HEAD" \
-            --allowed-headers "*" \
-            --allow-credentials false \
-            --max-age 3600
+            --query "properties.configuration.ingress.fqdn" \
+            --output tsv)"
+          export BACKEND_URL
+
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent --show-error --max-time 20 "$BACKEND_URL/api/health" >/dev/null; then
+              break
+            fi
+            if [ "$attempt" -eq 60 ]; then
+              echo "Backend did not become healthy after deployment."
+              exit 1
+            fi
+            sleep 5
+          done
+
+          echo "Rebuilding Azure MongoDB Atlas and Qdrant Cloud index from /app/data/raw"
+          INGEST_RESPONSE="$(curl --fail --silent --show-error --max-time 3600 \
+            -X POST "$BACKEND_URL/api/ingest" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "folder": "raw",
+              "stages": {
+                "chunking": {
+                  "method": "section_tokens",
+                  "params": {
+                    "chunk_size": 256,
+                    "chunk_overlap": 32
+                  }
+                }
+              }
+            }')"
+
+          echo "$INGEST_RESPONSE"
+
+          python3 -c '
+          import json, os, sys, urllib.request
+          backend = os.environ["BACKEND_URL"]
+          def get(path):
+              with urllib.request.urlopen(backend + path, timeout=30) as response:
+                  return json.load(response)
+          health = get("/api/health")
+          documents = get("/api/documents")
+          print(json.dumps({"health": health, "documents": documents}, indent=2))
+          index = health.get("index") or {}
+          if index.get("documents") != 4:
+              print(f"Expected 4 documents, got {index.get(\"documents\")}", file=sys.stderr)
+              sys.exit(1)
+          if index.get("chunks") not in (211,):
+              print(f"Expected 211 chunks, got {index.get(\"chunks\")}", file=sys.stderr)
+              sys.exit(1)
+          if not health["mongodb"]["ok"] or not health["qdrant"]["ok"]:
+              print("MongoDB or Qdrant health check failed", file=sys.stderr)
+              sys.exit(1)
+          '
