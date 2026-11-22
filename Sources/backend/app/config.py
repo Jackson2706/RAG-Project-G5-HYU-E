@@ -29,8 +29,12 @@ def resolve_ingest_folder(name: str, data_dir: Path | None = None) -> Path | Non
     if name == SAMPLE_FOLDER:
         return SAMPLE_DATA_DIR
     root = (data_dir or DATA_DIR).resolve()
+    if name.startswith("HYU/snapshots/"):
+        snapshot_name = name.split("/", 2)[-1]
+        folder = (root / "HYU" / "snapshots" / snapshot_name).resolve()
+        return folder if folder.is_relative_to(root) and folder.is_dir() else None
     folder = (root / name).resolve()
-    return folder if folder.is_relative_to(root) else None
+    return folder if folder.is_relative_to(root) and folder.is_dir() else None
 
 
 def resolve_stored_path(path: str | Path) -> Path:

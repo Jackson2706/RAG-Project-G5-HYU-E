@@ -4,7 +4,7 @@ import json
 
 import pytest
 
-from app.config import DATA_DIR
+from app.config import DATA_DIR, resolve_ingest_folder
 from app.rag.applicability import ChunkCondition
 from app.rag.blocks.ingestion.metadata_extraction import applicability_extractor as extractor_module
 from app.rag.registry import create_block, validate_config
@@ -12,6 +12,12 @@ from app.rag.schemas import Chunk
 from app.rag.snapshot import HANGUL, evaluate_checks, load_snapshot, source_spans_match, to_parsed_document
 
 SNAPSHOT = "hyu-20261110-97dc1269"
+
+
+def test_resolve_committed_snapshot_folder():
+    folder = resolve_ingest_folder(f"HYU/snapshots/{SNAPSHOT}")
+    assert folder is not None
+    assert (folder / "documents.jsonl").is_file()
 
 
 def span_row(pieces):

@@ -15,7 +15,7 @@ from app.config import get_settings, resolve_ingest_folder
 from app.database import DEFAULT_INDEX, Database
 from app.demo import load_demo_cases, needs_oracle, oracle_for, public_view
 from app.ollama import OllamaError
-from app.rag.pipeline import run_ingestion, run_rag
+from app.rag.pipeline import run_ingestion, run_rag, run_snapshot_ingestion
 from app.rag.presets import presets_json
 from app.rag.registry import PIPELINE, ConfigError, registry_json, validate_config
 from app.rag.schemas import Services
@@ -42,7 +42,7 @@ class ChatRequest(BaseModel):
 
 
 class IngestRequest(BaseModel):
-    folder: str = Field(default="HYU/raw", description="Folder relative to DATA_DIR, e.g. 'HYU/raw', or 'sample_data' for the sample documents")
+    folder: str = Field(default="sample_data", description="Folder relative to DATA_DIR, or 'sample_data'")
     stages: StageChoices = Field(default_factory=dict, description="Offline methods and parameters (e.g. chunk size)")
 
 
@@ -202,8 +202,10 @@ async def ingest(body: IngestRequest, request: Request):
     config = checked(body.stages)
     folder = resolve_ingest_folder(body.folder, get_settings().data_dir)
     if folder is None or not folder.is_dir():
-        raise HTTPException(400, f"'{body.folder}' is not a folder under the configured data directory")
+        raise HTTPException(400, f"Folder '{body.folder}' was not found under the configured data directory.")
     try:
+        if (folder / "documents.jsonl").is_file() and (folder / "SNAPSHOT.sha256").is_file():
+            return await asyncio.to_thread(run_snapshot_ingestion, folder.name, config, services(request))
         return await asyncio.to_thread(run_ingestion, folder, config, services(request))
     except (ValueError, FileNotFoundError) as exc:
         raise HTTPException(400, str(exc)) from exc

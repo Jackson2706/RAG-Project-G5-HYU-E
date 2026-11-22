@@ -13,6 +13,7 @@ import re
 import time
 import uuid
 from collections.abc import Awaitable, Callable
+from copy import deepcopy
 from dataclasses import replace
 from datetime import UTC, datetime
 from pathlib import Path
@@ -23,7 +24,7 @@ from app.rag.followup import apply_stated, clarify_marker, resolve
 from app.rag.reply_cleanup import clean_reply as tidy
 from app.rag.blocks.retrieval.hybrid_fusion.rrf import reciprocal_rank_fusion
 from app.rag.registry import PIPELINE, STAGES, create_block, get_method
-from app.rag.schemas import (INSUFFICIENT_ANSWER, INSUFFICIENT_MARKER, Evidence, FilterCriteria, FinalAnswer, GenerationResult,
+from app.rag.schemas import (INSUFFICIENT_ANSWER, INSUFFICIENT_MARKER, Chunk, Evidence, FilterCriteria, FinalAnswer, GenerationResult,
                              ParsedDocument, PostfilterResult, PromptContext, QueryAnalysis, RetrievalFilter, RetrievalResult,
                              RewrittenQuery, Services, SourceReference, make_chunk_id, make_doc_id)  # fmt: skip
 from app.tracing import Tracer, to_jsonable
@@ -102,6 +103,42 @@ def run_ingestion(folder: Path, config: dict, services: Services) -> dict:
     report["errors"] = errors + report["errors"]
     report["skipped"] = skipped
     return report
+
+
+def run_snapshot_ingestion(snapshot_id: str, config: dict, services: Services) -> dict:
+    """Build the default index from a frozen HYU snapshot JSONL."""
+    from app.rag.snapshot import load_snapshot
+
+    snapshot_config = deepcopy(config)
+    snapshot_config["chunking"] = {"method": "section_tokens", "params": {"chunk_size": 320, "chunk_overlap": 48}}
+    snapshot_config["metadata_extraction"] = {
+        "method": "applicability_extractor",
+        "params": {
+            "llm_fallback": False,
+            "model": "qwen/qwen3.8-27b",
+            "temperature": 0.0,
+        },
+    }
+    services = _with_embedder(snapshot_config, services)
+    entries = load_snapshot(
+        snapshot_id,
+        count_tokens=services.embedder.count_tokens,
+        max_tokens=320,
+    )
+    lookups = {doc.source_uri: lookup for doc, lookup in entries}
+    documents = [doc for doc, _ in entries]
+
+    def snapshot_tag_input(parsed: ParsedDocument, chunk: Chunk) -> dict:
+        lookup = lookups[parsed.source_uri]
+        return lookup.chunk_input(parsed, chunk)
+
+    return index_documents(
+        documents,
+        snapshot_config,
+        services,
+        corpus={"source": f"HYU/snapshots/{snapshot_id}", "snapshot_id": snapshot_id},
+        tag_input=snapshot_tag_input,
+    )
 
 
 def index_documents(documents: list[ParsedDocument], config: dict, services: Services, *, source_hashes: dict[str, str] | None = None,
