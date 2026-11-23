@@ -115,7 +115,7 @@ def run_snapshot_ingestion(snapshot_id: str, config: dict, services: Services) -
         "method": "applicability_extractor",
         "params": {
             "llm_fallback": False,
-            "model": "qwen/qwen3.8-27b",
+            "model": "",
             "temperature": 0.0,
         },
     }

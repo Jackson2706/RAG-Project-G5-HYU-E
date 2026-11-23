@@ -21,10 +21,15 @@ die() { printf '\033[1;31m[error]\033[0m %s\n' "$*" >&2; exit 1; }
 
 command -v docker >/dev/null || PATH="$PATH:/Applications/Docker.app/Contents/Resources/bin"
 # A script does not read your shell profile, so `conda` may be missing from the PATH: try the usual places.
-command -v conda >/dev/null || for d in "${CONDA_EXE%/conda}" "$HOME"/miniconda3/bin "$HOME"/anaconda3/bin "$HOME"/miniforge3/bin /opt/homebrew/Caskroom/miniconda/base/bin; do
+command -v conda >/dev/null || for d in "$(dirname "${CONDA_EXE:-/dev/null}")" "$HOME"/miniconda3/bin "$HOME"/anaconda3/bin "$HOME"/miniforge3/bin /opt/homebrew/Caskroom/miniconda/base/bin; do
   [ -x "$d/conda" ] && PATH="$PATH:$d" && break
 done
 command -v conda >/dev/null || die "Conda not found. Run ./setup.sh first."
+# Scripts do not always inherit interactive shell setup. Prefer a Linux NVM Node for Linux-hosted frontend builds.
+command -v node >/dev/null || for d in "$HOME"/.nvm/versions/node/*/bin; do
+  [ -x "$d/node" ] && PATH="$d:$PATH" && break
+done
+command -v node >/dev/null || die "Node.js not found. Run ./setup.sh first."
 [ -f .env ] && [ -f backend/.env ] && [ -d frontend/node_modules ] || die "Not set up yet. Run ./setup.sh first."
 docker info >/dev/null 2>&1 || die "Docker is not running. Start Docker Desktop and try again."
 mkdir -p "$RUN_DIR"

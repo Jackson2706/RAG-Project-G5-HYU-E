@@ -21,9 +21,9 @@ async def test_ollama_lists_models_and_streams_answers(ollama, fake_ollama):
 
 
 @pytest.mark.anyio
-async def test_ollama_errors_are_clear(ollama, fake_ollama):
-    with pytest.raises(OllamaError, match="not installed"):
-        await ollama.pick_model("imaginary-model", "")
+async def test_ollama_missing_model_falls_back_to_installed_model(ollama, fake_ollama):
+    fallback = await ollama.pick_model("imaginary-model", "")
+    assert fallback["name"] == "test-model"
     fake_ollama.models = []
     with pytest.raises(OllamaError, match="ollama pull"):
         await ollama.pick_model("", "")
@@ -94,6 +94,39 @@ async def test_groq_uses_openai_compatible_models_and_streaming():
     pieces = [p async for p in client.chat_stream(model, [], {"temperature": 0.1, "top_p": 0.9, "num_predict": 100}, usage=usage)]
     assert "".join(pieces) == "Groq works"
     assert usage["total_tokens"] == 12
+
+
+@pytest.mark.anyio
+async def test_groq_falls_back_instantly_when_primary_hits_rate_limit():
+    requested = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path.endswith("/models"):
+            return httpx.Response(200, json={"data": [{"id": "qwen/qwen3.8-27b"}, {"id": "llama-3.1-8b-instant"}]})
+        body = json.loads(request.content)
+        requested.append(body["model"])
+        if body["model"] == "qwen/qwen3.8-27b":
+            return httpx.Response(429, json={"error": {"message": "Rate limit reached"}})
+        content = 'data: {"choices":[{"delta":{"content":"fallback works"},"finish_reason":"stop"}]}\n\ndata: [DONE]\n\n'
+        return httpx.Response(200, text=content, headers={"content-type": "text/event-stream"})
+
+    client = OllamaClient(
+        "https://api.groq.com/openai/v1",
+        api_key="test-key",
+        provider="groq",
+        default_model="qwen/qwen3.8-27b",
+        groq_chat_models=[
+            "qwen/qwen3.8-27b",
+            "llama-3.1-8b-instant",
+            "openai/gpt-oss-20b",
+            "llama-3.3-70b-versatile",
+        ],
+        transport=httpx.MockTransport(handler),
+    )
+    model = await client.pick_model("qwen/qwen3.8-27b", "")
+    pieces = [p async for p in client.chat_stream(model, [], {"num_predict": 100})]
+    assert "".join(pieces) == "fallback works"
+    assert requested == ["qwen/qwen3.8-27b", "llama-3.1-8b-instant"]
 
 
 # ------------------------------------------------------------------ API

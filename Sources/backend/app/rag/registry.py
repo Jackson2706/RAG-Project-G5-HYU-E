@@ -254,7 +254,7 @@ PIPELINE: list[Stage] = [
                      "Rule-first student applicability tags, with a validated local-LLM fallback.", parameters={
                          "llm_fallback": Param("boolean", True, "LLM fallback", "Ask the auxiliary LLM only when rules find no constraints.",
                                                ui="toggle", scope="ingestion"),
-                         "model": Param("string", "qwen/qwen3.8-27b", "Cloud LLM", "Groq model used for unmatched chunks.",
+                         "model": Param("string", "", "LLM model", "Local Ollama or Groq model; empty uses the provider default.",
                                         ui="ollama_model", scope="ingestion"),
                          "temperature": Param("float", 0.0, "Temperature", "0 = most repeatable output.", min=0, max=1, step=0.05,
                                               scope="ingestion", advanced=True),

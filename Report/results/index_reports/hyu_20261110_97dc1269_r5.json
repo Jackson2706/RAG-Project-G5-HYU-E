@@ -33,7 +33,7 @@
     "llm": {
       "enabled": false,
       "role": "auxiliary",
-      "model": "qwen3.5:4b",
+      "model": "qwen/qwen3.8-27b",
       "digest": null,
       "prompt_version": "v3",
       "postcheck_version": "p1",
@@ -42,7 +42,7 @@
       "num_ctx": 4096,
       "seed": 42,
       "thinking": "off",
-      "cache_path": "/Users/jackson/Desktop/Courses/RAG Course - HYU-E/hyu-compass/Sources/data/HYU/cache/llm_tags.jsonl"
+      "cache_path": "/mnt/c/docs/document/RAG-Project-G5-HYU-E/Sources/data/HYU/cache/llm_tags.jsonl"
     }
   },
   "facts": {
@@ -68,14 +68,14 @@
     "unmasked_emails": 0,
     "hangul_headers": 0,
     "default_before": {
-      "documents": 5,
-      "chunks": 23,
-      "vectors": 23
+      "documents": 4,
+      "chunks": 195,
+      "vectors": 195
     },
     "default_after": {
-      "documents": 5,
-      "chunks": 23,
-      "vectors": 23
+      "documents": 4,
+      "chunks": 195,
+      "vectors": 195
     }
   },
   "checks": {

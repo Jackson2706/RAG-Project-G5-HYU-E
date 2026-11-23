@@ -106,6 +106,10 @@ class Settings(BaseSettings):
         default="qwen/qwen3.8-27b",
         validation_alias=AliasChoices("GROQ_CHAT_MODEL", "groq_chat_model"),
     )
+    groq_chat_models: str = Field(
+        default="qwen/qwen3.8-27b,llama-3.1-8b-instant,openai/gpt-oss-20b,llama-3.3-70b-versatile",
+        validation_alias=AliasChoices("GROQ_CHAT_MODELS", "groq_chat_models"),
+    )
 
     # Ollama (legacy/local provider)
     ollama_base_url: str = Field(

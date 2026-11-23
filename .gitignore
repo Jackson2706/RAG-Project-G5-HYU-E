@@ -35,7 +35,7 @@ dist/
 .claude
 
 # Crawled and benchmark data, report inputs, and bulky per-query results
-Sources/data/HYU/raw/
+# Sources/data/HYU/raw/
 Sources/data/HYU/extracted/
 Sources/data/benchmarks/*/*
 !Sources/data/benchmarks/*/SOURCE.md

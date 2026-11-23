@@ -80,13 +80,9 @@ async def check_runnable(request: Request, config: dict, index_id: str) -> None:
               if p.ui == "ollama_model" and config[s.stage_id]["params"].get(name)}  # fmt: skip
     if wanted:
         try:
-            installed = {m["name"] for m in await request.app.state.ollama.list_models()}
+            await request.app.state.ollama.list_models()
         except OllamaError as exc:
-            installed = None
             errors.append({"stage_id": None, "param": None, "message": str(exc)})
-        for stage_id, name, model in sorted(wanted):
-            if installed is not None and model not in installed:
-                errors.append({"stage_id": stage_id, "param": name, "message": f"Ollama model '{model}' is not installed. Run: ollama pull {model}"})
     if errors:
         raise HTTPException(422, {"message": "This configuration cannot run", "errors": errors})
 
