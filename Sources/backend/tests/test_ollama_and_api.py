@@ -129,6 +129,36 @@ async def test_groq_falls_back_instantly_when_primary_hits_rate_limit():
     assert requested == ["qwen/qwen3.8-27b", "llama-3.1-8b-instant"]
 
 
+@pytest.mark.anyio
+async def test_groq_switches_api_keys_before_switching_models():
+    requested = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path.endswith("/models"):
+            return httpx.Response(200, json={"data": [{"id": "llama-3.1-8b-instant"}]})
+        auth = request.headers.get("authorization", "")
+        body = json.loads(request.content)
+        requested.append((auth, body["model"]))
+        if auth == "Bearer key-one":
+            return httpx.Response(429, json={"error": {"message": "Key limit reached"}})
+        content = 'data: {"choices":[{"delta":{"content":"second key works"},"finish_reason":"stop"}]}\n\ndata: [DONE]\n\n'
+        return httpx.Response(200, text=content, headers={"content-type": "text/event-stream"})
+
+    client = OllamaClient(
+        "https://api.groq.com/openai/v1",
+        api_key="key-one",
+        groq_api_keys=["key-one", "key-two"],
+        provider="groq",
+        default_model="llama-3.1-8b-instant",
+        groq_chat_models=["llama-3.1-8b-instant"],
+        transport=httpx.MockTransport(handler),
+    )
+    model = await client.pick_model("llama-3.1-8b-instant", "")
+    pieces = [p async for p in client.chat_stream(model, [], {"num_predict": 100})]
+    assert "".join(pieces) == "second key works"
+    assert requested == [("Bearer key-one", "llama-3.1-8b-instant"), ("Bearer key-two", "llama-3.1-8b-instant")]
+
+
 # ------------------------------------------------------------------ API
 
 

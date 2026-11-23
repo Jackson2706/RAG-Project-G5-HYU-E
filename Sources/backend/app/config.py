@@ -98,6 +98,10 @@ class Settings(BaseSettings):
         default=None,
         validation_alias=AliasChoices("GROQ_API_KEY", "groq_api_key"),
     )
+    groq_api_keys: str = Field(
+        default="",
+        validation_alias=AliasChoices("GROQ_API_KEYS", "groq_api_keys"),
+    )
     groq_base_url: str = Field(
         default="https://api.groq.com/openai/v1",
         validation_alias=AliasChoices("GROQ_BASE_URL", "groq_base_url"),

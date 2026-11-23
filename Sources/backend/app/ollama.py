@@ -43,10 +43,25 @@ def cache_key(model: dict, messages: list[dict], options: dict, think: str) -> s
 class OllamaClient:
     def __init__(self, base_url: str, timeout: float = 120.0, transport: httpx.AsyncBaseTransport | None = None,
                  api_key: str | None = None, provider: str = "ollama", default_model: str = "",
-                 groq_chat_models: list[str] | str | None = None) -> None:
+                 groq_chat_models: list[str] | str | None = None,
+                 groq_api_keys: list[str] | str | None = None) -> None:
         self.base_url = base_url
         self.provider = provider
         self.default_model = default_model
+        if isinstance(groq_api_keys, str):
+            text = groq_api_keys.strip()
+            if text.startswith("["):
+                try:
+                    parsed = json.loads(text)
+                    key_names = parsed if isinstance(parsed, list) else []
+                except json.JSONDecodeError:
+                    key_names = []
+            else:
+                key_names = text.split(",")
+            extra_keys = [str(key).strip() for key in key_names if str(key).strip()] 
+        else:
+            extra_keys = groq_api_keys or []
+        self.groq_api_keys = list(dict.fromkeys([key for key in [api_key, *extra_keys] if key]))
         if isinstance(groq_chat_models, str):
             text = groq_chat_models.strip()
             if text.startswith("["):
@@ -74,15 +89,26 @@ class OllamaClient:
         if provider == "groq":
             return cls(settings.groq_base_url, settings.ollama_timeout, api_key=settings.groq_api_key,
                        provider="groq", default_model=settings.groq_chat_model,
-                       groq_chat_models=settings.groq_chat_models)
+                       groq_chat_models=settings.groq_chat_models,
+                       groq_api_keys=settings.groq_api_keys)
         return cls(settings.ollama_base_url, settings.ollama_timeout,
                    provider="ollama", default_model=settings.ollama_chat_model)
 
     async def list_models(self) -> list[dict]:
         """Installed models: [{"name", "parameter_size", "capabilities"}]."""
         try:
-            response = await self.http.get("/models" if self.provider == "groq" else "/api/tags")
-            response.raise_for_status()
+            if self.provider == "groq":
+                last_status = None
+                for key in self.groq_api_keys:
+                    response = await self.http.get("/models", headers={"Authorization": f"Bearer {key}"})
+                    if response.status_code == 200:
+                        break
+                    last_status = response.status_code
+                else:
+                    raise OllamaError(f"Cannot reach Groq model API. No API key succeeded (last status {last_status}).")
+            else:
+                response = await self.http.get("/api/tags")
+                response.raise_for_status()
         except httpx.HTTPError as exc:
             service = "Groq" if self.provider == "groq" else "Ollama"
             raise OllamaError(f"Cannot reach {service} at {self.base_url}. ({exc.__class__.__name__})") from exc
@@ -231,21 +257,26 @@ class OllamaClient:
     async def _groq_chat_stream(self, model: dict, messages: list[dict], options: dict[str, Any],
                                 timeout: float | None = None, usage: dict | None = None) -> AsyncIterator[str]:
         candidates = list(dict.fromkeys([model["name"], *self.groq_chat_models]))
+        api_keys = self.groq_api_keys
         last_error: GroqFallbackError | None = None
         for candidate in candidates:
-            try:
-                async for piece in self._groq_chat_stream_once({**model, "name": candidate}, messages, options, timeout, usage):
-                    yield piece
-                return
-            except GroqFallbackError as exc:
-                last_error = exc
-                continue
+            for api_key in api_keys:
+                try:
+                    async for piece in self._groq_chat_stream_once(
+                        {**model, "name": candidate}, messages, options, timeout, usage, api_key
+                    ):
+                        yield piece
+                    return
+                except GroqFallbackError as exc:
+                    last_error = exc
+                    continue
         if last_error:
             raise last_error
         raise OllamaError("Groq returned no usable chat model.")
 
     async def _groq_chat_stream_once(self, model: dict, messages: list[dict], options: dict[str, Any],
-                                     timeout: float | None = None, usage: dict | None = None) -> AsyncIterator[str]:
+                                     timeout: float | None = None, usage: dict | None = None,
+                                     api_key: str | None = None) -> AsyncIterator[str]:
         body: dict[str, Any] = {
             "model": model["name"],
             "messages": messages,
@@ -259,7 +290,8 @@ class OllamaClient:
         received_text = False
         try:
             request_timeout = httpx.Timeout(timeout, connect=5.0) if timeout else self.http.timeout
-            async with self.http.stream("POST", "/chat/completions", json=body, timeout=request_timeout) as response:
+            headers = {"Authorization": f"Bearer {api_key}"} if api_key else None
+            async with self.http.stream("POST", "/chat/completions", json=body, headers=headers, timeout=request_timeout) as response:
                 if response.status_code != 200:
                     await response.aread()
                     try:
@@ -268,7 +300,7 @@ class OllamaClient:
                         detail = None
                     status = response.status_code
                     detail_text = detail or response.text[:200]
-                    if status in {400, 404, 429, 500, 502, 503, 504}:
+                    if status in {400, 401, 403, 404, 408, 422, 429, 500, 502, 503, 504}:
                         raise GroqFallbackError(status, detail_text)
                     raise OllamaError(f"Groq returned {status}: {detail_text}")
                 async for line in response.aiter_lines():
@@ -289,7 +321,7 @@ class OllamaClient:
                         code = error.get("code") if isinstance(error, dict) else None
                         status = int(code) if isinstance(code, str) and code.isdigit() else None
                         detail = error.get("message") if isinstance(error, dict) else str(error)
-                        if status in {400, 404, 429, 500, 502, 503, 504}:
+                        if status in {400, 401, 403, 404, 408, 422, 429, 500, 502, 503, 504}:
                             raise GroqFallbackError(status, detail or str(error))
                         raise OllamaError(f"Groq error: {error}")
                     choice = (chunk.get("choices") or [{}])[0]

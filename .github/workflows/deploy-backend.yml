@@ -1,0 +1,138 @@
+name: Deploy Backend to Azure Container Apps
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "Sources/backend/**"
+      - "Sources/data/**"
+      - "Dockerfile.backend"
+      - ".github/workflows/deploy-backend.yml"
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Azure Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: hyucompassacr.azurecr.io
+          username: hyucompassacr
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      - name: Build and push Docker image
+        run: |
+          docker build -f Dockerfile.backend \
+            -t hyucompassacr.azurecr.io/hyu-compass-backend:${{ github.sha }} \
+            -t hyucompassacr.azurecr.io/hyu-compass-backend:latest .
+          docker push hyucompassacr.azurecr.io/hyu-compass-backend:${{ github.sha }}
+          docker push hyucompassacr.azurecr.io/hyu-compass-backend:latest
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Update Azure Container App
+        env:
+          MONGODB_DB: ${{ secrets.MONGODB_DB }}
+        run: |
+          az containerapp secret set \
+            --name hyu-compass-backend \
+            --resource-group hyu-compass \
+            --secrets \
+              mongodb-uri="${{ secrets.MONGODB_URI }}" \
+              groq-api-key="${{ secrets.GROQ_API_KEY }}" \
+              qdrant-url="${{ secrets.QDRANT_URL }}" \
+              qdrant-api-key="${{ secrets.QDRANT_API_KEY }}"
+
+          GROQ_MODEL="${{ secrets.GROQ_CHAT_MODEL }}"
+          if [ -z "$GROQ_MODEL" ]; then
+            GROQ_MODEL="qwen/qwen3.8-27b"
+          fi
+
+          az containerapp update \
+            --name hyu-compass-backend \
+            --resource-group hyu-compass \
+            --remove-env-vars CORS_ORIGINS
+
+          az containerapp update \
+            --name hyu-compass-backend \
+            --resource-group hyu-compass \
+            --image hyucompassacr.azurecr.io/hyu-compass-backend:${{ github.sha }} \
+            --set-env-vars \
+              "LLM_PROVIDER=groq" \
+              "GROQ_BASE_URL=https://api.groq.com/openai/v1" \
+              "GROQ_CHAT_MODEL=$GROQ_MODEL" \
+              "GROQ_API_KEY=secretref:groq-api-key" \
+              "MONGODB_URI=secretref:mongodb-uri" \
+              "MONGODB_DB=$MONGODB_DB" \
+              "QDRANT_URL=secretref:qdrant-url" \
+              "QDRANT_API_KEY=secretref:qdrant-api-key"
+
+          az containerapp ingress cors disable \
+            --name hyu-compass-backend \
+            --resource-group hyu-compass
+
+          az containerapp ingress cors show \
+            --name hyu-compass-backend \
+            --resource-group hyu-compass
+
+          BACKEND_URL="https://$(az containerapp show \
+            --name hyu-compass-backend \
+            --resource-group hyu-compass \
+            --query "properties.configuration.ingress.fqdn" \
+            --output tsv)"
+          export BACKEND_URL
+
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent --show-error --max-time 20 "$BACKEND_URL/api/health" >/dev/null; then
+              break
+            fi
+            if [ "$attempt" -eq 60 ]; then
+              echo "Backend did not become healthy after deployment."
+              exit 1
+            fi
+            sleep 5
+          done
+
+          echo "Rebuilding Azure MongoDB Atlas and Qdrant Cloud index from HYU snapshot"
+          INGEST_RESPONSE="$(curl --fail --silent --show-error --max-time 3600 \
+            -X POST "$BACKEND_URL/api/ingest" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "folder": "HYU/snapshots/hyu-20261110-97dc1269"
+            }')"
+
+          echo "$INGEST_RESPONSE"
+
+          python3 -c '
+          import json, os, sys, urllib.request
+          backend = os.environ["BACKEND_URL"]
+          def get(path):
+              with urllib.request.urlopen(backend + path, timeout=30) as response:
+                  return json.load(response)
+          health = get("/api/health")
+          documents = get("/api/documents")
+          print(json.dumps({"health": health, "documents": documents}, indent=2))
+          index = health.get("index") or {}
+          if index.get("documents") != 362:
+              print("Expected 362 documents, got " + str(index.get("documents")), file=sys.stderr)
+              sys.exit(1)
+          if index.get("chunks") != 1867:
+              print("Expected 1867 chunks, got " + str(index.get("chunks")), file=sys.stderr)
+              sys.exit(1)
+          if not health["mongodb"]["ok"] or not health["qdrant"]["ok"]:
+              print("MongoDB or Qdrant health check failed", file=sys.stderr)
+              sys.exit(1)
+          '
