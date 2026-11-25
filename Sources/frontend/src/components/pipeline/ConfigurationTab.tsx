@@ -8,6 +8,9 @@ import { CUSTOM, groupStartsAt, type PipelineConfigState } from "@/hooks/usePipe
 import type { SystemState } from "@/hooks/useSystem";
 import { api } from "@/services/api";
 
+// Re-index box hidden on request (demo UI); set to true to bring it back.
+const SHOW_REINDEX = false;
+
 const groupLabel = (label: string | null) =>
   label && <p className="px-1 pt-1 text-[11px] font-semibold uppercase tracking-wide text-primary">{label}</p>;
 
@@ -150,11 +153,11 @@ export function ConfigurationTab({ config, system }: { config: PipelineConfigSta
           <h3 className="px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             {phase === "online" ? "Answering a question (runs every time)" : "Ingestion (applies after re-indexing)"}
           </h3>
-          {phase === "offline" && (config.indexId === "default" ? <Reindex config={config} system={system} /> : (
+          {phase === "offline" && (config.indexId !== "default" ? (
             <p className="rounded-xl border border-border bg-surface p-3 text-xs text-muted-foreground">
               Benchmark index <span className="font-mono">{config.indexId}</span> is built by the evaluation runner (python -m evaluation.runner), not here.
             </p>
-          ))}
+          ) : SHOW_REINDEX && <Reindex config={config} system={system} />)}
           <ol className="space-y-1.5">
             {config.stages.filter((s) => s.phase === phase).map((stage, i, list) => (
               <li key={stage.stage_id} className={stage.group ? "border-l-2 border-primary/30 pl-2" : undefined}>
